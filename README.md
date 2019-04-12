@@ -1,15 +1,13 @@
 # UER-py
 
-<img src="uer-logo.jpg" width="375" hegiht="500" align=left />
+<img src="uer-logo.jpg" width="350" hegiht="350" align=left />
 
-<br/>
-
-Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. For example, [Google BERT](https://arxiv.org/abs/1810.04805) and its pre-trained models have become the key to the success of various NLP tasks. 
+Pre-training has become an essential part for NLP tasks and has led to remarkable improvements.
 UER-py is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the implementations of different pre-training models (such as BERT), and provides interfaces for users to further extend upon. UER-py also incorporates a series of mechanisms for better pre-training performance and efficiency. Our works outperform Chinese model provided by Google BERT on a range of datasets.
 
+
 <br/>
-[TOC]
-<br/>
+
 ## Features
 UER-py has the following features:
 - UER-py is able to reproduce the results of existing pre-training models (such as [Google BERT](https://github.com/google-research/bert)). 
@@ -22,6 +20,7 @@ UER-py has the following features:
 
 
 <br/>
+
 ## Quickstart
 We use BERT model and book review classification dataset to demonstrate the way of using UER-py. There are three input files: book review corpus, book review dataset, and vocabulary. All files are encoded in UTF-8 and they are included in this project.
 
@@ -88,6 +87,7 @@ python3 classifier.py --pretrained_model_path models/review_model.bin --vocab_pa
 实验结果表明Google预训练模型的结果是87.5;而使用预训练模型book_review_model.bin的结果是88.1
 
 <br/>
+
 ## 中文预训练模型
 BERT-PyTorch目前提供谷歌中文模型、人民日报模型、豆瓣书评模型，更多的中文预训练模型将陆续开放
 模型下载链接：
@@ -108,6 +108,7 @@ BERT-PyTorch目前提供谷歌中文模型、人民日报模型、豆瓣书评�
 </table>
 
 <br/>
+
 ## Documentation
 ### UER-py's framework
 BERT-PyTorch主要分成Embedding层、Encoder层、Target层
