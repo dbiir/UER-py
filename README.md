@@ -5,7 +5,10 @@
 Pre-training has become an essential part for NLP tasks and has led to remarkable improvements.
 UER-py is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the implementations of different pre-training models (such as BERT), and provides interfaces for users to further extend upon. UER-py also incorporates a series of mechanisms for better pre-training performance and efficiency. Our works outperform Chinese model provided by Google BERT on a range of datasets.
 
-
+Table of Contents
+=================
+  * [Features](#features)
+  * [Quickstart](#quickstart)
 <br/>
 
 ## Features
