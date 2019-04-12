@@ -103,7 +103,7 @@ if __name__ == '__main__':
     if args.tokenizer == "mixed":
         tokenizer = MixedTokenizer(vocab)
     else:
-        tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"]()
+        tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
 
     
     # Construct input datasets.

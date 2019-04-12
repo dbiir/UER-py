@@ -31,7 +31,7 @@ def main():
     parser.add_argument("--report_steps", type=int, default=100,
                         help="Specific steps to print prompt.")
     parser.add_argument("--accumulation_steps", type=int, default=1,
-                        help="Specific steps to Accumulate gradient.")
+                        help="Specific steps to accumulate gradient.")
     parser.add_argument("--batch_size", type=int, default=32,
                         help="Training batch size. The actual batch_size is [batch_size x world_size x accumulation_steps].")
     parser.add_argument("--instances_buffer_size", type=int, default=1000000,
@@ -52,8 +52,8 @@ def main():
                                                    default="bert", help="Encoder type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s"], default="bert",
-                        help=".")
-    parser.add_argument("--labels_num", type=int, default=2, help=".")
+                        help="The training target of the pretraining model.")
+    parser.add_argument("--labels_num", type=int, default=2, help="Specific to classification target.")
 
     # Optimizer options.
     parser.add_argument("--learning_rate", type=float, default=2e-5, help="Initial learning rate.")

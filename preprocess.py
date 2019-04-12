@@ -20,23 +20,25 @@ def main():
                         help="Path of the preprocessed dataset.")
     
     # Preprocess options.
-    parser.add_argument("--tokenizer", choices=["char", "space"], default="char",
+    parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
                         help="Specify the tokenizer." 
-                             "Original Google BERT uses char tokenizer on Chinese corpus."
+                             "Original Google BERT uses bert tokenizer on Chinese corpus."
+                             "Char tokenizer segments sentences into characters."
                              "Space tokenizer segments sentences into words according to space."
                              )
     parser.add_argument("--dataset_split_num", type=int, default=1,
                         help="Split the whole dataset into `dataset_split_num` parts, "
                              "and each part is fed to a single process in training step.")
     parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s"], default="bert",
-                        help=".")
+                        help="The training target of the pretraining model.")
     parser.add_argument("--docs_buffer_size", type=int, default=50000,
                         help="The buffer size of documents in memory.")
     parser.add_argument("--seq_length", type=int, default=128, help="Sequence length of instances.")
     parser.add_argument("--dup_factor", type=int, default=5,
                         help="Duplicate instances multiple times.")
     parser.add_argument("--short_seq_prob", type=float, default=0.1,
-                        help="Probability for truncating instances.")
+                        help="Probability of truncating sequence."
+                             "The larger value, the higher probability of using short (truncated) sequence.")
     parser.add_argument("--seed", type=int, default=7, help="Random seed.")
     
     args = parser.parse_args()
@@ -55,4 +57,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

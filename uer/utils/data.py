@@ -37,6 +37,14 @@ def mask_seq(src, vocab_size):
         return src, tgt_mlm
 
 
+def count_lines(file_path):
+    lines_num = 0
+    with open(file_path, mode="r", encoding="utf-8") as f:
+        for line in f:
+            lines_num += 1
+    return lines_num
+
+
 class BertDataset(object):
     """
     Construct dataset for MLM and NSP tasks from the given corpus.
@@ -61,16 +69,16 @@ class BertDataset(object):
         Build dataset from the given corpus.
         Start workers_num processes and each process deals with a part of data.
         """
-        file_size = os.path.getsize(self.corpus_path)
+        lines_num = count_lines(self.corpus_path)
         print("Starting %d workers for building datasets ... " % workers_num)
         assert(workers_num >= 1)
         if workers_num == 1:
-            self.worker(0, 0, file_size)
+            self.worker(0, 0, lines_num)
         else:
             pool = Pool(workers_num)
             for i in range(workers_num):
-                start = i * file_size // workers_num
-                end = (i+1) * file_size // workers_num
+                start = i * lines_num // workers_num
+                end = (i+1) * lines_num // workers_num
                 pool.apply_async(func=self.worker, args=[i, start, end])
             pool.close()
             pool.join()
@@ -80,16 +88,23 @@ class BertDataset(object):
         set_seed(self.seed)
         docs_buffer = []
         document = []
-        pos = start
+        pos = 0
         f_write = open(self.dataset_path + "-" + str(proc_id) + ".pt", "wb")
-        # Open function in python3 does not support tell operation. We have to use codecs.
-        with codecs.open(self.corpus_path, "r", "utf-8") as f:
-            f.seek(start)
+        with open(self.corpus_path, mode="r", encoding="utf-8") as f:
+            while pos < start:
+                try:
+                    f.readline()
+                except:
+                    continue
+                finally:
+                    pos += 1
             while True:
                 try:
                     line = f.readline()
-                except UnicodeDecodeError:
+                except:
                     continue
+                finally:
+                    pos += 1
                 if not line.strip():
                     if len(document) >= 1:
                         docs_buffer.append(document)
@@ -105,10 +120,10 @@ class BertDataset(object):
                         instances = []
                     continue
                 sentence = [self.vocab.get(w) for w in self.tokenizer.tokenize(line)]
-                document.append(sentence)
+                if len(sentence) > 0:
+                    document.append(sentence)
         
-                pos = f.tell()
-                if pos >= end:
+                if pos >= end - 1:
                     if len(docs_buffer) > 0:
                         instances = self.build_instances(docs_buffer)
                         pickle.dump(instances, f_write)
@@ -177,8 +192,8 @@ class BertDataset(object):
 
                     self.truncate_seq_pair(tokens_a, tokens_b, max_num_tokens)
 
-                    assert len(tokens_a) >= 1
-                    assert len(tokens_b) >= 1
+                    # assert len(tokens_a) >= 1
+                    # assert len(tokens_b) >= 1
 
                     src = []
                     seg = []
@@ -219,7 +234,7 @@ class BertDataset(object):
                 break
                 
             trunc_tokens = tokens_a if len(tokens_a) > len(tokens_b) else tokens_b
-            assert len(trunc_tokens) >= 1
+            # assert len(trunc_tokens) >= 1
 
             if random.random() < 0.5:
                 del trunc_tokens[0]
