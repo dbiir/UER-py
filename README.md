@@ -11,6 +11,7 @@ Table of Contents
 =================
   * [Features](#features)
   * [Quickstart](#quickstart)
+  * [Instructions](#instructions)
 <br/>
 
 ## Features
@@ -83,36 +84,15 @@ python3 classifier.py --pretrained_model_path models/review_model.bin --vocab_pa
 ```
 It turns out that the result of Google's model is 87.5; The result of book_review_model.bin is 88.1.
 
-<br/>
-
-## 中文预训练模型
-BERT-PyTorch目前提供谷歌中文模型、人民日报模型、豆瓣书评模型，更多的中文预训练模型将陆续开放
-模型下载链接：
-<table>
-<tr align="center"><th> 模型 <th> 链接 <th> 说明 
-<tr align="center"><td> google_model.bin <td> https://share.weiyun.com/51tMpcr <td> 谷歌官方中文模型，字
-<tr align="center"><td> rmrb_model.bin <td> https://share.weiyun.com/5w1lGV0 <td> 人民日报中文模型，字
-<tr align="center"><td> book_review_model.bin <td> https://share.weiyun.com/59OoBes <td> 豆瓣书评中文模型，字
-<tr align="center"><td> google_vocab.txt <td> https://share.weiyun.com/5iOrZxD <td> 谷歌字表，字
-<tr align="center"><td> 敬请期待 <td> ~ <td> 百度百科
-<tr align="center"><td> 敬请期待 <td> ~ <td> 搜狗新闻
-<tr align="center"><td> 敬请期待 <td> ~ <td> 金融新闻
-<tr align="center"><td> 敬请期待 <td> ~ <td> 知乎问答
-<tr align="center"><td> 敬请期待 <td> ~ <td> 微博
-<tr align="center"><td> 敬请期待 <td> ~ <td> 文学作品
-<tr align="center"><td> 敬请期待 <td> ~ <td> 四库全书
-<tr align="center"><td> 敬请期待 <td> ~ <td> 综合
-</table>
 
 <br/>
 
-## Documentation
+## Instructions
 ### UER-py's framework
-BERT-PyTorch主要分成Embedding层、Encoder层、Target层
-项目细节：
+UER-py is organized as follows：
 ```
-bert-pytorch/
-    |--bert/
+UER-py/
+    |--uer/
     
     |   |--encoders/：编码器模块
     |   |--layers/：神经网络模块，包括Embedding，LayerNorm，Multi-Head等
@@ -140,7 +120,7 @@ bert-pytorch/
 
 下面对BERT-PyTorch的使用方式进行详细介绍
 
-### 数据预处理
+### Preprocess the data
 入口脚本是preprocess.py，使用CPU运行
 ```
 usage: preprocess.py [-h] --corpus_path CORPUS_PATH --vocab_path VOCAB_PATH
@@ -165,7 +145,7 @@ python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path mo
 ```
 最后会生成 dataset-0.pt到dataset-15.pt，总共16个dataset文件，其中后缀“-0.pt”是由代码自动生成，到时候需要手动把 dataset-8.pt到dataset-15.pt文件复制到第二台参与预训练的机器
 
-### 预训练
+### Pretrain the model
 入口脚本是pretrain.py。预训练计算量非常大，推荐使用多GPU模式。预训练时参数初始化有两种方案：（1）随机初始化；（2）加载已有的预训练模型
 ```
 usage: pretrain.py [-h] [--dataset_path DATASET_PATH] --vocab_path VOCAB_PATH
@@ -228,9 +208,9 @@ Node-1 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_v
             --pretrained_model_path models/google_model.bin --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 --master_ip tcp://node-0-addr:port
 ```
 
-### 下游任务微调
+### Fine-tune on downstream tasks
 BERT-PyTorch目前包含4类下游任务：分类（classification）、序列标注（sequence labeling）、完型填空（cloze test）、特征抽取（feature extractor）
-#### 分类
+#### Classification
 classifier.py选择BERT-PyTorch的Encoder最后一层输出的第一个隐层状态，接前向神经网络+激活函数+前向神经网络分类器。后面的前向神经网络参数随机初始化
 ```
 usage: classifier.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
@@ -252,7 +232,7 @@ python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_pa
 
 ```
 
-#### 序列标注
+#### Sequence labeling
 tagger.py选择BERT-PyTorch的Encoder最后一层输出的隐层状态，每个隐层状态经过前向神经网络
 ```
 usage: tagger.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
@@ -322,6 +302,7 @@ python3 feature_extractor.py --input_path datasets/cloze_input.txt --pretrained_
 
 
 <br/>
+
 ## 实验
 ### 速度评测
 速度评测运行环境：docker容器、CUDA Version 9.0.176、CUDNN 7.0.5，容器评测速度仅供参考
@@ -359,6 +340,27 @@ CPU MHz：             2201.000
 <tr align="center"><td> BERT+semi-supervision   <td> 88.1    <td> 95.6         <td> 97.0     <td> 94.3/92.6/93.4
 </table>
 
+
+<br/>
+
+## Chinese model zoo
+BERT-PyTorch目前提供谷歌中文模型、人民日报模型、豆瓣书评模型，更多的中文预训练模型将陆续开放
+模型下载链接：
+<table>
+<tr align="center"><th> 模型 <th> 链接 <th> 说明 
+<tr align="center"><td> google_model.bin <td> https://share.weiyun.com/51tMpcr <td> 谷歌官方中文模型，字
+<tr align="center"><td> rmrb_model.bin <td> https://share.weiyun.com/5w1lGV0 <td> 人民日报中文模型，字
+<tr align="center"><td> book_review_model.bin <td> https://share.weiyun.com/59OoBes <td> 豆瓣书评中文模型，字
+<tr align="center"><td> google_vocab.txt <td> https://share.weiyun.com/5iOrZxD <td> 谷歌字表，字
+<tr align="center"><td> 敬请期待 <td> ~ <td> 百度百科
+<tr align="center"><td> 敬请期待 <td> ~ <td> 搜狗新闻
+<tr align="center"><td> 敬请期待 <td> ~ <td> 金融新闻
+<tr align="center"><td> 敬请期待 <td> ~ <td> 知乎问答
+<tr align="center"><td> 敬请期待 <td> ~ <td> 微博
+<tr align="center"><td> 敬请期待 <td> ~ <td> 文学作品
+<tr align="center"><td> 敬请期待 <td> ~ <td> 四库全书
+<tr align="center"><td> 敬请期待 <td> ~ <td> 综合
+</table>
 
 <br/>
 ## 联系我们
