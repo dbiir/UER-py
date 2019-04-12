@@ -3,7 +3,9 @@
 <img src="uer-logo.jpg" width="350" hegiht="350" align=left />
 
 Pre-training has become an essential part for NLP tasks and has led to remarkable improvements.
-UER-py is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the implementations of different pre-training models (such as BERT), and provides interfaces for users to further extend upon. UER-py also incorporates a series of mechanisms for better pre-training performance and efficiency. Our works outperform Chinese model provided by Google BERT on a range of datasets.
+UER-py is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the implementations of different pre-training models (such as BERT), and provides interfaces for users to further extend upon. UER-py also incorporates a series of mechanisms for better performance and efficiency. Our works outperform Chinese model of Google BERT on a range of datasets.
+
+<br>
 
 Table of Contents
 =================
@@ -13,13 +15,12 @@ Table of Contents
 
 ## Features
 UER-py has the following features:
-- UER-py is able to reproduce the results of existing pre-training models (such as [Google BERT](https://github.com/google-research/bert)). 
-- UER-py supports CPU, single GPU, and distributed training modes. 
-- Model modularity. UER-py consists of four components: subencoder, encoder, target, and fine-tuning. UER-py 
-- Ample modules are implemented in UER-py. Clear and robust interface allows users to combine modules with as few restrictions as possible.
-- UER-py incorporates many mechanisms in pre-processing, pre-training, and fine-tuning stages, which largely boosts the efficiency in both speed and memory.
-- SOTA results. Our works outperform Google BERT's Chinese model, which provides a new strong baselines for a range of datasets.
-- Chinese model zoo. We are training models with different corpora, encoders, and targets.
+- __Reliable implementation.__ UER-py is able to reproduce the results of existing pre-training models (such as [Google BERT](https://github.com/google-research/bert)). It has been tested on several datasets and should match the performance of the Google's TensorFlow implementation.
+- __Multi-GPU.__ UER-py supports CPU mode, single GPU mode, and distributed training mode. 
+- __Model modularity.__ UER-py is divided into four components: subencoder, encoder, target, and fine-tuning. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules with as few restrictions as possible.
+- __Efficiency.__ UER-py incorporates many mechanisms in pre-processing, pre-training, and fine-tuning stages, which largely boosts the efficiency in both speed and memory.
+- __SOTA results.__ Our works further improve the results upon Google BERT, providing new strong baselines for a range of datasets.
+- __Chinese model zoo.__ We are training models with different corpora, encoders, and targets.
 
 
 <br/>
