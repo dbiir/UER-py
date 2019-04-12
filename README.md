@@ -47,7 +47,7 @@ The format of classification dataset is as follows (label and instance are separ
 1 instance3
 ```
 
-The format of vocabulary is as follows:
+We use Google's Chinese vocabulary file, which contains 21128 Chinese characters. The format of vocabulary is as follows:
 ```
 word-1
 word-2
@@ -62,33 +62,26 @@ python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path mo
                       --dataset_split_num 8 --target bert
 ```
 Since we have 8 GPUs, we split the dataset into 8 parts. Each GPU processes one part.
-以单机8GPU情形为例
-这里我们使用半监督的微调策略，先让模型在下游任务数据集语料上进行无监督训练，使其熟悉下游任务数据集的内容
-首先我们对语料进行预处理
-```
-python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset --dataset_split_num 8
-```
-由于有8个GPU，我们将数据集分成8份，每个GPU对应一个进程，处理一份数据
-然后下载Google预训练模型google_model.bin，放到models文件夹之中
-接着加载Google预训练模型，对语料进行预训练（8GPU大概需要5小时，BERT-PyTorch已经提供了训练好的模型book_review_model.bin）
+We download [Google's pre-trained Chinese model](https://share.weiyun.com/51tMpcr), and put it into *models* file.
+Then we load Google's pre-trained model and train on book review corpus.
 ```
 python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin \
-    --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
-    --total_steps 20000 --save_checkpoint_steps 1000
+                    --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
+                    --total_steps 20000 --save_checkpoint_steps 1000 --target bert
 ```
-最后进行分类任务，我们可以使用Google提供的预训练模型google_model.bin：
+Finally, we do classification. We can use google_model.bin:
 ```
 python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
     --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
     --epochs_num 3 --batch_size 64
 ```
-也可以使用我们自己预训练得到的模型book_review_model.bin：
+or use our book_review_model.bin：
 ```
 python3 classifier.py --pretrained_model_path models/review_model.bin --vocab_path models/google_vocab.txt \
     --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
     --epochs_num 3 --batch_size 64
 ```
-实验结果表明Google预训练模型的结果是87.5;而使用预训练模型book_review_model.bin的结果是88.1
+It turns out that the result of Google's model is 87.5; The result of book_review_model.bin is 88.1.
 
 <br/>
 
