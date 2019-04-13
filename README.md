@@ -12,6 +12,10 @@ Table of Contents
   * [Features](#features)
   * [Quickstart](#quickstart)
   * [Instructions](#instructions)
+  * [Modules](#modules)
+  * [Scripts](#scripts)
+  * [Experiments](#experiments)
+  * [Chinese model zoo](#chinese model zoo)
 <br/>
 
 ## Features
@@ -117,7 +121,7 @@ UER-py/
     |--README.md
 ```
 
-Next, we provide detailed instructions of UER-py.
+Next, we provide detailed instructions of UER-py. UER-py uses BERT encoder and BERT target by default.
 
 ### Preprocess the data
 ```
@@ -129,9 +133,10 @@ usage: preprocess.py [-h] --corpus_path CORPUS_PATH --vocab_path VOCAB_PATH
                      [--seq_length SEQ_LENGTH] [--dup_factor DUP_FACTOR]
                      [--short_seq_prob SHORT_SEQ_PROB] [--seed SEED]
 ```
-Example of using CPU and single GPU for training：
+Example of using CPU and single GPU for training. UER-py uses BERT target by default. Here we specify the target explicitly：
 ```
-python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset
+python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt \
+                      --dataset_path dataset --target bert
 ```
 Example of using distributed mode for training (single machine). *--dataset_split_num n* represents the corpus is divided into n parts. During the pre-training stage, each process handles one part. Suppose we have 8 GPUs, the n is set to 8：
 ```
@@ -145,7 +150,7 @@ We can obtain 16 datasets: from dataset-0.pt to dataset-15.pt. We need to copy d
 
 
 ### Pretrain the model
-There two strategies for pre-training: 1）random initialization 2）load a pre-trained model
+There two strategies for pre-training: 1）random initialization 2）loading a pre-trained model.
 ```
 usage: pretrain.py [-h] [--dataset_path DATASET_PATH] --vocab_path VOCAB_PATH
                    [--pretrained_model_path PRETRAINED_MODEL_PATH]
@@ -163,54 +168,61 @@ usage: pretrain.py [-h] [--dataset_path DATASET_PATH] --vocab_path VOCAB_PATH
                    [--gpu_ranks GPU_RANKS [GPU_RANKS ...]]
                    [--master_ip MASTER_IP] [--backend {nccl,gloo}]
 ```
-#### 随机初始化
-单机CPU预训练示例：
+#### Random initialization
+Pre-training on CPU. UER-py uses BERT encoder and BERT target by default. Here we specify the encoder and the target explicitly：
 ```
-python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --output_model_path models/model.bin
+python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --output_model_path models/model.bin --encoder bert --target bert
 ```
-单机单GPU预训练示例，使用id为3的GPU：
+Pre-training on single GPU. The id of GPU is 3：
 ```
 python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --output_model_path models/model.bin --gpu_ranks 3
 ```
-单机8GPU预训练示例，IP设置为localhost或者127.0.0.1，端口设置为可用端口即可（默认设置）：
+Pre-training on a single machine with 8 GPUs：
 ```
 python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
                     --output_model_path models/model.bin --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 
 ```
-2机每机8GPU预训练示例，总共启动16个进程。依次在不同机器上启动脚本，唯一不同的参数为gpu_ranks。不同的rank值对应不同的进程，跑在不同的GPU上
-**注意点：**(1)通常机器有几个GPU就启动几个进程，preprocess.py阶段--dataset_split_num通常设置为启动的进程个数；（2）--master_ip参数设置为gpu_ranks包含0的机器的 IP:Port，rank值为0的进程是主节点；（3）--dataset_path 中的dataset不要加后缀“-n.pt”。启动示例：
+Pre-training on two nachines, each has 8 GPUs (16 GPUs in total): 
 ```
 Node-0 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
-            --output_model_path models/model.bin --world_size 16 --gpu_ranks 0 1 2 3 4 5 6 7 --master_ip tcp://node-0-addr:port
+            --output_model_path models/model.bin --world_size 16 --gpu_ranks 0 1 2 3 4 5 6 7 \
+            --master_ip tcp://node-0-addr:port
 Node-1 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
-            --output_model_path models/model.bin --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 --master_ip tcp://node-0-addr:port            
+            --output_model_path models/model.bin --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 \
+            --master_ip tcp://node-0-addr:port            
 ```
 
-#### 加载已有的预训练模型
-这种模式能够利用已有的预训练模型，我们推荐使用这种模式，通过参数 --pretrained_model_path 控制加载已有的预训练模型。单机单GPU、单机CPU预训练示例:
+#### Loading a pre-trained model
+We recommend to load a pre-trained model. We can specify the pre-trained model by *--pretrained_model_path* .
+Pre-training on CPU and single GPU:
 ```
-python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin \
-                    --output_model_path models/model.bin
-python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin \
-                    --output_model_path models/model.bin --gpu_ranks 3
+python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
+                    --pretrained_model_path models/google_model.bin --output_model_path models/model.bin \
+                    --encoder bert --target bert
+python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
+                    --pretrained_model_path models/google_model.bin --output_model_path models/model.bin \
+                    --gpu_ranks 3 --encoder bert --target bert
 ```
-单机8GPU预训练示例：
+Pre-training on a single machine with 8 GPUs：
 ```
 python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin \
                     --output_model_path models/model.bin --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 
 ```
-2机每机8GPU预训练示例：
+Pre-training on two nachines, each has 8 GPUs (16 GPUs in total): 
 ```
-Node-0 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --output_model_path models/model.bin \
-            --pretrained_model_path models/google_model.bin --world_size 16 --gpu_ranks 0 1 2 3 4 5 6 7 --master_ip tcp://node-0-addr:port
-Node-1 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --output_model_path models/model.bin \
-            --pretrained_model_path models/google_model.bin --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 --master_ip tcp://node-0-addr:port
+Node-0 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
+            --output_model_path models/model.bin --pretrained_model_path models/google_model.bin\
+            --world_size 16 --gpu_ranks 0 1 2 3 4 5 6 7 --master_ip tcp://node-0-addr:port
+Node-1 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
+            --output_model_path models/model.bin --pretrained_model_path models/google_model.bin \
+            --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 --master_ip tcp://node-0-addr:port
 ```
 
 ### Fine-tune on downstream tasks
-BERT-PyTorch目前包含4类下游任务：分类（classification）、序列标注（sequence labeling）、完型填空（cloze test）、特征抽取（feature extractor）
+Currently, UER-py consists of 4 downstream tasks, i.e. classification, sequence labeling, cloze test, feature extractor.
+
 #### Classification
-classifier.py选择BERT-PyTorch的Encoder最后一层输出的第一个隐层状态，接前向神经网络+激活函数+前向神经网络分类器。后面的前向神经网络参数随机初始化
+classifier.py adds two feedforward layers upon encoder layer.
 ```
 usage: classifier.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                      [--output_model_path OUTPUT_MODEL_PATH]
@@ -223,7 +235,7 @@ usage: classifier.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                      [--dropout DROPOUT] [--epochs_num EPOCHS_NUM]
                      [--report_steps REPORT_STEPS] [--seed SEED]
 ```
-使用示例：
+Example of using classifier.py：
 ```
 python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                       --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt \
@@ -231,8 +243,7 @@ python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_pa
 
 ```
 
-#### Sequence labeling
-tagger.py选择BERT-PyTorch的Encoder最后一层输出的隐层状态，每个隐层状态经过前向神经网络
+tagger.py adds a feedforward layer upon encoder layer.
 ```
 usage: tagger.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                  [--output_model_path OUTPUT_MODEL_PATH]
@@ -244,16 +255,15 @@ usage: tagger.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                  [--epochs_num EPOCHS_NUM] [--report_steps REPORT_STEPS]
                  [--seed SEED]
 ```
-
-使用示例：
+Example of using tagger.py：
 ```
 python3 tagger.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                   --train_path datasets/msra/train.txt --dev_path datasets/msra/dev.txt --test_path datasets/msra/test.txt \
                   --epochs_num 5 --batch_size 32
 ```
 
-#### 完型填空
-cloze.py基于BERT-PyTorch中的MLM任务，对遮住的词进行预测，返回前topn最有可能的词
+#### Cloze test
+cloze.py predicts masked words. Top n words are returned.
 ```
 usage: cloze.py [-h] [--model_path MODEL_PATH] [--vocab_path VOCAB_PATH]
                 [--input_path INPUT_PATH] [--output_path OUTPUT_PATH]
@@ -261,15 +271,15 @@ usage: cloze.py [-h] [--model_path MODEL_PATH] [--vocab_path VOCAB_PATH]
                 [--seq_length SEQ_LENGTH] [--tokenizer {bert,char,word,space}]
                 [--topn TOPN]
 ```
-使用示例：
+Example of using cloze.py：
 ```
 python3 cloze.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                  --input_path ./datasets/cloze_input.txt --output_path output.txt
 
 ```
 
-#### 特征抽取
-输入文本文件，每行一个句子，输出每个句子的向量表示
+#### Feature extractor
+feature_extractor.py extracts sentence embeddings.
 ```
 usage: feature_extractor.py [-h] --input_path INPUT_PATH --model_path
                             MODEL_PATH --vocab_path VOCAB_PATH --output_path
@@ -278,14 +288,21 @@ usage: feature_extractor.py [-h] --input_path INPUT_PATH --model_path
                             [--config_path CONFIG_PATH]
                             [--tokenizer {bert,char,word,space}]
 ```
-使用示例：
+Using example of feature_extractor.py：
 ```
 python3 feature_extractor.py --input_path datasets/cloze_input.txt --pretrained_model_path models/google_model.bin \
                              --vocab_path models/google_vocab.txt --output_path output.npy
 ```
 
 <br/>
-## 实用脚本说明
+
+## Modules
+### Encoder
+### Target
+
+<br/>
+
+## Scripts
 <table>
 <tr align="center"><th> 脚本名 <th> 功能描述
 <tr align="center"><td> average_model.py <td> 对多个模型的参数取平均，深度学习中常用的ensemble策略
@@ -302,7 +319,7 @@ python3 feature_extractor.py --input_path datasets/cloze_input.txt --pretrained_
 
 <br/>
 
-## 实验
+## Experiments
 ### 速度评测
 速度评测运行环境：docker容器、CUDA Version 9.0.176、CUDNN 7.0.5，容器评测速度仅供参考
 ```
