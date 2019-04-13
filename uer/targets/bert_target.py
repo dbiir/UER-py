@@ -55,7 +55,7 @@ class BertTarget(nn.Module):
         loss_mlm = numerator / denominator
         correct_mlm = torch.sum(label_mask * (output_mlm.argmax(dim=-1).eq(tgt_mlm)).float())
 
-        return loss, correct_mlm, denominator
+        return loss_mlm, correct_mlm, denominator
 
     def forward(self, memory_bank, tgt):
         """
