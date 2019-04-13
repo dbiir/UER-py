@@ -298,46 +298,55 @@ python3 feature_extractor.py --input_path datasets/cloze_input.txt --pretrained_
 
 ## Modules
 ### Encoder
+
+UER-py incorporates ample encoder modules:
+- (bi-)LSTM
+- (bi-)GRU
+- CNN
+- gatedCNN
+- Attn
+- GPT
+- BERT
+- RCNN
+- CRNN
+
 ### Target
+
+UER-py incorporates ample target modules:
+- lm: language model
+- mlm: masked language model (cloze test)
+- nsp: next sentence prediction
+- cls: classification
+- s2s: supports autoencoder and machine translation target
+- bert: masked language model + next sentence prediction
 
 <br/>
 
 ## Scripts
 <table>
-<tr align="center"><th> 脚本名 <th> 功能描述
-<tr align="center"><td> average_model.py <td> 对多个模型的参数取平均，深度学习中常用的ensemble策略
-<tr align="center"><td> build_vocab.py <td> 根据给定的数据集构造词表
-<tr align="center"><td> check_model.py <td> 查看模型是多GPU版本，还是单GPU版本，测试加载单GPU版本模型是否成功
-<tr align="center"><td> diff_vocab.py <td> 比较两个词表的重合度 
-<tr align="center"><td> dynamic_vocab_adapter.py <td> 动态调整模型词表
-<tr align="center"><td> multi_single_convert.py <td> 模型的多GPU和单GPU版本转换
-<tr align="center"><td> dedup.py+simhash.py <td> 基于Simhash的数据集去重脚本
-<tr align="center"><td> word_polysemy.py <td> 多义词相似度计算脚本
-<tr align="center"><td> longtail_word_2_char.py <td> 根据排序的词表，把长尾词切成字
+<tr align="center"><th> Scripts <th> Function description
+<tr align="center"><td> average_model.py <td> Take the average of pre-trained model. A common ensemble strategy for deep learning models 
+<tr align="center"><td> build_vocab.py <td> Build vocabulary (multi-processing supported)
+<tr align="center"><td> check_model.py <td> Check the model (single GPU or multiple GPUs)
+<tr align="center"><td> diff_vocab.py <td> Compare two vocabularies
+<tr align="center"><td> dynamic_vocab_adapter.py <td> Change the pre-trained model according to the vocabulary
+<tr align="center"><td> multi_single_convert.py <td> convert the model (single GPU or multiple GPUs)
 </table>
 
 
 <br/>
 
 ## Experiments
-### 速度评测
-速度评测运行环境：docker容器、CUDA Version 9.0.176、CUDNN 7.0.5，容器评测速度仅供参考
+### Speed
 ```
-GPU信息：
-型号：Tesla P40
+GPU：Tesla P40
 
-CPU信息：
-CPU(s):                88
-Thread(s) per core:    2
-Core(s) per socket:    22
-CPU 系列：          6
-型号：              79
-型号名称：        Intel(R) Xeon(R) CPU E5-2699 v4 @ 2.20GHz
-CPU MHz：             2201.000
+CPU：Intel(R) Xeon(R) CPU E5-2699 v4 @ 2.20GHz
+
 ```
 
 <table>
-<tr align="center"><th> 机器数 <th> GPU数/机 <th> 速度：tokens/秒
+<tr align="center"><th> #(machine) <th> #(GPU)/machine <th> tokens/second
 <tr align="center"><td> 1 <td> 0 <td> 276
 <tr align="center"><td> 1 <td> 1 <td> 7050
 <tr align="center"><td> 1 <td> 2 <td> 13071
@@ -346,7 +355,7 @@ CPU MHz：             2201.000
 <tr align="center"><td> 3 <td> 8 <td> 84386
 </table>
 
-### 实验评测
+### Performance
 这里使用多个公开的中文数据集去评估BERT-PyTorch的效果。这些数据集被包括在本项目之中。用户可以轻松的还原实验结果
 让模型在下游任务数据集语料上进行无监督训练对结果有显著的提升。这种先在数据集上进行无监督训练，然后再根据标签进行有监督训练的过程，也被叫作semi-supervised微调策略
 后续我们会加上更多的改进策略
@@ -359,7 +368,7 @@ CPU MHz：             2201.000
 
 <br/>
 
-## Chinese model zoo
+## Chinese_model_zoo
 BERT-PyTorch目前提供谷歌中文模型、人民日报模型、豆瓣书评模型，更多的中文预训练模型将陆续开放
 模型下载链接：
 <table>
