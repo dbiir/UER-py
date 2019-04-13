@@ -18,7 +18,7 @@ class Vocab(object):
         self.reserved_vocab_path = \
             os.path.abspath(os.path.join(os.path.dirname(__file__), "../../models/reserved_vocab.txt"))
         
-    def load(self, vocab_path):
+    def load(self, vocab_path, is_quiet=False):
         with open(vocab_path, mode="r", encoding="utf-8") as reader:
             for index, line in enumerate(reader):
                 try:
@@ -28,9 +28,11 @@ class Vocab(object):
                 except:
                     self.w2i["???"+str(index)] = index
                     self.i2w.append("???"+str(index))
-                    print("Vocabulary file line " + str(index+1) + " has bad format token")
+                    if not is_quiet:
+                        print("Vocabulary file line " + str(index+1) + " has bad format token")
             assert len(self.w2i) == len(self.i2w)
-        print("Vocabulary Size: ", len(self))
+        if not is_quiet:
+            print("Vocabulary Size: ", len(self))
 
     def save(self, save_path):
         print("Vocabulary Size: ", len(self))
