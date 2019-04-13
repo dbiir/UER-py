@@ -300,25 +300,22 @@ python3 feature_extractor.py --input_path datasets/cloze_input.txt --pretrained_
 ### Encoder
 
 UER-py incorporates ample encoder modules:
-- (bi-)LSTM
-- (bi-)GRU
-- CNN
-- gatedCNN
-- Attn
-- GPT
-- BERT
-- RCNN
-- CRNN
+- rnn_encoder.py: contains (bi-)LSTM and (bi-)GRU.
+- cnn_encoder.py: contains CNN and gatedCNN
+- attn_encoder.py: contains attention neural network
+- gpt_encoder.py: contains GPT encoder
+- bert_encoder.py: contains BERT encoder, a 12 transformer layers
+- mixed_encoder.py: combined basic encoders, such as RCNN (RNN+CNN), CRNN (CNN+RNN)
 
 ### Target
 
 UER-py incorporates ample target modules:
-- lm: language model
-- mlm: masked language model (cloze test)
-- nsp: next sentence prediction
-- cls: classification
-- s2s: supports autoencoder and machine translation target
-- bert: masked language model + next sentence prediction
+- lm_target.py: language model
+- mlm_target.py: masked language model (cloze test)
+- nsp_target.py: next sentence prediction
+- cls_target.py: classification
+- s2s_target.py: supports autoencoder and machine translation target
+- bert_target.py: masked language model + next sentence prediction
 
 <br/>
 
@@ -389,7 +386,9 @@ With the help of UER, we are pre-training models with different corpora, encoder
 
 ## Organization
 Renmin University of China
+<br/>
 Tencent, Beijing Research
+<br/>
 Peking University
 
 <br/>
