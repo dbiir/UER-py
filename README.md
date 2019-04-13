@@ -61,7 +61,7 @@ word-n
 ```
 
 Suppose we have a machine with 8 GPUs.
-First of all, we preprocess the book review corpus:
+First of all, we preprocess the book review corpus (from downstream dataset):
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset \
                       --dataset_split_num 8 --target bert
@@ -356,57 +356,44 @@ CPU：Intel(R) Xeon(R) CPU E5-2699 v4 @ 2.20GHz
 </table>
 
 ### Performance
-这里使用多个公开的中文数据集去评估BERT-PyTorch的效果。这些数据集被包括在本项目之中。用户可以轻松的还原实验结果
-让模型在下游任务数据集语料上进行无监督训练对结果有显著的提升。这种先在数据集上进行无监督训练，然后再根据标签进行有监督训练的过程，也被叫作semi-supervised微调策略
-后续我们会加上更多的改进策略
+We use a range of Chinese datasets to evaluate the performance of UER-py. These datasets are included in this project. One can reproduce our results with little efforts.
+Training model on the corpus of downstream task can boost the performance. It is sometimes known as semi-supervised fune-tuning. More improvements will be added soon for better performance.
 <table>
-<tr align="center"><th> 模型/数据集              <th> 豆瓣书评 <th> ChnSentiCorp <th> Shopping <th> MSRA-NER
-<tr align="center"><td> BERT                    <td> 87.5    <td> 94.3         <td> 96.3     <td> 93.0/92.4/92.7
-<tr align="center"><td> BERT+semi-supervision   <td> 88.1    <td> 95.6         <td> 97.0     <td> 94.3/92.6/93.4
+<tr align="center"><th> Model/Dataset              <th> Douban book review <th> ChnSentiCorp <th> Shopping <th> MSRA-NER
+<tr align="center"><td> BERT                       <td> 87.5               <td> 94.3         <td> 96.3     <td> 93.0/92.4/92.7
+<tr align="center"><td> BERT+semi-supervision      <td> 88.1               <td> 95.6         <td> 97.0     <td> 94.3/92.6/93.4
 </table>
 
 
 <br/>
 
 ## Chinese_model_zoo
-BERT-PyTorch目前提供谷歌中文模型、人民日报模型、豆瓣书评模型，更多的中文预训练模型将陆续开放
-模型下载链接：
+With the help of UER, we are pre-training models with different corpora, encoders, and targets.
 <table>
-<tr align="center"><th> 模型 <th> 链接 <th> 说明 
-<tr align="center"><td> google_model.bin <td> https://share.weiyun.com/51tMpcr <td> 谷歌官方中文模型，字
-<tr align="center"><td> rmrb_model.bin <td> https://share.weiyun.com/5w1lGV0 <td> 人民日报中文模型，字
-<tr align="center"><td> book_review_model.bin <td> https://share.weiyun.com/59OoBes <td> 豆瓣书评中文模型，字
-<tr align="center"><td> google_vocab.txt <td> https://share.weiyun.com/5iOrZxD <td> 谷歌字表，字
-<tr align="center"><td> 敬请期待 <td> ~ <td> 百度百科
-<tr align="center"><td> 敬请期待 <td> ~ <td> 搜狗新闻
-<tr align="center"><td> 敬请期待 <td> ~ <td> 金融新闻
-<tr align="center"><td> 敬请期待 <td> ~ <td> 知乎问答
-<tr align="center"><td> 敬请期待 <td> ~ <td> 微博
-<tr align="center"><td> 敬请期待 <td> ~ <td> 文学作品
-<tr align="center"><td> 敬请期待 <td> ~ <td> 四库全书
-<tr align="center"><td> 敬请期待 <td> ~ <td> 综合
+<tr align="center"><th> pre-trained model <th> Link <th> Description 
+<tr align="center"><td> <td> <td> 
+<tr align="center"><td> <td> <td>
+<tr align="center"><td> <td> <td> 
+<tr align="center"><td> <td> <td> 
+<tr align="center"><td> <td> <td> 
+<tr align="center"><td> <td> <td> 
+<tr align="center"><td> <td> <td> 
+<tr align="center"><td> <td> <td> 
+<tr align="center"><td> <td> <td> 
+<tr align="center"><td> <td> <td> 
+<tr align="center"><td> <td> <td> 
+<tr align="center"><td> <td> <td> 
 </table>
 
 <br/>
-## 联系我们
-陈辉 chenhuichen@tencent.com
-赵哲 nlpzhezhao@tencent.com; helloworld@ruc.edu.cn
-张晋斌 westonzhang@tencent.com
+
+## Organization
+Renmin University of China
+Tencent, Beijing Research
+Peking University
 
 <br/>
-## 致谢
-感谢犀牛鸟计划对本项目的支持
-赵哲和陈希是通过犀牛鸟计划进入腾讯的实习生。他们的企业导师是邓浩棠，鞠奇
-赵哲的学校导师是刘桃，杜小勇；陈希的学校导师是邓志鸿
-实现BERT-PyTorch过程中参考或引用了业界一些公开的代码，这里一并列出表示感谢
-1. https://github.com/google-research/bert
-2. https://github.com/huggingface/pytorch-pretrained-BERT
-3. https://github.com/pytorch/examples/tree/master/imagenet
 
-此外腾讯内部还有其它的高质量的BERT复现工作，大家可以一并参考
-1. https://git.code.oa.com/jcykcai/BERT
-
-<br/>
-## 参考文献
+## References
 1. Devlin J, Chang M W, Lee K, et al. Bert: Pre-training of deep bidirectional transformers for language understanding[J]. arXiv preprint arXiv:1810.04805, 2018.
 
