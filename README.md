@@ -242,7 +242,7 @@ python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_pa
                       --test_path datasets/book_review/test.txt --epochs_num 3 --batch_size 64
 
 ```
-
+#### Sequence labeling
 tagger.py adds a feedforward layer upon encoder layer.
 ```
 usage: tagger.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
