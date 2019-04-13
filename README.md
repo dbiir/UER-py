@@ -15,7 +15,7 @@ Table of Contents
   * [Modules](#modules)
   * [Scripts](#scripts)
   * [Experiments](#experiments)
-  * [Chinese model zoo](#chinese model zoo)
+  * [Chinese_model_zoo](#chinese_model_zoo)
 <br/>
 
 ## Features
