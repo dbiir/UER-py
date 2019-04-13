@@ -62,7 +62,7 @@ First of all, we preprocess the book review corpus:
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset \
                       --dataset_split_num 8 --target bert
 ```
-Since we have 8 GPUs, we split the dataset into 8 parts. Each GPU processes one part.
+Since we have 8 GPUs, we split the *dataset* into 8 parts. Each GPU processes one part.
 We download [Google's pre-trained Chinese model](https://share.weiyun.com/51tMpcr), and put it into *models* file.
 Then we load Google's pre-trained model and train on book review corpus.
 ```
@@ -93,35 +93,33 @@ UER-py is organized as follows：
 ```
 UER-py/
     |--uer/
-    
-    |   |--encoders/：编码器模块
-    |   |--layers/：神经网络模块，包括Embedding，LayerNorm，Multi-Head等
-    |   |--models/：模型构造模块
-    |   |--targets/：目标任务模块
-    |   |--utils/：工具模块
-    |   |--model_builder.py：模型构造
-    |   |--model_saver.py：模型保存
-    |   |--trainer.py：训练迭代执行，分布式功能实现
+    |    |--encoders/: contains encoders such as RNN, CNN, Attention, BERT
+    |    |--layers/: contains common NN layers, such as embedding layer, normalization layer
+    |    |--models/: contains model.py, which combines subencoder, embedding, encoder, and target modules
+    |    |--subencoders/: contains subencoders such as RNN, CNN and different pooling strategies
+    |    |--targets/: contains targets such as language model, masked language model, sentence prediction
+    |    |--utils/: contains common utilities
+    |    |--model_builder.py 
+    |    |--model_saver.py
+    |    |--trainer.py
     |
-    |--corpora/：预训练语料存放文件夹
-    |--datasets/：下游任务数据集存放文件夹
-    |--models/：模型，词表，配置文件存放文件夹
-    |--scripts/：实用脚本存放文件夹
+    |--corpora/: contains corpora for pre-training
+    |--datasets/: contains downstream tasks
+    |--models/: contains pre-trained models, vocabularies, and config files
+    |--scripts/
     |
-    |--preprocess.py: 预处理入口脚本
-    |--pretrain.py: 预训练入口脚本
-    |--classifier.py: 下游任务文本分类示例脚本
-    |--cloze.py: 下游任务完型填空示例脚本
-    |--tagger.py: 下游任务序列标注示例脚本
-    |--feature_extractor.py: 抽取文本表示示例脚本
+    |--preprocess.py
+    |--pretrain.py
+    |--classifier.py
+    |--cloze.py
+    |--tagger.py
+    |--feature_extractor.py
     |--README.md
 ```
 
-
-下面对BERT-PyTorch的使用方式进行详细介绍
+Next, we provide detailed instructions of UER-py.
 
 ### Preprocess the data
-入口脚本是preprocess.py，使用CPU运行
 ```
 usage: preprocess.py [-h] --corpus_path CORPUS_PATH --vocab_path VOCAB_PATH
                      [--dataset_path DATASET_PATH]
@@ -131,22 +129,23 @@ usage: preprocess.py [-h] --corpus_path CORPUS_PATH --vocab_path VOCAB_PATH
                      [--seq_length SEQ_LENGTH] [--dup_factor DUP_FACTOR]
                      [--short_seq_prob SHORT_SEQ_PROB] [--seed SEED]
 ```
-单CPU和单机单GPU训练模式预处理示例：
+Example of using CPU and single GPU for training：
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset
 ```
-单机多GPU训练模式预处理示例，--dataset_split_num n表示将整个语料分成n份，并启动n个进程进行预处理。预处理后得到n份数据，在预训练阶段每个进程会加载1份数据。以单机8GPU为例，dataset_split_num设置为8，使用google词表：
+Example of using distributed mode for training (single machine). *--dataset_split_num n* represents the corpus is divided into n parts. During the pre-training stage, each process handles one part. Suppose we have 8 GPUs, the n is set to 8：
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset --dataset_split_num 8
 ```
-多机多GPU训练模式预处理示例，如果是2机每机8GPU的情况，总共16个进程，则执行命令如下：
+Example of using distributed mode for training (multiple machines). Suppose we have two machines, each has 8 GPUs (16 GPUs in total):
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset --dataset_split_num 16
 ```
-最后会生成 dataset-0.pt到dataset-15.pt，总共16个dataset文件，其中后缀“-0.pt”是由代码自动生成，到时候需要手动把 dataset-8.pt到dataset-15.pt文件复制到第二台参与预训练的机器
+We can obtain 16 datasets: from dataset-0.pt to dataset-15.pt. We need to copy dataset-8.pt~dataset-15.pt to the second machine.
+
 
 ### Pretrain the model
-入口脚本是pretrain.py。预训练计算量非常大，推荐使用多GPU模式。预训练时参数初始化有两种方案：（1）随机初始化；（2）加载已有的预训练模型
+There two strategies for pre-training: 1）random initialization 2）load a pre-trained model
 ```
 usage: pretrain.py [-h] [--dataset_path DATASET_PATH] --vocab_path VOCAB_PATH
                    [--pretrained_model_path PRETRAINED_MODEL_PATH]
