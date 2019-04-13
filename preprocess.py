@@ -48,7 +48,7 @@ def main():
     vocab.load(args.vocab_path)
     
     # Build tokenizer.
-    tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"]()
+    tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
         
     # Build and save dataset.
     dataset = globals()[args.target.capitalize() + "Dataset"](args, vocab, tokenizer)
