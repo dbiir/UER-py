@@ -60,7 +60,7 @@ word-n
 ```
 
 Suppose we have a machine with 8 GPUs.
-First of all, we preprocess the book review corpus:
+First of all, we preprocess the book review corpus. We need to specify the model's target during the pre-processing stage:
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset \
                       --dataset_split_num 8 --target bert
@@ -77,16 +77,15 @@ Finally, we do classification. We can use google_model.bin:
 ```
 python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
     --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
-    --epochs_num 3 --batch_size 64
+    --epochs_num 3 --batch_size 64 --encoder_type bert --target bert
 ```
 or use our [book_review_model.bin](https://share.weiyun.com/59OoBes), the output of pretrain.py：
 ```
 python3 classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_vocab.txt \
     --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
-    --epochs_num 3 --batch_size 64
+    --epochs_num 3 --batch_size 64 --encoder_type bert --target bert
 ```
 It turns out that the result of Google's model is 87.5; The result of book_review_model.bin is 88.1.
-
 
 <br/>
 
@@ -109,7 +108,7 @@ UER-py/
     |--corpora/: contains corpora for pre-training
     |--datasets/: contains downstream tasks
     |--models/: contains pre-trained models, vocabularies, and config files
-    |--scripts/
+    |--scripts/: contains some useful scripts for pre-training models
     |
     |--preprocess.py
     |--pretrain.py
@@ -120,30 +119,33 @@ UER-py/
     |--README.md
 ```
 
-Next, we provide detailed instructions of UER-py. UER-py uses BERT encoder and BERT target by default.
+Next, we provide instructions of UER-py.
 
 ### Preprocess the data
 ```
 usage: preprocess.py [-h] --corpus_path CORPUS_PATH --vocab_path VOCAB_PATH
                      [--dataset_path DATASET_PATH]
-                     [--tokenizer {bert,char,word,space}]
+                     [--tokenizer {bert,char,space}]
                      [--dataset_split_num DATASET_SPLIT_NUM]
+                     [--target {bert,lm,cls,mlm,nsp,s2s}]
                      [--docs_buffer_size DOCS_BUFFER_SIZE]
                      [--seq_length SEQ_LENGTH] [--dup_factor DUP_FACTOR]
                      [--short_seq_prob SHORT_SEQ_PROB] [--seed SEED]
 ```
-Example of using CPU and single GPU for training. UER-py uses BERT target by default. Here we specify the target explicitly：
+*--docs_buffer_size* could be used to control memory consumption. We need to specify the model's target during the pre-processing stage since different targets require different data format. The example of using CPU and single GPU is as follows：
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt \
                       --dataset_path dataset --target bert
 ```
-Example of using distributed mode for training (single machine). *--dataset_split_num n* represents the corpus is divided into n parts. During the pre-training stage, each process handles one part. Suppose we have 8 GPUs, the n is set to 8：
+*--dataset_split_num n* represents that the corpus is divided into n parts. During the pre-training stage, each process handles one part. Suppose we have 8 GPUs, the n is set to 8. The example of using distributed mode for training (single machine) is as follows:
 ```
-python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset --dataset_split_num 8
+python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt \
+                      --dataset_path dataset --dataset_split_num 8 --target bert
 ```
-Example of using distributed mode for training (multiple machines). Suppose we have two machines, each has 8 GPUs (16 GPUs in total):
+Suppose we have two machines, each has 8 GPUs (16 GPUs in total). The example of using distributed mode for training (multiple machines) as follows:
 ```
-python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset --dataset_split_num 16
+python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt \
+                      --dataset_path dataset --dataset_split_num 16 --target bert
 ```
 We can obtain 16 datasets: from dataset-0.pt to dataset-15.pt. We need to copy dataset-8.pt~dataset-15.pt to the second machine.
 
@@ -156,19 +158,23 @@ usage: pretrain.py [-h] [--dataset_path DATASET_PATH] --vocab_path VOCAB_PATH
                    --output_model_path OUTPUT_MODEL_PATH
                    [--config_path CONFIG_PATH] [--total_steps TOTAL_STEPS]
                    [--save_checkpoint_steps SAVE_CHECKPOINT_STEPS]
-                   [--report_steps REPORT_STEPS] [--batch_size BATCH_SIZE]
+                   [--report_steps REPORT_STEPS]
+                   [--accumulation_steps ACCUMULATION_STEPS]
+                   [--batch_size BATCH_SIZE]
                    [--instances_buffer_size INSTANCES_BUFFER_SIZE]
                    [--emb_size EMB_SIZE] [--hidden_size HIDDEN_SIZE]
                    [--feedforward_size FEEDFORWARD_SIZE]
-                   [--heads_num HEADS_NUM] [--layers_num LAYERS_NUM]
-                   [--dropout DROPOUT] [--seed SEED]
-                   [--learning_rate LEARNING_RATE] [--warmup WARMUP]
-                   [--world_size WORLD_SIZE]
+                   [--kernel_size KERNEL_SIZE] [--heads_num HEADS_NUM]
+                   [--layers_num LAYERS_NUM] [--dropout DROPOUT] [--seed SEED]
+                   [--encoder_type {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt}]
+                   [--bidirectional] [--target {bert,lm,cls,mlm,nsp,s2s}]
+                   [--labels_num LABELS_NUM] [--learning_rate LEARNING_RATE]
+                   [--warmup WARMUP] [--world_size WORLD_SIZE]
                    [--gpu_ranks GPU_RANKS [GPU_RANKS ...]]
                    [--master_ip MASTER_IP] [--backend {nccl,gloo}]
 ```
 #### Random initialization
-Pre-training on CPU. UER-py uses BERT encoder and BERT target by default. Here we specify the encoder and the target explicitly：
+The example of pre-training on CPU is as follows：
 ```
 python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --output_model_path models/model.bin --encoder bert --target bert
 ```
