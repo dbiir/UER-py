@@ -1,9 +1,8 @@
 # UER-py
 
-<img src="uer-logo.jpg" width="350" hegiht="350" align=left />
+<img src="uer-logo.jpg" width="390" hegiht="390" align=left />
 
-Pre-training has become an essential part for NLP tasks and has led to remarkable improvements.
-UER-py is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the implementations of different pre-training models (such as BERT), and provides interfaces for users to further extend upon. UER-py also incorporates many mechanisms for better performance and efficiency. Our implementation has been tested on serveal Chinese datasets and should match or even outperform Google's TF implementation.
+Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the implementations of different pre-training models (such as BERT), and provides interfaces for users to further extend upon. UER-py also incorporates many mechanisms for better performance and efficiency. It has been tested on serveal Chinese datasets and should match or even outperform Google's TF implementation.
 
 <br>
 
