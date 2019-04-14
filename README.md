@@ -60,18 +60,18 @@ word-n
 ```
 
 Suppose we have a machine with 8 GPUs.
-First of all, we preprocess the book review corpus (from downstream dataset):
+First of all, we preprocess the book review corpus:
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset \
                       --dataset_split_num 8 --target bert
 ```
 Since we have 8 GPUs, we split the *dataset* into 8 parts. Each GPU processes one part.
-We download [Google's pre-trained Chinese model](https://share.weiyun.com/51tMpcr), and put it into *models* file.
-Then we load Google's pre-trained model and train on book review corpus.
+We download [Google's pre-trained Chinese model](https://share.weiyun.com/51tMpcr), and put it into *models* folder.
+Then we load Google's pre-trained model and train on book review corpus. We explicitly specify model's encoder and target:
 ```
 python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin \
                     --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
-                    --total_steps 20000 --save_checkpoint_steps 1000 --target bert
+                    --total_steps 20000 --save_checkpoint_steps 1000 --encoder_type bert --target bert
 ```
 Finally, we do classification. We can use google_model.bin:
 ```
@@ -79,9 +79,9 @@ python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_pa
     --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
     --epochs_num 3 --batch_size 64
 ```
-or use our book_review_model.bin：
+or use our [book_review_model.bin](https://share.weiyun.com/59OoBes), the output of pretrain.py：
 ```
-python3 classifier.py --pretrained_model_path models/review_model.bin --vocab_path models/google_vocab.txt \
+python3 classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_vocab.txt \
     --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
     --epochs_num 3 --batch_size 64
 ```
