@@ -8,14 +8,14 @@ import random
 import argparse
 import collections
 import torch.nn as nn
-from bert.utils.vocab import Vocab
-from bert.utils.constants import *
-from bert.utils.tokenizer import * 
-from bert.model_builder import build_model
-from bert.utils.optimizers import  BertAdam
-from bert.utils.config import load_hyperparam
-from bert.utils.seed import set_seed
-from bert.model_saver import save_model
+from uer.utils.vocab import Vocab
+from uer.utils.constants import *
+from uer.utils.tokenizer import * 
+from uer.model_builder import build_model
+from uer.utils.optimizers import  BertAdam
+from uer.utils.config import load_hyperparam
+from uer.utils.seed import set_seed
+from uer.model_saver import save_model
 
 
 class BertClassifier(nn.Module):

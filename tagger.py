@@ -9,13 +9,13 @@ import torch
 import torch.nn as nn
 from torch.nn import CrossEntropyLoss
 
-from bert.model_builder import build_model
-from bert.utils.config import load_hyperparam
-from bert.utils.optimizers import  BertAdam
-from bert.utils.constants import *
-from bert.utils.vocab import Vocab
-from bert.utils.seed import set_seed
-from bert.model_saver import save_model
+from uer.model_builder import build_model
+from uer.utils.config import load_hyperparam
+from uer.utils.optimizers import  BertAdam
+from uer.utils.constants import *
+from uer.utils.vocab import Vocab
+from uer.utils.seed import set_seed
+from uer.model_saver import save_model
 
 
 class BertTagger(nn.Module):
@@ -98,6 +98,13 @@ def main():
                         help="Batch_size.")
     parser.add_argument("--seq_length", default=256, type=int,
                         help="Sequence length.")
+    parser.add_argument("--encoder_type", choices=["bert", "lstm", "gru", \
+                                                   "cnn", "gatedcnn", "attn", \
+                                                   "rcnn", "crnn", "gpt"], \
+                                                   default="bert", help="Encoder type.")
+    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
+    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s"], default="bert",
+                        help="The training target of the pretraining model.")
     
     # Optimizer options.
     parser.add_argument("--learning_rate", type=float, default=2e-5,
