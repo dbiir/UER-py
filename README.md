@@ -79,13 +79,13 @@ python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_pa
     --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
     --epochs_num 3 --batch_size 64 --encoder_type bert --target bert
 ```
-or use our [book_review_model.bin](https://share.weiyun.com/59OoBes), the output of pretrain.py：
+or use our [book_review_model.bin](https://share.weiyun.com/59OoBes), which is the output of pretrain.py：
 ```
 python3 classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_vocab.txt \
     --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
     --epochs_num 3 --batch_size 64 --encoder_type bert --target bert
 ```
-It turns out that the result of Google's model is 87.5; The result of book_review_model.bin is 88.1.
+It turns out that the result of Google's model is 87.5; The result of *book_review_model.bin* is 88.1.
 
 <br/>
 
@@ -96,10 +96,10 @@ UER-py is organized as follows：
 UER-py/
     |--uer/
     |    |--encoders/: contains encoders such as RNN, CNN, Attention, BERT
+    |    |--targets/: contains targets such as language model, masked language model, sentence prediction
+    |    |--subencoders/: contains subencoders such as RNN, CNN and different pooling strategies
     |    |--layers/: contains common NN layers, such as embedding layer, normalization layer
     |    |--models/: contains model.py, which combines subencoder, embedding, encoder, and target modules
-    |    |--subencoders/: contains subencoders such as RNN, CNN and different pooling strategies
-    |    |--targets/: contains targets such as language model, masked language model, sentence prediction
     |    |--utils/: contains common utilities
     |    |--model_builder.py 
     |    |--model_saver.py
@@ -137,12 +137,12 @@ usage: preprocess.py [-h] --corpus_path CORPUS_PATH --vocab_path VOCAB_PATH
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt \
                       --dataset_path dataset --target bert
 ```
-*--dataset_split_num n* represents that the corpus is divided into n parts. During the pre-training stage, each process handles one part. Suppose we have 8 GPUs, the n is set to 8. The example of using distributed mode for training (single machine) is as follows:
+*--dataset_split_num n* represents that the corpus is divided into n parts. During the pre-training stage, each process handles one part. Suppose we have 8 GPUs, the n is set to 8. The example of using distributed mode (single machine) is as follows:
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt \
                       --dataset_path dataset --dataset_split_num 8 --target bert
 ```
-Suppose we have two machines, each has 8 GPUs (16 GPUs in total). The example of using distributed mode for training (multiple machines) as follows:
+Suppose we have two machines, each has 8 GPUs (16 GPUs in total). The example of using distributed mode (multiple machines) as follows:
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt \
                       --dataset_path dataset --dataset_split_num 16 --target bert
@@ -174,11 +174,11 @@ usage: pretrain.py [-h] [--dataset_path DATASET_PATH] --vocab_path VOCAB_PATH
                    [--master_ip MASTER_IP] [--backend {nccl,gloo}]
 ```
 #### Random initialization
-The example of pre-training on CPU is as follows：
+The example of pre-training on CPU：
 ```
 python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --output_model_path models/model.bin --encoder bert --target bert
 ```
-Pre-training on single GPU. The id of GPU is 3：
+The example of pre-training on single GPU (the id of GPU is 3)：
 ```
 python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --output_model_path models/model.bin --gpu_ranks 3
 ```
@@ -197,9 +197,9 @@ Node-1 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_v
             --master_ip tcp://node-0-addr:port            
 ```
 
-#### Loading a pre-trained model
+#### Load a pre-trained model
 We recommend to load a pre-trained model. We can specify the pre-trained model by *--pretrained_model_path* .
-Pre-training on CPU and single GPU:
+The example of pre-training on CPU and single GPU:
 ```
 python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
                     --pretrained_model_path models/google_model.bin --output_model_path models/model.bin \
@@ -208,12 +208,12 @@ python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt 
                     --pretrained_model_path models/google_model.bin --output_model_path models/model.bin \
                     --gpu_ranks 3 --encoder bert --target bert
 ```
-Pre-training on a single machine with 8 GPUs：
+The example of pre-training on a single machine with 8 GPUs：
 ```
 python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin \
                     --output_model_path models/model.bin --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 
 ```
-Pre-training on two nachines, each has 8 GPUs (16 GPUs in total): 
+The example of pre-training on two nachines, each has 8 GPUs (16 GPUs in total): 
 ```
 Node-0 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
             --output_model_path models/model.bin --pretrained_model_path models/google_model.bin\
