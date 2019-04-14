@@ -256,16 +256,18 @@ usage: tagger.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                  [--vocab_path VOCAB_PATH] [--train_path TRAIN_PATH]
                  [--dev_path DEV_PATH] [--test_path TEST_PATH]
                  [--config_path CONFIG_PATH] [--batch_size BATCH_SIZE]
-                 [--seq_length SEQ_LENGTH] [--learning_rate LEARNING_RATE]
-                 [--warmup WARMUP] [--dropout DROPOUT]
-                 [--epochs_num EPOCHS_NUM] [--report_steps REPORT_STEPS]
-                 [--seed SEED]
+                 [--seq_length SEQ_LENGTH]
+                 [--encoder_type {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt}]
+                 [--bidirectional] [--target {bert,lm,cls,mlm,nsp,s2s}]
+                 [--learning_rate LEARNING_RATE] [--warmup WARMUP]
+                 [--dropout DROPOUT] [--epochs_num EPOCHS_NUM]
+                 [--report_steps REPORT_STEPS] [--seed SEED]
 ```
 Example of using tagger.py：
 ```
 python3 tagger.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                   --train_path datasets/msra/train.txt --dev_path datasets/msra/dev.txt --test_path datasets/msra/test.txt \
-                  --epochs_num 5 --batch_size 32
+                  --epochs_num 5 --batch_size 32 --encoder_type bert --target bert
 ```
 
 #### Cloze test
