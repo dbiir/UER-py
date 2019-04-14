@@ -30,9 +30,9 @@ UER-py has the following features:
 <br/>
 
 ## Quickstart
-We use BERT model and book review classification dataset to demonstrate the way of using UER-py. There are three input files: book review corpus, book review dataset, and vocabulary. All files are encoded in UTF-8 and they are included in this project.
+We use BERT model and book review classification dataset to demonstrate how to UER-py. There are three input files: book review corpus, book review dataset, and vocabulary. All files are encoded in UTF-8 and are included in this project.
 
-The format of the corpus for BERT is as follows：
+The book review corpus is obtained by book review dataset with labels removed. The format of the corpus for BERT is as follows：
 ```
 doc1-sent1
 doc1-sent2
@@ -44,14 +44,14 @@ doc3-sent1
 doc3-sent2
 ```
 
-The format of classification dataset is as follows (label and instance are separated by \t):
+The format of the classification dataset is as follows (label and instance are separated by \t):
 ```
 1 instance1
 0 instance2
 1 instance3
 ```
 
-We use Google's Chinese vocabulary file, which contains 21128 Chinese characters. The format of vocabulary is as follows:
+We use Google's Chinese vocabulary file, which contains 21128 Chinese characters. The format of the vocabulary is as follows:
 ```
 word-1
 word-2
