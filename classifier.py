@@ -77,6 +77,13 @@ def main():
                         help="Batch size.")
     parser.add_argument("--seq_length", type=int, default=100,
                         help="Sequence length.")
+    parser.add_argument("--encoder_type", choices=["bert", "lstm", "gru", \
+                                                   "cnn", "gatedcnn", "attn", \
+                                                   "rcnn", "crnn", "gpt"], \
+                                                   default="bert", help="Encoder type.")
+    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
+    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s"], default="bert",
+                        help="The training target of the pretraining model.")
 
     # Tokenizer options.
     parser.add_argument("--tokenizer", choices=["bert", "char", "word", "space"], default="bert",
