@@ -13,11 +13,13 @@ from uer.targets.cls_target import ClsTarget
 from uer.targets.mlm_target import MlmTarget
 from uer.targets.nsp_target import NspTarget
 from uer.targets.s2s_target import S2sTarget
-#from uer.models.bert_model import BertModel
+from uer.subencoders.avg_subencoder import AvgSubencoder
+from uer.subencoders.rnn_subencoder import LstmSubencoder
+from uer.subencoders.cnn_subencoder import CnnSubencoder
 from uer.models.model import Model
 
 
-def build_model(args, vocab_size):
+def build_model(args):
     """
     Build universial encoder representations models.
     Only BERT is retained in this project.
@@ -27,14 +29,14 @@ def build_model(args, vocab_size):
     We could select suitable one for downstream tasks.
     """
 
-    # embedding = BertEmbedding(args, vocab_size)
-    # encoder = BertEncoder(args)
-    # target = BertTarget(args, vocab_size)
-    # model = BertModel(args, embedding, encoder, target)
+    if args.subword_type != "none":
+        subencoder = globals()[args.subencoder_type.capitalize() + "Subencoder"](args, len(args.sub_vocab))
+    else:
+        subencoder = None
 
-    embedding = BertEmbedding(args, vocab_size)
+    embedding = BertEmbedding(args, len(args.vocab))
     encoder = globals()[args.encoder_type.capitalize() + "Encoder"](args)
-    target = globals()[args.target.capitalize() + "Target"](args, vocab_size)
-    model = Model(args, embedding, encoder, target)
+    target = globals()[args.target.capitalize() + "Target"](args, len(args.vocab))
+    model = Model(args, embedding, encoder, target, subencoder)
 
     return model

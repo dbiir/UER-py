@@ -59,6 +59,14 @@ def main():
     parser.add_argument("--learning_rate", type=float, default=2e-5, help="Initial learning rate.")
     parser.add_argument("--warmup", type=float, default=0.1, help="Warm up value.")
 
+    # Subword options.
+    parser.add_argument("--subword_type", choices=["none", "char"], default="none",
+                        help="Subword feature type.")
+    parser.add_argument("--sub_vocab_path", type=str, default="models/sub_vocab.txt",
+                        help="Path of the subword vocabulary file.")
+    parser.add_argument("--subencoder_type", choices=["avg", "lstm", "gru", "cnn"], default="avg",
+                        help="Subencoder type.")
+
     # GPU options.
     parser.add_argument("--world_size", type=int, default=1, help="Total number of processes (GPUs) for training.")
     parser.add_argument("--gpu_ranks", default=[], nargs='+', type=int, help="List of ranks of each process."
