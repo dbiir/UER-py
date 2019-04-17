@@ -59,15 +59,14 @@ word-2
 word-n
 ```
 
-Suppose we have a machine with 8 GPUs.
 First of all, we preprocess the book review corpus. We need to specify the model's target during the pre-processing stage:
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset \
-                      --dataset_split_num 8 --target bert
+                      --processes_num 8 --target bert
 ```
-Since we have 8 GPUs, we split the *dataset* into 8 parts. Each GPU processes one part.
-We download [Google's pre-trained Chinese model](https://share.weiyun.com/51tMpcr), and put it into *models* folder.
-Then we load Google's pre-trained model and train on book review corpus. We explicitly specify model's encoder and target:
+Pre-processing is time-consuming. Multi-process can largely accelerate the pre-processing speed.
+Then  we download [Google's pre-trained Chinese model](https://share.weiyun.com/51tMpcr), and put it into *models* folder.
+We load Google's pre-trained model and train on book review corpus. Suppose we have a machine with 8 GPUs. We explicitly specify model's encoder and target:
 ```
 python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin \
                     --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
@@ -126,29 +125,18 @@ Next, we provide instructions of UER-py.
 usage: preprocess.py [-h] --corpus_path CORPUS_PATH --vocab_path VOCAB_PATH
                      [--dataset_path DATASET_PATH]
                      [--tokenizer {bert,char,space}]
-                     [--dataset_split_num DATASET_SPLIT_NUM]
+                     [--processes_num PROCESSES_NUM]
                      [--target {bert,lm,cls,mlm,nsp,s2s}]
                      [--docs_buffer_size DOCS_BUFFER_SIZE]
                      [--seq_length SEQ_LENGTH] [--dup_factor DUP_FACTOR]
                      [--short_seq_prob SHORT_SEQ_PROB] [--seed SEED]
 ```
-*--docs_buffer_size* could be used to control memory consumption. We need to specify the model's target during the pre-processing stage since different targets require different data format. The example of using CPU and single GPU is as follows：
+*--docs_buffer_size* could be used to control memory consumption. We need to specify the model's target during the pre-processing stage since different targets require different data format. *--preprocesses_num n* denotes that n processes are used for pre-processing. The example of using a single machine is as follows：
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt \
-                      --dataset_path dataset --target bert
+                      --dataset_path dataset --processes_num 8 --target bert
 ```
-*--dataset_split_num n* represents that the corpus is divided into n parts. During the pre-training stage, each process handles one part. Suppose we have 8 GPUs, the n is set to 8. The example of using distributed mode (single machine) is as follows:
-```
-python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt \
-                      --dataset_path dataset --dataset_split_num 8 --target bert
-```
-Suppose we have two machines, each has 8 GPUs (16 GPUs in total). The example of using distributed mode (multiple machines) as follows:
-```
-python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt \
-                      --dataset_path dataset --dataset_split_num 16 --target bert
-```
-We can obtain 16 datasets: from dataset-0.pt to dataset-15.pt. We need to copy dataset-8.pt~dataset-15.pt to the second machine.
-
+If multiple machines are available, each machine contains a part of corpus. The command is identical with the single machine case.
 
 ### Pretrain the model
 There two strategies for pre-training: 1）random initialization 2）loading a pre-trained model.

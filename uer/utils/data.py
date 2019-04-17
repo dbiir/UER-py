@@ -245,8 +245,10 @@ class BertDataset(object):
 class BertDataLoader(object):
     """
     """
-    def __init__(self, args, dataset_path, batch_size, shuffle=True):
+    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=True):
         self.batch_size = batch_size
+        self.proc_id = proc_id
+        self.proc_num = proc_num
         self.shuffle = shuffle
         self.buffer_size = args.instances_buffer_size
         # We only need to read dataset once when buffer is big enough to load entire dataset.
@@ -287,7 +289,7 @@ class BertDataLoader(object):
             self.end = len(self.buffer)
 
     def _empty(self):
-        return self.start + self.batch_size >= self.end
+        return self.start + self.batch_size*self.proc_num >= self.end
 
     def __del__(self):
         self.f_read.close()
@@ -296,8 +298,8 @@ class BertDataLoader(object):
         while True:
             if self._empty():
                 self._fill_buf()
-            instances = self.buffer[self.start : self.start + self.batch_size] 
-            self.start += self.batch_size
+            instances = self.buffer[self.start + self.proc_id*self.batch_size: self.start + (self.proc_id+1)*self.batch_size]
+            self.start += self.batch_size*self.proc_num
         
             src = []
             tgt_mlm = []
@@ -394,9 +396,11 @@ class LmDataset(object):
 class LmDataLoader(object):
     """
     """
-    def __init__(self, args, dataset_path, batch_size, shuffle=True):
+    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=True):
         self.batch_size = batch_size
         self.shuffle = shuffle
+        self.proc_id = proc_id
+        self.proc_num = proc_num
 
         self.f_read = open(dataset_path, "rb")
         self.start = 0
@@ -413,7 +417,7 @@ class LmDataLoader(object):
         self.end = len(self.buffer)
 
     def _empty(self):
-        return self.start + self.batch_size >= self.end
+        return self.start + self.batch_size*self.proc_num >= self.end
 
     def __del__(self):
         self.f_read.close()
@@ -422,8 +426,8 @@ class LmDataLoader(object):
         while True:
             if self._empty():
                 self._fill_buf()
-            instances = self.buffer[self.start : self.start + self.batch_size] 
-            self.start += self.batch_size
+            instances = self.buffer[self.start + self.proc_id*self.batch_size: self.start + (self.proc_id+1)*self.batch_size]
+            self.start += self.batch_size*self.proc_num
         
             src = []
             tgt = []
@@ -536,7 +540,7 @@ class ClsDataLoader(object):
         self.end = len(self.buffer)
 
     def _empty(self):
-        return self.start + self.batch_size >= self.end
+        return self.start + self.batch_size*self.proc_num >= self.end
 
     def __del__(self):
         self.f_read.close()
@@ -545,8 +549,8 @@ class ClsDataLoader(object):
         while True:
             if self._empty():
                 self._fill_buf()
-            instances = self.buffer[self.start : self.start + self.batch_size] 
-            self.start += self.batch_size
+            instances = self.buffer[self.start + self.proc_id*self.batch_size: self.start + (self.proc_id+1)*self.batch_size]
+            self.start += self.batch_size*self.proc_num
         
             src = []
             tgt = []
@@ -657,7 +661,7 @@ class MlmDataLoader(object):
         self.end = len(self.buffer)
 
     def _empty(self):
-        return self.start + self.batch_size >= self.end
+        return self.start + self.batch_size*self.proc_num >= self.end
 
     def __del__(self):
         self.f_read.close()
@@ -666,8 +670,8 @@ class MlmDataLoader(object):
         while True:
             if self._empty():
                 self._fill_buf()
-            instances = self.buffer[self.start : self.start + self.batch_size] 
-            self.start += self.batch_size
+            instances = self.buffer[self.start + self.proc_id*self.batch_size: self.start + (self.proc_id+1)*self.batch_size]
+            self.start += self.batch_size*self.proc_num
         
             src = []
             tgt = []
@@ -873,7 +877,7 @@ class NspDataLoader(object):
         self.end = len(self.buffer)
 
     def _empty(self):
-        return self.start + self.batch_size >= self.end
+        return self.start + self.batch_size*self.proc_num >= self.end
 
     def __del__(self):
         self.f_read.close()
@@ -882,8 +886,8 @@ class NspDataLoader(object):
         while True:
             if self._empty():
                 self._fill_buf()
-            instances = self.buffer[self.start : self.start + self.batch_size] 
-            self.start += self.batch_size
+            instances = self.buffer[self.start + self.proc_id*self.batch_size: self.start + (self.proc_id+1)*self.batch_size]
+            self.start += self.batch_size*self.proc_num
         
             src = []
             seg = []
@@ -1000,7 +1004,7 @@ class S2sDataLoader(object):
         self.end = len(self.buffer)
 
     def _empty(self):
-        return self.start + self.batch_size >= self.end
+        return self.start + self.batch_size*self.proc_num >= self.end
 
     def __del__(self):
         self.f_read.close()
@@ -1009,8 +1013,8 @@ class S2sDataLoader(object):
         while True:
             if self._empty():
                 self._fill_buf()
-            instances = self.buffer[self.start : self.start + self.batch_size] 
-            self.start += self.batch_size
+            instances = self.buffer[self.start + self.proc_id*self.batch_size: self.start + (self.proc_id+1)*self.batch_size]
+            self.start += self.batch_size*self.proc_num
         
             src = []
             tgt = []

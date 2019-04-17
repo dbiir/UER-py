@@ -26,8 +26,8 @@ def main():
                              "Char tokenizer segments sentences into characters."
                              "Space tokenizer segments sentences into words according to space."
                              )
-    parser.add_argument("--dataset_split_num", type=int, default=1,
-                        help="Split the whole dataset into `dataset_split_num` parts, "
+    parser.add_argument("--processes_num", type=int, default=1,
+                        help="Split the whole dataset into `processes_num` parts, "
                              "and each part is fed to a single process in training step.")
     parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s"], default="bert",
                         help="The training target of the pretraining model.")
@@ -52,7 +52,12 @@ def main():
         
     # Build and save dataset.
     dataset = globals()[args.target.capitalize() + "Dataset"](args, vocab, tokenizer)
-    dataset.build_and_save(args.dataset_split_num)
+    dataset.build_and_save(args.processes_num)
+
+    # Merge datasets.
+    for i in range(args.processes_num):
+        os.system("cat " + args.dataset_path + "-" + str(i) + ".pt >> " + args.dataset_path + ".pt")
+        os.system("rm " + args.dataset_path + "-" + str(i) + ".pt")
 
 
 if __name__ == "__main__":
