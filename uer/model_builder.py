@@ -35,7 +35,7 @@ def build_model(args):
         subencoder = None
 
     embedding = BertEmbedding(args, len(args.vocab))
-    encoder = globals()[args.encoder_type.capitalize() + "Encoder"](args)
+    encoder = globals()[args.encoder.capitalize() + "Encoder"](args)
     target = globals()[args.target.capitalize() + "Target"](args, len(args.vocab))
     model = Model(args, embedding, encoder, target, subencoder)
 

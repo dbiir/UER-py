@@ -77,7 +77,7 @@ def main():
                         help="Batch size.")
     parser.add_argument("--seq_length", type=int, default=100,
                         help="Sequence length.")
-    parser.add_argument("--encoder_type", choices=["bert", "lstm", "gru", \
+    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
                                                    "cnn", "gatedcnn", "attn", \
                                                    "rcnn", "crnn", "gpt"], \
                                                    default="bert", help="Encoder type.")

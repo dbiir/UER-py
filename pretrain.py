@@ -46,7 +46,7 @@ def main():
     parser.add_argument("--layers_num", type=int, default=12, help="The number of encoder layers.")
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout value.")
     parser.add_argument("--seed", type=int, default=7,  help="Random seed.")
-    parser.add_argument("--encoder_type", choices=["bert", "lstm", "gru", \
+    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
                                                    "cnn", "gatedcnn", "attn", \
                                                    "rcnn", "crnn", "gpt"], \
                                                    default="bert", help="Encoder type.")
