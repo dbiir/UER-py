@@ -9,11 +9,18 @@ Pre-training has become an essential part for NLP tasks and has led to remarkabl
 Table of Contents
 =================
   * [Features](#features)
+  * [Requirements](#requirements)
   * [Quickstart](#quickstart)
   * [Instructions](#instructions)
   * [Scripts](#scripts)
   * [Experiments](#experiments)
   * [Chinese_model_zoo](#chinese_model_zoo)
+  
+<br/>
+
+## Requirements
+Python3.6, PyTorch-1.0.0, CUDA Version 9.0.176, CUDNN 7.0.5
+  
 <br/>
 
 ## Features
@@ -168,14 +175,17 @@ usage: pretrain.py [-h] [--dataset_path DATASET_PATH] --vocab_path VOCAB_PATH
                    [--master_ip MASTER_IP] [--backend {nccl,gloo}]
 ```
 *--instances_buffer_size* could be used to control memory consumption during pre-training stage.
-We'd better to explicitly specify model's encoder and target. UER-py consists of the following encoder modules:
-- rnn_encoder.py: contains (bi-)LSTM and (bi-)GRU.
+
+Notice that it is recommended to explicitly specify model's encoder and target. UER-py consists of the following encoder modules:
+- rnn_encoder.py: contains (bi-)LSTM and (bi-)GRU
 - cnn_encoder.py: contains CNN and gatedCNN
 - attn_encoder.py: contains attention neural network
 - gpt_encoder.py: contains GPT encoder
-- bert_encoder.py: contains BERT encoder, a 12 transformer layers
-- mixed_encoder.py: combined basic encoders, such as RCNN (RNN+CNN), CRNN (CNN+RNN)
-The target should be coincident with the target in pre-process stage.
+- bert_encoder.py: contains BERT encoder
+- mixed_encoder.py: contains combinations of basic encoders, such as RCNN (RNN+CNN), CRNN (CNN+RNN)
+
+The target should be coincident with the target in pre-processing stage. Users can try different combinations of encoders and targets by by *--encoder* and *--target*.
+
 There two strategies for pre-training: 1）random initialization 2）loading a pre-trained model.
 #### Random initialization
 The example of pre-training on CPU：
@@ -240,7 +250,7 @@ usage: classifier.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                      --dev_path DEV_PATH --test_path TEST_PATH
                      [--config_path CONFIG_PATH] [--batch_size BATCH_SIZE]
                      [--seq_length SEQ_LENGTH]
-                     [--encoder_type {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt}]
+                     [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt}]
                      [--bidirectional] [--target {bert,lm,cls,mlm,nsp,s2s}]
                      [--tokenizer {bert,char,word,space}]
                      [--learning_rate LEARNING_RATE] [--warmup WARMUP]
@@ -251,7 +261,7 @@ The example of using classifier.py：
 ```
 python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                       --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt \
-                      --test_path datasets/book_review/test.txt --epochs_num 3 --batch_size 64 --encoder_type bert --target bert
+                      --test_path datasets/book_review/test.txt --epochs_num 3 --batch_size 64 --encoder bert --target bert
 ```
 #### Sequence labeling
 tagger.py adds a feedforward layer upon encoder layer.
@@ -262,7 +272,7 @@ usage: tagger.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                  [--dev_path DEV_PATH] [--test_path TEST_PATH]
                  [--config_path CONFIG_PATH] [--batch_size BATCH_SIZE]
                  [--seq_length SEQ_LENGTH]
-                 [--encoder_type {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt}]
+                 [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt}]
                  [--bidirectional] [--target {bert,lm,cls,mlm,nsp,s2s}]
                  [--learning_rate LEARNING_RATE] [--warmup WARMUP]
                  [--dropout DROPOUT] [--epochs_num EPOCHS_NUM]
@@ -272,7 +282,7 @@ The example of using tagger.py：
 ```
 python3 tagger.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                   --train_path datasets/msra/train.txt --dev_path datasets/msra/dev.txt --test_path datasets/msra/test.txt \
-                  --epochs_num 5 --batch_size 32 --encoder_type bert --target bert
+                  --epochs_num 5 --batch_size 32 --encoder bert --target bert
 ```
 
 #### Cloze test
