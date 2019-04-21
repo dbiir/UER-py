@@ -11,7 +11,6 @@ Table of Contents
   * [Features](#features)
   * [Quickstart](#quickstart)
   * [Instructions](#instructions)
-  * [Modules](#modules)
   * [Scripts](#scripts)
   * [Experiments](#experiments)
   * [Chinese_model_zoo](#chinese_model_zoo)
@@ -131,11 +130,19 @@ usage: preprocess.py [-h] --corpus_path CORPUS_PATH --vocab_path VOCAB_PATH
                      [--seq_length SEQ_LENGTH] [--dup_factor DUP_FACTOR]
                      [--short_seq_prob SHORT_SEQ_PROB] [--seed SEED]
 ```
-*--docs_buffer_size* could be used to control memory consumption during pre-processing stage. We need to specify the model's target during the pre-processing stage since different targets require different data format. *--preprocesses_num n* denotes that n processes are used for pre-processing. The example of using a single machine is as follows：
+*--docs_buffer_size* could be used to control memory consumption during pre-processing stage. *--preprocesses_num n* denotes that n processes are used for pre-processing. The example of using a single machine is as follows：
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt \
                       --dataset_path dataset --processes_num 8 --target bert
 ```
+We need to specify the model's target during the pre-processing stage since different targets require different data format. Currently, UER-py consists of the following target modules:
+- lm_target.py: language model
+- mlm_target.py: masked language model (cloze test)
+- nsp_target.py: next sentence prediction
+- cls_target.py: classification
+- s2s_target.py: supports autoencoder and machine translation
+- bert_target.py: masked language model + next sentence prediction
+
 If multiple machines are available, each machine contains a part of corpus. The command is identical with the single machine case.
 
 ### Pretrain the model
@@ -161,6 +168,14 @@ usage: pretrain.py [-h] [--dataset_path DATASET_PATH] --vocab_path VOCAB_PATH
                    [--master_ip MASTER_IP] [--backend {nccl,gloo}]
 ```
 *--instances_buffer_size* could be used to control memory consumption during pre-training stage.
+We'd better to explicitly specify model's encoder and target. UER-py consists of the following encoder modules:
+- rnn_encoder.py: contains (bi-)LSTM and (bi-)GRU.
+- cnn_encoder.py: contains CNN and gatedCNN
+- attn_encoder.py: contains attention neural network
+- gpt_encoder.py: contains GPT encoder
+- bert_encoder.py: contains BERT encoder, a 12 transformer layers
+- mixed_encoder.py: combined basic encoders, such as RCNN (RNN+CNN), CRNN (CNN+RNN)
+The target should be coincident with the target in pre-process stage.
 There two strategies for pre-training: 1）random initialization 2）loading a pre-trained model.
 #### Random initialization
 The example of pre-training on CPU：
@@ -291,29 +306,6 @@ The example of using feature_extractor.py：
 python3 feature_extractor.py --input_path datasets/cloze_input.txt --pretrained_model_path models/google_model.bin \
                              --vocab_path models/google_vocab.txt --output_path output.npy
 ```
-
-<br/>
-
-## Modules
-### Encoder
-
-UER-py incorporates ample encoder modules:
-- rnn_encoder.py: contains (bi-)LSTM and (bi-)GRU.
-- cnn_encoder.py: contains CNN and gatedCNN
-- attn_encoder.py: contains attention neural network
-- gpt_encoder.py: contains GPT encoder
-- bert_encoder.py: contains BERT encoder, a 12 transformer layers
-- mixed_encoder.py: combined basic encoders, such as RCNN (RNN+CNN), CRNN (CNN+RNN)
-
-### Target
-
-UER-py incorporates ample target modules:
-- lm_target.py: language model
-- mlm_target.py: masked language model (cloze test)
-- nsp_target.py: next sentence prediction
-- cls_target.py: classification
-- s2s_target.py: supports autoencoder and machine translation target
-- bert_target.py: masked language model + next sentence prediction
 
 <br/>
 
