@@ -363,13 +363,13 @@ Hyper-parameter settings are as follows:
 - Stage 2: We train with batch size of 256 sequences. For classification datasets, the sequence length is 128. For sequence labeling datasets, the sequence length is 256. We train upon Google's pretrained model for 20,000 steps. Optimizer settings are identical with stage 1. BERT tokenizer is used.
 - Stage 3: For classification datasets, the training batch size and epochs are 64 and 3. For sequence labeling datasets, the training batch size and epochs are 32 and 5. Optimizer settings are identical with stage 1. BERT tokenizer is used.
 
-We provide the pre-trained models on different corpora （see Chinese model zoo） and downstream datasets. So users don't need to pre-train on general-domain corpora and downstream datasets. We provide [book_review_model.bin](https://share.weiyun.com/5yXzafX), [chnsenticorp_model.bin](https://share.weiyun.com/5xNDxhr), [shopping_model.bin](https://share.weiyun.com/5mbQRuK), [msra_model.bin](https://share.weiyun.com/5k2Ln8o)
+We provide the pre-trained models on different corpora （see Chinese model zoo） and downstream datasets. So users don't need to pre-train on general-domain corpora and downstream datasets. We provide [book_review_model.bin](https://share.weiyun.com/5yXzafX), [chnsenticorp_model.bin](https://share.weiyun.com/5xNDxhr), [shopping_model.bin](https://share.weiyun.com/5mbQRuK), [msra_model.bin](https://share.weiyun.com/5k2Ln8o). Tencentnews dataset and its pretrained model will be publicly available after data desensitization.
 
 
 <table>
-<tr align="center"><th> Model/Dataset              <th> Douban book review <th> ChnSentiCorp <th> Shopping <th> MSRA-NER
-<tr align="center"><td> BERT                       <td> 87.5               <td> 94.3         <td> 96.3     <td> 93.0/92.4/92.7
-<tr align="center"><td> BERT+semi-supervision      <td> 88.1               <td> 95.6         <td> 97.0     <td> 94.3/92.6/93.4
+<tr align="center"><th> Model/Dataset              <th> Douban book review <th> ChnSentiCorp <th> Shopping <th> MSRA-NER <th> Tencentnews review
+<tr align="center"><td> BERT                       <td> 87.5               <td> 94.3         <td> 96.3     <td> 93.0/92.4/92.7  <th> 84.2
+<tr align="center"><td> BERT+semi-supervision      <td> 88.1               <td> 95.6         <td> 97.0     <td> 94.3/92.6/93.4  <th> 85.1
 </table>
  
 <table>
