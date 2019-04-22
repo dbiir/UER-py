@@ -368,8 +368,8 @@ We provide the pre-trained models on different corpora ï¼ˆsee Chinese model zooï
 
 <table>
 <tr align="center"><th> Model/Dataset              <th> Douban book review <th> ChnSentiCorp <th> Shopping <th> MSRA-NER <th> Tencentnews review
-<tr align="center"><td> BERT                       <td> 87.5               <td> 94.3         <td> 96.3     <td> 93.0/92.4/92.7  <th> 84.2
-<tr align="center"><td> BERT+semi-supervision      <td> 88.1               <td> 95.6         <td> 97.0     <td> 94.3/92.6/93.4  <th> 85.1
+<tr align="center"><td> BERT                       <td> 87.5               <td> 94.3         <td> 96.3     <td> 93.0/92.4/92.7  <td> 84.2
+<tr align="center"><td> BERT+semi-supervision      <td> 88.1               <td> 95.6         <td> 97.0     <td> 94.3/92.6/93.4  <td> 85.1
 </table>
  
 <table>
