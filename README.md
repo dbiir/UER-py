@@ -71,7 +71,7 @@ python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path mo
                       --processes_num 8 --target bert
 ```
 Pre-processing is time-consuming. Multi-process can largely accelerate the pre-processing speed.
-Then  we download [Google's pre-trained Chinese model](https://share.weiyun.com/51tMpcr), and put it into *models* folder.
+Then  we download [Google's pre-trained Chinese model](https://share.weiyun.com/5MLx5qu), and put it into *models* folder.
 We load Google's pre-trained model and train on book review corpus. Suppose we have a machine with 8 GPUs. We explicitly specify model's encoder and target:
 ```
 python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin \
@@ -84,7 +84,7 @@ python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_pa
     --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
     --epochs_num 3 --batch_size 64 --encoder bert --target bert
 ```
-or use our [book_review_model.bin](https://share.weiyun.com/59OoBes), which is the output of pretrain.py：
+or use our [book_review_model.bin](https://share.weiyun.com/5yXzafX), which is the output of pretrain.py：
 ```
 python3 classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_vocab.txt \
     --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
@@ -341,6 +341,7 @@ GPU：Tesla P40
 CPU：Intel(R) Xeon(R) CPU E5-2699 v4 @ 2.20GHz
 
 ```
+We use BERT to test the speed of distributed training mode. Google BERT is trained for 1 million steps and each step contains 128,000 tokens. It takes around 18 days to reproduce the experiments by UER-py on 3 GPU machines (24 GPU in total).
 
 <table>
 <tr align="center"><th> #(machine) <th> #(GPU)/machine <th> tokens/second
@@ -354,11 +355,27 @@ CPU：Intel(R) Xeon(R) CPU E5-2699 v4 @ 2.20GHz
 
 ### Performance
 We use a range of Chinese datasets to evaluate the performance of UER-py. These datasets are included in this project. One can reproduce our results with little efforts.
-Training model on the corpus of downstream task can boost the performance. It is sometimes known as semi-supervised fune-tuning. More improvements will be added soon for better performance.
+
+Most pre-training models consist of 2 stages: pre-training on general-domain corpus and fine-tuning on downstream dataset. We recommend 3-stage mode: 1)Pre-training on general-domain corpus; 2)Pre-training on downstream dataset; 3)Fine-tuning on downstream dataset. Stage 2 enables models to get familiar with distributions of downstream tasks. It is sometimes known as semi-supervised fune-tuning.
+
+Hyper-parameter settings are as follows:
+- Stage 1: We train with batch size of 256 sequences and each sequence contains 256 tokens. We load Google's pretrained models and train upon it for 500,000 steps. The learning rate is 2e-5 and other optimizer settings are identical with Google BERT.
+- Stage 2: We train with batch size of 256 sequences. For classification datasets, the sequence length is 128. For sequence labeling datasets, the sequence length is 256. We train upon Google's pretrained model for 20,000 steps. Optimizer settings are identical with stage 1. BERT tokenizer is used.
+- Stage 3: For classification datasets, the training batch size and epochs are 64 and 3. For sequence labeling datasets, the training batch size and epochs are 32 and 5. Optimizer settings are identical with stage 1. BERT tokenizer is used.
+
+We provide the pre-trained models on different corpora （see Chinese model zoo） and downstream datasets. So users don't need to pre-train on general-domain corpora and downstream datasets. We provide [book_review_model.bin](https://share.weiyun.com/5yXzafX), [chnsenticorp_model.bin](https://share.weiyun.com/5xNDxhr), [shopping_model.bin](https://share.weiyun.com/5mbQRuK), [msra_model.bin](https://share.weiyun.com/5k2Ln8o)
+
+
 <table>
 <tr align="center"><th> Model/Dataset              <th> Douban book review <th> ChnSentiCorp <th> Shopping <th> MSRA-NER
 <tr align="center"><td> BERT                       <td> 87.5               <td> 94.3         <td> 96.3     <td> 93.0/92.4/92.7
 <tr align="center"><td> BERT+semi-supervision      <td> 88.1               <td> 95.6         <td> 97.0     <td> 94.3/92.6/93.4
+</table>
+ 
+<table>
+<tr align="center"><th> Model/Dataset              <th> MSRA-NER
+<tr align="center"><td> Google                     <td> 93.0/92.4/92.7
+<tr align="center"><td> Renminribao                <td> 94.1/94.1/94.1
 </table>
 
 
