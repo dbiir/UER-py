@@ -17,22 +17,22 @@ class BertTarget(nn.Module):
         self.hidden_size = args.hidden_size
 
         # MLM.
-        self.transform_norm = LayerNorm(args.hidden_size)
-        self.transform = nn.Linear(args.hidden_size, args.hidden_size)
-        self.output_mlm = nn.Linear(args.hidden_size, self.vocab_size)
+        self.mlm_linear_1 = nn.Linear(args.hidden_size, args.hidden_size)
+        self.layer_norm = LayerNorm(args.hidden_size)
+        self.mlm_linear_2 = nn.Linear(args.hidden_size, self.vocab_size)
 
         # NSP.
-        self.pooler = nn.Linear(args.hidden_size, args.hidden_size)
-        self.output_nsp = nn.Linear(args.hidden_size, 2)
+        self.nsp_linear_1 = nn.Linear(args.hidden_size, args.hidden_size)
+        self.nsp_linear_2 = nn.Linear(args.hidden_size, 2)
         self.softmax = nn.LogSoftmax(dim=-1)
 
         self.criterion = nn.NLLLoss()
 
     def mlm(self, memory_bank, tgt_mlm):
         # Masked language model (MLM) with full softmax prediction.
-        output_mlm = gelu(self.transform(memory_bank))
-        output_mlm = self.transform_norm(output_mlm)
-        output_mlm = self.output_mlm(output_mlm)
+        output_mlm = gelu(self.mlm_linear_1(memory_bank))
+        output_mlm = self.layer_norm(output_mlm)
+        output_mlm = self.mlm_linear_2(output_mlm)
         output_mlm = output_mlm.contiguous().view(-1, self.vocab_size)
         # Full probability distribution.
         output_mlm = self.softmax(output_mlm)
@@ -78,8 +78,8 @@ class BertTarget(nn.Module):
         loss_mlm, correct_mlm, denominator = self.mlm(memory_bank, tgt_mlm)
            
         # Next sentence prediction (NSP).
-        output_nsp = torch.tanh(self.pooler(memory_bank[:, 0, :]))
-        output_nsp = self.output_nsp(output_nsp)
+        output_nsp = torch.tanh(self.nsp_linear_1(memory_bank[:, 0, :]))
+        output_nsp = self.nsp_linear_2(output_nsp)
         loss_nsp = self.criterion(self.softmax(output_nsp), tgt_nsp)
         correct_nsp = self.softmax(output_nsp).argmax(dim=-1).eq(tgt_nsp).sum()
 

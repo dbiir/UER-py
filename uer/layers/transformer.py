@@ -12,18 +12,19 @@ class TransformerLayer(nn.Module):
     """
     def __init__(self, args):
         super(TransformerLayer, self).__init__()
-        self.dropout1 = nn.Dropout(args.dropout)
-        self.dropout2 = nn.Dropout(args.dropout)
-        self.layer_norm1 = LayerNorm(args.hidden_size)
-        self.layer_norm2 = LayerNorm(args.hidden_size)
+
         # Multi-headed self-attention.
         self.self_attn = MultiHeadedAttention(
             args.hidden_size, args.heads_num, args.dropout
         )
+        self.dropout_1 = nn.Dropout(args.dropout)
+        self.layer_norm_1 = LayerNorm(args.hidden_size)
         # Feed forward layer.
         self.feed_forward = PositionwiseFeedForward(
             args.hidden_size, args.feedforward_size
         )
+        self.dropout_2 = nn.Dropout(args.dropout)
+        self.layer_norm_2 = LayerNorm(args.hidden_size)
 
     def forward(self, hidden, mask):
         """
@@ -34,8 +35,8 @@ class TransformerLayer(nn.Module):
         Returns:
             output: [batch_size x seq_length x hidden_size]
         """
-        inter = self.dropout1(self.self_attn(hidden, hidden, hidden, mask))
-        inter = self.layer_norm1(inter + hidden)
-        output = self.dropout2(self.feed_forward(inter))
-        output = self.layer_norm2(output + inter)  
+        inter = self.dropout_1(self.self_attn(hidden, hidden, hidden, mask))
+        inter = self.layer_norm_1(inter + hidden)
+        output = self.dropout_2(self.feed_forward(inter))
+        output = self.layer_norm_2(output + inter)  
         return output

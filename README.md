@@ -71,7 +71,7 @@ python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path mo
                       --processes_num 8 --target bert
 ```
 Pre-processing is time-consuming. Multi-process can largely accelerate the pre-processing speed.
-Then  we download [Google's pre-trained Chinese model](https://share.weiyun.com/5MLx5qu), and put it into *models* folder.
+Then  we download [Google's pre-trained Chinese model](https://share.weiyun.com/5DJasRk), and put it into *models* folder.
 We load Google's pre-trained model and train on book review corpus. Suppose we have a machine with 8 GPUs. We explicitly specify model's encoder and target:
 ```
 python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin \
@@ -84,7 +84,7 @@ python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_pa
     --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
     --epochs_num 3 --batch_size 64 --encoder bert --target bert
 ```
-or use our [book_review_model.bin](https://share.weiyun.com/5yXzafX), which is the output of pretrain.py：
+or use our [book_review_model.bin](https://share.weiyun.com/52BEFs2), which is the output of pretrain.py：
 ```
 python3 classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_vocab.txt \
     --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
@@ -363,7 +363,7 @@ Hyper-parameter settings are as follows:
 - Stage 2: We train with batch size of 256 sequences. For classification datasets, the sequence length is 128. For sequence labeling datasets, the sequence length is 256. We train upon Google's pretrained model for 20,000 steps. Optimizer settings are identical with stage 1. BERT tokenizer is used.
 - Stage 3: For classification datasets, the training batch size and epochs are 64 and 3. For sequence labeling datasets, the training batch size and epochs are 32 and 5. Optimizer settings are identical with stage 1. BERT tokenizer is used.
 
-We provide the pre-trained models on different corpora （see Chinese model zoo） and downstream datasets. So users don't need to pre-train on general-domain corpora and downstream datasets. We provide [book_review_model.bin](https://share.weiyun.com/5yXzafX), [chnsenticorp_model.bin](https://share.weiyun.com/5xNDxhr), [shopping_model.bin](https://share.weiyun.com/5mbQRuK), [msra_model.bin](https://share.weiyun.com/5k2Ln8o). Tencentnews dataset and its pretrained model will be publicly available after data desensitization.
+We provide the pre-trained models on different corpora （see Chinese model zoo） and downstream datasets. So users don't need to pre-train on general-domain corpora and downstream datasets. We provide [book_review_model.bin](https://share.weiyun.com/52BEFs2), [chnsenticorp_model.bin](https://share.weiyun.com/53WDBeJ), [shopping_model.bin](https://share.weiyun.com/5HaxwAf), [msra_model.bin](https://share.weiyun.com/5k2Ln8o). Tencentnews dataset and its pretrained model will be publicly available after data desensitization.
 
 
 <table>
