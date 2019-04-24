@@ -44,10 +44,6 @@ class BertTagger(nn.Module):
         # Embedding.
         emb = self.embedding(src, mask)
         # Encoder.
-        # seq_length = emb.size(1)
-        # mask_attn = (mask>0).unsqueeze(1).repeat(1, seq_length, 1).unsqueeze(1)
-        # mask_attn = mask_attn.float()
-        # mask_attn = (1.0 - mask_attn) * -10000.0
         output = self.encoder(emb, mask)
         # Target.
         output = self.output_layer(output)
@@ -98,13 +94,21 @@ def main():
                         help="Batch_size.")
     parser.add_argument("--seq_length", default=256, type=int,
                         help="Sequence length.")
-    parser.add_argument("--encoder_type", choices=["bert", "lstm", "gru", \
+    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
                                                    "cnn", "gatedcnn", "attn", \
                                                    "rcnn", "crnn", "gpt"], \
                                                    default="bert", help="Encoder type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s"], default="bert",
                         help="The training target of the pretraining model.")
+
+    # Subword options.
+    parser.add_argument("--subword_type", choices=["none", "char"], default="none",
+                        help="Subword feature type.")
+    parser.add_argument("--sub_vocab_path", type=str, default="models/sub_vocab.txt",
+                        help="Path of the subword vocabulary file.")
+    parser.add_argument("--subencoder_type", choices=["avg", "lstm", "gru", "cnn"], default="avg",
+                        help="Subencoder type.")
     
     # Optimizer options.
     parser.add_argument("--learning_rate", type=float, default=2e-5,
@@ -147,9 +151,10 @@ def main():
     # Load vocabulary.
     vocab = Vocab()
     vocab.load(args.vocab_path)
+    args.vocab = vocab
 
     # Build bert model.
-    bert_model = build_model(args, len(vocab))
+    bert_model = build_model(args)
 
     # Load pretrained model.
     pretrained_model = torch.load(args.pretrained_model_path)
