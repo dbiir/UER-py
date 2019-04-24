@@ -363,7 +363,7 @@ Hyper-parameter settings are as follows:
 - Stage 2: We train with batch size of 256 sequences. For classification datasets, the sequence length is 128. For sequence labeling datasets, the sequence length is 256. We train upon Google's pretrained model for 20,000 steps. Optimizer settings are identical with stage 1. BERT tokenizer is used.
 - Stage 3: For classification datasets, the training batch size and epochs are 64 and 3. For sequence labeling datasets, the training batch size and epochs are 32 and 5. Optimizer settings are identical with stage 1. BERT tokenizer is used.
 
-We provide the pre-trained models on different corpora （see Chinese model zoo） and downstream datasets. So users don't need to pre-train on general-domain corpora and downstream datasets. We provide [book_review_model.bin](https://share.weiyun.com/52BEFs2), [chnsenticorp_model.bin](https://share.weiyun.com/53WDBeJ), [shopping_model.bin](https://share.weiyun.com/5HaxwAf), [msra_model.bin](https://share.weiyun.com/5k2Ln8o). Tencentnews dataset and its pretrained model will be publicly available after data desensitization.
+We provide the pre-trained models on different corpora （see Chinese model zoo） and downstream datasets. So users don't need to pre-train on general-domain corpora and downstream datasets. We provide [book_review_model.bin](https://share.weiyun.com/52BEFs2), [chnsenticorp_model.bin](https://share.weiyun.com/53WDBeJ), [shopping_model.bin](https://share.weiyun.com/5HaxwAf), [msra_model.bin](https://share.weiyun.com/5E6XpEt). Tencentnews dataset and its pretrained model will be publicly available after data desensitization.
 
 
 <table>
@@ -375,7 +375,7 @@ We provide the pre-trained models on different corpora （see Chinese model zoo�
 <table>
 <tr align="center"><th> Model/Dataset              <th> MSRA-NER
 <tr align="center"><td> Google                     <td> 93.0/92.4/92.7
-<tr align="center"><td> Renminribao                <td> 94.1/94.1/94.1
+<tr align="center"><td> Renminribao                <td> 94.3/94.1/94.2
 </table>
 
 
@@ -388,15 +388,7 @@ With the help of UER, we are pre-training models with different corpora, encoder
 <tr align="center"><td> Wikizh+BertEncoder+BertTarget <td> https://share.weiyun.com/5DJasRk <td> Trained by Google 
 <tr align="center"><td> RenMinRiBao+BertEncoder+BertTarget <td> https://share.weiyun.com/5HKnsxq <td> 
 <tr align="center"><td> Webqa2019+BertEncoder+BertTarget <td> https://share.weiyun.com/5Ln6rgv <td>
-<tr align="center"><td> <td> <td> 
-<tr align="center"><td> <td> <td> 
-<tr align="center"><td> <td> <td> 
-<tr align="center"><td> <td> <td> 
-<tr align="center"><td> <td> <td> 
-<tr align="center"><td> <td> <td> 
-<tr align="center"><td> <td> <td> 
-<tr align="center"><td> <td> <td> 
-<tr align="center"><td> <td> <td> 
+<tr align="center"><td> Wikizh+LstmEncoder+LmTarget <td> <td> 
 <tr align="center"><td> <td> <td> 
 </table>
 
