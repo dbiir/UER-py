@@ -7,13 +7,13 @@ import sys
 import torch
 import argparse
 import random
-from bert.utils.act_fun import gelu
-from bert.utils.constants import *
-from bert.utils.tokenizer import *
-from bert.layers.layer_norm import LayerNorm
-from bert.utils.config import load_hyperparam
-from bert.utils.vocab import Vocab
-from bert.model_builder import build_model
+from uer.utils.act_fun import gelu
+from uer.utils.constants import *
+from uer.utils.tokenizer import *
+from uer.layers.layer_norm import LayerNorm
+from uer.utils.config import load_hyperparam
+from uer.utils.vocab import Vocab
+from uer.model_builder import build_model
 
 
 class ClozeModel(torch.nn.Module):
@@ -25,23 +25,12 @@ class ClozeModel(torch.nn.Module):
         # open eval mode
         self.eval()
 
-    def forward(self, input_ids, seg_ids):
-        emb = self.embedding(input_ids, seg_ids)
-        # seq_length = emb.size(1)
-        # # 
-        # mask = (seg_ids>0).\
-        #         unsqueeze(1).\
-        #         repeat(1, seq_length, 1).\
-        #         unsqueeze(1)
-
-        # mask = mask.float()
-        # mask = (1.0 - mask) * -10000.0
-        output = self.encoder(emb, seg_ids)
-        # mlm loss
-        output = gelu(self.target.transform(output))
-        output = self.target.transform_norm(output)
-        # computing word prediction probability based on mlm task
-        output = self.target.output_mlm(output)
+    def forward(self, src, seg):
+        emb = self.embedding(src, seg)
+        output = self.encoder(emb, seg)
+        output = gelu(self.target.mlm_linear_1(output))
+        output = self.target.layer_norm(output)
+        output = self.target.mlm_linear_2(output)
         prob = torch.nn.Softmax(dim=-1)(output)
         return prob
 
@@ -50,31 +39,46 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     # Path options.
-    parser.add_argument("--model_path", default="./models/google_model.bin", type=str, 
+    parser.add_argument("--pretrained_model_path", default="models/google_model.bin", type=str, 
                         help="Path of the pretrained model.")
-    parser.add_argument("--vocab_path", default="./models/google_vocab.txt", type=str,
+    parser.add_argument("--vocab_path", default="models/google_vocab.txt", type=str,
                         help="Path of the vocabulary file.")
     parser.add_argument("--input_path", type=str, default="datasets/cloze_input.txt", 
                         help="Path of the input file for cloze test. One sentence per line.")
-    parser.add_argument("--output_path", type=str, default="./datasets/cloze_output.txt", 
+    parser.add_argument("--output_path", type=str, default="datasets/cloze_output.txt", 
                         help="Path of the output file for cloze test.")
-    parser.add_argument("--config_path", default="./model.config", type=str,
+    parser.add_argument("--config_path", default="models/google_config.json", type=str,
                         help="Path of the config file.")
 
     # Model options.
-    parser.add_argument("--batch_size", type=int, default=50,
+    parser.add_argument("--batch_size", type=int, default=64,
                         help="Batch size.")
     parser.add_argument("--seq_length", type=int, default=100,
                         help="Sequence length.")
+    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
+                                                   "cnn", "gatedcnn", "attn", \
+                                                   "rcnn", "crnn", "gpt"], \
+                                                   default="bert", help="Encoder type.")
+    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
+    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s"], default="bert",
+                        help="The training target of the pretraining model.")
+
+    # Subword options.
+    parser.add_argument("--subword_type", choices=["none", "char"], default="none",
+                        help="Subword feature type.")
+    parser.add_argument("--sub_vocab_path", type=str, default="models/sub_vocab.txt",
+                        help="Path of the subword vocabulary file.")
+    parser.add_argument("--subencoder_type", choices=["avg", "lstm", "gru", "cnn"], default="avg",
+                        help="Subencoder type.")
+
 
     # Tokenizer options.
-    parser.add_argument("--tokenizer", choices=["char", "word", "space", "mixed"], default="char",
-                        help="Specify the tokenizer." 
-                             "Original Google BERT uses char tokenizer on Chinese corpus."
+    parser.add_argument("--tokenizer", choices=["bert", "char", "word", "space"], default="bert",
+                        help="Specify the tokenizer."
+                             "Original Google BERT uses bert tokenizer on Chinese corpus."
+                             "Char tokenizer segments sentences into characters."
                              "Word tokenizer supports online word segmentation based on jieba segmentor."
                              "Space tokenizer segments sentences into words according to space."
-                             "Mixed tokenizer segments sentences into words according to space."
-                             "If words are not in the vocabulary, the tokenizer splits words into characters."
                              )
 
     # Output options.
@@ -89,12 +93,13 @@ if __name__ == '__main__':
     # Load Vocabulary
     vocab = Vocab()
     vocab.load(args.vocab_path)
+    args.vocab = vocab
 
     # Build bert model.
-    bert_model = build_model(args, len(vocab))
+    bert_model = build_model(args)
 
     # Load pretrained model.
-    pretrained_model = torch.load(args.model_path)
+    pretrained_model = torch.load(args.pretrained_model_path)
     bert_model.load_state_dict(pretrained_model, strict=True)
 
     model = ClozeModel(args, bert_model)
@@ -170,7 +175,7 @@ if __name__ == '__main__':
         prob = model(input_ids_batch, seg_ids_batch)
 
         for j, p in enumerate(mask_positions_batch):
-            topn_tokens = (-prob[i][p]).argsort()[:args.topn]
+            topn_tokens = (-prob[j][p]).argsort()[:args.topn]
 
             sentence = "".join([vocab.i2w[token_id] for token_id in input_ids[j] if token_id != 0])
             pred_tokens = " ".join(vocab.i2w[token_id] for token_id in topn_tokens)
