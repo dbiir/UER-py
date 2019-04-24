@@ -40,10 +40,6 @@ class BertClassifier(nn.Module):
         # Embedding.
         emb = self.embedding(src, mask)
         # Encoder.
-        # seq_length = emb.size(1)
-        # mask_attn = (mask>0).unsqueeze(1).repeat(1, seq_length, 1).unsqueeze(1)
-        # mask_attn = mask_attn.float()
-        # mask_attn = (1.0 - mask_attn) * -10000.0
         output = self.encoder(emb, mask)
         # Target.
         output = torch.tanh(self.target.pooler(output[:,0,:]))
@@ -84,6 +80,14 @@ def main():
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s"], default="bert",
                         help="The training target of the pretraining model.")
+
+    # Subword options.
+    parser.add_argument("--subword_type", choices=["none", "char"], default="none",
+                        help="Subword feature type.")
+    parser.add_argument("--sub_vocab_path", type=str, default="models/sub_vocab.txt",
+                        help="Path of the subword vocabulary file.")
+    parser.add_argument("--subencoder_type", choices=["avg", "lstm", "gru", "cnn"], default="avg",
+                        help="Subencoder type.")
 
     # Tokenizer options.
     parser.add_argument("--tokenizer", choices=["bert", "char", "word", "space"], default="bert",
@@ -132,9 +136,10 @@ def main():
     # Load vocabulary.
     vocab = Vocab()
     vocab.load(args.vocab_path)
+    args.vocab = vocab
 
     # Build bert model.
-    bert_model = build_model(args, len(vocab))
+    bert_model = build_model(args)
 
     # Load or initialize parameters.
     if args.pretrained_model_path is not None:
@@ -173,29 +178,6 @@ def main():
 
     # Build tokenizer.
     tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
-
-    # # Read dataset.
-    # def read_dataset(path):
-    #     dataset = []
-    #     with open(path, mode="r", encoding="utf-8") as f:
-    #         for line in f:
-    #             try:
-    #                 line = line.strip().split()
-    #                 label = int(line[0])
-    #                 text = " ".join(line[1:])
-    #                 tokens = [vocab.get(t) for t in tokenizer.tokenize(text)]
-    #                 tokens = [CLS_ID] + tokens
-    #                 mask = [1] * len(tokens)
-    #                 if len(tokens) > args.seq_length:
-    #                     tokens = tokens[:args.seq_length]
-    #                     mask = mask[:args.seq_length]
-    #                 while len(tokens) < args.seq_length:
-    #                     tokens.append(0)
-    #                     mask.append(0)
-    #                 dataset.append((tokens, label, mask))
-    #             except:
-    #                 pass
-    #     return dataset
 
     # Read dataset.
     def read_dataset(path):

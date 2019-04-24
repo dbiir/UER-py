@@ -24,9 +24,10 @@ def train_and_validate(args):
     # Load vocabulary.
     vocab = Vocab()
     vocab.load(args.vocab_path)
+    args.vocab = vocab
 
     # Build model.
-    model = build_model(args, len(vocab))
+    model = build_model(args)
 
     # Load or initialize parameters.
     if args.pretrained_model_path is not None:
