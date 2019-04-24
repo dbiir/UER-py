@@ -36,7 +36,7 @@ UER-py has the following features:
 <br/>
 
 ## Quickstart
-We use BERT model and book review classification dataset to demonstrate how to UER-py. There are three input files: book review corpus, book review dataset, and vocabulary. All files are encoded in UTF-8 and are included in this project.
+We use BERT model and [book review classification dataset](https://github.com/dbiir/UER-py) to demonstrate how to UER-py. There are three input files: book review corpus, book review dataset, and vocabulary. All files are encoded in UTF-8 and are included in this project.
 
 The book review corpus is obtained by book review dataset with labels removed. The format of the corpus for BERT is as follows：
 ```
