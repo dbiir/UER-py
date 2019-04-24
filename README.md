@@ -2,7 +2,7 @@
 
 <img src="uer-logo.jpg" width="390" hegiht="390" align=left />
 
-Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of different pre-training models (such as BERT), and provides interfaces for users to further extend upon. UER-py also incorporates many mechanisms for better performance and efficiency. It has been tested on several Chinese datasets and should match or even outperform Google's TF implementation.
+Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of different pre-training models (e.g. BERT), and provides interfaces for users to further extend upon. UER-py also incorporates many mechanisms for better performance and efficiency. It has been tested on several Chinese datasets and should match or even outperform Google's TF implementation.
 
 <br>
 
@@ -385,8 +385,9 @@ We provide the pre-trained models on different corpora ï¼ˆsee Chinese model zooï
 With the help of UER, we are pre-training models with different corpora, encoders, and targets.
 <table>
 <tr align="center"><th> pre-trained model <th> Link <th> Description 
-<tr align="center"><td> <td> <td> 
-<tr align="center"><td> <td> <td>
+<tr align="center"><td> Wikizh+BertEncoder+BertTarget <td> https://share.weiyun.com/5DJasRk <td> Trained by Google 
+<tr align="center"><td> RenMinRiBao+BertEncoder+BertTarget <td> https://share.weiyun.com/5HKnsxq <td> 
+<tr align="center"><td> Webqa2019+BertEncoder+BertTarget <td> https://share.weiyun.com/5Ln6rgv <td>
 <tr align="center"><td> <td> <td> 
 <tr align="center"><td> <td> <td> 
 <tr align="center"><td> <td> <td> 
