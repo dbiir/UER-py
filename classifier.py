@@ -42,7 +42,7 @@ class BertClassifier(nn.Module):
         # Encoder.
         output = self.encoder(emb, mask)
         # Target.
-        output = torch.tanh(self.target.pooler(output[:,0,:]))
+        output = torch.tanh(self.target.nsp_linear_1(output[:,0,:]))
         output = self.dropout(output)
         logits = self.classifier(output)
         loss = self.criterion(self.softmax(logits.view(-1, self.labels_num)), label.view(-1))
