@@ -25,6 +25,8 @@ class BertTagger(nn.Module):
         self.encoder = bert_model.encoder
         self.target = bert_model.target
         self.labels_num = args.labels_num
+        #self.output_layer_1 = nn.Linear(args.hidden_size, args.hidden_size)
+        #self.output_layer_2 = nn.Linear(args.hidden_size, self.labels_num)
         self.output_layer = nn.Linear(args.hidden_size, self.labels_num)
         self.softmax = nn.LogSoftmax(dim=-1)
 
@@ -46,7 +48,10 @@ class BertTagger(nn.Module):
         # Encoder.
         output = self.encoder(emb, mask)
         # Target.
+        #output = torch.tanh(self.output_layer_1(output))
+        #output = self.output_layer_2(output)
         output = self.output_layer(output)
+
         output = output.contiguous().view(-1, self.labels_num)
         output = self.softmax(output)
 
@@ -90,7 +95,7 @@ def main():
                         help="Path of the config file.")
 
     # Model options.
-    parser.add_argument("--batch_size", type=int, default=32,
+    parser.add_argument("--batch_size", type=int, default=64,
                         help="Batch_size.")
     parser.add_argument("--seq_length", default=256, type=int,
                         help="Sequence length.")
@@ -101,7 +106,7 @@ def main():
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s"], default="bert",
                         help="The training target of the pretraining model.")
-
+    
     # Subword options.
     parser.add_argument("--subword_type", choices=["none", "char"], default="none",
                         help="Subword feature type.")
@@ -109,7 +114,7 @@ def main():
                         help="Path of the subword vocabulary file.")
     parser.add_argument("--subencoder_type", choices=["avg", "lstm", "gru", "cnn"], default="avg",
                         help="Subencoder type.")
-    
+
     # Optimizer options.
     parser.add_argument("--learning_rate", type=float, default=2e-5,
                         help="Learning rate.")
@@ -246,18 +251,16 @@ def main():
             label_ids_batch = label_ids_batch.to(device)
             mask_ids_batch = mask_ids_batch.to(device)
             loss, _, pred, gold = model(input_ids_batch, label_ids_batch, mask_ids_batch)
-
+            
             # Gold.
             for j in range(gold.size()[0]):
-                if j > 0:
-                    if gold[j-1].item() <= 1 and gold[j].item() > 1:
-                        gold_entities_num += 1
+                if (j > 0 and gold[j-1].item() <= 1 and gold[j].item() > 1) or (j == 0 and gold[j].item() > 1):
+                    gold_entities_num += 1
 
             # Predict.
             for j in range(pred.size()[0]):
-                if j > 0 and gold[j].item() != 0:
-                    if pred[j-1].item() <= 1 and pred[j].item() > 1:
-                        pred_entities_num += 1
+                if (j > 0 and pred[j-1].item() <= 1 and pred[j].item() > 1 and gold[j].item() != 0) or (j == 0 and pred[j].item() > 1):
+                    pred_entities_num += 1
 
             pred_entities_pos = []
             gold_entities_pos = []
@@ -265,20 +268,19 @@ def main():
 
             # Correct.
             for j in range(gold.size()[0]):
-                if j > 0:
-                    if gold[j-1].item() <= 1 and gold[j].item() > 1:
-                        start = j
-                        for k in range(j, gold.size()[0]):
-                            if gold[k].item() <= 1:
-                                end = k - 1
-                                break
-                        else:
-                            end = gold.size()[0] - 1
-                        gold_entities_pos.append((start, end))
+                if (j > 0 and gold[j-1].item() <= 1 and gold[j].item() > 1) or (j == 0 and gold[j].item() > 1):
+                    start = j
+                    for k in range(j, gold.size()[0]):
+                        if gold[k].item() <= 1:
+                            end = k - 1
+                            break
+                    else:
+                        end = gold.size()[0] - 1
+                    gold_entities_pos.append((start, end))
 
+            # Predict.
             for j in range(pred.size()[0]):
-                if j > 0:
-                    if pred[j-1].item() <= 1 and pred[j].item() > 1:
+                if (j > 0 and pred[j-1].item() <= 1 and pred[j].item() > 1) or (j == 0 and pred[j].item() > 1):
                         start = j
                         for k in range(j, pred.size()[0]):
                             if pred[k].item() <= 1:
@@ -287,7 +289,7 @@ def main():
                         else:
                             end = pred.size()[0] - 1
                         pred_entities_pos.append((start, end))
-                
+
             for entity in pred_entities_pos:
                 if entity not in gold_entities_pos:
                     continue
