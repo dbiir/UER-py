@@ -48,8 +48,6 @@ class BertTagger(nn.Module):
         # Encoder.
         output = self.encoder(emb, mask)
         # Target.
-        #output = torch.tanh(self.output_layer_1(output))
-        #output = self.output_layer_2(output)
         output = self.output_layer(output)
 
         output = output.contiguous().view(-1, self.labels_num)

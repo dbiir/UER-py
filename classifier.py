@@ -25,8 +25,8 @@ class BertClassifier(nn.Module):
         self.encoder = bert_model.encoder
         self.target = bert_model.target
         self.labels_num = args.labels_num
-        self.classifier = nn.Linear(args.hidden_size, self.labels_num)
-        self.dropout = nn.Dropout(args.dropout)
+        self.output_layer_1 = nn.Linear(args.hidden_size, args.hidden)
+        self.output_layer_2 = nn.Linear(args.hidden_size, args.labels_num)
         self.softmax = nn.LogSoftmax(dim=-1)
         self.criterion = nn.NLLLoss()
 
@@ -42,9 +42,8 @@ class BertClassifier(nn.Module):
         # Encoder.
         output = self.encoder(emb, mask)
         # Target.
-        output = torch.tanh(self.target.nsp_linear_1(output[:,0,:]))
-        output = self.dropout(output)
-        logits = self.classifier(output)
+        output = torch.tanh(self.output_layer_1(output[:, 0, :]))
+        logits = self.output_layer_2(output)
         loss = self.criterion(self.softmax(logits.view(-1, self.labels_num)), label.view(-1))
         return loss, logits
 
