@@ -25,7 +25,7 @@ class BertClassifier(nn.Module):
         self.encoder = bert_model.encoder
         self.target = bert_model.target
         self.labels_num = args.labels_num
-        self.output_layer_1 = nn.Linear(args.hidden_size, args.hidden)
+        self.output_layer_1 = nn.Linear(args.hidden_size, args.hidden_size)
         self.output_layer_2 = nn.Linear(args.hidden_size, args.labels_num)
         self.softmax = nn.LogSoftmax(dim=-1)
         self.criterion = nn.NLLLoss()
