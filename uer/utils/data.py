@@ -521,7 +521,7 @@ class ClsDataset(object):
 class ClsDataLoader(object):
     """
     """
-    def __init__(self, args, dataset_path, batch_size, shuffle=True):
+    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=True):
         self.batch_size = batch_size
         self.shuffle = shuffle
 
