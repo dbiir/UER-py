@@ -356,7 +356,7 @@ We use BERT to test the speed of distributed training mode. Google BERT is train
 </table>
 
 ### Performance
-We use a range of Chinese datasets to evaluate the performance of UER-py. These datasets are included in this project. One can reproduce our results with little efforts.
+We use a range of Chinese datasets to evaluate the performance of UER-py. Douban book review, ChnSentiCorp, Shopping, and Tencentnews are sentence-level sentiment classification datasets. MSRA-NER is a sequence labeling dataset. These datasets are included in this project. One can reproduce our results with little efforts.
 
 Most pre-training models consist of 2 stages: pre-training on general-domain corpus and fine-tuning on downstream dataset. We recommend 3-stage mode: 1)Pre-training on general-domain corpus; 2)Pre-training on downstream dataset; 3)Fine-tuning on downstream dataset. Stage 2 enables models to get familiar with distributions of downstream tasks. It is sometimes known as semi-supervised fune-tuning.
 
@@ -365,7 +365,7 @@ Hyper-parameter settings are as follows:
 - Stage 2: We train with batch size of 256 sequences. For classification datasets, the sequence length is 128. For sequence labeling datasets, the sequence length is 256. We train upon Google's pretrained model for 20,000 steps. Optimizer settings and tokenizer are identical with stage 1.
 - Stage 3: For classification datasets, the training batch size and epochs are 64 and 3. For sequence labeling datasets, the training batch size and epochs are 32 and 5. Optimizer settings and tokenizer are identical with stage 1.
 
-We provide the pre-trained models on different downstream datasets: [book_review_model.bin](https://share.weiyun.com/52BEFs2); [chnsenticorp_model.bin](https://share.weiyun.com/53WDBeJ); [shopping_model.bin](https://share.weiyun.com/5HaxwAf); [msra_model.bin](https://share.weiyun.com/5E6XpEt). Tencentnews dataset and its pretrained model will be publicly available after data desensitization.
+We provide the pre-trained models on different downstream datasets: [book_review_model.bin](https://share.weiyun.com/52BEFs2); [chnsenticorp_model.bin](https://share.weiyun.com/53WDBeJ); [shopping_model.bin](https://share.weiyun.com/5HaxwAf); [msra_model.bin](https://share.weiyun.com/5E6XpEt). Tencentnews dataset and its pretrained model will be publicly available after data desensitization. 
 
 <table>
 <tr align="center"><th> Model/Dataset              <th> Douban book review <th> ChnSentiCorp <th> Shopping <th> MSRA-NER <th> Tencentnews review
@@ -377,7 +377,7 @@ We also provide the pre-trained models on different corpora, encoders, and targe
 
 <table>
 <tr align="center"><th> Model/Dataset                     <th> MSRA-NER
-<tr align="center"><td> Wikizh corpus (Gogole)            <td> 93.0/92.4/92.7
+<tr align="center"><td> Wikizh corpus (Google)            <td> 93.0/92.4/92.7
 <tr align="center"><td> Renminribao corpus                <td> 94.3/94.1/94.2
 </table>
 
