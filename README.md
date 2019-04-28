@@ -253,7 +253,9 @@ usage: classifier.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                      [--config_path CONFIG_PATH] [--batch_size BATCH_SIZE]
                      [--seq_length SEQ_LENGTH]
                      [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt}]
-                     [--bidirectional] [--target {bert,lm,cls,mlm,nsp,s2s}]
+                     [--bidirectional] [--subword_type {none,char}]
+                     [--sub_vocab_path SUB_VOCAB_PATH]
+                     [--subencoder_type {avg,lstm,gru,cnn}]
                      [--tokenizer {bert,char,word,space}]
                      [--learning_rate LEARNING_RATE] [--warmup WARMUP]
                      [--dropout DROPOUT] [--epochs_num EPOCHS_NUM]
@@ -262,8 +264,8 @@ usage: classifier.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
 The example of using classifier.py：
 ```
 python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
-                      --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt \
-                      --test_path datasets/book_review/test.txt --epochs_num 3 --batch_size 64 --encoder bert
+                      --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
+                      --epochs_num 3 --batch_size 64 --encoder bert
 ```
 #### Sequence labeling
 tagger.py adds a feedforward layer upon encoder layer.
