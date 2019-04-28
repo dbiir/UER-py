@@ -77,8 +77,6 @@ def main():
                                                    "rcnn", "crnn", "gpt"], \
                                                    default="bert", help="Encoder type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s"], default="bert",
-                        help="The training target of the pretraining model.")
 
     # Subword options.
     parser.add_argument("--subword_type", choices=["none", "char"], default="none",
@@ -138,6 +136,8 @@ def main():
     args.vocab = vocab
 
     # Build bert model.
+    # A pseudo target is added.
+    args.target = "bert"
     bert_model = build_model(args)
 
     # Load or initialize parameters.
