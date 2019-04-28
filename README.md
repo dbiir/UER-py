@@ -24,7 +24,7 @@ UER-py has the following features:
 - __Reproducibility.__ UER-py is able to reproduce the results of existing pre-training models (such as [Google BERT](https://github.com/google-research/bert)).
 - __Multi-GPU.__ UER-py supports CPU mode, single GPU mode, and distributed training mode. 
 - __Model modularity.__ UER-py is divided into multiple components: subencoder, encoder, target, and fine-tuning. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules with as few restrictions as possible.
-- __Efficiency.__ UER-py incorporates many mechanisms in pre-processing, pre-training, and fine-tuning stages, which largely improves the efficiency in speed and needs less memory.
+- __Efficiency.__ UER-py refines its pre-processing, pre-training, and fine-tuning stages, which largely improves speed and needs less memory. 
 - __SOTA results.__ Our works further improve the results upon Google BERT, providing new baselines for a range of datasets.
 - __Chinese model zoo.__ We are pre-training models with different corpora, encoders, and targets. Selecting proper pre-training models is beneficial to the performance of downstream tasks.
 
@@ -139,7 +139,7 @@ usage: preprocess.py [-h] --corpus_path CORPUS_PATH --vocab_path VOCAB_PATH
                      [--seq_length SEQ_LENGTH] [--dup_factor DUP_FACTOR]
                      [--short_seq_prob SHORT_SEQ_PROB] [--seed SEED]
 ```
-*--docs_buffer_size* could be used to control memory consumption during pre-processing stage. *--preprocesses_num n* denotes that n processes are used for pre-processing. The example of pre-processing on a single machine is as follows：
+*--docs_buffer_size* could be used to control memory consumption in pre-processing stage. *--preprocesses_num n* denotes that n processes are used for pre-processing. The example of pre-processing on a single machine is as follows：
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt \
                       --dataset_path dataset --processes_num 8 --target bert
@@ -176,17 +176,17 @@ usage: pretrain.py [-h] [--dataset_path DATASET_PATH] --vocab_path VOCAB_PATH
                    [--gpu_ranks GPU_RANKS [GPU_RANKS ...]]
                    [--master_ip MASTER_IP] [--backend {nccl,gloo}]
 ```
-*--instances_buffer_size* could be used to control memory consumption during pre-training stage.
+*--instances_buffer_size* could be used to control memory consumption in pre-training stage.
 
 Notice that it is recommended to explicitly specify model's encoder and target. UER-py consists of the following encoder modules:
 - rnn_encoder.py: contains (bi-)LSTM and (bi-)GRU
 - cnn_encoder.py: contains CNN and gatedCNN
-- attn_encoder.py: contains attention neural network
+- attn_encoder.py: contains attentionNN
 - gpt_encoder.py: contains GPT encoder
 - bert_encoder.py: contains BERT encoder
 - mixed_encoder.py: contains combinations of basic encoders, such as RCNN (RNN+CNN), CRNN (CNN+RNN)
 
-The target should be coincident with the target in pre-processing stage. Users can try different combinations of encoders and targets by by *--encoder* and *--target*.
+The target should be coincident with the target in pre-processing stage. Users can try different combinations of encoders and targets by *--encoder* and *--target*.
 
 There two strategies for pre-training: 1）random initialization 2）loading a pre-trained model.
 #### Random initialization
@@ -198,7 +198,7 @@ The example of pre-training on single GPU (the id of GPU is 3)：
 ```
 python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --output_model_path models/output_model.bin --encoder bert --target bert --gpu_ranks 3
 ```
-Pre-training on a single machine with 8 GPUs：
+Pre-training on single machine with 8 GPUs：
 ```
 python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
                     --output_model_path models/output_model.bin --encoder bert --target bert --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 
@@ -241,7 +241,7 @@ Node-1 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_v
 ```
 
 ### Fine-tune on downstream tasks
-Currently, UER-py consists of 4 downstream tasks, i.e. classification, sequence labeling, cloze test, feature extractor.
+Currently, UER-py consists of 4 downstream tasks, i.e. classification, sequence labeling, cloze test, feature extractor. The encoder of downstream task should be coincident with the pre-trained model.
 
 #### Classification
 classifier.py adds two feedforward layers upon encoder layer.
@@ -263,7 +263,7 @@ The example of using classifier.py：
 ```
 python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                       --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt \
-                      --test_path datasets/book_review/test.txt --epochs_num 3 --batch_size 64 --encoder bert --target bert
+                      --test_path datasets/book_review/test.txt --epochs_num 3 --batch_size 64 --encoder bert
 ```
 #### Sequence labeling
 tagger.py adds a feedforward layer upon encoder layer.
@@ -284,7 +284,7 @@ The example of using tagger.py：
 ```
 python3 tagger.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                   --train_path datasets/msra/train.txt --dev_path datasets/msra/dev.txt --test_path datasets/msra/test.txt \
-                  --epochs_num 5 --batch_size 32 --encoder bert --target bert
+                  --epochs_num 5 --batch_size 32 --encoder bert
 ```
 
 #### Cloze test
@@ -324,11 +324,11 @@ python3 feature_extractor.py --input_path datasets/cloze_input.txt --pretrained_
 ## Scripts
 <table>
 <tr align="center"><th> Scripts <th> Function description
-<tr align="center"><td> average_model.py <td> Take the average of pre-trained model. A common ensemble strategy for deep learning models 
+<tr align="center"><td> average_model.py <td> Take the average of pre-trained models. A frequently-used ensemble strategy for deep learning models 
 <tr align="center"><td> build_vocab.py <td> Build vocabulary (multi-processing supported)
 <tr align="center"><td> check_model.py <td> Check the model (single GPU or multiple GPUs)
 <tr align="center"><td> diff_vocab.py <td> Compare two vocabularies
-<tr align="center"><td> dynamic_vocab_adapter.py <td> Change the pre-trained model according to the vocabulary
+<tr align="center"><td> dynamic_vocab_adapter.py <td> Change the pre-trained model according to the vocabulary. It can save memory in fine-tuning stage since task-specific vocabulary is much smaller than general-domain vocabulary 
 <tr align="center"><td> multi_single_convert.py <td> convert the model (single GPU or multiple GPUs)
 </table>
 
@@ -361,23 +361,24 @@ We use a range of Chinese datasets to evaluate the performance of UER-py. These 
 Most pre-training models consist of 2 stages: pre-training on general-domain corpus and fine-tuning on downstream dataset. We recommend 3-stage mode: 1)Pre-training on general-domain corpus; 2)Pre-training on downstream dataset; 3)Fine-tuning on downstream dataset. Stage 2 enables models to get familiar with distributions of downstream tasks. It is sometimes known as semi-supervised fune-tuning.
 
 Hyper-parameter settings are as follows:
-- Stage 1: We train with batch size of 256 sequences and each sequence contains 256 tokens. We load Google's pretrained models and train upon it for 500,000 steps. The learning rate is 2e-5 and other optimizer settings are identical with Google BERT.
-- Stage 2: We train with batch size of 256 sequences. For classification datasets, the sequence length is 128. For sequence labeling datasets, the sequence length is 256. We train upon Google's pretrained model for 20,000 steps. Optimizer settings are identical with stage 1. BERT tokenizer is used.
-- Stage 3: For classification datasets, the training batch size and epochs are 64 and 3. For sequence labeling datasets, the training batch size and epochs are 32 and 5. Optimizer settings are identical with stage 1. BERT tokenizer is used.
+- Stage 1: We train with batch size of 256 sequences and each sequence contains 256 tokens. We load Google's pretrained models and train upon it for 500,000 steps. The learning rate is 2e-5 and other optimizer settings are identical with Google BERT. BERT tokenizer is used.
+- Stage 2: We train with batch size of 256 sequences. For classification datasets, the sequence length is 128. For sequence labeling datasets, the sequence length is 256. We train upon Google's pretrained model for 20,000 steps. Optimizer settings and tokenizer are identical with stage 1.
+- Stage 3: For classification datasets, the training batch size and epochs are 64 and 3. For sequence labeling datasets, the training batch size and epochs are 32 and 5. Optimizer settings and tokenizer are identical with stage 1.
 
-We provide the pre-trained models on different corpora （see Chinese model zoo） and downstream datasets. So users don't need to pre-train on general-domain corpora and downstream datasets. We provide [book_review_model.bin](https://share.weiyun.com/52BEFs2), [chnsenticorp_model.bin](https://share.weiyun.com/53WDBeJ), [shopping_model.bin](https://share.weiyun.com/5HaxwAf), [msra_model.bin](https://share.weiyun.com/5E6XpEt). Tencentnews dataset and its pretrained model will be publicly available after data desensitization.
-
+We provide the pre-trained models on different downstream datasets: [book_review_model.bin](https://share.weiyun.com/52BEFs2); [chnsenticorp_model.bin](https://share.weiyun.com/53WDBeJ); [shopping_model.bin](https://share.weiyun.com/5HaxwAf); [msra_model.bin](https://share.weiyun.com/5E6XpEt). Tencentnews dataset and its pretrained model will be publicly available after data desensitization.
 
 <table>
 <tr align="center"><th> Model/Dataset              <th> Douban book review <th> ChnSentiCorp <th> Shopping <th> MSRA-NER <th> Tencentnews review
 <tr align="center"><td> BERT                       <td> 87.5               <td> 94.3         <td> 96.3     <td> 93.0/92.4/92.7  <td> 84.2
 <tr align="center"><td> BERT+semi-supervision      <td> 88.1               <td> 95.6         <td> 97.0     <td> 94.3/92.6/93.4  <td> 85.1
 </table>
- 
+
+We also provide the pre-trained models on different corpora, encoders, and targets (see Chinese model zoo). Selecting proper pre-training models is beneficial to the performance of downstream tasks.
+
 <table>
-<tr align="center"><th> Model/Dataset              <th> MSRA-NER
-<tr align="center"><td> Google                     <td> 93.0/92.4/92.7
-<tr align="center"><td> Renminribao                <td> 94.3/94.1/94.2
+<tr align="center"><th> Model/Dataset                     <th> MSRA-NER
+<tr align="center"><td> Wikizh corpus (Gogole)            <td> 93.0/92.4/92.7
+<tr align="center"><td> Renminribao corpus                <td> 94.3/94.1/94.2
 </table>
 
 
@@ -387,9 +388,9 @@ We provide the pre-trained models on different corpora （see Chinese model zoo�
 With the help of UER, we are pre-training models with different corpora, encoders, and targets.
 <table>
 <tr align="center"><th> pre-trained model <th> Link <th> Description 
-<tr align="center"><td> Wikizh+BertEncoder+BertTarget <td> https://share.weiyun.com/5DJasRk <td> Trained by Google 
-<tr align="center"><td> RenMinRiBao+BertEncoder+BertTarget <td> https://share.weiyun.com/5HKnsxq <td> 
-<tr align="center"><td> Webqa2019+BertEncoder+BertTarget <td> https://share.weiyun.com/5Ln6rgv <td>
+<tr align="center"><td> Wikizh+BertEncoder+BertTarget <td> https://share.weiyun.com/5DJasRk <td> The training corpus Wiki_zh, trained by Google
+<tr align="center"><td> RenMinRiBao+BertEncoder+BertTarget <td> https://share.weiyun.com/5HKnsxq <td> The training corpus is news data from People's Daily (1946-2017). It is suitable for datasets related with news, e.g. F1 is improved on MSRA-NER from 92.7 to 94.2 (compared with Google BERT)
+<tr align="center"><td> Webqa2019+BertEncoder+BertTarget <td> https://share.weiyun.com/5Ln6rgv <td> The training corpus is WebQA, which is suitable for datasets related with social media
 <tr align="center"><td> Wikizh+LstmEncoder+LmTarget <td> <td> 
 <tr align="center"><td> <td> <td> 
 </table>
