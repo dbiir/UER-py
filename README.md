@@ -21,7 +21,7 @@ Table of Contents
 
 ## Features
 UER-py has the following features:
-- __Reliable implementation.__ UER-py is able to reproduce the results of existing pre-training models (such as [Google BERT](https://github.com/google-research/bert)).
+- __Reproducibility.__ UER-py is able to reproduce the results of existing pre-training models (such as [Google BERT](https://github.com/google-research/bert)).
 - __Multi-GPU.__ UER-py supports CPU mode, single GPU mode, and distributed training mode. 
 - __Model modularity.__ UER-py is divided into multiple components: subencoder, encoder, target, and fine-tuning. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules with as few restrictions as possible.
 - __Efficiency.__ UER-py incorporates many mechanisms in pre-processing, pre-training, and fine-tuning stages, which largely improves the efficiency in speed and needs less memory.
@@ -38,7 +38,7 @@ Python3.6, PyTorch-1.0.0, CUDA Version 9.0.176, CUDNN 7.0.5
 <br/>
 
 ## Quickstart
-We use BERT model and [book review classification dataset](https://github.com/dbiir/UER-py) to demonstrate how to UER-py. There are three input files: book review corpus, book review dataset, and vocabulary. All files are encoded in UTF-8 and are included in this project.
+We use BERT model and [book review classification dataset](https://github.com/dbiir/UER-py) to demonstrate how to use UER-py. There are three input files: book review corpus, book review dataset, and vocabulary. All files are encoded in UTF-8 and are included in this project.
 
 The book review corpus is obtained by book review dataset with labels removed. The format of the corpus for BERT is as follows：
 ```
@@ -104,10 +104,10 @@ UER-py/
     |--uer/
     |    |--encoders/: contains encoders such as RNN, CNN, Attention, CNN-RNN, BERT
     |    |--targets/: contains targets such as language model, masked language model, sentence prediction
-    |    |--subencoders/: contains subencoders such as RNN, CNN and different pooling strategies
-    |    |--layers/: contains common NN layers, such as embedding layer, normalization layer
+    |    |--subencoders/: contains subencoders such as RNN, CNN, and different pooling strategies
+    |    |--layers/: contains frequently-used NN layers, such as embedding layer, normalization layer
     |    |--models/: contains model.py, which combines subencoder, embedding, encoder, and target modules
-    |    |--utils/: contains common utilities
+    |    |--utils/: contains frequently-used utilities
     |    |--model_builder.py 
     |    |--model_saver.py
     |    |--trainer.py
@@ -126,7 +126,7 @@ UER-py/
     |--README.md
 ```
 
-Next, we provide instructions of UER-py.
+The code is well-organized. Users can use and extend upon it with little efforts.
 
 ### Preprocess the data
 ```
@@ -139,12 +139,12 @@ usage: preprocess.py [-h] --corpus_path CORPUS_PATH --vocab_path VOCAB_PATH
                      [--seq_length SEQ_LENGTH] [--dup_factor DUP_FACTOR]
                      [--short_seq_prob SHORT_SEQ_PROB] [--seed SEED]
 ```
-*--docs_buffer_size* could be used to control memory consumption during pre-processing stage. *--preprocesses_num n* denotes that n processes are used for pre-processing. The example of using a single machine is as follows：
+*--docs_buffer_size* could be used to control memory consumption during pre-processing stage. *--preprocesses_num n* denotes that n processes are used for pre-processing. The example of pre-processing on a single machine is as follows：
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt \
                       --dataset_path dataset --processes_num 8 --target bert
 ```
-We need to specify the model's target during the pre-processing stage since different targets require different data format. Currently, UER-py consists of the following target modules:
+We need to specify the model's target in pre-processing stage since different targets require different data formats. Currently, UER-py consists of the following target modules:
 - lm_target.py: language model
 - mlm_target.py: masked language model (cloze test)
 - nsp_target.py: next sentence prediction
