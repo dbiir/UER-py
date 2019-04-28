@@ -16,10 +16,6 @@ Table of Contents
   * [Experiments](#experiments)
   * [Chinese_model_zoo](#chinese_model_zoo)
   
-<br/>
-
-## Requirements
-Python3.6, PyTorch-1.0.0, CUDA Version 9.0.176, CUDNN 7.0.5
   
 <br/>
 
@@ -27,10 +23,16 @@ Python3.6, PyTorch-1.0.0, CUDA Version 9.0.176, CUDNN 7.0.5
 UER-py has the following features:
 - __Reliable implementation.__ UER-py is able to reproduce the results of existing pre-training models (such as [Google BERT](https://github.com/google-research/bert)).
 - __Multi-GPU.__ UER-py supports CPU mode, single GPU mode, and distributed training mode. 
-- __Model modularity.__ UER-py is divided into four components: subencoder, encoder, target, and fine-tuning. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules with as few restrictions as possible.
-- __Efficiency.__ UER-py incorporates many mechanisms in pre-processing, pre-training, and fine-tuning stages, which largely boosts the efficiency in speed and memory.
-- __SOTA results.__ Our works further improve the results upon Google BERT, providing new strong baselines for a range of datasets.
+- __Model modularity.__ UER-py is divided into multiple components: subencoder, encoder, target, and fine-tuning. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules with as few restrictions as possible.
+- __Efficiency.__ UER-py incorporates many mechanisms in pre-processing, pre-training, and fine-tuning stages, which largely improves the efficiency in speed and needs less memory.
+- __SOTA results.__ Our works further improve the results upon Google BERT, providing new baselines for a range of datasets.
 - __Chinese model zoo.__ We are pre-training models with different corpora, encoders, and targets. Selecting proper pre-training models is beneficial to the performance of downstream tasks.
+
+
+<br/>
+
+## Requirements
+Python3.6, PyTorch-1.0.0, CUDA Version 9.0.176, CUDNN 7.0.5
 
 
 <br/>
@@ -65,7 +67,7 @@ word-2
 word-n
 ```
 
-First of all, we preprocess the book review corpus. We need to specify the model's target during the pre-processing stage:
+First of all, we preprocess the book review corpus. We need to specify the model's target in pre-processing stage:
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset \
                       --processes_num 8 --target bert
@@ -82,15 +84,15 @@ Finally, we do classification. We can use google_model.bin:
 ```
 python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
     --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
-    --epochs_num 3 --batch_size 64 --encoder bert --target bert
+    --epochs_num 3 --batch_size 64 --encoder bert
 ```
 or use our [book_review_model.bin](https://share.weiyun.com/52BEFs2), which is the output of pretrain.py：
 ```
 python3 classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_vocab.txt \
     --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
-    --epochs_num 3 --batch_size 64 --encoder bert --target bert
+    --epochs_num 3 --batch_size 64 --encoder bert
 ```
-It turns out that the result of Google's model is 87.5; The result of *book_review_model.bin* is 88.1.
+It turns out that the result of Google's model is 87.5; The result of *book_review_model.bin* is 88.1. It is also noticable that we don't need to specify the target in fine-tuning stage. Pre-training target is replaced with task-specific target.
 
 <br/>
 
