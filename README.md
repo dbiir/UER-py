@@ -392,7 +392,7 @@ With the help of UER, we are pre-training models with different corpora, encoder
 <tr align="center"><th> pre-trained model <th> Link <th> Description 
 <tr align="center"><td> Wikizh+BertEncoder+BertTarget <td> https://share.weiyun.com/5DJasRk <td> The training corpus Wiki_zh, trained by Google
 <tr align="center"><td> RenMinRiBao+BertEncoder+BertTarget <td> https://share.weiyun.com/5HKnsxq <td> The training corpus is news data from People's Daily (1946-2017). It is suitable for datasets related with news, e.g. F1 is improved on MSRA-NER from 92.7 to 94.2 (compared with Google BERT)
-<tr align="center"><td> Webqa2019+BertEncoder+BertTarget <td> https://share.weiyun.com/5Ln6rgv <td> The training corpus is WebQA, which is suitable for datasets related with social media
+<tr align="center"><td> Webqa2019+BertEncoder+BertTarget <td> https://share.weiyun.com/5HYbmBh <td> The training corpus is WebQA, which is suitable for datasets related with social media
 <tr align="center"><td> Wikizh+LstmEncoder+LmTarget <td> <td> 
 <tr align="center"><td> <td> <td> 
 </table>
