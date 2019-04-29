@@ -52,7 +52,7 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     # Path options.
-    parser.add_argument("--pretrained_model_path", default="./models/google_model.bin", type=str,
+    parser.add_argument("--pretrained_model_path", default=None, type=str,
                         help="Path of the pretrained model.")
     parser.add_argument("--output_model_path", default="./models/classifier_model.bin", type=str,
                         help="Path of the output model.")

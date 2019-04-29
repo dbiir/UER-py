@@ -6,7 +6,7 @@ class LstmSubencoder(nn.Module):
     def __init__(self, args, vocab_size):
         super(LstmSubencoder, self).__init__()
         self.hidden_size= args.emb_size
-        self.layers_num = args.layers_num
+        self.layers_num = args.sub_layers_num
 
         self.embedding_layer = nn.Embedding(vocab_size, args.emb_size)
         self.rnn = nn.LSTM(input_size=args.emb_size,

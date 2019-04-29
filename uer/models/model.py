@@ -17,11 +17,14 @@ class Model(nn.Module):
         self.embedding = embedding
         self.encoder = encoder
         self.target = target
+        
         # Subencoder.
         if subencoder is not None:
             self.vocab, self.sub_vocab = args.vocab, args.sub_vocab
-        self.subword_type = args.subword_type
-        self.subencoder = subencoder
+            self.subword_type = args.subword_type
+            self.subencoder = subencoder
+        else:
+            self.subencoder = None
 
     def forward(self, src, tgt, seg):
         # [batch_size, seq_length, emb_size]

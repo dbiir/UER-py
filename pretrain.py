@@ -64,8 +64,9 @@ def main():
                         help="Subword feature type.")
     parser.add_argument("--sub_vocab_path", type=str, default="models/sub_vocab.txt",
                         help="Path of the subword vocabulary file.")
-    parser.add_argument("--subencoder_type", choices=["avg", "lstm", "gru", "cnn"], default="avg",
+    parser.add_argument("--subencoder", choices=["avg", "lstm", "gru", "cnn"], default="avg",
                         help="Subencoder type.")
+    parser.add_argument("--sub_layers_num", type=int, default=2, help="The number of subencoder layers.")
 
     # GPU options.
     parser.add_argument("--world_size", type=int, default=1, help="Total number of processes (GPUs) for training.")

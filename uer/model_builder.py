@@ -30,7 +30,7 @@ def build_model(args):
     """
 
     if args.subword_type != "none":
-        subencoder = globals()[args.subencoder_type.capitalize() + "Subencoder"](args, len(args.sub_vocab))
+        subencoder = globals()[args.subencoder.capitalize() + "Subencoder"](args, len(args.sub_vocab))
     else:
         subencoder = None
 
