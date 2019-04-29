@@ -408,9 +408,13 @@ class LmDataLoader(object):
         self.buffer = []
         
     def _fill_buf(self):
+        try:
+            self.buffer = pickle.load(self.f_read)
+        except EOFError:
+            # Reach file end.
+            self.f_read.seek(0)
+            self.buffer = pickle.load(self.f_read)
 
-        self.f_read.seek(0)
-        self.buffer = pickle.load(self.f_read)
         if self.shuffle:
             random.shuffle(self.buffer)
         self.start = 0
@@ -534,8 +538,13 @@ class ClsDataLoader(object):
         
     def _fill_buf(self):
 
-        self.f_read.seek(0)
-        self.buffer = pickle.load(self.f_read)
+        try:
+            self.buffer = pickle.load(self.f_read)
+        except EOFError:
+            # Reach file end.
+            self.f_read.seek(0)
+            self.buffer = pickle.load(self.f_read)
+
         if self.shuffle:
             random.shuffle(self.buffer)
         self.start = 0
@@ -610,10 +619,10 @@ class MlmDataset(object):
         pos = start
         f_write = open(self.dataset_path + "-" + str(proc_id) + ".pt", "wb")
         # Open function in python3 does not support tell operation. We have to use codecs.
-        for _ in range(self.dup_factor):
-            with codecs.open(self.corpus_path, "r", "utf-8") as f:
+        with codecs.open(self.corpus_path, "r", "utf-8") as f:
+            instances = []
+            for _ in range(self.dup_factor):
                 f.seek(start)
-                instances = []
                 while True:
                     try:
                         line = f.readline()
@@ -637,9 +646,9 @@ class MlmDataset(object):
 
                     pos = f.tell()
                     if pos >= end:
-                        pickle.dump(instances, f_write)
                         break
 
+        pickle.dump(instances, f_write)
         f_write.close()
 
 
@@ -659,8 +668,13 @@ class MlmDataLoader(object):
         
     def _fill_buf(self):
 
-        self.f_read.seek(0)
-        self.buffer = pickle.load(self.f_read)
+        try:
+            self.buffer = pickle.load(self.f_read)
+        except EOFError:
+            # Reach file end.
+            self.f_read.seek(0)
+            self.buffer = pickle.load(self.f_read)
+
         if self.shuffle:
             random.shuffle(self.buffer)
         self.start = 0
@@ -866,9 +880,11 @@ class NspDataset(object):
 class NspDataLoader(object):
     """
     """
-    def __init__(self, args, dataset_path, batch_size, shuffle=True):
+    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num，shuffle=True):
         self.batch_size = batch_size
         self.shuffle = shuffle
+        self.proc_id = proc_id
+        self.proc_num = proc_num
 
         self.f_read = open(dataset_path, "rb")
         self.start = 0
@@ -876,8 +892,13 @@ class NspDataLoader(object):
         self.buffer = []
         
     def _fill_buf(self):
-        self.f_read.seek(0)
-        self.buffer = pickle.load(self.f_read)
+        try:
+            self.buffer = pickle.load(self.f_read)
+        except EOFError:
+            # Reach file end.
+            self.f_read.seek(0)
+            self.buffer = pickle.load(self.f_read)
+
         if self.shuffle:
             random.shuffle(self.buffer)
         self.start = 0
@@ -992,9 +1013,11 @@ class S2sDataset(object):
 class S2sDataLoader(object):
     """
     """
-    def __init__(self, args, dataset_path, batch_size, shuffle=True):
+    def __init__(self, args, dataset_path, batch_size,  proc_id, proc_num， shuffle=True):
         self.batch_size = batch_size
         self.shuffle = shuffle
+        self.proc_id = proc_id
+        self.proc_num = proc_num
 
         self.f_read = open(dataset_path, "rb")
         self.start = 0
@@ -1002,9 +1025,13 @@ class S2sDataLoader(object):
         self.buffer = []
         
     def _fill_buf(self):
+        try:
+            self.buffer = pickle.load(self.f_read)
+        except EOFError:
+            # Reach file end.
+            self.f_read.seek(0)
+            self.buffer = pickle.load(self.f_read)
 
-        self.f_read.seek(0)
-        self.buffer = pickle.load(self.f_read)
         if self.shuffle:
             random.shuffle(self.buffer)
         self.start = 0
