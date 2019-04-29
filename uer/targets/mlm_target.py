@@ -16,9 +16,9 @@ class MlmTarget(nn.Module):
         self.vocab_size = vocab_size
         self.hidden_size = args.hidden_size
 
-        self.transform_norm = LayerNorm(args.hidden_size)
-        self.transform = nn.Linear(args.hidden_size, args.hidden_size)
-        self.output_mlm = nn.Linear(args.hidden_size, self.vocab_size)
+        self.mlm_linear_1 = nn.Linear(args.hidden_size, args.hidden_size)
+        self.layer_norm = LayerNorm(args.hidden_size)
+        self.mlm_linear_2 = nn.Linear(args.hidden_size, self.vocab_size)
 
         self.softmax = nn.LogSoftmax(dim=-1)
 
@@ -26,9 +26,9 @@ class MlmTarget(nn.Module):
 
     def mlm(self, memory_bank, tgt_mlm):
         # Masked language model (MLM) with full softmax prediction.
-        output_mlm = gelu(self.transform(memory_bank))
-        output_mlm = self.transform_norm(output_mlm)
-        output_mlm = self.output_mlm(output_mlm)
+        output_mlm = gelu(self.mlm_linear_1(memory_bank))
+        output_mlm = self.layer_norm(output_mlm)
+        output_mlm = self.mlm_linear_2(output_mlm)
         output_mlm = output_mlm.contiguous().view(-1, self.vocab_size)
         # Full probability distribution.
         output_mlm = self.softmax(output_mlm)

@@ -583,6 +583,7 @@ class MlmDataset(object):
         
         self.seq_length = args.seq_length
         self.seed = args.seed
+        self.dup_factor = args.dup_factor
 
     def build_and_save(self, workers_num):
         """
@@ -609,34 +610,35 @@ class MlmDataset(object):
         pos = start
         f_write = open(self.dataset_path + "-" + str(proc_id) + ".pt", "wb")
         # Open function in python3 does not support tell operation. We have to use codecs.
-        with codecs.open(self.corpus_path, "r", "utf-8") as f:
-            f.seek(start)
-            instances = []
-            while True:
-                try:
-                    line = f.readline()
-                except:
-                    continue
+        for _ in range(self.dup_factor):
+            with codecs.open(self.corpus_path, "r", "utf-8") as f:
+                f.seek(start)
+                instances = []
+                while True:
+                    try:
+                        line = f.readline()
+                    except:
+                        continue
 
-                src = [self.vocab.get(w) for w in self.tokenizer.tokenize(line)]
-                src, tgt = mask_seq(src, len(self.vocab))
-                seg = [1] * len(src)
-                if len(src) >= self.seq_length:
-                    src = src[:self.seq_length]
-                    tgt = tgt[:self.seq_length]
-                    seg = seg[:self.seq_length]
-                else:
-                    while len(src) != self.seq_length:
-                        src.append(PAD_ID)
-                        tgt.append(PAD_ID)
-                        seg.append(PAD_ID)
+                    src = [self.vocab.get(w) for w in self.tokenizer.tokenize(line)]
+                    src, tgt = mask_seq(src, len(self.vocab))
+                    seg = [1] * len(src)
+                    if len(src) >= self.seq_length:
+                        src = src[:self.seq_length]
+                        tgt = tgt[:self.seq_length]
+                        seg = seg[:self.seq_length]
+                    else:
+                        while len(src) != self.seq_length:
+                            src.append(PAD_ID)
+                            tgt.append(PAD_ID)
+                            seg.append(PAD_ID)
 
-                instances.append((src, tgt, seg))
+                    instances.append((src, tgt, seg))
 
-                pos = f.tell()
-                if pos >= end:
-                    pickle.dump(instances, f_write)
-                    break
+                    pos = f.tell()
+                    if pos >= end:
+                        pickle.dump(instances, f_write)
+                        break
 
         f_write.close()
 
@@ -644,9 +646,11 @@ class MlmDataset(object):
 class MlmDataLoader(object):
     """
     """
-    def __init__(self, args, dataset_path, batch_size, shuffle=True):
+    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=True):
         self.batch_size = batch_size
         self.shuffle = shuffle
+        self.proc_id = proc_id
+        self.proc_num = proc_num
 
         self.f_read = open(dataset_path, "rb")
         self.start = 0
@@ -687,6 +691,7 @@ class MlmDataLoader(object):
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt), \
                 torch.LongTensor(seg)
+
 
 class NspDataset(object):
     """
