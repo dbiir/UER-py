@@ -37,6 +37,22 @@ def mask_seq(src, vocab_size):
         return src, tgt_mlm
 
 
+def merge_dataset(dataset_path, workers_num):
+    # Merge datasets.
+    f_writer = open(dataset_path, "wb")
+    for i in range(workers_num):
+        tmp_dataset_reader = open("dataset-tmp-"+str(i)+".pt", "rb")
+        while True:
+            try:
+                instances = pickle.load(tmp_dataset_reader)
+                pickle.dump(instances, f_writer)
+            except:
+                break
+        tmp_dataset_reader.close()
+        os.remove("dataset-tmp-"+str(i)+".pt")
+    f_writer.close()
+
+
 def count_lines(file_path):
     lines_num = 0
     with open(file_path, mode="r", encoding="utf-8") as f:
@@ -83,13 +99,16 @@ class BertDataset(object):
             pool.close()
             pool.join()
 
+        # Merge datasets.
+        merge_dataset(self.dataset_path, workers_num)
+
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
         set_seed(self.seed)
         docs_buffer = []
         document = []
         pos = 0
-        f_write = open(self.dataset_path + "-" + str(proc_id) + ".pt", "wb")
+        f_write = open("dataset-tmp-" + str(proc_id) + ".pt", "wb")
         with open(self.corpus_path, mode="r", encoding="utf-8") as f:
             while pos < start:
                 try:
@@ -352,13 +371,16 @@ class LmDataset(object):
             pool.close()
             pool.join()
 
+        # Merge datasets.
+        merge_dataset(self.dataset_path, workers_num)
+
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
         set_seed(self.seed)
         docs_buffer = []
         document = []
         pos = start
-        f_write = open(self.dataset_path + "-" + str(proc_id) + ".pt", "wb")
+        f_write = open("dataset-tmp-" + str(proc_id) + ".pt", "wb")
         # Open function in python3 does not support tell operation. We have to use codecs.
         with codecs.open(self.corpus_path, "r", "utf-8") as f:
             f.seek(start)
@@ -482,11 +504,14 @@ class ClsDataset(object):
             pool.close()
             pool.join()
 
+        # Merge datasets.
+        merge_dataset(self.dataset_path, workers_num)
+
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
         set_seed(self.seed)
         pos = start
-        f_write = open(self.dataset_path + "-" + str(proc_id) + ".pt", "wb")
+        f_write = open("dataset-tmp-" + str(proc_id) + ".pt", "wb")
         # Open function in python3 does not support tell operation. We have to use codecs.
         with codecs.open(self.corpus_path, "r", "utf-8") as f:
             f.seek(start)
@@ -535,30 +560,7 @@ class ClsDataset(object):
                         pass
 
                 except:
-                    continue
-
-
-
-
-                try:
-                    line = f.readline()
-                    line = line.strip().split("\t")
-                    label, text = int(line[0]), line[1]
-                except:
-                    continue
-
-                src = [self.vocab.get(w) for w in self.tokenizer.tokenize(text)]
-                tgt = label
-                seg = [1] * len(src)
-                if len(src) >= self.seq_length:
-                    src = src[:self.seq_length]
-                    seg = seg[:self.seq_length]
-                else:
-                    while len(src) != self.seq_length:
-                        src.append(PAD_ID)
-                        seg.append(PAD_ID)
-
-                instances.append((src, tgt, seg))
+                    pass
 
                 pos = f.tell()
                 if pos >= end:
@@ -659,11 +661,14 @@ class MlmDataset(object):
             pool.close()
             pool.join()
 
+        # Merge datasets.
+        merge_dataset(self.dataset_path, workers_num)
+
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
         set_seed(self.seed)
         pos = start
-        f_write = open(self.dataset_path + "-" + str(proc_id) + ".pt", "wb")
+        f_write = open("dataset-tmp-" + str(proc_id) + ".pt", "wb")
         # Open function in python3 does not support tell operation. We have to use codecs.
         with codecs.open(self.corpus_path, "r", "utf-8") as f:
             instances = []
@@ -785,13 +790,16 @@ class NspDataset(object):
             pool.close()
             pool.join()
 
+        # Merge datasets.
+        merge_dataset(self.dataset_path, workers_num)
+
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
         set_seed(self.seed)
         docs_buffer = []
         document = []
         pos = start
-        f_write = open(self.dataset_path + "-" + str(proc_id) + ".pt", "wb")
+        f_write = open("dataset-tmp-" + str(proc_id) + ".pt", "wb")
         # Open function in python3 does not support tell operation. We have to use codecs.
         with codecs.open(self.corpus_path, "r", "utf-8") as f:
             f.seek(start)
@@ -1011,13 +1019,16 @@ class S2sDataset(object):
             pool.close()
             pool.join()
 
+        # Merge datasets.
+        merge_dataset(self.dataset_path, workers_num)
+
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
         set_seed(self.seed)
         docs_buffer = []
         document = []
         pos = start
-        f_write = open(self.dataset_path + "-" + str(proc_id) + ".pt", "wb")
+        f_write = open("dataset-tmp-" + str(proc_id) + ".pt", "wb")
         # Open function in python3 does not support tell operation. We have to use codecs.
         with codecs.open(self.corpus_path, "r", "utf-8") as f:
             f.seek(start)

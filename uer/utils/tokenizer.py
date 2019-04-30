@@ -1,13 +1,9 @@
 # -*- encoding:utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
-import os
 from uer.utils.constants import *
 from uer.utils.vocab import Vocab
-
 import collections
-import logging
 import unicodedata
-from io import open
 
 
 class Tokenizer(object):

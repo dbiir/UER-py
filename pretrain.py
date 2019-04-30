@@ -12,7 +12,7 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
     # Path options.
-    parser.add_argument("--dataset_path", type=str, default="dataset",
+    parser.add_argument("--dataset_path", type=str, default="dataset.pt",
                         help="Base path of the preprocessed dataset.")
     parser.add_argument("--vocab_path", type=str, required=True,
                         help="Path of the vocabulary file.")

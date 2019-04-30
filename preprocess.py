@@ -16,7 +16,7 @@ def main():
                         help="Path of the corpus for pretraining.")
     parser.add_argument("--vocab_path", type=str, required=True,
                         help="Path of the vocabulary file.")
-    parser.add_argument("--dataset_path", type=str, default="dataset",
+    parser.add_argument("--dataset_path", type=str, default="dataset.pt",
                         help="Path of the preprocessed dataset.")
     
     # Preprocess options.
@@ -53,11 +53,6 @@ def main():
     # Build and save dataset.
     dataset = globals()[args.target.capitalize() + "Dataset"](args, vocab, tokenizer)
     dataset.build_and_save(args.processes_num)
-
-    # Merge datasets.
-    for i in range(args.processes_num):
-        os.system("cat " + args.dataset_path + "-" + str(i) + ".pt >> " + args.dataset_path + ".pt")
-        os.system("rm " + args.dataset_path + "-" + str(i) + ".pt")
 
 
 if __name__ == "__main__":
