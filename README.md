@@ -69,14 +69,14 @@ word-n
 
 First of all, we preprocess the book review corpus. We need to specify the model's target in pre-processing stage:
 ```
-python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset \
+python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset.pt \
                       --processes_num 8 --target bert
 ```
 Pre-processing is time-consuming. Multi-process can largely accelerate the pre-processing speed.
 Then  we download [Google's pre-trained Chinese model](https://share.weiyun.com/5DJasRk), and put it into *models* folder.
 We load Google's pre-trained model and train on book review corpus. Suppose we have a machine with 8 GPUs. We explicitly specify model's encoder and target:
 ```
-python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin \
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin \
                     --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
                     --total_steps 20000 --save_checkpoint_steps 1000 --encoder bert --target bert
 ```
@@ -142,7 +142,7 @@ usage: preprocess.py [-h] --corpus_path CORPUS_PATH --vocab_path VOCAB_PATH
 *--docs_buffer_size* could be used to control memory consumption in pre-processing stage. *--preprocesses_num n* denotes that n processes are used for pre-processing. The example of pre-processing on a single machine is as follows：
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt \
-                      --dataset_path dataset --processes_num 8 --target bert
+                      --dataset_path dataset.pt --processes_num 8 --target bert
 ```
 We need to specify the model's target in pre-processing stage since different targets require different data formats. Currently, UER-py consists of the following target modules:
 - lm_target.py: language model
@@ -192,23 +192,23 @@ There two strategies for pre-training: 1）random initialization 2）loading a p
 #### Random initialization
 The example of pre-training on CPU：
 ```
-python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --output_model_path models/output_model.bin --encoder bert --target bert
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt --output_model_path models/output_model.bin --encoder bert --target bert
 ```
 The example of pre-training on single GPU (the id of GPU is 3)：
 ```
-python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt --output_model_path models/output_model.bin --encoder bert --target bert --gpu_ranks 3
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt --output_model_path models/output_model.bin --encoder bert --target bert --gpu_ranks 3
 ```
 Pre-training on single machine with 8 GPUs：
 ```
-python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt \
                     --output_model_path models/output_model.bin --encoder bert --target bert --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 
 ```
 Pre-training on two nachines, each has 8 GPUs (16 GPUs in total): 
 ```
-Node-0 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
+Node-0 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt \
             --output_model_path models/output_model.bin --encoder bert --target bert --world_size 16 --gpu_ranks 0 1 2 3 4 5 6 7 \
             --master_ip tcp://node-0-addr:port
-Node-1 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
+Node-1 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt \
             --output_model_path models/output_model.bin --encoder bert --target bert --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 \
             --master_ip tcp://node-0-addr:port            
 ```
@@ -217,25 +217,25 @@ Node-1 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_v
 We recommend to load a pre-trained model. We can specify the pre-trained model by *--pretrained_model_path* .
 The example of pre-training on CPU and single GPU:
 ```
-python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt \
                     --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
                     --encoder bert --target bert
-python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt \
                     --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
                     --encoder bert --target bert --gpu_ranks 3
 ```
 The example of pre-training on a single machine with 8 GPUs：
 ```
-python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt \
                     --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
                     --encoder bert --target bert --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 
 ```
 The example of pre-training on two machines, each has 8 GPUs (16 GPUs in total): 
 ```
-Node-0 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
+Node-0 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt \
             --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
             --encoder bert --target bert --world_size 16 --gpu_ranks 0 1 2 3 4 5 6 7 --master_ip tcp://node-0-addr:port
-Node-1 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_vocab.txt \
+Node-1 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt \
             --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
             --encoder bert --target bert --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 --master_ip tcp://node-0-addr:port
 ```
@@ -373,7 +373,8 @@ We provide the pre-trained models on different downstream datasets: [book_review
 <table>
 <tr align="center"><th> Model/Dataset              <th> Douban book review <th> ChnSentiCorp <th> Shopping <th> MSRA-NER <th> Tencentnews review
 <tr align="center"><td> BERT                       <td> 87.5               <td> 94.3         <td> 96.3     <td> 93.0/92.4/92.7  <td> 84.2
-<tr align="center"><td> BERT+semi-supervision      <td> 88.1               <td> 95.6         <td> 97.0     <td> 94.3/92.6/93.4  <td> 85.1
+<tr align="center"><td> BERT+semi+BertTarget       <td> 88.1               <td> 95.6         <td> 97.0     <td> 94.3/92.6/93.4  <td> 85.1
+<tr align="center"><td> BERT+semi+MlmTarget       <td> 87.9               <td> 95.8         <td>      <td>   <td> 85.1
 </table>
 
 For large-scale classification datasets, we not only provide the pre-trained models, but also provide classification models (see Chinese model zoo). Classification models on large-scale datasets allow users to reproduce the results without training. Besides that, classification models could be used for improving other related tasks. More experimental results will come soon. 
