@@ -38,7 +38,7 @@ Python3.6, PyTorch-1.0.0, CUDA Version 9.0.176, CUDNN 7.0.5
 <br/>
 
 ## Quickstart
-We use BERT model and [book review classification dataset](https://github.com/dbiir/UER-py) to demonstrate how to use UER-py. There are three input files: book review corpus, book review dataset, and vocabulary. All files are encoded in UTF-8 and are included in this project.
+We use BERT model and [book review classification dataset](https://github.com/dbiir/UER-py) to demonstrate how to use UER-py. We firstly pre-train model on book review corpus and then fine-tune it on classification dataset. There are three input files: book review corpus, book review dataset, and vocabulary. All files are encoded in UTF-8 and are included in this project.
 
 The book review corpus is obtained by book review dataset with labels removed. The format of the corpus for BERT is as follows：
 ```
@@ -240,6 +240,7 @@ Node-1 : python3 pretrain.py --dataset_path dataset --vocab_path models/google_v
             --encoder bert --target bert --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 --master_ip tcp://node-0-addr:port
 ```
 
+
 ### Fine-tune on downstream tasks
 Currently, UER-py consists of 4 downstream tasks, i.e. classification, sequence labeling, cloze test, feature extractor. The encoder of downstream task should be coincident with the pre-trained model.
 
@@ -358,7 +359,7 @@ We use BERT to test the speed of distributed training mode. Google BERT is train
 </table>
 
 ### Performance
-We use a range of Chinese datasets to evaluate the performance of UER-py. Douban book review, ChnSentiCorp, Shopping, and Tencentnews are sentence-level sentiment classification datasets. MSRA-NER is a sequence labeling dataset. These datasets are included in this project. One can reproduce our results with little efforts.
+We use a range of Chinese datasets to evaluate the performance of UER-py. Douban book review, ChnSentiCorp, Shopping, and Tencentnews are sentence-level small-scale sentiment classification datasets. MSRA-NER is a sequence labeling dataset. These datasets are included in this project. Dianping, JDfull, JDbinary, Ifeng, and Chinanews are large-scale classification datasets. They are collected in [glyph](https://arxiv.org/pdf/1708.02657.pdf) and can be downloaded at [glyph's github project](https://github.com/zhangxiangxiao/glyph). 
 
 Most pre-training models consist of 2 stages: pre-training on general-domain corpus and fine-tuning on downstream dataset. We recommend 3-stage mode: 1)Pre-training on general-domain corpus; 2)Pre-training on downstream dataset; 3)Fine-tuning on downstream dataset. Stage 2 enables models to get familiar with distributions of downstream tasks. It is sometimes known as semi-supervised fune-tuning.
 
@@ -373,6 +374,15 @@ We provide the pre-trained models on different downstream datasets: [book_review
 <tr align="center"><th> Model/Dataset              <th> Douban book review <th> ChnSentiCorp <th> Shopping <th> MSRA-NER <th> Tencentnews review
 <tr align="center"><td> BERT                       <td> 87.5               <td> 94.3         <td> 96.3     <td> 93.0/92.4/92.7  <td> 84.2
 <tr align="center"><td> BERT+semi-supervision      <td> 88.1               <td> 95.6         <td> 97.0     <td> 94.3/92.6/93.4  <td> 85.1
+</table>
+
+For large-scale classification datasets, we not only provide the pre-trained models, but also provide classification models (see Chinese model zoo). Classification models on large-scale datasets allow users to reproduce the results without training. Besides that, classification models could be used for improving other related tasks. More experimental results will come soon. 
+
+<table>
+<tr align="center"><th> Model/Dataset              <th> Ifeng     <th> Chinanews <th> Dianping <th> JDbinary <th> JDfull
+<tr align="center"><td> pre-SOTA (Glyph & Glyce)   <td> 85.76     <td> 91.88     <td> 78.46    <td> 91.76    <td> 54.24 
+<tr align="center"><td> BERT                       <td> 87.50     <td> 93.37     <td>          <td>          <td> 
+<tr align="center"><td> BERT+semi-supervision      <td> 87.64     <td>           <td>          <td>          <td> 
 </table>
 
 We also provide the pre-trained models on different corpora, encoders, and targets (see Chinese model zoo). Selecting proper pre-training models is beneficial to the performance of downstream tasks.
