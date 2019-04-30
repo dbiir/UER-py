@@ -246,7 +246,7 @@ UER-py allows users to combine different components (e.g. subencoders, encoders,
 
 In fact, NSP target and sentence-level reviews are incompatible to some extent. We could replace BERT target with MLM target on book review dataset:
 ```
-python3 preprocess.py --corpus_path corpora/bookreview.txt --vocab_path models/google_vocab.txt --dataset_path dataset.pt --processes_num 8 --target mlm
+python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_vocab.txt --dataset_path dataset.pt --processes_num 8 --target mlm
 
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin --output_model_path models/book_review_model.bin \
                     --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --total_steps 20000 --save_checkpoint_steps 1000 --encoder bert --target mlm
