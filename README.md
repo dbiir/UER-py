@@ -40,7 +40,7 @@ Python3.6, PyTorch-1.0.0, CUDA Version 9.0.176, CUDNN 7.0.5
 ## Quickstart
 We use BERT model and [book review classification dataset](https://github.com/dbiir/UER-py) to demonstrate how to use UER-py. We firstly pre-train model on book review corpus and then fine-tune it on classification dataset. There are three input files: book review corpus, book review dataset, and vocabulary. All files are encoded in UTF-8 and are included in this project.
 
-The book review corpus is obtained by book review dataset with labels removed. The format of the corpus for BERT is as follows：
+The format of the corpus for BERT is as follows：
 ```
 doc1-sent1
 doc1-sent2
@@ -51,6 +51,7 @@ doc2-sent1
 doc3-sent1
 doc3-sent2
 ```
+The book review corpus is obtained by book review dataset. We remove labels and split a review into two parts from the middle. Each review constitutes a document with two sentences. 
 
 The format of the classification dataset is as follows (label and instance are separated by \t):
 ```
@@ -240,6 +241,16 @@ Node-1 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/googl
             --encoder bert --target bert --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 --master_ip tcp://node-0-addr:port
 ```
 
+#### Try different pre-training models
+UER-py allows users to combine different components (e.g. subencoders, encoders, and targets).
+In fact, NSP target and sentence-level reviews are incompatible to some extent. We could replace BERT target with MLM target on book review dataset:
+```
+python3 preprocess.py --corpus_path corpora/bookreview.txt --vocab_path models/google_vocab.txt --dataset_path dataset.pt --processes_num 8 --target mlm
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --total_steps 20000 --save_checkpoint_steps 1000 --encoder bert --target mlm
+```
+Notice that different targets correspond to different corpus formats. We provide the examples (of different formats) for different targets in corpora folder.
+
+
 
 ### Fine-tune on downstream tasks
 Currently, UER-py consists of 4 downstream tasks, i.e. classification, sequence labeling, cloze test, feature extractor. The encoder of downstream task should be coincident with the pre-trained model.
@@ -359,7 +370,7 @@ We use BERT to test the speed of distributed training mode. Google BERT is train
 </table>
 
 ### Performance
-We use a range of Chinese datasets to evaluate the performance of UER-py. Douban book review, ChnSentiCorp, Shopping, and Tencentnews are sentence-level small-scale sentiment classification datasets. MSRA-NER is a sequence labeling dataset. These datasets are included in this project. Dianping, JDfull, JDbinary, Ifeng, and Chinanews are large-scale classification datasets. They are collected in [glyph](https://arxiv.org/pdf/1708.02657.pdf) and can be downloaded at [glyph's github project](https://github.com/zhangxiangxiao/glyph). 
+We use a range of Chinese datasets to evaluate the performance of UER-py. Douban book review, ChnSentiCorp, Shopping, and Tencentnews are sentence-level small-scale sentiment classification datasets. MSRA-NER is a sequence labeling dataset. These datasets are included in this project. Dianping, JDfull, JDbinary, Ifeng, and Chinanews are large-scale classification datasets. They are collected in [glyph](https://arxiv.org/pdf/1708.02657.pdf) and can be downloaded at [glyph's github project](https://github.com/zhangxiangxiao/glyph). These five datasets don't contain validation set. We use 10% instances in trainset for validation.
 
 Most pre-training models consist of 2 stages: pre-training on general-domain corpus and fine-tuning on downstream dataset. We recommend 3-stage mode: 1)Pre-training on general-domain corpus; 2)Pre-training on downstream dataset; 3)Fine-tuning on downstream dataset. Stage 2 enables models to get familiar with distributions of downstream tasks. It is sometimes known as semi-supervised fune-tuning.
 
@@ -368,14 +379,15 @@ Hyper-parameter settings are as follows:
 - Stage 2: We train with batch size of 256 sequences. For classification datasets, the sequence length is 128. For sequence labeling datasets, the sequence length is 256. We train upon Google's pretrained model for 20,000 steps. Optimizer settings and tokenizer are identical with stage 1.
 - Stage 3: For classification datasets, the training batch size and epochs are 64 and 3. For sequence labeling datasets, the training batch size and epochs are 32 and 5. Optimizer settings and tokenizer are identical with stage 1.
 
-We provide the pre-trained models on different downstream datasets: [book_review_model.bin](https://share.weiyun.com/52BEFs2); [chnsenticorp_model.bin](https://share.weiyun.com/53WDBeJ); [shopping_model.bin](https://share.weiyun.com/5HaxwAf); [msra_model.bin](https://share.weiyun.com/5E6XpEt). Tencentnews dataset and its pretrained model will be publicly available after data desensitization. 
+We provide the pre-trained models (using BERT target) on different downstream datasets: [book_review_model.bin](https://share.weiyun.com/52BEFs2); [chnsenticorp_model.bin](https://share.weiyun.com/53WDBeJ); [shopping_model.bin](https://share.weiyun.com/5HaxwAf); [msra_model.bin](https://share.weiyun.com/5E6XpEt). Tencentnews dataset and its pretrained model will be publicly available after data desensitization. 
 
 <table>
 <tr align="center"><th> Model/Dataset              <th> Douban book review <th> ChnSentiCorp <th> Shopping <th> MSRA-NER <th> Tencentnews review
 <tr align="center"><td> BERT                       <td> 87.5               <td> 94.3         <td> 96.3     <td> 93.0/92.4/92.7  <td> 84.2
 <tr align="center"><td> BERT+semi+BertTarget       <td> 88.1               <td> 95.6         <td> 97.0     <td> 94.3/92.6/93.4  <td> 85.1
-<tr align="center"><td> BERT+semi+MlmTarget       <td> 87.9               <td> 95.8         <td>      <td>   <td> 85.1
+<tr align="center"><td> BERT+semi+MlmTarget        <td> 87.9               <td> 95.5         <td> 97.2     <td>   <td> 85.1
 </table>
+
 
 For large-scale classification datasets, we not only provide the pre-trained models, but also provide classification models (see Chinese model zoo). Classification models on large-scale datasets allow users to reproduce the results without training. Besides that, classification models could be used for improving other related tasks. More experimental results will come soon. 
 
