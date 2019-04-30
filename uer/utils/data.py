@@ -524,7 +524,7 @@ class ClsDataset(object):
                     if len(line) == 2:
                         label = int(line[0])
                         text = " ".join(line[1:])
-                        src = [vocab.get(t) for t in tokenizer.tokenize(text)]
+                        src = [self.vocab.get(t) for t in self.tokenizer.tokenize(text)]
                         src = [CLS_ID] + src
                         tgt = label
                         seg = [1] * len(src)
@@ -540,7 +540,7 @@ class ClsDataset(object):
                         label = int(line[0])
                         text_a, text_b = line[1], line[2]
 
-                        src_a = [vocab.get(t) for t in tokenizer.tokenize(text_a)]
+                        src_a = [self.vocab.get(t) for t in self.tokenizer.tokenize(text_a)]
                         src_a = [CLS_ID] + tokens_a + [SEP_ID]
                         src_b = [vocab.get(t) for t in tokenizer.tokenize(text_b)]
                         src_b = tokens_b + [SEP_ID]
