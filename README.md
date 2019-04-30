@@ -394,11 +394,13 @@ We provide the pre-trained models (using BERT target) on different downstream da
 
 For large-scale classification datasets, we not only provide the pre-trained models, but also provide classification models (see Chinese model zoo). Classification models on large-scale datasets allow users to reproduce the results without training. Besides that, classification models could be used for improving other related tasks. More experimental results will come soon. 
 
+Ifeng and Chinanews datasets contain news' titles and abstracts. In stage 2, we use title to predict abstract. 
+
 <table>
 <tr align="center"><th> Model/Dataset              <th> Ifeng     <th> Chinanews <th> Dianping <th> JDbinary <th> JDfull
 <tr align="center"><td> pre-SOTA (Glyph & Glyce)   <td> 85.76     <td> 91.88     <td> 78.46    <td> 91.76    <td> 54.24 
 <tr align="center"><td> BERT                       <td> 87.50     <td> 93.37     <td>          <td>          <td> 
-<tr align="center"><td> BERT+semi-supervision      <td> 87.64     <td>           <td>          <td>          <td> 
+<tr align="center"><td> BERT+semi+BertTarget       <td> 87.65     <td>           <td>          <td>          <td> 
 </table>
 
 We also provide the pre-trained models on different corpora, encoders, and targets (see Chinese model zoo). Selecting proper pre-training models is beneficial to the performance of downstream tasks.
