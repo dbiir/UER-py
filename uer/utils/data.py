@@ -485,8 +485,6 @@ class ClsDataset(object):
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
         set_seed(self.seed)
-        docs_buffer = []
-        document = []
         pos = start
         f_write = open(self.dataset_path + "-" + str(proc_id) + ".pt", "wb")
         # Open function in python3 does not support tell operation. We have to use codecs.
@@ -497,7 +495,7 @@ class ClsDataset(object):
                 try:
                     line = f.readline()
                     line = line.strip().split("\t")
-                    label, text = int(line[0]), "".join(line[1])
+                    label, text = int(line[0]), line[1]
                 except:
                     continue
 
@@ -880,7 +878,7 @@ class NspDataset(object):
 class NspDataLoader(object):
     """
     """
-    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num，shuffle=True):
+    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=True):
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.proc_id = proc_id
@@ -1013,7 +1011,7 @@ class S2sDataset(object):
 class S2sDataLoader(object):
     """
     """
-    def __init__(self, args, dataset_path, batch_size,  proc_id, proc_num， shuffle=True):
+    def __init__(self, args, dataset_path, batch_size,  proc_id, proc_num, shuffle=True):
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.proc_id = proc_id
