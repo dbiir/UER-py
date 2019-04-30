@@ -16,7 +16,8 @@ class ClsTarget(nn.Module):
         self.vocab_size = vocab_size
         self.hidden_size = args.hidden_size
 
-        self.linear = nn.Linear(args.hidden_size, args.labels_num)
+        self.linear_1 = nn.Linear(args.hidden_size, aargs.hidden_size)
+        self.linear_2 = nn.Linear(args.hidden_size, args.labels_num)
         self.softmax = nn.LogSoftmax(dim=-1)
         self.criterion = nn.NLLLoss()
 
@@ -36,8 +37,10 @@ class ClsTarget(nn.Module):
             denominator: Number of masked words.
         """
 
-        output = self.linear(memory_bank[:, 0, :])
-        loss = self.criterion(self.softmax(output), tgt)
+        output = torch.tanh(self.linear_1(output[:, 0, :]))
+        logits = self.linear_2(output)
+
+        loss = self.criterion(self.softmax(logits), tgt)
         correct = self.softmax(output).argmax(dim=-1).eq(tgt).sum()
 
         return loss, correct

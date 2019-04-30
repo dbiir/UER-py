@@ -492,6 +492,54 @@ class ClsDataset(object):
             f.seek(start)
             instances = []
             while True:
+                
+                try:
+                    line = f.readline()
+                    line = line.strip().split('\t')
+                    if len(line) == 2:
+                        label = int(line[0])
+                        text = " ".join(line[1:])
+                        src = [vocab.get(t) for t in tokenizer.tokenize(text)]
+                        src = [CLS_ID] + src
+                        tgt = label
+                        seg = [1] * len(src)
+                        if len(src) >= self.seq_length:
+                            src = src[:self.seq_length]
+                            seg = seg[:self.seq_length]
+                        else:
+                            while len(src) != self.seq_length:
+                                src.append(PAD_ID)
+                                seg.append(PAD_ID)
+                        instances.append((src, tgt, seg))
+                    elif len(line) == 3: # For sentence pair input.
+                        label = int(line[0])
+                        text_a, text_b = line[1], line[2]
+
+                        src_a = [vocab.get(t) for t in tokenizer.tokenize(text_a)]
+                        src_a = [CLS_ID] + tokens_a + [SEP_ID]
+                        src_b = [vocab.get(t) for t in tokenizer.tokenize(text_b)]
+                        src_b = tokens_b + [SEP_ID]
+
+                        src = src_a + src_b
+                        seg = [1] * len(src_a) + [2] * len(src_b)
+
+                        if len(src) >= self.seq_length:
+                            src = src[:self.seq_length]
+                            seg = seg[:self.seq_length]
+                        else:
+                            while len(src) != self.seq_length:
+                                src.append(PAD_ID)
+                                seg.append(PAD_ID)
+                        instances.append((src, tgt, seg))
+                    else:
+                        pass
+
+                except:
+                    continue
+
+
+
+
                 try:
                     line = f.readline()
                     line = line.strip().split("\t")
