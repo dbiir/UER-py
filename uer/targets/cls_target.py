@@ -37,10 +37,10 @@ class ClsTarget(nn.Module):
             denominator: Number of masked words.
         """
 
-        output = torch.tanh(self.linear_1(output[:, 0, :]))
+        output = torch.tanh(self.linear_1(memory_bank[:, 0, :]))
         logits = self.linear_2(output)
 
         loss = self.criterion(self.softmax(logits), tgt)
-        correct = self.softmax(output).argmax(dim=-1).eq(tgt).sum()
+        correct = self.softmax(logits).argmax(dim=-1).eq(tgt).sum()
 
         return loss, correct
