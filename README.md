@@ -38,7 +38,7 @@ Python3.6, PyTorch-1.0.0, CUDA Version 9.0.176, CUDNN 7.0.5
 <br/>
 
 ## Quickstart
-We use BERT model and [book review classification dataset](https://github.com/dbiir/UER-py) to demonstrate how to use UER-py. We firstly pre-train model on book review corpus and then fine-tune it on classification dataset. There are three input files: book review corpus, book review dataset, and vocabulary. All files are encoded in UTF-8 and are included in this project.
+We use BERT model and [Douban book review classification dataset](http://www.cips-cl.org/static/anthology/CCL-2018/CCL-18-086.pdf) to demonstrate how to use UER-py. We firstly pre-train model on book review corpus and then fine-tune it on classification dataset. There are three input files: book review corpus, book review dataset, and vocabulary. All files are encoded in UTF-8 and are included in this project.
 
 The format of the corpus for BERT is as follows：
 ```
@@ -94,6 +94,8 @@ python3 classifier.py --pretrained_model_path models/book_review_model.bin --voc
     --epochs_num 3 --batch_size 64 --encoder bert
 ```
 It turns out that the result of Google's model is 87.5; The result of *book_review_model.bin* is 88.1. It is also noticable that we don't need to specify the target in fine-tuning stage. Pre-training target is replaced with task-specific target.
+
+We could search proper pre-trained models in [Chinese model zoo](#chinese_model_zoo) for further improvements. For example, we could download [models pre-trained on Amazon corpus (over 4 million reviews) with BERT encoder and classification target](https://share.weiyun.com/5XuxtFA). It achieves 88.5 accuracy on book review dataset.
 
 <br/>
 
@@ -392,7 +394,7 @@ We provide the pre-trained models (using BERT target) on different downstream da
 </table>
 
 
-For large-scale classification datasets, we not only provide the pre-trained models, but also provide classification models (see Chinese model zoo). Classification models on large-scale datasets allow users to reproduce the results without training. Besides that, classification models could be used for improving other related tasks. More experimental results will come soon. 
+It requires tremendous computional resources to fine-tune on large-scale datasets. For Ifeng, Chinanews, Dianping, JDbinary, and JDfull datasets, we provide their classification models (see Chinese model zoo). Classification models on large-scale datasets allow users to reproduce the results without training. Besides that, classification models could be used for improving other related tasks. More experimental results will come soon. 
 
 Ifeng and Chinanews datasets contain news' titles and abstracts. In stage 2, we use title to predict abstract. 
 
@@ -423,8 +425,20 @@ With the help of UER, we are pre-training models with different corpora, encoder
 <tr align="center"><td> Webqa2019+BertEncoder+BertTarget <td> https://share.weiyun.com/5HYbmBh <td> The training corpus is WebQA, which is suitable for datasets related with social media
 <tr align="center"><td> IfengNews+BertEncoder+BertTarget <td> https://share.weiyun.com/5HVcUWO <td> The training corpus is news data from Ifeng website. We use news titles to predict news abstracts. Training steps: 100,000; Sequence length: 128. 
 <tr align="center"><td> jdbinary+BertEncoder+ClsTarget <td> https://share.weiyun.com/596k2bu <td> The training corpus is review data from JD (jingdong). Classification target is used for pre-training. It is suitable for datasets related with shopping reviews, e.g. accuracy is improved on shopping datasets from 96.3 to 97.2 (compared with Google BERT)
+<tr align="center"><td> Amazonreview+BertEncoder+ClsTarget <td> https://share.weiyun.com/5XuxtFA <td> The training corpus is review data from Amazon (including book reviews, movie reviews, and etc.). Classification target is used for pre-training. It is suitable for datasets related with reviews, e.g. accuracy is improved on Douban book review datasets from 87.6 to 88.7 (compared with Google BERT)
 <tr align="center"><td> Wikizh+LstmEncoder+LmTarget <td>  <td> 
 <tr align="center"><td> <td> <td> 
+</table>
+
+We release the classification models on 5 large-scale datasets, i.e. Ifeng, Chinanews, Dianping, JDbinary, and
+JDfull. Users can use these models to reproduce results, or regard them as pre-training models for other datasets.
+<table>
+<tr align="center"><th> Datasets <th> Link  
+<tr align="center"><td> Ifeng <td>  
+<tr align="center"><td> Chinanews <td>
+<tr align="center"><td> Dianping <td>
+<tr align="center"><td> JDbinary <td>
+<tr align="center"><td> JDfull <td>
 </table>
 
 <br/>
