@@ -5,7 +5,7 @@ import torch
 import argparse
 import torch.multiprocessing as mp
 import uer.trainer as trainer
-from uer.utils.config import save_hyperparam, load_hyperparam
+from uer.utils.config import load_hyperparam
 
 
 def main():

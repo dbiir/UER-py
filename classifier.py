@@ -25,6 +25,7 @@ class BertClassifier(nn.Module):
         self.encoder = bert_model.encoder
         self.target = bert_model.target
         self.labels_num = args.labels_num
+        self.pooling = args.pooling
         self.output_layer_1 = nn.Linear(args.hidden_size, args.hidden_size)
         self.output_layer_2 = nn.Linear(args.hidden_size, args.labels_num)
         self.softmax = nn.LogSoftmax(dim=-1)
@@ -42,7 +43,13 @@ class BertClassifier(nn.Module):
         # Encoder.
         output = self.encoder(emb, mask)
         # Target.
-        output = torch.tanh(self.output_layer_1(output[:, 0, :]))
+        if self.pooling == "mean":
+            output = torch.mean(output, dim=1)
+        elif self.pooling == "last":
+            output = output[:, -1, :]
+        else:
+            output = output[:, 0, :]
+        output = torch.tanh(self.output_layer_1(output))
         logits = self.output_layer_2(output)
         loss = self.criterion(self.softmax(logits.view(-1, self.labels_num)), label.view(-1))
         return loss, logits
@@ -77,14 +84,17 @@ def main():
                                                    "rcnn", "crnn", "gpt"], \
                                                    default="bert", help="Encoder type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
+    parser.add_argument("--pooling", choices=["mean", "first", "last"], default="first",
+                        help="Pooling type.")
 
     # Subword options.
     parser.add_argument("--subword_type", choices=["none", "char"], default="none",
                         help="Subword feature type.")
     parser.add_argument("--sub_vocab_path", type=str, default="models/sub_vocab.txt",
                         help="Path of the subword vocabulary file.")
-    parser.add_argument("--subencoder_type", choices=["avg", "lstm", "gru", "cnn"], default="avg",
+    parser.add_argument("--subencoder", choices=["avg", "lstm", "gru", "cnn"], default="avg",
                         help="Subencoder type.")
+    parser.add_argument("--sub_layers_num", type=int, default=2, help="The number of subencoder layers.")
 
     # Tokenizer options.
     parser.add_argument("--tokenizer", choices=["bert", "char", "word", "space"], default="bert",
