@@ -75,7 +75,7 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     # Path options.
-    parser.add_argument("--pretrained_model_path", default="./models/google_model.bin", type=str,
+    parser.add_argument("--pretrained_model_path", default=None, type=str,
                         help="Path of the pretrained model.")
     parser.add_argument("--output_model_path", default="./models/tagger_model.bin", type=str,
                         help="Path of the output model.")
@@ -106,8 +106,9 @@ def main():
                         help="Subword feature type.")
     parser.add_argument("--sub_vocab_path", type=str, default="models/sub_vocab.txt",
                         help="Path of the subword vocabulary file.")
-    parser.add_argument("--subencoder_type", choices=["avg", "lstm", "gru", "cnn"], default="avg",
+    parser.add_argument("--subencoder", choices=["avg", "lstm", "gru", "cnn"], default="avg",
                         help="Subencoder type.")
+    parser.add_argument("--sub_layers_num", type=int, default=2, help="The number of subencoder layers.")
 
     # Optimizer options.
     parser.add_argument("--learning_rate", type=float, default=2e-5,
@@ -133,7 +134,7 @@ def main():
     set_seed(args.seed)
 
      # Find tagging labels.
-    labels_map = {"NULL": 0} # Additional symbol for padding.
+    labels_map = {"NULL": 0, "O": 1} # ID for padding and non-entity.
     with open(args.train_path, mode="r", encoding="utf-8") as f:
         for line in f:
             line = line.strip().split()
@@ -141,8 +142,6 @@ def main():
                 continue
             if line[1] not in labels_map:
                 labels_map[line[1]] = len(labels_map)
-
-    assert(labels_map["O"] == 1)
 
     print("Labels: ", labels_map)
     args.labels_num = len(labels_map)
@@ -157,9 +156,15 @@ def main():
     args.target = "bert"
     bert_model = build_model(args)
 
-    # Load pretrained model.
-    pretrained_model = torch.load(args.pretrained_model_path)
-    bert_model.load_state_dict(pretrained_model, strict=True)
+    # Load or initialize parameters.
+    if args.pretrained_model_path is not None:
+        # Initialize with pretrained model.
+        bert_model.load_state_dict(torch.load(args.pretrained_model_path), strict=False)  
+    else:
+        # Initialize with normal distribution.
+        for n, p in list(bert_model.named_parameters()):
+            if 'gamma' not in n and 'beta' not in n:
+                p.data.normal_(0, 0.02)
     
     # Build sequence labeling model.
     model = BertTagger(args, bert_model)
