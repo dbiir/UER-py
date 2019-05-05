@@ -389,8 +389,8 @@ We provide the pre-trained models (using BERT target) on different downstream da
 <table>
 <tr align="center"><th> Model/Dataset              <th> Douban book review <th> ChnSentiCorp <th> Shopping <th> MSRA-NER <th> Tencentnews review
 <tr align="center"><td> BERT                       <td> 87.5               <td> 94.3         <td> 96.3     <td> 93.0/92.4/92.7  <td> 84.2
-<tr align="center"><td> BERT+semi+BertTarget       <td> 88.1               <td> 95.6         <td> 97.0     <td> 94.3/92.6/93.4  <td> 85.1
-<tr align="center"><td> BERT+semi+MlmTarget        <td> 87.9               <td> 95.5         <td> 97.2     <td>   <td> 85.1
+<tr align="center"><td> BERT+semi_BertTarget       <td> 88.1               <td> 95.6         <td> 97.0     <td> 94.3/92.6/93.4  <td> 85.1
+<tr align="center"><td> BERT+semi_MlmTarget        <td> 87.9               <td> 95.5         <td> 97.1     <td>   <td> 85.1
 </table>
 
 
@@ -401,7 +401,7 @@ Ifeng and Chinanews datasets contain news' titles and abstracts. In stage 2, we 
 <table>
 <tr align="center"><th> Model/Dataset              <th> Ifeng     <th> Chinanews <th> Dianping <th> JDbinary <th> JDfull
 <tr align="center"><td> pre-SOTA (Glyph & Glyce)   <td> 85.76     <td> 91.88     <td> 78.46    <td> 91.76    <td> 54.24 
-<tr align="center"><td> BERT                       <td> 87.50     <td> 93.37     <td>          <td>          <td> 
+<tr align="center"><td> BERT                       <td> 87.50     <td> 93.37     <td>          <td> 92.37    <td> 
 <tr align="center"><td> BERT+semi+BertTarget       <td> 87.65     <td>           <td>          <td>          <td> 
 </table>
 
@@ -435,10 +435,10 @@ We release the classification models on 5 large-scale datasets, i.e. Ifeng, Chin
 JDfull. Users can use these models to reproduce results, or regard them as pre-training models for other datasets.
 <table>
 <tr align="center"><th> Datasets <th> Link  
-<tr align="center"><td> Ifeng <td>  
+<tr align="center"><td> Ifeng <td> https://share.weiyun.com/5ZCp4wU 
 <tr align="center"><td> Chinanews <td>
 <tr align="center"><td> Dianping <td> https://share.weiyun.com/5Ls8R02
-<tr align="center"><td> JDbinary <td>
+<tr align="center"><td> JDbinary <td> https://share.weiyun.com/5QNu4QF
 <tr align="center"><td> JDfull <td>
 </table>
 
