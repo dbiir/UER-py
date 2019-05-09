@@ -428,6 +428,7 @@ With the help of UER, we are pre-training models with different corpora, encoder
 <tr align="center"><td> jdfull+BertEncoder+MlmTarget <td> https://share.weiyun.com/5L6EkUF <td> The training corpus is review data from JD (jingdong). Masked LM target is used for pre-training. Training steps: 50,000; Sequence length: 128
 <tr align="center"><td> Amazonreview+BertEncoder+ClsTarget <td> https://share.weiyun.com/5XuxtFA <td> The training corpus is review data from Amazon (including book reviews, movie reviews, and etc.). Classification target is used for pre-training. It is suitable for datasets related with reviews, e.g. accuracy is improved on Douban book review datasets from 87.6 to 88.5 (compared with Google BERT). Training steps: 20,000; Sequence length: 128
 <tr align="center"><td> Reviews+LstmEncoder+LmTarget <td> https://share.weiyun.com/57dZhqo  <td> The training corpus is amazon reviews + JDbinary reviews + dainping reviews (11.4M reviews in total). Language model target is used. It is suitable for datasets related with reviews. It achieves over 5 percent improvements on some review datasets compared with random initialization. Training steps: 200,000; Sequence length: 128
+<tr align="center"><td> XNLI+BertEncoder+ClsTarget <td> https://share.weiyun.com/5oXPugA <td> Infersent with BertEncoder
 <tr align="center"><td> <td> <td> 
 </table>
 
@@ -436,10 +437,10 @@ JDfull. Users can use these models to reproduce results, or regard them as pre-t
 <table>
 <tr align="center"><th> Datasets <th> Link  
 <tr align="center"><td> Ifeng <td> https://share.weiyun.com/5ZCp4wU 
-<tr align="center"><td> Chinanews <td>
+<tr align="center"><td> Chinanews <td> https://share.weiyun.com/5bSfeQ7
 <tr align="center"><td> Dianping <td> https://share.weiyun.com/5Ls8R02
 <tr align="center"><td> JDbinary <td> https://share.weiyun.com/5QNu4QF
-<tr align="center"><td> JDfull <td>
+<tr align="center"><td> JDfull <td> https://share.weiyun.com/5bqchN1
 </table>
 
 <br/>
