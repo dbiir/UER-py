@@ -260,7 +260,7 @@ class WordpieceTokenizer(object):
                     substr = "".join(chars[start:end])
                     if start > 0:
                         substr = "##" + substr
-                    if substr in self.vocab.i2w:
+                    if substr in self.vocab.w2i:
                         cur_substr = substr
                         break
                     end -= 1
