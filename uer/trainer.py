@@ -59,7 +59,10 @@ def worker(gpu_id, gpu_ranks, args, model):
     """
     set_seed(args.seed)
 
-    train_loader = globals()[args.target.capitalize() + "DataLoader"](args, args.dataset_path, args.batch_size, gpu_id, len(gpu_ranks), True)
+    if gpu_ranks is None:
+        train_loader = globals()[args.target.capitalize() + "DataLoader"](args, args.dataset_path, args.batch_size, gpu_id, 1, True)
+    else:
+        train_loader = globals()[args.target.capitalize() + "DataLoader"](args, args.dataset_path, args.batch_size, gpu_id, len(gpu_ranks), True)
 
     if gpu_id is not None: 
         torch.cuda.set_device(gpu_id)
