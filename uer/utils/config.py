@@ -7,8 +7,10 @@ def load_hyperparam(args):
         param = json.load(f)
     args.emb_size = param.get("emb_size", 768)
     args.hidden_size = param.get("hidden_size", 768)
+    args.kernel_size = param.get("kernel_size", 3)
     args.feedforward_size = param.get("feedforward_size", None)
     args.heads_num = param.get("heads_num", None)
     args.layers_num = param.get("layers_num", 12)
     args.dropout = param.get("dropout", 0.1)
+    
     return args
