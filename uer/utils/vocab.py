@@ -1,8 +1,9 @@
 # -*- encoding:utf-8 -*-
 import os
 import torch
+from bert.utils.constants import *
+from bert.utils.misc import count_line
 from multiprocessing import Pool
-from uer.utils.constants import *
 
 class Vocab(object):
     """
@@ -52,14 +53,23 @@ class Vocab(object):
         worker that creates vocabulary from corpus[seek_start:seek_end]
         """
         w2i, i2w, w2c = {}, [], {}
+        pos = 0
         with open(corpus_path, mode="r", encoding="utf-8") as f:
-            f.seek(start)
+            while pos < start:
+               try:
+                   f.readline()
+               except:
+                   continue
+               finally:
+                   pos += 1
             while True:
                 try:
                     line = f.readline()
-                except UnicodeDecodeError:
-                    # If decode error, skip.
+                except:
                     continue
+                finally:
+                   pos += 1
+
                 tokens = tokenizer.tokenize(line)
                 for t in tokens:
                     if t not in w2i:
@@ -67,59 +77,54 @@ class Vocab(object):
                         i2w.append(t)
                     else:
                         w2c[t] += 1
-                pos = f.tell()
-                if pos >= end:
+                if pos >= end - 1:
                     return (w2i, i2w, w2c)
                             
-    def union(self, results):
+    def union(self, vocab_list):
         """ Union vocab in all workers. """
         w2i, i2w, w2c = {}, [], {}
         index = 0
-        for res in results:
-            w2i_p, i2w_p, w2c_p = res.get()
-            for k in i2w_p:
-                if k not in w2i:
-                    w2i[k] = index
-                    i2w.append(k)
-                    # udpate count with w2c_p[k]
-                    w2c[k] = w2c_p[k]
-                    index += 1
+        for v_p in vocab_list:
+            w2i_p, i2w_p, w2c_p = v_p
+            for w in i2w_p:
+                if w not in w2i:
+                    w2i[w], w2c[w] = len(i2w), w2c_p[w]
+                    i2w.append(w)
                 else:
-                    w2c[k] += w2c_p[k]
+                    w2c[w] += w2c_p[w]
         return (w2i, i2w, w2c)
                     
     def build(self, corpus_path, tokenizer, workers_num=1, min_count=1):
         """ Build vocabulary from the given corpus. """
         print("Start %d workers for building vocabulary..." % workers_num)
-        file_size = os.path.getsize(corpus_path)
+        lines_num = count_line(corpus_path)
         pool = Pool(workers_num)
-        results = []
+        vocab_list = []
         for i in range(workers_num):
-            start = i * file_size // workers_num
-            end = (i+1) * file_size // workers_num
-            res = pool.apply_async(func=self.worker, args=[corpus_path, tokenizer, start, end])
-            results.append(res)
+            start = i * lines_num // workers_num
+            end = (i+1) * lines_num // workers_num
+            vocab_p = pool.apply_async(func=self.worker, args=[corpus_path, tokenizer, start, end])
+            vocab_list.append(vocab_p.get())
         pool.close()
         pool.join()
         
         # Union vocab in all workers.
-        w2i,i2w,w2c = self.union(results)
+        w2i, i2w, w2c = self.union(vocab_list)
+        # Sort w2c according to word count.
+        sorted_w2c = sorted(w2c.items(), key=lambda item:item[1], reverse=True)
 
         # Add special symbols and remove low frequency words.
         with open(self.reserved_vocab_path, mode="r", encoding="utf-8") as reader:
-            reserved_vocab = [line.strip().split()[0] for line in reader]
+            self.i2w = [line.strip().split()[0] for line in reader]
 
-        for i, w in enumerate(reserved_vocab):
+        for i, w in enumerate(self.i2w):
             self.w2i[w] = i
             self.w2c[w] = -1
-        self.i2w = reserved_vocab
-
-        # Sort w2c according to word count.
-        sorted_w2c = sorted(w2c.items(), key=lambda item:item[1], reverse=True)
 
         for w, c in sorted_w2c:
             if c < min_count:
                 break
-            self.w2c[w] = c
-            self.w2i[w] = len(self.i2w)
-            self.i2w.append(w)
+            if w not in self.w2i:
+                self.w2i[w], self.w2c[w] = len(self.i2w), c
+                self.i2w.append(w)
+                
