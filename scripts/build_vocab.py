@@ -7,11 +7,11 @@ import sys
 import os
 import argparse
 
-bert_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(bert_dir)
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
 
-from bert.utils.tokenizer import *
-from bert.utils.vocab import Vocab
+from uer.utils.tokenizer import *
+from uer.utils.vocab import Vocab
 
 
 if __name__ == '__main__':
