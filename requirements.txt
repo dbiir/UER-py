@@ -1,4 +1,2 @@
 torch>=1.0
-random
 argparse==1.1
-collections
