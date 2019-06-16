@@ -1,5 +1,5 @@
 torch>=1.0
-json
+json=2.0.9
 random
-argparse
+argparse=1.1
 collections
