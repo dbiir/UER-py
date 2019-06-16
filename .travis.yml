@@ -22,4 +22,4 @@ install:
 
 script:
 
-    python classifier.py --vocab_path modelsgoogle_vocab.txt --train_path datasets/chnsenticorp/train.txt --dev_path datasets/chnsenticorp/dev.txt --test_path datasets/chnsenticorp/test.txt --epochs_num 3 --batch_size 32 --encoder bert
+    python classifier.py --vocab_path models/google_vocab.txt --train_path datasets/chnsenticorp/train.txt --dev_path datasets/chnsenticorp/dev.txt --test_path datasets/chnsenticorp/test.txt --epochs_num 3 --batch_size 32 --encoder bert
