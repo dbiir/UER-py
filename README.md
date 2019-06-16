@@ -1,7 +1,6 @@
 # UER-py
-
 [![codebeat badge](https://codebeat.co/badges/f75fab90-6d00-44b4-bb42-d19067400243)](https://codebeat.co/projects/github-com-dbiir-uer-py-master)
-1 ![](https://img.shields.io/badge/license-MIT-000000.svg)
+![](https://img.shields.io/badge/license-MIT-000000.svg)
 
 <img src="uer-logo.jpg" width="390" hegiht="390" align=left />
 
