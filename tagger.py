@@ -136,7 +136,9 @@ def main():
      # Find tagging labels.
     labels_map = {"NULL": 0, "O": 1} # ID for padding and non-entity.
     with open(args.train_path, mode="r", encoding="utf-8") as f:
-        for line in f:
+        for line_id, line in enumerate(f):
+            if line_id == 0:
+                continue
             line = line.strip().split()
             if len(line) != 2:
                 continue
@@ -196,7 +198,9 @@ def main():
         dataset = []
         with open(path, mode="r", encoding="utf-8") as f:
             tokens, labels = [], []
-            for line in f:
+            for line_id, line in enumerate(f):
+                if line_id == 0:
+                    continue
                 line = line.strip().split()
                 if len(line) != 2:
                     assert len(tokens) == len(labels)

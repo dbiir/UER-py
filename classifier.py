@@ -121,6 +121,9 @@ def main():
     parser.add_argument("--seed", type=int, default=7,
                         help="Random seed.")
 
+    # Evaluation options.
+    parser.add_argument("--mean_reciprocal_rank", action="store_true", help="Evaluation metrics for DBQA dataset.")
+
     args = parser.parse_args()
 
     # Load the hyperparameters from the config file.
@@ -130,15 +133,21 @@ def main():
 
     # Count the number of labels.
     labels_set = set()
+    columns = {}
     with open(args.train_path, mode="r", encoding="utf-8") as f:
-        for line in f:
+        for line_id, line in enumerate(f):
             try:
-                line = line.strip().split()
-                label = int(line[0])
+                line = line.strip().split("\t")
+                if line_id == 0:
+                    for i, column_name in enumerate(line):
+                        columns[column_name] = i
+                    continue
+                label = int(line[columns["label"]])
                 labels_set.add(label)
             except:
                 pass
     args.labels_num = len(labels_set) 
+    print(columns)
 
     # Load vocabulary.
     vocab = Vocab()
@@ -153,7 +162,7 @@ def main():
     # Load or initialize parameters.
     if args.pretrained_model_path is not None:
         # Initialize with pretrained model.
-        bert_model.load_state_dict(torch.load(args.pretrained_model_path), strict=False)  
+        bert_model.load_state_dict(torch.load(args.pretrained_model_path), strict=True)  
     else:
         # Initialize with normal distribution.
         for n, p in list(bert_model.named_parameters()):
@@ -196,8 +205,8 @@ def main():
                 try:
                     line = line.strip().split('\t')
                     if len(line) == 2:
-                        label = int(line[0])
-                        text = " ".join(line[1:])
+                        label = int(line[columns["label"]])
+                        text = line[columns["text_a"]]
                         tokens = [vocab.get(t) for t in tokenizer.tokenize(text)]
                         tokens = [CLS_ID] + tokens
                         mask = [1] * len(tokens)
@@ -209,8 +218,8 @@ def main():
                             mask.append(0)
                         dataset.append((tokens, label, mask))
                     elif len(line) == 3: # For sentence pair input.
-                        label = int(line[0])
-                        text_a, text_b = line[1], line[2]
+                        label = int(line[columns["label"]])
+                        text_a, text_b = line[columns["text_a"]], line[columns["text_b"]]
 
                         tokens_a = [vocab.get(t) for t in tokenizer.tokenize(text_a)]
                         tokens_a = [CLS_ID] + tokens_a + [SEP_ID]
@@ -227,6 +236,26 @@ def main():
                             tokens.append(0)
                             mask.append(0)
                         dataset.append((tokens, label, mask))
+                    elif len(line) == 4: # For sentence pair input.
+                        qid=int(line[columns["qid"]])
+                        label = int(line[columns["label"]])
+                        text_a, text_b = line[columns["text_a"]], line[columns["text_b"]]
+
+                        tokens_a = [vocab.get(t) for t in tokenizer.tokenize(text_a)]
+                        tokens_a = [CLS_ID] + tokens_a + [SEP_ID]
+                        tokens_b = [vocab.get(t) for t in tokenizer.tokenize(text_b)]
+                        tokens_b = tokens_b + [SEP_ID]
+
+                        tokens = tokens_a + tokens_b
+                        mask = [1] * len(tokens_a) + [2] * len(tokens_b)
+
+                        if len(tokens) > args.seq_length:
+                            tokens = tokens[:args.seq_length]
+                            mask = mask[:args.seq_length]
+                        while len(tokens) < args.seq_length:
+                            tokens.append(0)
+                            mask.append(0)
+                        dataset.append((tokens, label, mask, qid))
                     else:
                         pass
                         
@@ -240,7 +269,7 @@ def main():
             dataset = read_dataset(args.test_path)
         else:
             dataset = read_dataset(args.dev_path)
-        random.shuffle(dataset)
+
         input_ids = torch.LongTensor([sample[0] for sample in dataset])
         label_ids = torch.LongTensor([sample[1] for sample in dataset])
         mask_ids = torch.LongTensor([sample[2] for sample in dataset])
@@ -255,32 +284,120 @@ def main():
         confusion = torch.zeros(args.labels_num, args.labels_num, dtype=torch.long)
 
         model.eval()
-
-        for i, (input_ids_batch, label_ids_batch,  mask_ids_batch) in enumerate(batch_loader(batch_size, input_ids, label_ids, mask_ids)):
-            input_ids_batch = input_ids_batch.to(device)
-            label_ids_batch = label_ids_batch.to(device)
-            mask_ids_batch = mask_ids_batch.to(device)
-            with torch.no_grad():
-                loss, logits = model(input_ids_batch, label_ids_batch, mask_ids_batch)
-            logits = nn.Softmax(dim=1)(logits)
-            pred = torch.argmax(logits, dim=1)
-            gold = label_ids_batch
-            for j in range(pred.size()[0]):
-                confusion[pred[j], gold[j]] += 1
-            correct += torch.sum(pred == gold).item()
         
-        if is_test:
-            print("Confusion matrix:")
-            print(confusion)
-            print("Report precision, recall, and f1:")
-        for i in range(confusion.size()[0]):
-            p = confusion[i,i].item()/confusion[i,:].sum().item()
-            r = confusion[i,i].item()/confusion[:,i].sum().item()
-            f1 = 2*p*r / (p+r)
+        if not args.mean_reciprocal_rank:
+            for i, (input_ids_batch, label_ids_batch,  mask_ids_batch) in enumerate(batch_loader(batch_size, input_ids, label_ids, mask_ids)):
+                input_ids_batch = input_ids_batch.to(device)
+                label_ids_batch = label_ids_batch.to(device)
+                mask_ids_batch = mask_ids_batch.to(device)
+                with torch.no_grad():
+                    loss, logits = model(input_ids_batch, label_ids_batch, mask_ids_batch)
+                logits = nn.Softmax(dim=1)(logits)
+                pred = torch.argmax(logits, dim=1)
+                gold = label_ids_batch
+                for j in range(pred.size()[0]):
+                    confusion[pred[j], gold[j]] += 1
+                correct += torch.sum(pred == gold).item()
+        
             if is_test:
-                print("Label {}: {:.3f}, {:.3f}, {:.3f}".format(i,p,r,f1))
-        print("Acc. (Correct/Total): {:.4f} ({}/{}) ".format(correct/len(dataset), correct, len(dataset)))
-        return correct/len(dataset)
+                print("Confusion matrix:")
+                print(confusion)
+                print("Report precision, recall, and f1:")
+            for i in range(confusion.size()[0]):
+                p = confusion[i,i].item()/confusion[i,:].sum().item()
+                r = confusion[i,i].item()/confusion[:,i].sum().item()
+                f1 = 2*p*r / (p+r)
+                if is_test:
+                    print("Label {}: {:.3f}, {:.3f}, {:.3f}".format(i,p,r,f1))
+            print("Acc. (Correct/Total): {:.4f} ({}/{}) ".format(correct/len(dataset), correct, len(dataset)))
+            return correct/len(dataset)
+        else:
+            for i, (input_ids_batch, label_ids_batch, mask_ids_batch) in enumerate(batch_loader(batch_size, input_ids, label_ids, mask_ids)):
+                input_ids_batch = input_ids_batch.to(device)
+                label_ids_batch = label_ids_batch.to(device)
+                mask_ids_batch = mask_ids_batch.to(device)
+                with torch.no_grad():
+                    loss, logits = model(input_ids_batch, label_ids_batch, mask_ids_batch)
+                logits = nn.Softmax(dim=1)(logits)
+                if i == 0:
+                    logits_all=logits
+                if i >= 1:
+                    logits_all=torch.cat((logits_all,logits),0)
+        
+            order = -1
+            gold = []
+            for i in range(len(dataset)):
+                qid = dataset[i][3]
+                label = dataset[i][1]
+                if qid == order:
+                    j += 1
+                    if label == 1:
+                        gold.append((qid,j))
+                else:
+                    order = qid
+                    j = 0
+                    if label == 1:
+                        gold.append((qid,j))
+
+
+            label_order = []
+            order = -1
+            for i in range(len(gold)):
+                if gold[i][0] == order:
+                    templist.append(gold[i][1])
+                elif gold[i][0] != order:
+                    order=gold[i][0]
+                    if i > 0:
+                        label_order.append(templist)
+                    templist = []
+                    templist.append(gold[i][1])
+            label_order.append(templist)
+
+            order = -1
+            score_list = []
+            for i in range(len(logits_all)):
+                score = float(logits_all[i][1])
+                qid=int(dataset[i][3])
+                if qid == order:
+                    templist.append(score)
+                else:
+                    order = qid
+                    if i > 0:
+                        score_list.append(templist)
+                    templist = []
+                    templist.append(score)
+            score_list.append(templist)
+
+            rank = []
+            pred = []
+            for i in range(len(score_list)):
+                if len(label_order[i])==1:
+                    if label_order[i][0] < len(score_list[i]):
+                        true_score = score_list[i][label_order[i][0]]
+                        score_list[i].sort(reverse=True)
+                        for j in range(len(score_list[i])):
+                            if score_list[i][j] == true_score:
+                                rank.append(1 / (j + 1))
+                    else:
+                        rank.append(0)
+
+                else:
+                    true_rank = len(score_list[i])
+                    for k in range(len(label_order[i])):
+                        if label_order[i][k] < len(score_list[i]):
+                            true_score = score_list[i][label_order[i][k]]
+                            temp = sorted(score_list[i],reverse=True)
+                            for j in range(len(temp)):
+                                if temp[j] == true_score:
+                                    if j < true_rank:
+                                        true_rank = j
+                    if true_rank < len(score_list[i]):
+                        rank.append(1 / (true_rank + 1))
+                    else:
+                        rank.append(0)
+            MRR = sum(rank) / len(rank)
+            print(MRR)
+            return MRR
 
     # Training phase.
     print("Start training.")
@@ -307,8 +424,8 @@ def main():
     optimizer = BertAdam(optimizer_grouped_parameters, lr=args.learning_rate, warmup=args.warmup, t_total=train_steps)
 
     total_loss = 0.
-    acc = 0.0
-    best_acc = 0.0
+    result = 0.0
+    best_result = 0.0
     
     for epoch in range(1, args.epochs_num+1):
         model.train()
@@ -328,9 +445,9 @@ def main():
                 total_loss = 0.
             loss.backward()
             optimizer.step()
-        acc = evaluate(args, False)
-        if acc > best_acc:
-            best_acc = acc
+        result = evaluate(args, False)
+        if result > best_result:
+            best_result = result
             save_model(model, args.output_model_path)
         else:
             break
