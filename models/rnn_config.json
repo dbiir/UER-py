@@ -1,1 +1,1 @@
-{"emb_size": 300, "hidden_size": 300, "layers_num": 2, "dropout": 0.1}
+{"emb_size": 1000, "hidden_size": 1000, "layers_num": 2, "dropout": 0.1}
