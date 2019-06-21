@@ -8,8 +8,6 @@ from uer.utils.act_fun import gelu
 
 class LmTarget(nn.Module):
     """
-    BERT exploits masked language modeling (MLM) 
-    and next sentence prediction (NSP) for pretraining.
     """
     def __init__(self, args, vocab_size):
         super(LmTarget, self).__init__()
@@ -23,18 +21,15 @@ class LmTarget(nn.Module):
         """
         Args:
             memory_bank: [batch_size x seq_length x hidden_size]
-            tgt_mlm: [batch_size x seq_length]
-            tgt_nsp: [batch_size]
+            tgt: [batch_size x seq_length]
 
         Returns:
-            loss_mlm: Masked language model loss.
-            loss_nsp: Next sentence prediction loss.
-            correct_mlm: Number of words that are predicted correctly.
-            correct_nsp: Number of sentences that are predicted correctly.
-            denominator: Number of masked words.
+            loss: Language modeling loss.
+            correct: Number of words that are predicted correctly.
+            denominator: Number of predicted words.
         """
 
-        # Masked language model (MLM) with full softmax prediction.
+        # Language modeling (LM) with full softmax prediction.
         output = self.output_layer(memory_bank)
         output = output.contiguous().view(-1, self.vocab_size)
         # Full probability distribution.
@@ -45,8 +40,6 @@ class LmTarget(nn.Module):
         one_hot = torch.zeros(label_mask.size(0),  self.vocab_size). \
            to(torch.device(output.device)). \
            scatter_(1, tgt, 1.0)
-
-        # one_hot = torch.cuda.FloatTensor(label_mask.size(0), self.vocab_size).fill_(0).scatter_(1, tgt_mlm, 1.0)
 
         numerator = -torch.sum(output * one_hot, 1)
         label_mask = label_mask.contiguous().view(-1)

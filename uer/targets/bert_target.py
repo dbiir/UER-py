@@ -29,7 +29,7 @@ class BertTarget(nn.Module):
         self.criterion = nn.NLLLoss()
 
     def mlm(self, memory_bank, tgt_mlm):
-        # Masked language model (MLM) with full softmax prediction.
+        # Masked language modeling (MLM) with full softmax prediction.
         output_mlm = gelu(self.mlm_linear_1(memory_bank))
         output_mlm = self.layer_norm(output_mlm)
         output_mlm = output_mlm.contiguous().view(-1, self.hidden_size)
@@ -53,18 +53,18 @@ class BertTarget(nn.Module):
         """
         Args:
             memory_bank: [batch_size x seq_length x hidden_size]
-            tgt_mlm: [batch_size x seq_length]
-            tgt_nsp: [batch_size]
+            tgt: tuple with tgt_mlm [batch_size x seq_length] and tgt_nsp [batch_size]
+            
 
         Returns:
-            loss_mlm: Masked language model loss.
+            loss_mlm: Masked language modeling loss.
             loss_nsp: Next sentence prediction loss.
             correct_mlm: Number of words that are predicted correctly.
             correct_nsp: Number of sentences that are predicted correctly.
             denominator: Number of masked words.
         """
 
-        # Masked language model (MLM).
+        # Masked language modeling (MLM).
         assert type(tgt) == tuple
         tgt_mlm, tgt_nsp = tgt[0], tgt[1]
         loss_mlm, correct_mlm, denominator = self.mlm(memory_bank, tgt_mlm)

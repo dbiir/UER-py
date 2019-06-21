@@ -8,8 +8,6 @@ from uer.utils.act_fun import gelu
 
 class S2sTarget(nn.Module):
     """
-    BERT exploits masked language modeling (MLM) 
-    and next sentence prediction (NSP) for pretraining.
     """
     def __init__(self, args, vocab_size):
         super(S2sTarget, self).__init__()
@@ -20,10 +18,7 @@ class S2sTarget(nn.Module):
         self.decoder = nn.LSTM(args.emb_size, args.hidden_size, 1, batch_first=True)
         self.output_layer = nn.Linear(self.hidden_size, self.vocab_size)
 
-        # self.criterion = nn.CrossEntropyLoss()
-
         self.softmax = nn.LogSoftmax(dim=-1)
-        # self.output_layer = nn.Linear(self.hidden_size, self.vocab_size)
 
     def forward(self, memory_bank, tgt):
 
@@ -45,8 +40,6 @@ class S2sTarget(nn.Module):
            to(torch.device(output.device)). \
            scatter_(1, tgt, 1.0)
 
-        # one_hot = torch.cuda.FloatTensor(label_mask.size(0), self.vocab_size).fill_(0).scatter_(1, tgt_mlm, 1.0)
-
         numerator = -torch.sum(output * one_hot, 1)
         label_mask = label_mask.contiguous().view(-1)
         tgt = tgt.contiguous().view(-1)
@@ -56,23 +49,3 @@ class S2sTarget(nn.Module):
         correct = torch.sum(label_mask * (output.argmax(dim=-1).eq(tgt)).float())
 
         return loss, correct, denominator
-
-
-    # def __init__(self, args, vocab_size):
-    #     super(MTTarget, self).__init__()
-    #     self.vocab_size = vocab_size
-    #     self.embedding_layer = nn.Embedding(vocab_size, args.emb_size)
-    #     self.decoder = nn.LSTM(args.emb_size, args.hidden_size, args.layers_num, batch_first=True)
-    #     self.out = nn.Linear(args.hidden_size, vocab_size)
-    #     self.criterion = nn.CrossEntropyLoss()
-
-    # def forward(self, memory_bank, hidden_state, tgt):
-    #     emb = self.embedding_layer(tgt[:, :-1]) # bactch_size, seq_length, emb_size
-    #     output = []
-    #     for i, emb_i in enumerate(emb.split(1, dim=1)):
-    #         output_i, hidden_state = self.decoder(emb_i, hidden_state)
-    #         output.append(self.out(output_i))
-
-    #     output = torch.cat(output, dim=1)
-    #     loss = self.criterion(output.view(-1, self.vocab_size), tgt[:, 1:].contiguous().view(-1))
-    #     return loss

@@ -264,7 +264,7 @@ class BertDataset(object):
 class BertDataLoader(object):
     """
     """
-    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=True):
+    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=False):
         self.batch_size = batch_size
         self.proc_id = proc_id
         self.proc_num = proc_num
@@ -418,7 +418,7 @@ class LmDataset(object):
 class LmDataLoader(object):
     """
     """
-    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=True):
+    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=False):
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.proc_id = proc_id
@@ -573,7 +573,7 @@ class ClsDataset(object):
 class ClsDataLoader(object):
     """
     """
-    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=True):
+    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=False):
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.proc_id = proc_id
@@ -706,7 +706,7 @@ class MlmDataset(object):
 class MlmDataLoader(object):
     """
     """
-    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=True):
+    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=False):
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.proc_id = proc_id
@@ -934,7 +934,7 @@ class NspDataset(object):
 class NspDataLoader(object):
     """
     """
-    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=True):
+    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=False):
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.proc_id = proc_id
@@ -1070,7 +1070,7 @@ class S2sDataset(object):
 class S2sDataLoader(object):
     """
     """
-    def __init__(self, args, dataset_path, batch_size,  proc_id, proc_num, shuffle=True):
+    def __init__(self, args, dataset_path, batch_size,  proc_id, proc_num, shuffle=False):
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.proc_id = proc_id

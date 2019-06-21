@@ -1,6 +1,6 @@
 # -*- encoding:utf -*-
 """
-  This script provides an exmaple to wrap bert-pytorch for sequence labeling.
+  This script provides an exmaple to wrap UER-py for sequence labeling.
 """
 import random
 import argparse

@@ -41,8 +41,6 @@ class MlmTarget(nn.Module):
            to(torch.device(output_mlm.device)). \
            scatter_(1, tgt_mlm, 1.0)
 
-        # one_hot = torch.cuda.FloatTensor(label_mask.size(0), self.vocab_size).fill_(0).scatter_(1, tgt_mlm, 1.0)
-
         numerator = -torch.sum(output_mlm * one_hot, 1)
         label_mask = label_mask.contiguous().view(-1)
         tgt_mlm = tgt_mlm.contiguous().view(-1)
@@ -57,14 +55,11 @@ class MlmTarget(nn.Module):
         """
         Args:
             memory_bank: [batch_size x seq_length x hidden_size]
-            tgt_mlm: [batch_size x seq_length]
-            tgt_nsp: [batch_size]
+            tgt: [batch_size x seq_length]
 
         Returns:
-            loss_mlm: Masked language model loss.
-            loss_nsp: Next sentence prediction loss.
-            correct_mlm: Number of words that are predicted correctly.
-            correct_nsp: Number of sentences that are predicted correctly.
+            loss: Masked language modeling loss.
+            correct: Number of words that are predicted correctly.
             denominator: Number of masked words.
         """
 

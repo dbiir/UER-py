@@ -22,7 +22,6 @@ from uer.models.model import Model
 def build_model(args):
     """
     Build universial encoder representations models.
-    Only BERT is retained in this project.
     The combinations of different embedding, encoder, 
     and target layers yield pretrained models of different 
     properties. 

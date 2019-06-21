@@ -1,6 +1,6 @@
 # -*- encoding:utf-8 -*-
 """
-  This script provides an exmaple to wrap bert-pytorch for cloze test.
+  This script provides an exmaple to wrap UER-py for cloze test.
   We randomly mask some characters and use BERT to predict.
 """
 import sys
@@ -22,7 +22,7 @@ class ClozeModel(torch.nn.Module):
         self.embedding = bert_model.embedding
         self.encoder = bert_model.encoder
         self.target = bert_model.target
-        # open eval mode
+        # Open eval mode.
         self.eval()
 
     def forward(self, src, seg):

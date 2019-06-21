@@ -1,6 +1,6 @@
 # -*- encoding:utf-8 -*-
 """
-  This script provides an exmaple to wrap bert-pytorch for classification.
+  This script provides an exmaple to wrap UER-py for classification.
 """
 import torch
 import json

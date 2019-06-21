@@ -15,12 +15,8 @@ def count_line(corpus_path):
 
 class Vocab(object):
     """
-    Abstract class, defining member dictionary variables to store tokens.
-    Sub-classes must override the `tokenize` mehtod.
-
     """
     def __init__(self):
-        # add pre-defined special tokens
         self.w2i = {} 
         self.i2w = [] 
         self.w2c = {} 
@@ -58,7 +54,7 @@ class Vocab(object):
         
     def worker(self, corpus_path, tokenizer, start, end):
         """ 
-        worker that creates vocabulary from corpus[seek_start:seek_end]
+        Worker that creates vocabulary from corpus[start:end].
         """
         w2i, i2w, w2c = {}, [], {}
         pos = 0

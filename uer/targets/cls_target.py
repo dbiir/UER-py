@@ -8,8 +8,6 @@ from uer.utils.act_fun import gelu
 
 class ClsTarget(nn.Module):
     """
-    BERT exploits masked language modeling (MLM) 
-    and next sentence prediction (NSP) for pretraining.
     """
     def __init__(self, args, vocab_size):
         super(ClsTarget, self).__init__()
@@ -26,15 +24,11 @@ class ClsTarget(nn.Module):
         """
         Args:
             memory_bank: [batch_size x seq_length x hidden_size]
-            tgt_mlm: [batch_size x seq_length]
-            tgt_nsp: [batch_size]
+            tgt: [batch_size]
 
         Returns:
-            loss_mlm: Masked language model loss.
-            loss_nsp: Next sentence prediction loss.
-            correct_mlm: Number of words that are predicted correctly.
-            correct_nsp: Number of sentences that are predicted correctly.
-            denominator: Number of masked words.
+            loss: Classification loss.
+            correct: Number of sentences that are predicted correctly.
         """
 
         output = torch.tanh(self.linear_1(memory_bank[:, 0, :]))
