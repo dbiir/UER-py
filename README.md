@@ -78,7 +78,7 @@ python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path mo
                       --processes_num 8 --target bert
 ```
 Pre-processing is time-consuming. Multi-process can largely accelerate the pre-processing speed.
-Then  we download [Google's pre-trained Chinese model](https://share.weiyun.com/5DJasRk), and put it into *models* folder.
+Then  we download [Google's pre-trained Chinese model](https://share.weiyun.com/5s9AsfQ), and put it into *models* folder.
 We load Google's pre-trained model and train on book review corpus. Suppose we have a machine with 8 GPUs. We explicitly specify model's encoder and target:
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin \
