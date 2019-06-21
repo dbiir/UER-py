@@ -45,6 +45,8 @@ class BertClassifier(nn.Module):
         # Target.
         if self.pooling == "mean":
             output = torch.mean(output, dim=1)
+        elif self.pooling == "max":
+            output = torch.max(output, dim=1)[0]
         elif self.pooling == "last":
             output = output[:, -1, :]
         else:
@@ -84,7 +86,7 @@ def main():
                                                    "rcnn", "crnn", "gpt"], \
                                                    default="bert", help="Encoder type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--pooling", choices=["mean", "first", "last"], default="first",
+    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
                         help="Pooling type.")
 
     # Subword options.

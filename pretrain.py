@@ -42,6 +42,7 @@ def main():
     parser.add_argument("--hidden_size", type=int, default=768,  help="Hidden state dimension.")
     parser.add_argument("--feedforward_size", type=int, default=3072, help="Feed forward layer dimension.")
     parser.add_argument("--kernel_size", type=int, default=3,  help="Kernel size for CNN.")
+    parser.add_argument("--block_size", type=int, default=2,  help="Block size for CNN.")
     parser.add_argument("--heads_num", type=int, default=12, help="The number of heads in multiple-head attention.")
     parser.add_argument("--layers_num", type=int, default=12, help="The number of encoder layers.")
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout value.")
