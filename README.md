@@ -89,18 +89,18 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.t
 Finally, we do classification. We can use *google_model.bin*:
 ```
 python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
-    --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
+    --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
     --epochs_num 3 --batch_size 64 --encoder bert
 ```
-or use our [book_review_model.bin](https://share.weiyun.com/52BEFs2), which is the output of pretrain.py：
+or use our [*book_review_model.bin*](https://share.weiyun.com/52BEFs2), which is the output of pretrain.py：
 ```
 python3 classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_vocab.txt \
-    --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
+    --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
     --epochs_num 3 --batch_size 64 --encoder bert
 ```
 It turns out that the result of Google's model is 87.5; The result of *book_review_model.bin* is 88.1. It is also noticable that we don't need to specify the target in fine-tuning stage. Pre-training target is replaced with task-specific target.
 
-We could search proper pre-trained models in [Chinese model zoo](#chinese_model_zoo) for further improvements. For example, we could download [models pre-trained on Amazon corpus (over 4 million reviews) with BERT encoder and classification target](https://share.weiyun.com/5XuxtFA). It achieves 88.5 accuracy on book review dataset.
+We could search proper pre-trained models in [Chinese model zoo](#chinese_model_zoo) for further improvements. For example, we could download [a model pre-trained on Amazon corpus (over 4 million reviews) with BERT encoder and classification target](https://share.weiyun.com/5XuxtFA). It achieves 88.5 accuracy on book review dataset.
 
 <br/>
 
