@@ -128,7 +128,7 @@ It turns out that the result of Google's model is 92.6; The result of *rmrb_mode
 <br/>
 
 ## Datasets
-This project includes a range of Chinese datasets. Small-scale datasets can be downloaded at [datasets_zh.zip](). datasets_zh.zip contains 7 datasets: XNLI, LCQMC, MSRA-NER, ChnSentiCorp, and nlpcc-dbqa are from [Baidu ERNIE](https://github.com/PaddlePaddle/LARK/tree/develop/ERNIE); Book review (from BNU) and Shopping are two sentence-level sentiment analysis datasets. Large-scale datasets can be found in [glyph's github project](https://github.com/zhangxiangxiao/glyph).
+This project includes a range of Chinese datasets. Small-scale datasets can be downloaded at [datasets_zh.zip](https://share.weiyun.com/5SqM1Ek). datasets_zh.zip contains 7 datasets: XNLI, LCQMC, MSRA-NER, ChnSentiCorp, and nlpcc-dbqa are from [Baidu ERNIE](https://github.com/PaddlePaddle/LARK/tree/develop/ERNIE); Book review (from BNU) and Shopping are two sentence-level sentiment analysis datasets. Large-scale datasets can be found in [glyph's github project](https://github.com/zhangxiangxiao/glyph).
 
 <br/>
 
@@ -303,18 +303,21 @@ usage: classifier.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                      [--config_path CONFIG_PATH] [--batch_size BATCH_SIZE]
                      [--seq_length SEQ_LENGTH]
                      [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt}]
-                     [--bidirectional] [--subword_type {none,char}]
+                     [--bidirectional] [--pooling {mean,max,first,last}]
+                     [--subword_type {none,char}]
                      [--sub_vocab_path SUB_VOCAB_PATH]
-                     [--subencoder_type {avg,lstm,gru,cnn}]
+                     [--subencoder {avg,lstm,gru,cnn}]
+                     [--sub_layers_num SUB_LAYERS_NUM]
                      [--tokenizer {bert,char,word,space}]
                      [--learning_rate LEARNING_RATE] [--warmup WARMUP]
                      [--dropout DROPOUT] [--epochs_num EPOCHS_NUM]
                      [--report_steps REPORT_STEPS] [--seed SEED]
+                     [--mean_reciprocal_rank]
 ```
 The example of using classifier.py：
 ```
 python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
-                      --train_path datasets/book_review/train.txt --dev_path datasets/book_review/dev.txt --test_path datasets/book_review/test.txt \
+                      --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
                       --epochs_num 3 --batch_size 64 --encoder bert
 ```
 #### Sequence labeling
@@ -327,7 +330,10 @@ usage: tagger.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                  [--config_path CONFIG_PATH] [--batch_size BATCH_SIZE]
                  [--seq_length SEQ_LENGTH]
                  [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt}]
-                 [--bidirectional] [--target {bert,lm,cls,mlm,nsp,s2s}]
+                 [--bidirectional] [--subword_type {none,char}]
+                 [--sub_vocab_path SUB_VOCAB_PATH]
+                 [--subencoder {avg,lstm,gru,cnn}]
+                 [--sub_layers_num SUB_LAYERS_NUM]
                  [--learning_rate LEARNING_RATE] [--warmup WARMUP]
                  [--dropout DROPOUT] [--epochs_num EPOCHS_NUM]
                  [--report_steps REPORT_STEPS] [--seed SEED]
@@ -335,23 +341,27 @@ usage: tagger.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
 The example of using tagger.py：
 ```
 python3 tagger.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
-                  --train_path datasets/msra/train.txt --dev_path datasets/msra/dev.txt --test_path datasets/msra/test.txt \
+                  --train_path datasets/msra/train.tsv --dev_path datasets/msra/dev.tsv --test_path datasets/msra/test.tsv \
                   --epochs_num 5 --batch_size 32 --encoder bert
 ```
 
 #### Cloze test
 cloze.py predicts masked words. Top n words are returned.
 ```
-usage: cloze.py [-h] [--model_path MODEL_PATH] [--vocab_path VOCAB_PATH]
-                [--input_path INPUT_PATH] [--output_path OUTPUT_PATH]
-                [--config_path CONFIG_PATH] [--batch_size BATCH_SIZE]
-                [--seq_length SEQ_LENGTH] [--tokenizer {bert,char,word,space}]
-                [--topn TOPN]
+usage: cloze.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
+                [--vocab_path VOCAB_PATH] [--input_path INPUT_PATH]
+                [--output_path OUTPUT_PATH] [--config_path CONFIG_PATH]
+                [--batch_size BATCH_SIZE] [--seq_length SEQ_LENGTH]
+                [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt}]
+                [--bidirectional] [--target {bert,lm,cls,mlm,nsp,s2s}]
+                [--subword_type {none,char}] [--sub_vocab_path SUB_VOCAB_PATH]
+                [--subencoder_type {avg,lstm,gru,cnn}]
+                [--tokenizer {bert,char,word,space}] [--topn TOPN]
 ```
 The example of using cloze.py：
 ```
 python3 cloze.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
-                 --input_path ./datasets/cloze_input.txt --output_path output.txt
+                 --input_path datasets/cloze_input.txt --output_path output.txt
 
 ```
 
@@ -360,10 +370,16 @@ feature_extractor.py extracts sentence embeddings.
 ```
 usage: feature_extractor.py [-h] --input_path INPUT_PATH --model_path
                             MODEL_PATH --vocab_path VOCAB_PATH --output_path
-                            OUTPUT_PATH [--seq_length SEQ_LENGTH]
+                            OUTPUT_PATH [--subword_type {none,char}]
+                            [--sub_vocab_path SUB_VOCAB_PATH]
+                            [--subencoder {avg,lstm,gru,cnn}]
+                            [--sub_layers_num SUB_LAYERS_NUM]
+                            [--seq_length SEQ_LENGTH]
                             [--batch_size BATCH_SIZE]
                             [--config_path CONFIG_PATH]
-                            [--tokenizer {bert,char,word,space}]
+                            [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt}]
+                            [--target {bert,lm,cls,mlm,nsp,s2s}]
+                            [--tokenizer {char,word,space,mixed}]
 ```
 The example of using feature_extractor.py：
 ```
