@@ -79,7 +79,7 @@ def main():
     # Model options.
     parser.add_argument("--batch_size", type=int, default=64,
                         help="Batch size.")
-    parser.add_argument("--seq_length", type=int, default=100,
+    parser.add_argument("--seq_length", type=int, default=128,
                         help="Sequence length.")
     parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
                                                    "cnn", "gatedcnn", "attn", \
@@ -149,7 +149,6 @@ def main():
             except:
                 pass
     args.labels_num = len(labels_set) 
-    print(columns)
 
     # Load vocabulary.
     vocab = Vocab()
@@ -164,7 +163,7 @@ def main():
     # Load or initialize parameters.
     if args.pretrained_model_path is not None:
         # Initialize with pretrained model.
-        bert_model.load_state_dict(torch.load(args.pretrained_model_path), strict=True)  
+        bert_model.load_state_dict(torch.load(args.pretrained_model_path), strict=False)  
     else:
         # Initialize with normal distribution.
         for n, p in list(bert_model.named_parameters()):
@@ -203,7 +202,9 @@ def main():
     def read_dataset(path):
         dataset = []
         with open(path, mode="r", encoding="utf-8") as f:
-            for line in f:
+            for line_id, line in enumerate(f):
+                if line_id == 0:
+                    continue
                 try:
                     line = line.strip().split('\t')
                     if len(line) == 2:
@@ -238,7 +239,7 @@ def main():
                             tokens.append(0)
                             mask.append(0)
                         dataset.append((tokens, label, mask))
-                    elif len(line) == 4: # For sentence pair input.
+                    elif len(line) == 4: # For dbqa input.
                         qid=int(line[columns["qid"]])
                         label = int(line[columns["label"]])
                         text_a, text_b = line[columns["text_a"]], line[columns["text_b"]]

@@ -15,6 +15,7 @@ Table of Contents
   * [Features](#features)
   * [Requirements](#requirements)
   * [Quickstart](#quickstart)
+  * [Datasets](#datasets)
   * [Instructions](#instructions)
   * [Scripts](#scripts)
   * [Experiments](#experiments)
@@ -60,9 +61,9 @@ The book review corpus is obtained by book review dataset. We remove labels and 
 The format of the classification dataset is as follows (label and instance are separated by \t):
 ```
 label    text_a
-1    instance1
-0    instance2
-1    instance3
+1        instance1
+0        instance2
+1        instance3
 ```
 
 We use Google's Chinese vocabulary file, which contains 21128 Chinese characters. The format of the vocabulary is as follows:
@@ -80,7 +81,7 @@ python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path mo
 ```
 Pre-processing is time-consuming. Multi-process can largely accelerate the pre-processing speed.
 Then we download [Google's pre-trained Chinese model](https://share.weiyun.com/5s9AsfQ), and put it into *models* folder.
-We load Google's pre-trained model and train it on book review corpus. Suppose we have a machine with 8 GPUs. We explicitly specify model's encoder and target:
+We load Google's pre-trained model and train it on book review corpus. We should better explicitly specify model's encoder and target. Suppose we have a machine with 8 GPUs.:
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin \
                     --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
@@ -90,17 +91,44 @@ Finally, we do classification. We can use *google_model.bin*:
 ```
 python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
     --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
-    --epochs_num 3 --batch_size 64 --encoder bert
+    --epochs_num 3 --batch_size 32 --encoder bert
 ```
 or use our [*book_review_model.bin*](https://share.weiyun.com/52BEFs2), which is the output of pretrain.py：
 ```
 python3 classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_vocab.txt \
     --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
-    --epochs_num 3 --batch_size 64 --encoder bert
+    --epochs_num 3 --batch_size 32 --encoder bert
 ```
 It turns out that the result of Google's model is 87.5; The result of *book_review_model.bin* is 88.1. It is also noticable that we don't need to specify the target in fine-tuning stage. Pre-training target is replaced with task-specific target.
 
-We could search proper pre-trained models in [Chinese model zoo](#chinese_model_zoo) for further improvements. For example, we could download [a model pre-trained on Amazon corpus (over 4 million reviews) with BERT encoder and classification target](https://share.weiyun.com/5XuxtFA). It achieves 88.5 accuracy on book review dataset.
+We could search proper pre-trained models in [Chinese model zoo](#chinese_model_zoo) for further improvements. For example, we could download [a model pre-trained on Amazon corpus (over 4 million reviews) with BERT encoder and classification (CLS) target](https://share.weiyun.com/5XuxtFA). It achieves 88.5 accuracy on book review dataset.
+
+BERT is really slow. It could be great if we can speed up the model and still achieve comparable performance. We select a 2-layers LSTM encoder to substitute 12-layers Transformer encoder. We could download a model pre-trained with LSTM encoder and language modeling (LM) and classification (CLS) targets:
+```
+python3 classifier.py --pretrained_model_path models/ --vocab_path models/google_vocab.txt \
+    --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
+    --epochs_num 3  --batch_size 64 --encoder lstm --pooling mean --config_path models/rnn_config.json --learning_rate 1e-3
+```
+We can achieve 87.0 accuracy on testset, which is also a competitive result. Using LSTM without pre-training can only achieve 80.2 accuracy. In practice, above model is around 10 times faster than BERT. One can see Chinese model zoo section for more detailed information about above pre-trained LSTM model.
+
+Besides classification, UER-py also provides scripts for other downstream tasks. We could use tagger.py for sequence labeling:
+```
+python3 tagger.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+    --train_path datasets/msra/train.tsv --dev_path datasets/msra/dev.tsv --test_path datasets/msra/test.tsv \
+    --epochs_num 5 --batch_size 8 --encoder bert
+```
+We could download [a model pre-trained on RenMinRiBao (news corpus)](https://share.weiyun.com/5HKnsxq) and finetune on it: 
+```
+python3 tagger.py --pretrained_model_path models/rmrb_model.bin --vocab_path models/google_vocab.txt \
+    --train_path datasets/msra/train.tsv --dev_path datasets/msra/dev.tsv --test_path datasets/msra/test.tsv \
+    --epochs_num 5 --batch_size 8 --encoder bert
+```
+It turns out that the result of Google's model is 92.6; The result of *rmrb_model.bin* is 94.4.
+
+<br/>
+
+## Datasets
+This project includes a range of Chinese datasets. Small-scale datasets can be downloaded at [datasets_zh.zip](). datasets_zh.zip contains 7 datasets: XNLI, LCQMC, MSRA-NER, ChnSentiCorp, and nlpcc-dbqa are from [Baidu ERNIE](https://github.com/PaddlePaddle/LARK/tree/develop/ERNIE); Book review (from BNU) and Shopping are two sentence-level sentiment analysis datasets. Large-scale datasets can be found in [glyph's github project](https://github.com/zhangxiangxiao/glyph).
 
 <br/>
 

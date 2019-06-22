@@ -177,7 +177,7 @@ if __name__ == '__main__':
         for j, p in enumerate(mask_positions_batch):
             topn_tokens = (-prob[j][p]).argsort()[:args.topn]
 
-            sentence = "".join([vocab.i2w[token_id] for token_id in input_ids[j] if token_id != 0])
+            sentence = "".join([vocab.i2w[token_id] for token_id in input_ids_batch[j] if token_id != 0])
             pred_tokens = " ".join(vocab.i2w[token_id] for token_id in topn_tokens)
             label_token = vocab.i2w[label_ids_batch[j]]
             f_output.write(sentence + '\n')

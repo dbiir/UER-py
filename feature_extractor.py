@@ -7,11 +7,11 @@ import argparse
 import numpy as np
 import torch.nn as nn
 
-from bert.utils.vocab import Vocab
-from bert.utils.constants import *
-from bert.utils.config import load_hyperparam
-from bert.utils.tokenizer import *
-from bert.model_builder import build_model
+from uer.utils.vocab import Vocab
+from uer.utils.constants import *
+from uer.utils.config import load_hyperparam
+from uer.utils.tokenizer import *
+from uer.model_builder import build_model
 
 
 class SequenceEncoder(torch.nn.Module):
@@ -25,15 +25,6 @@ class SequenceEncoder(torch.nn.Module):
 
     def forward(self, input_ids, seg_ids):
         emb = self.embedding(input_ids, seg_ids)
-        # seq_length = emb.size(1)
-        # # 
-        # mask = (seg_ids>0).\
-        #         unsqueeze(1).\
-        #         repeat(1, seq_length, 1).\
-        #         unsqueeze(1)
-
-        # mask = mask.float()
-        # mask = (1.0 - mask) * -10000.0
         output = self.encoder(emb, seg_ids)
         return output        
 
@@ -50,11 +41,27 @@ if __name__ == '__main__':
                         help="Path of the vocabulary file.")
     parser.add_argument("--output_path", required=True,
                         help="Path of the input file which is in npy format.")
+    # Subword options.
+    parser.add_argument("--subword_type", choices=["none", "char"], default="none",
+                        help="Subword feature type.")
+    parser.add_argument("--sub_vocab_path", type=str, default="models/sub_vocab.txt",
+                        help="Path of the subword vocabulary file.")
+    parser.add_argument("--subencoder", choices=["avg", "lstm", "gru", "cnn"], default="avg",
+                        help="Subencoder type.")
+    parser.add_argument("--sub_layers_num", type=int, default=2, help="The number of subencoder layers.")
     
     # Model options
     parser.add_argument("--seq_length", type=int, default=100, help="Sequence length.")
     parser.add_argument("--batch_size", type=int, default=8, help="Batch size.")
-    parser.add_argument("--config_path", default="./model.config", help="Model config file.")
+    parser.add_argument("--config_path", default="models/google_config.json", help="Model config file.")
+    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
+                                                   "cnn", "gatedcnn", "attn", \
+                                                   "rcnn", "crnn", "gpt"], \
+                                                   default="bert", help="Encoder type.")
+    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s"], default="bert",
+                        help="The training target of the pretraining model.")
+
+    # Tokenizer options.
 
     # Tokenizer options.
     parser.add_argument("--tokenizer", choices=["char", "word", "space", "mixed"], default="char",
@@ -72,9 +79,10 @@ if __name__ == '__main__':
     # Load vocabulary.
     vocab = Vocab()
     vocab.load(args.vocab_path)
+    args.vocab = vocab
 
     # Build and load model.
-    bert_model = build_model(args, len(vocab))
+    bert_model = build_model(args)
     pretrained_model = torch.load(args.model_path)
     bert_model.load_state_dict(pretrained_model, strict=True)
     seq_encoder = SequenceEncoder(bert_model)
@@ -91,7 +99,7 @@ if __name__ == '__main__':
     if args.tokenizer == "mixed":
         tokenizer = MixedTokenizer(vocab)
     else:
-        tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"]()
+        tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
 
     dataset = []
     with open(args.input_path, mode="r", encoding="utf-8") as f:
@@ -127,6 +135,8 @@ if __name__ == '__main__':
 
     sentence_vectors = []
     for i, (input_ids_batch, seg_ids_batch) in enumerate(batch_loader(args.batch_size, input_ids, seg_ids)):
+        input_ids_batch = input_ids_batch.to(device)
+        seg_ids_batch = seg_ids_batch.to(device)
         output = seq_encoder(input_ids_batch, seg_ids_batch)
         output = output.cpu().data.numpy()
         sentence_vectors.append(output[:,0,:])
