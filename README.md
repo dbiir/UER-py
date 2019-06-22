@@ -59,10 +59,10 @@ The book review corpus is obtained by book review dataset. We remove labels and 
 
 The format of the classification dataset is as follows (label and instance are separated by \t):
 ```
-label text_a
-1 instance1
-0 instance2
-1 instance3
+label    text_a
+1    instance1
+0    instance2
+1    instance3
 ```
 
 We use Google's Chinese vocabulary file, which contains 21128 Chinese characters. The format of the vocabulary is as follows:
@@ -111,7 +111,7 @@ UER-py is organized as follows：
 UER-py/
     |--uer/
     |    |--encoders/: contains encoders such as RNN, CNN, Attention, CNN-RNN, BERT
-    |    |--targets/: contains targets such as language model, masked language model, sentence prediction
+    |    |--targets/: contains targets such as language modeling, masked language modeling, sentence prediction
     |    |--subencoders/: contains subencoders such as RNN, CNN, and different pooling strategies
     |    |--layers/: contains frequently-used NN layers, such as embedding layer, normalization layer
     |    |--models/: contains model.py, which combines subencoder, embedding, encoder, and target modules

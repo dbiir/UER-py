@@ -11,9 +11,9 @@ from uer.utils.seed import set_seed
 
 def mask_seq(src, vocab_size):
         """
-        mask input sequence for MLM task
+        Mask input sequence for MLM task.
         args:
-            src: a list of tokens
+            src: a list of token ids.
         """
         tgt_mlm = []
         for (i, token) in enumerate(src):
@@ -39,13 +39,18 @@ def mask_seq(src, vocab_size):
 
 def merge_dataset(dataset_path, workers_num):
     # Merge datasets.
+    instances_num_per_block = 10000
     f_writer = open(dataset_path, "wb")
     for i in range(workers_num):
         tmp_dataset_reader = open("dataset-tmp-"+str(i)+".pt", "rb")
         while True:
             try:
                 instances = pickle.load(tmp_dataset_reader)
-                pickle.dump(instances, f_writer)
+                for j in range(0, len(instances), instances_num_per_block):
+                    if j + instances_num_per_block > len(instances):
+                        pickle.dump(instances[j: len(instances)], f_writer)
+                    else:
+                        pickle.dump(instances[j: j+instances_num_per_block], f_writer)
             except:
                 break
         tmp_dataset_reader.close()
@@ -273,52 +278,44 @@ class BertDataLoader(object):
         # We only need to read dataset once when buffer is big enough to load entire dataset.
         self.repeat_read_dataset = False
         self.f_read = open(dataset_path, "rb")
+        self.read_count = 0
         self.start = 0
         self.end = 0
         self.buffer = []
-        
+
     def _fill_buf(self):
-        if len(self.buffer) > 0 and not self.repeat_read_dataset:
-            if self.shuffle:
-                random.shuffle(self.buffer)
-            self.start = 0
-            self.end = len(self.buffer)
-        else:
-            self.buffer = []
+        try:
             while True:
-                try:
-                    instances = pickle.load(self.f_read)
-                except EOFError:
-                    # Reach file end.
-                    if not self.repeat_read_dataset:
-                        # Buffer is big enough to load entire dataset.
-                        break
-                    # Buffer is not big enough, read dataset form start.
-                    self.f_read.seek(0)
-                    instances = pickle.load(self.f_read)
-
-                self.buffer.extend(instances)                
-                if len(self.buffer) > self.buffer_size:
-                    self.repeat_read_dataset = True 
+                self.buffer = pickle.load(self.f_read)
+                self.read_count += 1
+                if (self.read_count - 1) % self.proc_num == self.proc_id:
                     break
+        except EOFError:
+            # Reach file end.
+            self.f_read.seek(0)
+            self.buffer = []
 
-            if self.shuffle:
-                random.shuffle(self.buffer)
-            self.start = 0
-            self.end = len(self.buffer)
+        if self.shuffle:
+            random.shuffle(self.buffer)
+        self.start = 0
+        self.end = len(self.buffer)
 
     def _empty(self):
-        return self.start + self.batch_size*self.proc_num >= self.end
+        return self.start >= self.end
 
     def __del__(self):
         self.f_read.close()
 
     def __iter__(self):
         while True:
-            if self._empty():
+            while self._empty():
                 self._fill_buf()
-            instances = self.buffer[self.start + self.proc_id*self.batch_size: self.start + (self.proc_id+1)*self.batch_size]
-            self.start += self.batch_size*self.proc_num
+            if self.start + self.batch_size >= self.end:
+                instances = self.buffer[self.start:]
+            else:
+                instances = self.buffer[self.start: self.start + self.batch_size]
+
+            self.start += self.batch_size
         
             src = []
             tgt_mlm = []
@@ -425,17 +422,22 @@ class LmDataLoader(object):
         self.proc_num = proc_num
 
         self.f_read = open(dataset_path, "rb")
+        self.read_count = 0
         self.start = 0
         self.end = 0
         self.buffer = []
         
     def _fill_buf(self):
         try:
-            self.buffer = pickle.load(self.f_read)
+            while True:
+                self.buffer = pickle.load(self.f_read)
+                self.read_count += 1
+                if (self.read_count - 1) % self.proc_num == self.proc_id:
+                    break
         except EOFError:
             # Reach file end.
             self.f_read.seek(0)
-            self.buffer = pickle.load(self.f_read)
+            self.buffer = []
 
         if self.shuffle:
             random.shuffle(self.buffer)
@@ -443,17 +445,21 @@ class LmDataLoader(object):
         self.end = len(self.buffer)
 
     def _empty(self):
-        return self.start + self.batch_size*self.proc_num >= self.end
+        return self.start >= self.end
 
     def __del__(self):
         self.f_read.close()
 
     def __iter__(self):
         while True:
-            if self._empty():
+            while self._empty():
                 self._fill_buf()
-            instances = self.buffer[self.start + self.proc_id*self.batch_size: self.start + (self.proc_id+1)*self.batch_size]
-            self.start += self.batch_size*self.proc_num
+            if self.start + self.batch_size >= self.end:
+                instances = self.buffer[self.start:]
+            else:
+                instances = self.buffer[self.start: self.start + self.batch_size]
+
+            self.start += self.batch_size
         
             src = []
             tgt = []
@@ -580,18 +586,22 @@ class ClsDataLoader(object):
         self.proc_num = proc_num
 
         self.f_read = open(dataset_path, "rb")
+        self.read_count = 0
         self.start = 0
         self.end = 0
         self.buffer = []
-        
-    def _fill_buf(self):
 
+    def _fill_buf(self):
         try:
-            self.buffer = pickle.load(self.f_read)
+            while True:
+                self.buffer = pickle.load(self.f_read)
+                self.read_count += 1
+                if (self.read_count - 1) % self.proc_num == self.proc_id:
+                    break
         except EOFError:
             # Reach file end.
             self.f_read.seek(0)
-            self.buffer = pickle.load(self.f_read)
+            self.buffer = []
 
         if self.shuffle:
             random.shuffle(self.buffer)
@@ -599,17 +609,21 @@ class ClsDataLoader(object):
         self.end = len(self.buffer)
 
     def _empty(self):
-        return self.start + self.batch_size*self.proc_num >= self.end
+        return self.start >= self.end
 
     def __del__(self):
         self.f_read.close()
 
     def __iter__(self):
         while True:
-            if self._empty():
+            while self._empty():
                 self._fill_buf()
-            instances = self.buffer[self.start + self.proc_id*self.batch_size: self.start + (self.proc_id+1)*self.batch_size]
-            self.start += self.batch_size*self.proc_num
+            if self.start + self.batch_size >= self.end:
+                instances = self.buffer[self.start:]
+            else:
+                instances = self.buffer[self.start: self.start + self.batch_size]
+
+            self.start += self.batch_size
         
             src = []
             tgt = []
@@ -713,18 +727,22 @@ class MlmDataLoader(object):
         self.proc_num = proc_num
 
         self.f_read = open(dataset_path, "rb")
+        self.read_count = 0
         self.start = 0
         self.end = 0
         self.buffer = []
         
     def _fill_buf(self):
-
         try:
-            self.buffer = pickle.load(self.f_read)
+            while True:
+                self.buffer = pickle.load(self.f_read)
+                self.read_count += 1
+                if (self.read_count - 1) % self.proc_num == self.proc_id:
+                    break
         except EOFError:
             # Reach file end.
             self.f_read.seek(0)
-            self.buffer = pickle.load(self.f_read)
+            self.buffer = []
 
         if self.shuffle:
             random.shuffle(self.buffer)
@@ -732,17 +750,21 @@ class MlmDataLoader(object):
         self.end = len(self.buffer)
 
     def _empty(self):
-        return self.start + self.batch_size*self.proc_num >= self.end
+        return self.start >= self.end
 
     def __del__(self):
         self.f_read.close()
 
     def __iter__(self):
         while True:
-            if self._empty():
+            while self._empty():
                 self._fill_buf()
-            instances = self.buffer[self.start + self.proc_id*self.batch_size: self.start + (self.proc_id+1)*self.batch_size]
-            self.start += self.batch_size*self.proc_num
+            if self.start + self.batch_size >= self.end:
+                instances = self.buffer[self.start:]
+            else:
+                instances = self.buffer[self.start: self.start + self.batch_size]
+
+            self.start += self.batch_size
         
             src = []
             tgt = []
@@ -941,17 +963,22 @@ class NspDataLoader(object):
         self.proc_num = proc_num
 
         self.f_read = open(dataset_path, "rb")
+        self.read_count = 0
         self.start = 0
         self.end = 0
         self.buffer = []
         
     def _fill_buf(self):
         try:
-            self.buffer = pickle.load(self.f_read)
+            while True:
+                self.buffer = pickle.load(self.f_read)
+                self.read_count += 1
+                if (self.read_count - 1) % self.proc_num == self.proc_id:
+                    break
         except EOFError:
             # Reach file end.
             self.f_read.seek(0)
-            self.buffer = pickle.load(self.f_read)
+            self.buffer = []
 
         if self.shuffle:
             random.shuffle(self.buffer)
@@ -959,17 +986,21 @@ class NspDataLoader(object):
         self.end = len(self.buffer)
 
     def _empty(self):
-        return self.start + self.batch_size*self.proc_num >= self.end
+        return self.start >= self.end
 
     def __del__(self):
         self.f_read.close()
 
     def __iter__(self):
         while True:
-            if self._empty():
+            while self._empty():
                 self._fill_buf()
-            instances = self.buffer[self.start + self.proc_id*self.batch_size: self.start + (self.proc_id+1)*self.batch_size]
-            self.start += self.batch_size*self.proc_num
+            if self.start + self.batch_size >= self.end:
+                instances = self.buffer[self.start:]
+            else:
+                instances = self.buffer[self.start: self.start + self.batch_size]
+
+            self.start += self.batch_size
         
             src = []
             seg = []
@@ -981,7 +1012,7 @@ class NspDataLoader(object):
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt), \
-                torch.LongTensor(seg), \
+                torch.LongTensor(seg)
 
 
 class S2sDataset(object):
@@ -1077,17 +1108,22 @@ class S2sDataLoader(object):
         self.proc_num = proc_num
 
         self.f_read = open(dataset_path, "rb")
+        self.read_count = 0
         self.start = 0
         self.end = 0
         self.buffer = []
         
     def _fill_buf(self):
         try:
-            self.buffer = pickle.load(self.f_read)
+            while True:
+                self.buffer = pickle.load(self.f_read)
+                self.read_count += 1
+                if (self.read_count - 1) % self.proc_num == self.proc_id:
+                    break
         except EOFError:
             # Reach file end.
             self.f_read.seek(0)
-            self.buffer = pickle.load(self.f_read)
+            self.buffer = []
 
         if self.shuffle:
             random.shuffle(self.buffer)
@@ -1095,17 +1131,21 @@ class S2sDataLoader(object):
         self.end = len(self.buffer)
 
     def _empty(self):
-        return self.start + self.batch_size*self.proc_num >= self.end
+        return self.start >= self.end
 
     def __del__(self):
         self.f_read.close()
 
     def __iter__(self):
         while True:
-            if self._empty():
+            while self._empty():
                 self._fill_buf()
-            instances = self.buffer[self.start + self.proc_id*self.batch_size: self.start + (self.proc_id+1)*self.batch_size]
-            self.start += self.batch_size*self.proc_num
+            if self.start + self.batch_size >= self.end:
+                instances = self.buffer[self.start:]
+            else:
+                instances = self.buffer[self.start: self.start + self.batch_size]
+
+            self.start += self.batch_size
         
             src = []
             tgt = []
