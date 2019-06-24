@@ -109,7 +109,7 @@ python3 classifier.py --pretrained_model_path models/ --vocab_path models/google
     --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
     --epochs_num 3  --batch_size 64 --encoder lstm --pooling mean --config_path models/rnn_config.json --learning_rate 1e-3
 ```
-We can achieve 87.0 accuracy on testset, which is also a competitive result. Using LSTM without pre-training can only achieve 80.2 accuracy. In practice, above model is around 10 times faster than BERT. One can see Chinese model zoo section for more detailed information about above pre-trained LSTM model.
+We can achieve 86.5 accuracy on testset, which is also a competitive result. Using LSTM without pre-training can only achieve 80.2 accuracy. In practice, above model is around 10 times faster than BERT. One can see Chinese model zoo section for more detailed information about above pre-trained LSTM model.
 
 Besides classification, UER-py also provides scripts for other downstream tasks. We could use tagger.py for sequence labeling:
 ```
@@ -447,8 +447,8 @@ Pre-training is also important for other encoders and targets. We pre-train a 2-
 <table>
 <tr align="center"><th> Model/Dataset              <th> Douban book review <th> ChnSentiCorp <th> Shopping 
 <tr align="center"><td> BERT                       <td> 87.5               <td> 94.3         <td> 96.3     
-<tr align="center"><td> LSTM                       <td> 80.8               <td> 88.3         <td> 94.4     
-<tr align="center"><td> LSTM+pre-training          <td> 85.2(+4.4)         <td> 93.8(+5.5)   <td> 96.0(+1.7)     
+<tr align="center"><td> LSTM                       <td> 80.2               <td> 88.3         <td> 94.4     
+<tr align="center"><td> LSTM+pre-training          <td> 86.6(+6.4)         <td> 94.5(+6.2)   <td> 96.5(+2.1)     
 </table>
 
 
@@ -468,7 +468,7 @@ We also provide the pre-trained models on different corpora, encoders, and targe
 <table>
 <tr align="center"><th> Model/Dataset                     <th> MSRA-NER
 <tr align="center"><td> Wikizh corpus (Google)            <td> 93.0/92.4/92.7
-<tr align="center"><td> Renminribao corpus                <td> 94.3/94.1/94.2
+<tr align="center"><td> Renminribao corpus                <td> 94.4/94.4/94.4
 </table>
 
 
