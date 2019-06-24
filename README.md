@@ -117,7 +117,7 @@ python3 tagger.py --pretrained_model_path models/google_model.bin --vocab_path m
     --train_path datasets/msra/train.tsv --dev_path datasets/msra/dev.tsv --test_path datasets/msra/test.tsv \
     --epochs_num 5 --batch_size 8 --encoder bert
 ```
-We could download [a model pre-trained on RenMinRiBao (news corpus)](https://share.weiyun.com/5HKnsxq) and finetune on it: 
+We could download [a model pre-trained on RenMinRiBao (news corpus)](https://share.weiyun.com/5JWVjSE) and finetune on it: 
 ```
 python3 tagger.py --pretrained_model_path models/rmrb_model.bin --vocab_path models/google_vocab.txt \
     --train_path datasets/msra/train.tsv --dev_path datasets/msra/dev.tsv --test_path datasets/msra/test.tsv \
@@ -478,8 +478,8 @@ We also provide the pre-trained models on different corpora, encoders, and targe
 With the help of UER, we are pre-training models with different corpora, encoders, and targets.
 <table>
 <tr align="center"><th> pre-trained model <th> Link <th> Description 
-<tr align="center"><td> Wikizh+BertEncoder+BertTarget <td> https://share.weiyun.com/5DJasRk <td> The training corpus Wiki_zh, trained by Google
-<tr align="center"><td> RenMinRiBao+BertEncoder+BertTarget <td> https://share.weiyun.com/5HKnsxq <td> The training corpus is news data from People's Daily (1946-2017). It is suitable for datasets related with news, e.g. F1 is improved on MSRA-NER from 92.7 to 94.2 (compared with Google BERT)
+<tr align="center"><td> Wikizh+BertEncoder+BertTarget <td> https://share.weiyun.com/5s9AsfQ <td> The training corpus Wiki_zh, trained by Google
+<tr align="center"><td> RenMinRiBao+BertEncoder+BertTarget <td> https://share.weiyun.com/5JWVjSE <td> The training corpus is news data from People's Daily (1946-2017). It is suitable for datasets related with news, e.g. F1 is improved on MSRA-NER from 92.7 to 94.2 (compared with Google BERT)
 <tr align="center"><td> Webqa2019+BertEncoder+BertTarget <td> https://share.weiyun.com/5HYbmBh <td> The training corpus is WebQA, which is suitable for datasets related with social media
 <tr align="center"><td> Reviews+LstmEncoder+LmTarget <td> https://share.weiyun.com/57dZhqo  <td> The training corpus is amazon reviews + JDbinary reviews + dainping reviews (11.4M reviews in total). Language model target is used. It is suitable for datasets related with reviews. It achieves over 5 percent improvements on some review datasets compared with random initialization. Training steps: 200,000; Sequence length: 128
 <tr align="center"><td> IfengNews+BertEncoder+BertTarget <td> https://share.weiyun.com/5HVcUWO <td> The training corpus is news data from Ifeng website. We use news titles to predict news abstracts. Training steps: 100,000; Sequence length: 128
