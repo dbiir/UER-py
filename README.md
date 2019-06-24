@@ -115,13 +115,13 @@ Besides classification, UER-py also provides scripts for other downstream tasks.
 ```
 python3 tagger.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
     --train_path datasets/msra/train.tsv --dev_path datasets/msra/dev.tsv --test_path datasets/msra/test.tsv \
-    --epochs_num 5 --batch_size 8 --encoder bert
+    --epochs_num 5 --batch_size 16 --encoder bert
 ```
 We could download [a model pre-trained on RenMinRiBao (news corpus)](https://share.weiyun.com/5JWVjSE) and finetune on it: 
 ```
 python3 tagger.py --pretrained_model_path models/rmrb_model.bin --vocab_path models/google_vocab.txt \
     --train_path datasets/msra/train.tsv --dev_path datasets/msra/dev.tsv --test_path datasets/msra/test.tsv \
-    --epochs_num 5 --batch_size 8 --encoder bert
+    --epochs_num 5 --batch_size 16 --encoder bert
 ```
 It turns out that the result of Google's model is 92.6; The result of *rmrb_model.bin* is 94.4.
 
