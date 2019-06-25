@@ -37,7 +37,7 @@ def mask_seq(src, vocab_size):
         return src, tgt_mlm
 
 
-def merge_dataset(dataset_path, workers_num，instances_buffer_size):
+def merge_dataset(dataset_path, workers_num, instances_buffer_size):
     # Merge datasets.
     f_writer = open(dataset_path, "wb")
     for i in range(workers_num):
