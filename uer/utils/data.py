@@ -722,7 +722,7 @@ class MlmDataset(object):
                     if pos >= end:
                         break
 
-        pickle.dump(instances, f_write, self.instances_buffer_size)
+        pickle.dump(instances, f_write)
         f_write.close()
 
 
