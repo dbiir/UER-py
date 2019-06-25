@@ -685,7 +685,7 @@ class MlmDataset(object):
             pool.join()
 
         # Merge datasets.
-        merge_dataset(self.dataset_path, workers_num)
+        merge_dataset(self.dataset_path, workers_num, self.instances_buffer_size)
 
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
