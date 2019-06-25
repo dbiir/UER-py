@@ -34,8 +34,6 @@ def main():
                         help="Specific steps to accumulate gradient.")
     parser.add_argument("--batch_size", type=int, default=32,
                         help="Training batch size. The actual batch_size is [batch_size x world_size x accumulation_steps].")
-    parser.add_argument("--instances_buffer_size", type=int, default=1000000,
-                        help="The buffer size of instances in memory.")
 
     # Model options.
     parser.add_argument("--emb_size", type=int, default=768, help="Embedding dimension.")

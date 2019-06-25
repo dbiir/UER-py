@@ -37,20 +37,19 @@ def mask_seq(src, vocab_size):
         return src, tgt_mlm
 
 
-def merge_dataset(dataset_path, workers_num):
+def merge_dataset(dataset_path, workers_num，instances_buffer_size):
     # Merge datasets.
-    instances_num_per_block = 10000
     f_writer = open(dataset_path, "wb")
     for i in range(workers_num):
         tmp_dataset_reader = open("dataset-tmp-"+str(i)+".pt", "rb")
         while True:
             try:
                 instances = pickle.load(tmp_dataset_reader)
-                for j in range(0, len(instances), instances_num_per_block):
-                    if j + instances_num_per_block > len(instances):
+                for j in range(0, len(instances), instances_buffer_size):
+                    if j + instances_buffer_size > len(instances):
                         pickle.dump(instances[j: len(instances)], f_writer)
                     else:
-                        pickle.dump(instances[j: j+instances_num_per_block], f_writer)
+                        pickle.dump(instances[j: j+instances_buffer_size], f_writer)
             except:
                 break
         tmp_dataset_reader.close()
@@ -79,7 +78,8 @@ class BertDataset(object):
         self.corpus_path = args.corpus_path
         self.dataset_path = args.dataset_path
 
-        self.buffer_size = args.docs_buffer_size        
+        self.docs_buffer_size = args.docs_buffer_size
+        self.instances_buffer_size = args.instances_buffer_size        
         self.seq_length = args.seq_length
         self.dup_factor = args.dup_factor
         self.short_seq_prob = args.short_seq_prob
@@ -105,7 +105,7 @@ class BertDataset(object):
             pool.join()
 
         # Merge datasets.
-        merge_dataset(self.dataset_path, workers_num)
+        merge_dataset(self.dataset_path, workers_num, self.instances_buffer_size)
 
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
@@ -133,7 +133,7 @@ class BertDataset(object):
                     if len(document) >= 1:
                         docs_buffer.append(document)
                     document = []
-                    if len(docs_buffer) == self.buffer_size:
+                    if len(docs_buffer) == self.docs_buffer_size:
                         # Build instances from documents.                    
                         instances = self.build_instances(docs_buffer)
                         # Save instances.
@@ -274,7 +274,6 @@ class BertDataLoader(object):
         self.proc_id = proc_id
         self.proc_num = proc_num
         self.shuffle = shuffle
-        self.buffer_size = args.instances_buffer_size
         # We only need to read dataset once when buffer is big enough to load entire dataset.
         self.repeat_read_dataset = False
         self.f_read = open(dataset_path, "rb")
@@ -345,7 +344,7 @@ class LmDataset(object):
         self.tokenizer = tokenizer
         self.corpus_path = args.corpus_path
         self.dataset_path = args.dataset_path
-        
+        self.instances_buffer_size = args.instances_buffer_size
         self.seq_length = args.seq_length
         self.seed = args.seed
 
@@ -369,7 +368,7 @@ class LmDataset(object):
             pool.join()
 
         # Merge datasets.
-        merge_dataset(self.dataset_path, workers_num)
+        merge_dataset(self.dataset_path, workers_num, self.instances_buffer_size)
 
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
@@ -385,7 +384,7 @@ class LmDataset(object):
             while True:
                 try:
                     line = f.readline()
-                except UnicodeDecodeError:
+                except:
                     continue
 
                 src = [self.vocab.get(w) for w in self.tokenizer.tokenize(line)]
@@ -404,9 +403,14 @@ class LmDataset(object):
 
                 instances.append((src, tgt, seg))
 
+                if len(instances) >= self.instances_buffer_size:
+                    pickle.dump(instances, f_write)
+                    instances = []
+
                 pos = f.tell()
                 if pos >= end:
-                    pickle.dump(instances, f_write)
+                    if len(instances) > 0:
+                        pickle.dump(instances, f_write)
                     break
 
         f_write.close()
@@ -487,7 +491,7 @@ class ClsDataset(object):
         self.tokenizer = tokenizer
         self.corpus_path = args.corpus_path
         self.dataset_path = args.dataset_path
-        
+        self.instances_buffer_size = args.instances_buffer_size
         self.seq_length = args.seq_length
         self.seed = args.seed
 
@@ -511,7 +515,7 @@ class ClsDataset(object):
             pool.join()
 
         # Merge datasets.
-        merge_dataset(self.dataset_path, workers_num)
+        merge_dataset(self.dataset_path, workers_num, self.instances_buffer_size)
 
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
@@ -568,9 +572,14 @@ class ClsDataset(object):
                 except:
                     pass
 
+                if len(instances) >= self.instances_buffer_size:
+                    pickle.dump(instances, f_write)
+                    instances = []
+
                 pos = f.tell()
                 if pos >= end:
-                    pickle.dump(instances, f_write)
+                    if len(instances) > 0:
+                        pickle.dump(instances, f_write)
                     break
 
         f_write.close()
@@ -584,7 +593,7 @@ class ClsDataLoader(object):
         self.shuffle = shuffle
         self.proc_id = proc_id
         self.proc_num = proc_num
-
+        
         self.f_read = open(dataset_path, "rb")
         self.read_count = 0
         self.start = 0
@@ -651,7 +660,7 @@ class MlmDataset(object):
         self.tokenizer = tokenizer
         self.corpus_path = args.corpus_path
         self.dataset_path = args.dataset_path
-        
+        self.instances_buffer_size = args.instances_buffer_size
         self.seq_length = args.seq_length
         self.seed = args.seed
         self.dup_factor = args.dup_factor
@@ -713,7 +722,7 @@ class MlmDataset(object):
                     if pos >= end:
                         break
 
-        pickle.dump(instances, f_write)
+        pickle.dump(instances, f_write, self.instances_buffer_size)
         f_write.close()
 
 
@@ -789,7 +798,7 @@ class NspDataset(object):
         self.tokenizer = tokenizer
         self.corpus_path = args.corpus_path
         self.dataset_path = args.dataset_path
-       
+        self.instances_buffer_size = args.instances_buffer_size
         self.seq_length = args.seq_length
         self.seed = args.seed
 
@@ -813,7 +822,7 @@ class NspDataset(object):
             pool.join()
 
         # Merge datasets.
-        merge_dataset(self.dataset_path, workers_num)
+        merge_dataset(self.dataset_path, workers_num, self.instances_buffer_size)
 
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
@@ -1027,7 +1036,7 @@ class S2sDataset(object):
         self.tokenizer = tokenizer
         self.corpus_path = args.corpus_path
         self.dataset_path = args.dataset_path
-        
+        self.instances_buffer_size = args.instances_buffer_size
         self.seq_length = args.seq_length
         self.seed = args.seed
 
@@ -1051,7 +1060,7 @@ class S2sDataset(object):
             pool.join()
 
         # Merge datasets.
-        merge_dataset(self.dataset_path, workers_num)
+        merge_dataset(self.dataset_path, workers_num, self.instances_buffer_size)
 
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)

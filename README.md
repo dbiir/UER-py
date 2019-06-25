@@ -172,10 +172,11 @@ usage: preprocess.py [-h] --corpus_path CORPUS_PATH --vocab_path VOCAB_PATH
                      [--processes_num PROCESSES_NUM]
                      [--target {bert,lm,cls,mlm,nsp,s2s}]
                      [--docs_buffer_size DOCS_BUFFER_SIZE]
+                     [--instances_buffer_size INSTANCES_BUFFER_SIZE]
                      [--seq_length SEQ_LENGTH] [--dup_factor DUP_FACTOR]
                      [--short_seq_prob SHORT_SEQ_PROB] [--seed SEED]
 ```
-*--docs_buffer_size* could be used to control memory consumption in pre-processing stage. *--preprocesses_num n* denotes that n processes are used for pre-processing. The example of pre-processing on a single machine is as follows：
+*--docs_buffer_size* and *--instances_buffer_size* could be used to control memory consumption in pre-processing and pre-training stages. *--preprocesses_num n* denotes that n processes are used for pre-processing. The example of pre-processing on a single machine is as follows：
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt \
                       --dataset_path dataset.pt --processes_num 8 --target bert
@@ -200,7 +201,6 @@ usage: pretrain.py [-h] [--dataset_path DATASET_PATH] --vocab_path VOCAB_PATH
                    [--report_steps REPORT_STEPS]
                    [--accumulation_steps ACCUMULATION_STEPS]
                    [--batch_size BATCH_SIZE]
-                   [--instances_buffer_size INSTANCES_BUFFER_SIZE]
                    [--emb_size EMB_SIZE] [--hidden_size HIDDEN_SIZE]
                    [--feedforward_size FEEDFORWARD_SIZE]
                    [--kernel_size KERNEL_SIZE] [--heads_num HEADS_NUM]
@@ -212,7 +212,6 @@ usage: pretrain.py [-h] [--dataset_path DATASET_PATH] --vocab_path VOCAB_PATH
                    [--gpu_ranks GPU_RANKS [GPU_RANKS ...]]
                    [--master_ip MASTER_IP] [--backend {nccl,gloo}]
 ```
-*--instances_buffer_size* could be used to control memory consumption in pre-training stage.
 
 Notice that it is recommended to explicitly specify model's encoder and target. UER-py consists of the following encoder modules:
 - rnn_encoder.py: contains (bi-)LSTM and (bi-)GRU
@@ -224,7 +223,7 @@ Notice that it is recommended to explicitly specify model's encoder and target. 
 
 The target should be coincident with the target in pre-processing stage. Users can try different combinations of encoders and targets by *--encoder* and *--target*.
 
-There two strategies for pre-training: 1）random initialization 2）loading a pre-trained model.
+There are two strategies for pre-training: 1）random initialization 2）loading a pre-trained model.
 #### Random initialization
 The example of pre-training on CPU：
 ```
@@ -234,12 +233,12 @@ The example of pre-training on single GPU (the id of GPU is 3)：
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt --output_model_path models/output_model.bin --encoder bert --target bert --gpu_ranks 3
 ```
-Pre-training on single machine with 8 GPUs：
+The example of pre-training on a single machine with 8 GPUs：
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt \
                     --output_model_path models/output_model.bin --encoder bert --target bert --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 
 ```
-Pre-training on two nachines, each has 8 GPUs (16 GPUs in total): 
+The example of pre-training on two machines, each has 8 GPUs (16 GPUs in total): 
 ```
 Node-0 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt \
             --output_model_path models/output_model.bin --encoder bert --target bert --world_size 16 --gpu_ranks 0 1 2 3 4 5 6 7 \
@@ -276,18 +275,25 @@ Node-1 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/googl
             --encoder bert --target bert --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 --master_ip tcp://node-0-addr:port
 ```
 
-#### Try different pre-training models
+#### Try pre-training models with different targets and encoders
 UER-py allows users to combine different components (e.g. subencoders, encoders, and targets). Here is an example of trying different targets:
 
 In fact, NSP target and sentence-level reviews are incompatible to some extent. We could replace BERT target with MLM target on book review dataset:
 ```
 python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_vocab.txt --dataset_path dataset.pt --processes_num 8 --target mlm
 
-python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin --output_model_path models/book_review_model.bin \
-                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --total_steps 20000 --save_checkpoint_steps 1000 --encoder bert --target mlm
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --total_steps 20000 --save_checkpoint_steps 5000 --encoder bert --target mlm
 ```
-Notice that different targets correspond to different corpus formats. It is important to select proper format for a target. We provide the examples (of different formats) for different targets in corpora folder. Changing encoders is even simplier than changing targets. Only thing we need to do is specify --encoder in pretrain.py.
+Notice that different targets correspond to different corpus formats. It is important to select proper format for a target. 
+If we want to change encoder, only thing we need to do is to specify --encoder in pretrain.py. Here is an example of using LSTM for pre-training. 
+```
+python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_vocab.txt --dataset_path dataset.pt --processes_num 8 --target lm
 
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt --output_model_path models/output_model.bin \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --total_steps 20000 --save_checkpoint_steps 5000 \ 
+                    --encoder lstm --target lm --learning_rate 1e-3 --config_path models/rnn_config.json
+```
 
 
 ### Fine-tune on downstream tasks
@@ -320,6 +326,19 @@ python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_pa
                       --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
                       --epochs_num 3 --batch_size 64 --encoder bert
 ```
+The example of using classifier.py for pair classification:
+```
+python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+                      --train_path datasets/lcqmc/train.tsv --dev_path datasets/lcqmc/dev.tsv --test_path datasets/lcqmc/test.tsv \
+                      --epochs_num 3 --batch_size 64 --encoder bert
+```
+The example of using classifier.py for dbqa:
+```
+python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+                      --train_path datasets/dbqa/train.tsv --dev_path datasets/dbqa/dev.tsv --test_path datasets/dbqa/test.tsv \
+                      --epochs_num 3 --batch_size 64 --encoder bert --mean_reciprocal_rank
+```
+
 #### Sequence labeling
 tagger.py adds a feedforward layer upon encoder layer.
 ```
@@ -478,8 +497,8 @@ We also provide the pre-trained models on different corpora, encoders, and targe
 With the help of UER, we are pre-training models with different corpora, encoders, and targets.
 <table>
 <tr align="center"><th> pre-trained model <th> Link <th> Description 
-<tr align="center"><td> Wikizh+BertEncoder+BertTarget <td> https://share.weiyun.com/5s9AsfQ <td> The training corpus Wiki_zh, trained by Google
-<tr align="center"><td> RenMinRiBao+BertEncoder+BertTarget <td> https://share.weiyun.com/5JWVjSE <td> The training corpus is news data from People's Daily (1946-2017). It is suitable for datasets related with news, e.g. F1 is improved on MSRA-NER from 92.7 to 94.2 (compared with Google BERT)
+<tr align="center"><td> Wikizh+BertEncoder+BertTarget <td> https://share.weiyun.com/5s9AsfQ <td> The training corpus is Wiki_zh, trained by Google
+<tr align="center"><td> RenMinRiBao+BertEncoder+BertTarget <td> https://share.weiyun.com/5JWVjSE <td> The training corpus is news data from People's Daily (1946-2017). It is suitable for datasets related with news, e.g. F1 is improved on MSRA-NER from 92.6 to 94.4 (compared with Google BERT)
 <tr align="center"><td> Webqa2019+BertEncoder+BertTarget <td> https://share.weiyun.com/5HYbmBh <td> The training corpus is WebQA, which is suitable for datasets related with social media, e.g. Accuracy (dev/test) on LCQMC is improved from 88.8/87.0 to 89.6/87.4; Accuracy (dev/test) on XNLI is improved from 78.1/77.2 to 79.0/78.8 (compared with Google BERT)
 <tr align="center"><td> Reviews+LstmEncoder+LmTarget <td> https://share.weiyun.com/57dZhqo  <td> The training corpus is amazon reviews + JDbinary reviews + dainping reviews (11.4M reviews in total). Language model target is used. It is suitable for datasets related with reviews. It achieves over 5 percent improvements on some review datasets compared with random initialization. Training steps: 200,000; Sequence length: 128
 <tr align="center"><td> (Mixedlarge corpus & Amazon reviews)+LstmEncoder+(LmTarget & ClsTarget) <td> https://share.weiyun.com/5B671Ik  <td> Mixedlarge corpus contains baidubaike + wiki + webqa + RenMinRiBao. The model is trained on it with language model target. And then the model is trained on Amazon reviews with language model and classification targets. It is suitable for datasets related with reviews. It can achieve comparable results with BERT on some review datasets. Training steps: 500,000 + 100,000; Sequence length: 128
