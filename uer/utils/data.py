@@ -138,7 +138,6 @@ class BertDataset(object):
                         instances = self.build_instances(docs_buffer)
                         # Save instances.
                         pickle.dump(instances, f_write)
-                        print("Worker {:d}, process: {:.1f}%".format(proc_id, (pos-start)/(end-start)*100), end="\r")
                         # Clear buffer.
                         docs_buffer = []
                         instances = []

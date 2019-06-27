@@ -42,6 +42,7 @@ class GatedcnnEncoder(nn.Module):
         super(GatedcnnEncoder, self).__init__()
         self.layers_num = args.layers_num
         self.kernel_size = args.kernel_size
+        self.block_size = args.block_size
         self.emb_size = args.emb_size
         self.hidden_size = args.hidden_size
 
