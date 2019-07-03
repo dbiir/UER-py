@@ -28,7 +28,7 @@ class GptEncoder(nn.Module):
             hidden: [batch_size x seq_length x hidden_size]
         """
 
-        betch_size, seq_length, _ = emb.size()
+        batch_size, seq_length, _ = emb.size()
         # Generate mask according to segment indicators.
         # mask: [batch_size x 1 x seq_length x seq_length]
         mask = torch.ones(seq_length, seq_length, device=emb.device)
