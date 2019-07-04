@@ -58,6 +58,9 @@ if __name__ == '__main__':
                                                    "cnn", "gatedcnn", "attn", \
                                                    "rcnn", "crnn", "gpt"], \
                                                    default="bert", help="Encoder type.")
+    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
+    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
+                        help="Pooling type.")
     parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s"], default="bert",
                         help="The training target of the pretraining model.")
 
@@ -138,8 +141,16 @@ if __name__ == '__main__':
         input_ids_batch = input_ids_batch.to(device)
         seg_ids_batch = seg_ids_batch.to(device)
         output = seq_encoder(input_ids_batch, seg_ids_batch)
+        if self.pooling == "mean":
+            output = torch.mean(output, dim=1)
+        elif self.pooling == "max":
+            output = torch.max(output, dim=1)[0]
+        elif self.pooling == "last":
+            output = output[:, -1, :]
+        else:
+            output = output[:, 0, :]
         output = output.cpu().data.numpy()
-        sentence_vectors.append(output[:,0,:])
+        sentence_vectors.append(output)
 
     sentence_vectors = np.concatenate(sentence_vectors, axis=0)
     np.save(args.output_path, sentence_vectors)
