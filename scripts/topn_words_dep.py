@@ -6,15 +6,15 @@ import codecs
 import argparse
 import numpy as np
 
-bert_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(bert_dir)
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
 
-from bert.utils.vocab import Vocab
-from bert.utils.config import load_hyperparam
-from bert.layers.embeddings import BertEmbedding
-from bert.encoders.bert_encoder import BertEncoder
-from bert.utils.tokenizer import *
-from bert.utils.constants import *
+from uer.utils.vocab import Vocab
+from uer.utils.config import load_hyperparam
+from uer.layers.embeddings import BertEmbedding
+from uer.encoders.bert_encoder import BertEncoder
+from uer.utils.tokenizer import *
+from uer.utils.constants import *
 
 
 class SequenceEncoder(torch.nn.Module):
@@ -111,7 +111,7 @@ if __name__ == '__main__':
         target_word = line[-1]
         print("Original sentence: ")
         print(line[0])
-        sent = line[0].split(" ")
+        sent = tokenizer.tokenize(line[0])
         print("Target word" + ": " + target_word)
 
         src, seg = sentence_to_id(sent)

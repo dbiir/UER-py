@@ -5,16 +5,16 @@ import torch
 import codecs
 import argparse
 
-bert_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(bert_dir)
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
 
-from bert.utils.vocab import Vocab
+from uer.utils.vocab import Vocab
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # Path options.
-    parser.add_argument("--word_path", help=".")
+    parser.add_argument("--target_words_path", help=".")
     parser.add_argument("--vocab_path", help=".")
     parser.add_argument("--cand_vocab_path", help=".")
     parser.add_argument("--pretrained_model_path", help=".")
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     cand_vocab_id = [vocab.get(w) for w in cand_vocab.i2w]
     cand_embedding = embedding[cand_vocab_id, :]
 
-    f_word = open(args.word_path, mode="r", encoding="utf-8")
+    f_word = open(args.target_words_path, mode="r", encoding="utf-8")
 
     for line in f_word:
         word = line.strip().split()[0]
