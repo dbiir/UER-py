@@ -409,7 +409,7 @@ python3 feature_extractor.py --input_path datasets/cloze_input.txt --pretrained_
 ```
 
 ### Finding nearest neighbours
-Pre-trained models can learn high-quality word embeddings. Traditional word embeddings such as word2vec and GloVe assign each word a fixed vector. However, polysemy is a pervasive phenomenon in human language, and the meanings of a polysemous word depend on the context. To this end, we use a the hidden state in pre-trained models to represent a word. It is noticeable that Google BERT is a character-based model. To obtain real word embedding (not character embedding), Users should download our word-based BERT model and vocabulary.
+Pre-trained models can learn high-quality word embeddings. Traditional word embeddings such as word2vec and GloVe assign each word a fixed vector. However, polysemy is a pervasive phenomenon in human language, and the meanings of a polysemous word depend on the context. To this end, we use a the hidden state in pre-trained models to represent a word. It is noticeable that Google BERT is a character-based model. To obtain real word embedding (not character embedding), Users should download our [word-based BERT model](https://share.weiyun.com/5s4HVMi) and [vocabulary](https://share.weiyun.com/5NWYbYn).
 The example of using scripts/topn_words_indep.py (finding nearest neighbours for context-independent word embedding)：
 ```
 python3 scripts/topn_words_indep.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
@@ -449,6 +449,8 @@ Sentence and word are splitted by \t.
 <tr align="center"><td> diff_vocab.py <td> Compare two vocabularies
 <tr align="center"><td> dynamic_vocab_adapter.py <td> Change the pre-trained model according to the vocabulary. It can save memory in fine-tuning stage since task-specific vocabulary is much smaller than general-domain vocabulary 
 <tr align="center"><td> multi_single_convert.py <td> convert the model (single GPU or multiple GPUs)
+<tr align="center"><td> topn_words_indep.py <td> Finding nearest neighbours with context-independent word embedding
+<tr align="center"><td> topn_words_dep.py <td> Finding nearest neighbours with context-dependent word embedding
 </table>
 
 
@@ -631,6 +633,7 @@ With the help of UER, we are pre-training models with different corpora, encoder
 <table>
 <tr align="center"><th> pre-trained model <th> Link <th> Description 
 <tr align="center"><td> Wikizh+BertEncoder+BertTarget <td> https://share.weiyun.com/5s9AsfQ <td> The training corpus is Wiki_zh, trained by Google
+<tr align="center"><td> Wikizh(word-based)+BertEncoder+BertTarget <td> Model: https://share.weiyun.com/5s4HVMi Vocab: https://share.weiyun.com/5NWYbYn <td> Word-based BERT model trained on Wikizh 
 <tr align="center"><td> RenMinRiBao+BertEncoder+BertTarget <td> https://share.weiyun.com/5JWVjSE <td> The training corpus is news data from People's Daily (1946-2017). It is suitable for datasets related with news, e.g. F1 is improved on MSRA-NER from 92.6 to 94.4 (compared with Google BERT)
 <tr align="center"><td> Webqa2019+BertEncoder+BertTarget <td> https://share.weiyun.com/5HYbmBh <td> The training corpus is WebQA, which is suitable for datasets related with social media, e.g. Accuracy (dev/test) on LCQMC is improved from 88.8/87.0 to 89.6/87.4; Accuracy (dev/test) on XNLI is improved from 78.1/77.2 to 79.0/78.8 (compared with Google BERT)
 <tr align="center"><td> Reviews+LstmEncoder+LmTarget <td> https://share.weiyun.com/57dZhqo  <td> The training corpus is amazon reviews + JDbinary reviews + dainping reviews (11.4M reviews in total). Language model target is used. It is suitable for datasets related with reviews. It achieves over 5 percent improvements on some review datasets compared with random initialization. Training steps: 200,000; Sequence length: 128
