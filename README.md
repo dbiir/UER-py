@@ -490,7 +490,8 @@ Evaluation of context-independent word embedding:
 <tr align="center"><td> 柠 <td> 0.347  <td> 煮 <td> 0.324 <td> 油 <td> 0.266
 <tr align="center"><td> ios <td> 0.317  <td> 嚐 <td> 0.322 <td> 雨 <td> 0.259
 </table>
- 
+
+
 Evaluation of context-dependent word embedding:
 
 Target sentence: 其冲积而形成小平原沙土层厚而肥沃，盛产苹果、大樱桃、梨和葡萄。
@@ -502,7 +503,8 @@ Target sentence: 其冲积而形成小平原沙土层厚而肥沃，盛产苹果
 <tr align="center"><td> 柠 <td> 0.704
 <tr align="center"><td> 樱 <td> 0.696 
 </table>
- 
+
+
 Target sentence: 苹果削减了台式Mac产品线上的众多产品
 <table>
 <tr align="center"><td> Target word: 苹 <td> 
@@ -517,14 +519,15 @@ Target sentence: 苹果削减了台式Mac产品线上的众多产品
 Evaluation of context-independent word embedding:
 
 <table>
-<tr align="center"><td> Target word: 苹果 <td> <td> Target word: 腾讯 <td>  <td> Target word: 峨眉 <td> <td> Target word: 吉利 <td> 
-<tr align="center"><td> 苹果公司 <td> 0.419  <td> 新浪 <td> 0.357 <td> 峨嵋 <td> 0.344 <td> 沃尔沃 <td> 0.277
-<tr align="center"><td> apple <td> 0.415  <td> 网易 <td> 0.356 <td> 资阳 <td> 0.304 <td> 伊利 <td> 0.243
-<tr align="center"><td> 苹果电脑 <td> 0.349 <td> 搜狐 <td> 0.356 <td> 峨眉山 <td> 0.297 <td> 长荣 <td> 0.235
-<tr align="center"><td> 微软 <td> 0.320  <td> 百度 <td> 0.341 <td> 四川 <td> 0.280 <td> 天安 <td> 0.224
-<tr align="center"><td> mac <td> 0.298  <td> 乐视 <td> 0.332 <td> 川西 <td> 0.277 <td> 哈达 <td> 0.220
+<tr align="center"><td> Target word: 苹果 <td> <td> Target word: 腾讯 <td>  <td>  Target word: 吉利 <td> 
+<tr align="center"><td> 苹果公司 <td> 0.419  <td> 新浪 <td> 0.357 <td> 沃尔沃 <td> 0.277
+<tr align="center"><td> apple <td> 0.415  <td> 网易 <td> 0.356 <td> 伊利 <td> 0.243
+<tr align="center"><td> 苹果电脑 <td> 0.349 <td> 搜狐 <td> 0.356 <td> 长荣 <td> 0.235
+<tr align="center"><td> 微软 <td> 0.320  <td> 百度 <td> 0.341 <td> 天安 <td> 0.224
+<tr align="center"><td> mac <td> 0.298  <td> 乐视 <td> 0.332 <td> 哈达 <td> 0.220
 </table>
- 
+
+
 Evaluation of context-dependent word embedding:
 
 Target sentence: 其冲积而形成小平原沙土层厚而肥沃，盛产苹果、大樱桃、梨和葡萄。
@@ -536,6 +539,7 @@ Target sentence: 其冲积而形成小平原沙土层厚而肥沃，盛产苹果
 <tr align="center"><td> 树林 <td> 0.697
 <tr align="center"><td> 牡丹 <td> 0.686 
 </table>
+
  
 Target sentence: 苹果削减了台式Mac产品线上的众多产品
 <table>
@@ -546,6 +550,7 @@ Target sentence: 苹果削减了台式Mac产品线上的众多产品
 <tr align="center"><td> 微软 <td> 0.777
 <tr align="center"><td> 苹果电脑 <td> 0.773 
 </table>
+
  
 Target sentence: 讨吉利是通过做民间习俗的吉祥事，或重现过去曾经得到好结果的行为，以求得好兆头。
 <table>
@@ -556,6 +561,7 @@ Target sentence: 讨吉利是通过做民间习俗的吉祥事，或重现过去
 <tr align="center"><td> 永元 <td> 0.736
 <tr align="center"><td> 仁和 <td> 0.732 
 </table>
+
  
 Target sentence: 2010年6月2日福特汽车公司宣布出售旗下高端汽车沃尔沃予中国浙江省的吉利汽车，同时将于2010年第四季停止旗下中阶房车品牌所有业务
 <table>
@@ -566,6 +572,7 @@ Target sentence: 2010年6月2日福特汽车公司宣布出售旗下高端汽车
 <tr align="center"><td> 天安 <td> 0.741
 <tr align="center"><td> 仁和 <td> 0.741 
 </table>
+
  
 Target sentence: 主要演员有扎克·布拉夫、萨拉·朝克、唐纳德·费森、尼尔·弗林、肯·詹金斯、约翰·麦吉利、朱迪·雷耶斯、迈克尔·莫斯利等。
 <table>
