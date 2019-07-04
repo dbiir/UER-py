@@ -7,6 +7,8 @@
 
 Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of different pre-training models (e.g. BERT), and provides interfaces for users to further extend upon. UER-py also incorporates many mechanisms for better performance and efficiency. It has been tested on several Chinese datasets and should match or even outperform Google's TF implementation.
 
+Update: We release codes to evaluate BERT's word embedding, including context-independent embedding and context-dependent embedding. Context-dependent word embedding is in particular suitable for polysemous words.
+We will release GPT1/2 (Transformer encoder + LM target) trained on large mixed corpora in a week. More pre-trained models such as Transformer-XL and XLNet will also be  
 
 <br>
 
@@ -406,15 +408,15 @@ python3 feature_extractor.py --input_path datasets/cloze_input.txt --pretrained_
                              --vocab_path models/google_vocab.txt --output_path output.npy
 ```
 
-### Finding nearest neighbour
-Pre-trained models can learn high-quality word embeddings. Traditional word embeddings such as word2vec and GloVe assign each word a fixed vector. However, polysemy is a pervasive phenomenon in human language, and the meanings of a polysemous word depend on the context. To this end, we use a the hidden state in pre-trained models to represent a word.
+### Finding nearest neighbours
+Pre-trained models can learn high-quality word embeddings. Traditional word embeddings such as word2vec and GloVe assign each word a fixed vector. However, polysemy is a pervasive phenomenon in human language, and the meanings of a polysemous word depend on the context. To this end, we use a the hidden state in pre-trained models to represent a word. It is noticeable that Google BERT is a character-based model. To obtain real word embedding (not character embedding), Users should download our word-based BERT model and vocabulary.
 The example of using scripts/topn_words_indep.py (finding nearest neighbours for context-independent word embedding)：
 ```
 python3 scripts/topn_words_indep.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
-                                    --cand_vocab_path models/google_vocab.txt --target_words_path target_words.txt
+                                    --cand_vocab_path models/google_vocab.txt --target_words_path target_characters.txt
 ```
 Contexct-independent word embedding is obtained model's embedding layer.
-The format of the target_words.txt is as follows:
+The format of the target_characters.txt is as follows:
 ```
 word-1
 word-2
@@ -424,10 +426,10 @@ word-n
 The example of using scripts/topn_words_dep.py (finding nearest neighbours for context-dependent word embedding)：
 ```
 python3 scripts/topn_words_dep.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
-                                  --cand_vocab_path models/google_vocab.txt --sent_path target_words_with_sentences.txt --config_path models/google_config.json \
+                                  --cand_vocab_path models/google_vocab.txt --sent_path target_characters_with_sentences.txt --config_path models/google_config.json \
                                   --batch_size 256 --seq_length 32 --tokenizer bert
 ```
-We substitute the target word with other words in the vocabulary and feed the sentences into the pretrained model. Hidden state is used as the context-dependent embedding of a word. Select proper tokenizer according to the sentence in target_words_with_sentences.txt. The format of 
+We substitute the target word with other words in the vocabulary and feed the sentences into the pretrained model. Hidden state is used as the context-dependent embedding of a word. Select proper tokenizer according to the sentence in target_characters_with_sentences.txt. The format of 
 target_words_with_sentences.txt is as follows:
 ```
 sent1 word1
@@ -490,8 +492,8 @@ Evaluation of context-independent word embedding:
 Evaluation of context-dependent word embedding:
 
 Target sentence: 其冲积而形成小平原沙土层厚而肥沃，盛产苹果、大樱桃、梨和葡萄。
-Target word: 苹
 <table>
+<tr align="center"><td> Target word: 苹 <td> 
 <tr align="center"><td> 蘋 <td> 0.822
 <tr align="center"><td> 莓 <td> 0.714 
 <tr align="center"><td> 芒 <td> 0.706
@@ -500,8 +502,8 @@ Target word: 苹
 </table>
  
 Target sentence: 苹果削减了台式Mac产品线上的众多产品
-Target word: 苹
 <table>
+<tr align="center"><td> Target word: 苹 <td> 
 <tr align="center"><td> 蘋 <td> 0.892
 <tr align="center"><td> apple <td> 0.788 
 <tr align="center"><td> iphone <td> 0.743
@@ -510,6 +512,68 @@ Target word: 苹
 </table>
 
 #### Word-based model
+Evaluation of context-independent word embedding:
+
+<table>
+<tr align="center"><td> Target word: 苹果 <td> <td> Target word: 腾讯 <td>  <td> Target word: 峨眉 <td> <td> Target word: 吉利 <td> 
+<tr align="center"><td> 苹果公司 <td> 0.419  <td> 新浪 <td> 0.357 <td> 峨嵋 <td> 0.344 <td> 沃尔沃 <td> 0.277
+<tr align="center"><td> apple <td> 0.415  <td> 网易 <td> 0.356 <td> 资阳 <td> 0.304 <td> 伊利 <td> 0.243
+<tr align="center"><td> 苹果电脑 <td> 0.349 <td> 搜狐 <td> 0.356 <td> 峨眉山 <td> 0.297 <td> 长荣 <td> 0.235
+<tr align="center"><td> 微软 <td> 0.320  <td> 百度 <td> 0.341 <td> 四川 <td> 0.280 <td> 天安 <td> 0.224
+<tr align="center"><td> mac <td> 0.298  <td> 乐视 <td> 0.332 <td> 川西 <td> 0.277 <td> 哈达 <td> 0.220
+</table>
+ 
+Evaluation of context-dependent word embedding:
+
+Target sentence: 其冲积而形成小平原沙土层厚而肥沃，盛产苹果、大樱桃、梨和葡萄。
+<table>
+<tr align="center"><td> Target word: 苹果 <td> 
+<tr align="center"><td> 柠檬 <td> 0.734
+<tr align="center"><td> 草莓 <td> 0.725 
+<tr align="center"><td> 荔枝 <td> 0.719
+<tr align="center"><td> 树林 <td> 0.697
+<tr align="center"><td> 牡丹 <td> 0.686 
+</table>
+ 
+Target sentence: 苹果削减了台式Mac产品线上的众多产品
+<table>
+<tr align="center"><td> Target word: 苹果 <td> 
+<tr align="center"><td> 苹果公司 <td> 0.836
+<tr align="center"><td> apple <td> 0.829
+<tr align="center"><td> 福特 <td> 0.796
+<tr align="center"><td> 微软 <td> 0.777
+<tr align="center"><td> 苹果电脑 <td> 0.773 
+</table>
+ 
+Target sentence: 讨吉利是通过做民间习俗的吉祥事，或重现过去曾经得到好结果的行为，以求得好兆头。
+<table>
+<tr align="center"><td> Target word: 吉利 <td> 
+<tr align="center"><td> 仁德 <td> 0.749
+<tr align="center"><td> 光彩 <td> 0.743
+<tr align="center"><td> 愉快 <td> 0.736
+<tr align="center"><td> 永元 <td> 0.736
+<tr align="center"><td> 仁和 <td> 0.732 
+</table>
+ 
+Target sentence: 2010年6月2日福特汽车公司宣布出售旗下高端汽车沃尔沃予中国浙江省的吉利汽车，同时将于2010年第四季停止旗下中阶房车品牌所有业务
+<table>
+<tr align="center"><td> Target word: 吉利 <td> 
+<tr align="center"><td> 沃尔沃 <td> 0.771
+<tr align="center"><td> 卡比 <td> 0.751
+<tr align="center"><td> 永利 <td> 0.745
+<tr align="center"><td> 天安 <td> 0.741
+<tr align="center"><td> 仁和 <td> 0.741 
+</table>
+ 
+Target sentence: 主要演员有扎克·布拉夫、萨拉·朝克、唐纳德·费森、尼尔·弗林、肯·詹金斯、约翰·麦吉利、朱迪·雷耶斯、迈克尔·莫斯利等。
+<table>
+<tr align="center"><td> Target word: 吉利 <td> 
+<tr align="center"><td> 玛利 <td> 0.791
+<tr align="center"><td> 米格 <td> 0.768
+<tr align="center"><td> 韦利 <td> 0.767
+<tr align="center"><td> 马力 <td> 0.764
+<tr align="center"><td> 安吉 <td> 0.761 
+</table>
 
 ### Quantitative evaluation
 We use a range of Chinese datasets to evaluate the performance of UER-py. Douban book review, ChnSentiCorp, Shopping, and Tencentnews are sentence-level small-scale sentiment classification datasets. MSRA-NER is a sequence labeling dataset. These datasets are included in this project. Dianping, JDfull, JDbinary, Ifeng, and Chinanews are large-scale classification datasets. They are collected in [glyph](https://arxiv.org/pdf/1708.02657.pdf) and can be downloaded at [glyph's github project](https://github.com/zhangxiangxiao/glyph). These five datasets don't contain validation set. We use 10% instances in trainset for validation.
