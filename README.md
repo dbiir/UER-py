@@ -7,8 +7,8 @@
 
 Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of different pre-training models (e.g. BERT), and provides interfaces for users to further extend upon. UER-py also incorporates many mechanisms for better performance and efficiency. It has been tested on several Chinese datasets and should match or even outperform Google's TF implementation.
 
-Update: We release codes to evaluate BERT's word embedding, including context-independent embedding and context-dependent embedding. Context-dependent word embedding is in particular suitable for polysemous words.
-We will release GPT1/2 (Transformer encoder + LM target) trained on large mixed corpora in a week. More pre-trained models such as Transformer-XL and XLNet will also be  
+**Update: We release codes to evaluate BERT's word embedding, including context-independent embedding and context-dependent embedding. Context-dependent word embedding is in particular suitable for polysemous words.
+We will release GPT1/2 (Transformer encoder + LM target) trained on mixed large Chinese corpors in a week. More pre-trained models will be tried in our future work, such as GatedCNN, Transformer-XL, and XLNet.** 
 
 <br>
 
