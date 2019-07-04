@@ -406,6 +406,36 @@ python3 feature_extractor.py --input_path datasets/cloze_input.txt --pretrained_
                              --vocab_path models/google_vocab.txt --output_path output.npy
 ```
 
+### Finding nearest neighbour
+Pre-trained models can learn high-quality word embeddings. Traditional word embeddings such as word2vec and GloVe assign each word a fixed vector. However, polysemy is a pervasive phenomenon in human language, and the meanings of a polysemous word depend on the context. To this end, we use a the hidden state in pre-trained models to represent a word.
+The example of using scripts/topn_words_indep.py (finding nearest neighbours for context-independent word embedding)：
+```
+python3 scripts/topn_words_indep.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+                                    --cand_vocab_path models/google_vocab.txt --target_words_path target_words.txt
+```
+Contexct-independent word embedding is obtained model's embedding layer.
+The format of the target_words.txt is as follows:
+```
+word-1
+word-2
+...
+word-n
+```
+The example of using scripts/topn_words_dep.py (finding nearest neighbours for context-dependent word embedding)：
+```
+python3 scripts/topn_words_dep.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+                                  --cand_vocab_path models/google_vocab.txt --sent_path target_words_with_sentences.txt --config_path models/google_config.json \
+                                  --batch_size 256 --seq_length 32 --tokenizer bert
+```
+We substitute the target word with other words in the vocabulary and feed the sentences into the pretrained model. Hidden state is used as the context-dependent embedding of a word. Select proper tokenizer according to the sentence in target_words_with_sentences.txt. The format of 
+target_words_with_sentences.txt is as follows:
+```
+sent1 word1
+sent1 word1
+...
+sentn wordn
+```
+Sentence and word are splitted by \t. 
 <br/>
 
 ## Scripts
@@ -441,8 +471,47 @@ We use BERT to test the speed of distributed training mode. Google BERT is train
 <tr align="center"><td> 1 <td> 8 <td> 44300
 <tr align="center"><td> 3 <td> 8 <td> 84386
 </table>
+ 
+### Qualitative evaluation
+We qualitatively evaluate pre-trained models by finding words' near neighbours.
 
-### Performance
+#### Character-based model
+Evaluation of context-independent word embedding:
+
+<table>
+<tr align="center"><td> Target word: 苹 <td> <td> Target word: 吃 <td>  <td> Target word: 水 <td> 
+<tr align="center"><td> 蘋 <td> 0.762  <td> 喝 <td> 0.539 <td> 河 <td> 0.286 
+<tr align="center"><td> apple <td> 0.447  <td> 食 <td> 0.475 <td> 海 <td> 0.278
+<tr align="center"><td> iphone <td> 0.400 <td> 啃 <td> 0.340 <td> water <td> 0.276
+<tr align="center"><td> 柠 <td> 0.347  <td> 煮 <td> 0.324 <td> 油 <td> 0.266
+<tr align="center"><td> ios <td> 0.317  <td> 嚐 <td> 0.322 <td> 雨 <td> 0.259
+</table>
+ 
+Evaluation of context-dependent word embedding:
+
+Target sentence: 其冲积而形成小平原沙土层厚而肥沃，盛产苹果、大樱桃、梨和葡萄。
+Target word: 苹
+<table>
+<tr align="center"><td> 蘋 <td> 0.822
+<tr align="center"><td> 莓 <td> 0.714 
+<tr align="center"><td> 芒 <td> 0.706
+<tr align="center"><td> 柠 <td> 0.704
+<tr align="center"><td> 樱 <td> 0.696 
+</table>
+ 
+Target sentence: 苹果削减了台式Mac产品线上的众多产品
+Target word: 苹
+<table>
+<tr align="center"><td> 蘋 <td> 0.892
+<tr align="center"><td> apple <td> 0.788 
+<tr align="center"><td> iphone <td> 0.743
+<tr align="center"><td> ios <td> 0.720
+<tr align="center"><td> ipad <td> 0.706 
+</table>
+
+#### Word-based model
+
+### Quantitative evaluation
 We use a range of Chinese datasets to evaluate the performance of UER-py. Douban book review, ChnSentiCorp, Shopping, and Tencentnews are sentence-level small-scale sentiment classification datasets. MSRA-NER is a sequence labeling dataset. These datasets are included in this project. Dianping, JDfull, JDbinary, Ifeng, and Chinanews are large-scale classification datasets. They are collected in [glyph](https://arxiv.org/pdf/1708.02657.pdf) and can be downloaded at [glyph's github project](https://github.com/zhangxiangxiao/glyph). These five datasets don't contain validation set. We use 10% instances in trainset for validation.
 
 Most pre-training models consist of 2 stages: pre-training on general-domain corpus and fine-tuning on downstream dataset. We recommend 3-stage mode: 1)Pre-training on general-domain corpus; 2)Pre-training on downstream dataset; 3)Fine-tuning on downstream dataset. Stage 2 enables models to get familiar with distributions of downstream tasks. It is sometimes known as semi-supervised fune-tuning.
