@@ -45,7 +45,10 @@ class BertTarget(nn.Module):
         numerator = -torch.sum(output_mlm * one_hot, 1)
         denominator = torch.tensor(output_mlm.size(0) + 1e-6)
         loss_mlm = torch.sum(numerator) / denominator
-        correct_mlm = torch.sum( (output_mlm.argmax(dim=-1).eq(tgt_mlm)).float())
+        if output_mlm.size(0) == 0:
+            correct_mlm = torch.tensor(0.0)
+        else:
+            correct_mlm = torch.sum((output_mlm.argmax(dim=-1).eq(tgt_mlm)).float())
         
         return loss_mlm, correct_mlm, denominator
 
