@@ -88,7 +88,10 @@ Pre-processing is time-consuming. Multi-process can largely accelerate the pre-p
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt --pretrained_model_path models/google_model.bin \
                     --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
                     --total_steps 20000 --save_checkpoint_steps 5000 --encoder bert --target bert
+
+mv models/book_review_model.bin-20000 models/book_review_model.bin
 ```
+Notice that the model trained by *pretrain.py* is attacted with the suffix which records the training step. We could remove the suffix for ease of use.
 Finally, we do classification. We can use *google_model.bin*:
 ```
 python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
@@ -97,13 +100,10 @@ python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_pa
 ```
 or use our [*book_review_model.bin*](https://share.weiyun.com/52BEFs2), which is the output of pretrain.py：
 ```
-mv models/book_review_model.bin-20000 models/book_review_model.bin
-
 python3 classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_vocab.txt \
                       --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
                       --epochs_num 3 --batch_size 32 --encoder bert
-```
-Notice that the model trained by *pretrain.py* is attacted with the suffix which records the training step. 
+``` 
 It turns out that the result of Google's model is 87.5; The result of *book_review_model.bin* is 88.1. It is also noticable that we don't need to specify the target in fine-tuning stage. Pre-training target is replaced with task-specific target.
 
 BERT consists of next sentence prediction (NSP) target. However, NSP target is not suitable for sentence-level reviews since we have to split a review into two parts. UER-py facilitates the use of different targets. Using masked language modeling (MLM) as target could be a properer choice for pre-training of reviews:
