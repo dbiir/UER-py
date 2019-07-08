@@ -17,7 +17,7 @@ output_model = collections.OrderedDict()
 
 output_model["embedding.word_embedding.weight"] = input_model["bert.embeddings.word_embeddings.weight"]
 output_model["embedding.position_embedding.weight"] = input_model["bert.embeddings.position_embeddings.weight"]
-output_model["embedding.segment_embedding.weight"] = torch.cat((torch.Tensor([[0]*768]), input_model["bert.embeddings.token_type_embeddings.weight"]), dim=0)
+output_model["embedding.segment_embedding.weight"] = torch.cat((torch.Tensor([[0]*input_model["bert.embeddings.token_type_embeddings.weight"].size()[1]]), input_model["bert.embeddings.token_type_embeddings.weight"]), dim=0)
 output_model["embedding.layer_norm.gamma"] = input_model["bert.embeddings.LayerNorm.weight"]
 output_model["embedding.layer_norm.beta"] = input_model["bert.embeddings.LayerNorm.bias"]
 
@@ -50,104 +50,5 @@ output_model["target.layer_norm.beta"] = input_model["cls.predictions.transform.
 output_model["target.mlm_linear_2.weight"] = input_model["cls.predictions.decoder.weight"]
 output_model["target.mlm_linear_2.bias"] = input_model["cls.predictions.bias"]
 
-
-
-# p = torch.load(path)
-# for name in p.keys():
-#     print(name, p[name].size())
-# print(len(p))
-# print("______________")
-
-# namelist = []
-# for name in p.keys():
-#     namelist.append(name)
-# for name in namelist:
-#     if name == "bert.embeddings.word_embeddings.weight":
-#         p['embedding.word_embedding.weight'] = p[name] # [21128, 768]
-#         #print(p[name])
-#     if name == "bert.embeddings.position_embeddings.weight":
-#         p['embedding.position_embedding.weight'] = p[name] # [512, 768]
-#         #print(p[name])
-#     if name == "bert.embeddings.token_type_embeddings.weight":
-#         z=torch.Tensor([[0]*768])
-#         p['embedding.segment_embedding.weight'] = torch.cat((z,p[name]) ,dim=0)# [2, 768]
-#         #print(p[name])
-#     if name == "bert.embeddings.LayerNorm.weight":
-#         p['embedding.layer_norm.gamma'] = p[name]
-#     if name == "bert.embeddings.LayerNorm.bias":
-#         p['embedding.layer_norm.beta'] = p[name]
-
-
-#     if 'encoder.layer' in name:
-#         name_new = 'encoder.transformer.' + str(name[19])
-#         if name[20] != '.':
-#             name_new += str(name[20])
-#         name_new += '.'
-#         if 'query' in name:
-#             if 'weight' in name:
-#                 name_new += 'self_attn.linear_layers.0.weight'
-#             else:
-#                 name_new += 'self_attn.linear_layers.0.bias'
-#         if 'key' in name:
-#             if 'weight' in name:
-#                 name_new += 'self_attn.linear_layers.1.weight'
-#             else:
-#                 name_new += 'self_attn.linear_layers.1.bias'
-#         if 'value' in name:
-#             if 'weight' in name:
-#                 name_new += 'self_attn.linear_layers.2.weight'
-#             else:
-#                 name_new += 'self_attn.linear_layers.2.bias'
-#         if 'attention.output' in name:
-#             if 'LayerNorm.weight' in name:
-#                 name_new += 'layer_norm_1.gamma'
-#             if 'LayerNorm.bias' in name:
-#                 name_new += 'layer_norm_1.beta'
-#             if 'dense.weight' in name:
-#                 name_new += 'self_attn.final_linear.weight'
-#             if 'dense.bias' in name:
-#                 name_new += 'self_attn.final_linear.bias'
-#         else:
-#             if 'output.dense.weight' in name:
-#                 name_new += 'feed_forward.linear_2.weight'
-#             if 'output.dense.bias' in name:
-#                 name_new += 'feed_forward.linear_2.bias'
-#             if 'intermediate.dense.weight' in name:
-#                 name_new += 'feed_forward.linear_1.weight'
-#             if 'intermediate.dense.bias' in name:
-#                 name_new += 'feed_forward.linear_1.bias'
-#             if 'LayerNorm.weight' in name:
-#                 name_new += 'layer_norm_2.gamma'
-#             if 'LayerNorm.bias' in name:
-#                 name_new += 'layer_norm_2.beta'
-            
-#         p[name_new] = p[name]
-
-#     if name == 'bert.pooler.dense.weight':
-#         p['target.nsp_linear_1.weight'] = p[name]
-#     if name == 'bert.pooler.dense.bias':
-#         p['target.nsp_linear_1.bias'] = p[name]
-
-#     if name == 'cls.predictions.decoder.weight':
-#         p['target.mlm_linear_2.weight'] = p[name]
-#     if name == 'cls.predictions.bias':
-#         p['target.mlm_linear_2.bias'] = p[name]
-    
-#     if name == 'cls.predictions.transform.dense.weight':
-#         p['target.mlm_linear_1.weight'] = p[name]
-#     if name == 'cls.predictions.transform.dense.bias':
-#         p['target.mlm_linear_1.bias'] = p[name]
-    
-#     if name == 'cls.predictions.transform.LayerNorm.weight':
-#         p['target.layer_norm.gamma'] = p[name]
-#     if name == 'cls.predictions.transform.LayerNorm.bias':
-#         p['target.layer_norm.beta'] = p[name]
-    
-#     if name == 'cls.seq_relationship.weight':
-#         p['target.nsp_linear_2.weight'] = p[name]
-#     if name == 'cls.seq_relationship.bias':
-#         p['target.nsp_linear_2.bias'] = p[name]
-    
-#     del p[name]
 
 torch.save(output_model, args.output_model_path)
