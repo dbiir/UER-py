@@ -7,6 +7,7 @@ parser.add_argument("--input_model_path", type=str, default="pytorch_model.bin",
                         help=".")
 parser.add_argument("--output_model_path", type=str, default="google_model.bin",
                         help=".")
+parser.add_argument("--layers_num", type=int, default=12, help=".")
 
 args = parser.parse_args()
 path = args.input_model_path
@@ -21,7 +22,7 @@ output_model["embedding.segment_embedding.weight"] = torch.cat((torch.Tensor([[0
 output_model["embedding.layer_norm.gamma"] = input_model["bert.embeddings.LayerNorm.weight"]
 output_model["embedding.layer_norm.beta"] = input_model["bert.embeddings.LayerNorm.bias"]
 
-for i in range(12):
+for i in range(args.layers_num):
     output_model["encoder.transformer." + str(i) + ".self_attn.linear_layers.0.weight"] = input_model["bert.encoder.layer." + str(i) + ".attention.self.query.weight"]
     output_model["encoder.transformer." + str(i) + ".self_attn.linear_layers.0.bias"] = input_model["bert.encoder.layer." + str(i) + ".attention.self.query.bias"]
     output_model["encoder.transformer." + str(i) + ".self_attn.linear_layers.1.weight"] = input_model["bert.encoder.layer." + str(i) + ".attention.self.key.weight"]

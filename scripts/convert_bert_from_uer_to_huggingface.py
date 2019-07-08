@@ -7,6 +7,7 @@ parser.add_argument("--input_model_path", type=str, default="google_model.bin",
                         help=".")
 parser.add_argument("--output_model_path", type=str, default="huggingface_model.bin",
                         help=".")
+parser.add_argument("--layers_num", type=int, default=12, help=".")
 
 args = parser.parse_args()
 path = args.input_model_path
@@ -21,7 +22,7 @@ output_model["bert.embeddings.token_type_embeddings.weight"] = input_model["embe
 output_model["bert.embeddings.LayerNorm.weight"] = input_model["embedding.layer_norm.gamma"]
 output_model["bert.embeddings.LayerNorm.bias"] = input_model["embedding.layer_norm.beta"]
 
-for i in range(12):
+for i in range(args.layers_num):
     output_model["bert.encoder.layer." + str(i) + ".attention.self.query.weight"] = input_model["encoder.transformer." + str(i) + ".self_attn.linear_layers.0.weight"]
     output_model["bert.encoder.layer." + str(i) + ".attention.self.query.bias"] = input_model["encoder.transformer." + str(i) + ".self_attn.linear_layers.0.bias"]
     output_model["bert.encoder.layer." + str(i) + ".attention.self.key.weight"] = input_model["encoder.transformer." + str(i) + ".self_attn.linear_layers.1.weight"]
