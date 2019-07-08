@@ -478,6 +478,158 @@ class LmDataLoader(object):
                 torch.LongTensor(seg)
 
 
+class BilmDataset(object):
+    """
+    Construct dataset for MLM and NSP tasks from the given corpus.
+    Each document consists of multiple sentences, 
+    and each sentence occupies a single line. 
+    Documents in corpus must be separated by empty lines.
+    """
+    def __init__(self, args, vocab, tokenizer):
+        self.vocab = vocab
+        self.tokenizer = tokenizer
+        self.corpus_path = args.corpus_path
+        self.dataset_path = args.dataset_path
+        self.instances_buffer_size = args.instances_buffer_size
+        self.seq_length = args.seq_length
+        self.seed = args.seed
+
+    def build_and_save(self, workers_num):
+        """
+        Build dataset from the given corpus.
+        Start workers_num processes and each process deals with a part of data.
+        """
+        file_size = os.path.getsize(self.corpus_path)
+        print("Starting %d workers for building datasets ... " % workers_num)
+        assert(workers_num >= 1)
+        if workers_num == 1:
+            self.worker(0, 0, file_size)
+        else:
+            pool = Pool(workers_num)
+            for i in range(workers_num):
+                start = i * file_size // workers_num
+                end = (i+1) * file_size // workers_num
+                pool.apply_async(func=self.worker, args=[i, start, end])
+            pool.close()
+            pool.join()
+
+        # Merge datasets.
+        merge_dataset(self.dataset_path, workers_num, self.instances_buffer_size)
+
+    def worker(self, proc_id, start, end):
+        print("Worker %d is building dataset ... " % proc_id)
+        set_seed(self.seed)
+        docs_buffer = []
+        document = []
+        pos = start
+        f_write = open("dataset-tmp-" + str(proc_id) + ".pt", "wb")
+        # Open function in python3 does not support tell operation. We have to use codecs.
+        with codecs.open(self.corpus_path, "r", "utf-8") as f:
+            f.seek(start)
+            instances = []
+            while True:
+                try:
+                    line = f.readline()
+                except:
+                    continue
+
+                src = [self.vocab.get(w) for w in self.tokenizer.tokenize(line)]
+                tgt_forward = src[1:] + [SEP_ID]
+                tgt_backward = [CLS_ID] + src[:-1]
+                seg = [1] * len(src)
+                if len(src) >= self.seq_length:
+                    src = src[:self.seq_length]
+                    tgt_forward = tgt_forward[:self.seq_length]
+                    tgt_backward = tgt_backward[:self.seq_length]
+                    seg = seg[:self.seq_length]
+                else:
+                    while len(src) != self.seq_length:
+                        src.append(PAD_ID)
+                        tgt_forward.append(PAD_ID)
+                        tgt_backward.append(PAD_ID)
+                        seg.append(PAD_ID)
+
+                instances.append((src, tgt_forward, tgt_backward, seg))
+
+                if len(instances) >= self.instances_buffer_size:
+                    pickle.dump(instances, f_write)
+                    instances = []
+
+                pos = f.tell()
+                if pos >= end:
+                    if len(instances) > 0:
+                        pickle.dump(instances, f_write)
+                    break
+
+        f_write.close()
+
+
+class BilmDataLoader(object):
+    """
+    """
+    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=False):
+        self.batch_size = batch_size
+        self.shuffle = shuffle
+        self.proc_id = proc_id
+        self.proc_num = proc_num
+
+        self.f_read = open(dataset_path, "rb")
+        self.read_count = 0
+        self.start = 0
+        self.end = 0
+        self.buffer = []
+        
+    def _fill_buf(self):
+        try:
+            while True:
+                self.buffer = pickle.load(self.f_read)
+                self.read_count += 1
+                if (self.read_count - 1) % self.proc_num == self.proc_id:
+                    break
+        except EOFError:
+            # Reach file end.
+            self.f_read.seek(0)
+            self.buffer = []
+
+        if self.shuffle:
+            random.shuffle(self.buffer)
+        self.start = 0
+        self.end = len(self.buffer)
+
+    def _empty(self):
+        return self.start >= self.end
+
+    def __del__(self):
+        self.f_read.close()
+
+    def __iter__(self):
+        while True:
+            while self._empty():
+                self._fill_buf()
+            if self.start + self.batch_size >= self.end:
+                instances = self.buffer[self.start:]
+            else:
+                instances = self.buffer[self.start: self.start + self.batch_size]
+
+            self.start += self.batch_size
+        
+            src = []
+            tgt_forward = []
+            tgt_backward = []
+            seg = []
+
+            for ins in instances:
+                src.append(ins[0])
+                tgt_forward.append(ins[1])
+                tgt_backward.append(ins[2])
+                seg.append(ins[3])
+
+            yield torch.LongTensor(src), \
+                torch.LongTensor(tgt_forward), \
+                torch.LongTensor(tgt_backward), \
+                torch.LongTensor(seg)
+
+
 class ClsDataset(object):
     """
     Construct dataset for MLM and NSP tasks from the given corpus.

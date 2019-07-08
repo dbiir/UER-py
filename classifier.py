@@ -83,7 +83,7 @@ def main():
                         help="Sequence length.")
     parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
                                                    "cnn", "gatedcnn", "attn", \
-                                                   "rcnn", "crnn", "gpt"], \
+                                                   "rcnn", "crnn", "gpt", "bilstm"], \
                                                    default="bert", help="Encoder type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",

@@ -47,10 +47,10 @@ def main():
     parser.add_argument("--seed", type=int, default=7,  help="Random seed.")
     parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
                                                    "cnn", "gatedcnn", "attn", \
-                                                   "rcnn", "crnn", "gpt"], \
+                                                   "rcnn", "crnn", "gpt", "bilstm"], \
                                                    default="bert", help="Encoder type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s"], default="bert",
+    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s", "bilm"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--labels_num", type=int, default=2, help="Specific to classification target.")
 
