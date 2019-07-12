@@ -19,11 +19,11 @@ from uer.model_saver import save_model
 
 
 class BertTagger(nn.Module):
-    def __init__(self, args, bert_model):
+    def __init__(self, args, model):
         super(BertTagger, self).__init__()
-        self.embedding = bert_model.embedding
-        self.encoder = bert_model.encoder
-        self.target = bert_model.target
+        self.embedding = model.embedding
+        self.encoder = model.encoder
+        self.target = model.target
         self.labels_num = args.labels_num
         self.output_layer = nn.Linear(args.hidden_size, self.labels_num)
         self.softmax = nn.LogSoftmax(dim=-1)
@@ -81,11 +81,11 @@ def main():
                         help="Path of the output model.")
     parser.add_argument("--vocab_path", default="./models/google_vocab.txt", type=str,
                         help="Path of the vocabulary file.")
-    parser.add_argument("--train_path", default="./datasets/msra/train.txt", type=str,
+    parser.add_argument("--train_path", type=str, required=True,
                         help="Path of the trainset.")
-    parser.add_argument("--dev_path", default="./datasets/msra/dev.txt", type=str,
+    parser.add_argument("--dev_path", type=str, required=True,
                         help="Path of the devset.")
-    parser.add_argument("--test_path", default="./datasets/msra/test.txt", type=str,
+    parser.add_argument("--test_path", type=str, required=True
                         help="Path of the testset.")
     parser.add_argument("--config_path", default="./models/google_config.json", type=str,
                         help="Path of the config file.")
@@ -93,7 +93,7 @@ def main():
     # Model options.
     parser.add_argument("--batch_size", type=int, default=64,
                         help="Batch_size.")
-    parser.add_argument("--seq_length", default=256, type=int,
+    parser.add_argument("--seq_length", default=128, type=int,
                         help="Sequence length.")
     parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
                                                    "cnn", "gatedcnn", "attn", \
@@ -156,20 +156,20 @@ def main():
     # Build bert model.
     # A pseudo target is added.
     args.target = "bert"
-    bert_model = build_model(args)
+    model = build_model(args)
 
     # Load or initialize parameters.
     if args.pretrained_model_path is not None:
         # Initialize with pretrained model.
-        bert_model.load_state_dict(torch.load(args.pretrained_model_path), strict=False)  
+        model.load_state_dict(torch.load(args.pretrained_model_path), strict=False)  
     else:
         # Initialize with normal distribution.
-        for n, p in list(bert_model.named_parameters()):
+        for n, p in list(model.named_parameters()):
             if 'gamma' not in n and 'beta' not in n:
                 p.data.normal_(0, 0.02)
     
     # Build sequence labeling model.
-    model = BertTagger(args, bert_model)
+    model = BertTagger(args, model)
 
     # For simplicity, we use DataParallel wrapper to use multiple GPUs.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
