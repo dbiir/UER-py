@@ -14,8 +14,6 @@ import torch
 import numpy as np
 import collections
 from tensorflow.python import pywrap_tensorflow
-from dynamic_vocab_adapter import adapter
-from uer.utils.vocab import Vocab
 
 def main():
     parser = argparse.ArgumentParser()
@@ -28,13 +26,6 @@ def main():
                         default="models/bert_base_chinese/bert_model.ckpt",
                         type=str,
                         help=".")
-    parser.add_argument("--old_vocab_path",
-                        type=str,
-                        default="models/bert_base_chinese/vocab.txt")
-    parser.add_argument("--new_vocab_path",
-                        type=str,
-                        default="models/google_vocab.txt")
-
     parser.add_argument("--output_model_path",
                         default=None,
                         type=str,
@@ -125,17 +116,6 @@ def main():
         output_model["target.layer_norm.beta"] = input_model["cls/predictions/transform/LayerNorm/beta"]
         output_model["target.mlm_linear_2.weight"] = input_model["bert/embeddings/word_embeddings"]
         output_model["target.mlm_linear_2.bias"] =input_model["cls/predictions/output_bias"]
-
-    old_vocab = Vocab()
-    old_vocab.load(args.old_vocab_path)
-    new_vocab = Vocab()
-    new_vocab.load(args.new_vocab_path)
-
-    if len(old_vocab)!= len(new_vocab):
-        output_model = adapter(output_model,old_vocab,new_vocab)
-
-    for k,v in output_model.items():
-        print(k,v.shape)
 
     torch.save(output_model,args.output_model_path)
 
