@@ -85,7 +85,7 @@ def main():
                         help="Path of the trainset.")
     parser.add_argument("--dev_path", type=str, required=True,
                         help="Path of the devset.")
-    parser.add_argument("--test_path", type=str, required=True
+    parser.add_argument("--test_path", type=str, required=True,
                         help="Path of the testset.")
     parser.add_argument("--config_path", default="./models/google_config.json", type=str,
                         help="Path of the config file.")
