@@ -434,7 +434,7 @@ python3 feature_extractor.py --input_path datasets/cloze_input.txt --pretrained_
 Pre-trained models can learn high-quality word embeddings. Traditional word embeddings such as word2vec and GloVe assign each word a fixed vector. However, polysemy is a pervasive phenomenon in human language, and the meanings of a polysemous word depend on the context. To this end, we use a the hidden state in pre-trained models to represent a word. It is noticeable that Google BERT is a character-based model. To obtain real word embedding (not character embedding), Users should download our [word-based BERT model](https://share.weiyun.com/5s4HVMi) and [vocabulary](https://share.weiyun.com/5NWYbYn).
 The example of using scripts/topn_words_indep.py (finding nearest neighbours for context-independent word embedding)：
 ```
-python3 scripts/topn_words_indep.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+python3 scripts/topn_words_indep.py --pretrained_model_path models/bert_wiki_word_model.bin --vocab_path models/wiki_word_vocab.txt \
                                     --cand_vocab_path models/google_vocab.txt --target_words_path target_characters.txt
 ```
 Contexct-independent word embedding is obtained model's embedding layer.
@@ -447,7 +447,7 @@ word-n
 ```
 The example of using scripts/topn_words_dep.py (finding nearest neighbours for context-dependent word embedding)：
 ```
-python3 scripts/topn_words_dep.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+python3 scripts/topn_words_dep.py --pretrained_model_path models/bert_wiki_word_model.bin --vocab_path models/wiki_word_vocab.txt \
                                   --cand_vocab_path models/google_vocab.txt --sent_path target_characters_with_sentences.txt --config_path models/google_config.json \
                                   --batch_size 256 --seq_length 32 --tokenizer bert
 ```
@@ -538,7 +538,7 @@ Target sentence: 其冲积而形成小平原沙土层厚而肥沃，盛产苹果
 </table>
 
 
-Target sentence: 苹果削减了台式Mac产品线上的众多产品
+Target sentence: 苹果削减了台式Mac产品线上的众多产品。
 <table>
 <tr align="center"><td> Target word: 苹 <td> 
 <tr align="center"><td> 蘋 <td> 0.892
