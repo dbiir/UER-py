@@ -7,7 +7,9 @@
 
 Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of different pre-training models (e.g. BERT), and provides interfaces for users to further extend upon. UER-py also incorporates many mechanisms for better performance and efficiency. It has been tested on several Chinese datasets and should match or even outperform Google's TF implementation.
 
-**Update: Now ELMO (bilstm encoder + bilm target) is supported by UER. ELMO model pre-trained on mixed large corpus will be released soon. Word-based BERT is now available. Context-dependent word embedding (trained by BERT) is in particular suitable for polysemous words.** 
+**Update: Now [pretrained GPT model (512 length)](https://share.weiyun.com/51nTP8V) is available. One can use *generate.py* to generate text. 
+ELMO (bilstm encoder + bilm target) is supported by UER. 
+Pre-trained word-based BERT is available. Context-dependent word embedding (trained by BERT) is in particular suitable for polysemous words.** 
 
 <br>
 
@@ -458,6 +460,17 @@ sent1 word1
 sentn wordn
 ```
 Sentence and word are splitted by \t. 
+
+### Text generator
+We could use *generate.py* to generate text. Given a few words or sentences, *generate.py* can continue writing. The example of using *generate.py*:
+```
+python3 generate.py --pretrained_model_path models/gpt_model.bin --vocab_path models/google_vocab.txt 
+                    --input_path story_beginning.txt --output_path story_full.txt --config_path models/google_config.json 
+                    --encoder gpt --target lm --seq_length 128  
+```
+where *story_beginning* contains the beginning of a text. One can use any models pre-trained with LM target, such as [GPT trained on mixed large corpus](https://share.weiyun.com/51nTP8V). By now we only provide a vanilla version of generator. More mechanisms will be added for better performance and efficiency.
+
+
 <br/>
 
 ## Scripts
@@ -663,6 +676,7 @@ With the help of UER, we are pre-training models with different corpora, encoder
 <tr align="center"><td> Wikizh(word-based)+BertEncoder+BertTarget <td> Model: https://share.weiyun.com/5s4HVMi Vocab: https://share.weiyun.com/5NWYbYn <td> Word-based BERT model trained on Wikizh. Training steps: 500,000
 <tr align="center"><td> RenMinRiBao+BertEncoder+BertTarget <td> https://share.weiyun.com/5JWVjSE <td> The training corpus is news data from People's Daily (1946-2017). It is suitable for datasets related with news, e.g. F1 is improved on MSRA-NER from 92.6 to 94.4 (compared with Google BERT). Training steps: 500,000
 <tr align="center"><td> Webqa2019+BertEncoder+BertTarget <td> https://share.weiyun.com/5HYbmBh <td> The training corpus is WebQA, which is suitable for datasets related with social media, e.g. Accuracy (dev/test) on LCQMC is improved from 88.8/87.0 to 89.6/87.4; Accuracy (dev/test) on XNLI is improved from 78.1/77.2 to 79.0/78.8 (compared with Google BERT). Training steps: 500,000
+<tr align="center"><td> Mixedlarge corpus+GptEncoder+LmTarget <td> https://share.weiyun.com/51nTP8V <td> Mixedlarge corpus contains baidubaike + wiki + webqa + RenMinRiBao + literature + reviews. Training steps: 500,000 (with sequence lenght of 128) + 100,000 (with sequence length of 512)
 <tr align="center"><td> Google-BERT-en-uncased-base <td> Model: https://share.weiyun.com/5hWivED Vocab: https://share.weiyun.com/5gBxBYD <td> Provided by Google.
 <tr align="center"><td> Google-BERT-en-cased-base <td> Model: https://share.weiyun.com/5SltATz Vocab: https://share.weiyun.com/5ouUo2q <td> Provided by Google.
 <tr align="center"><td> Reviews+LstmEncoder+LmTarget <td> https://share.weiyun.com/57dZhqo  <td> The training corpus is amazon reviews + JDbinary reviews + dainping reviews (11.4M reviews in total). Language model target is used. It is suitable for datasets related with reviews. It achieves over 5 percent improvements on some review datasets compared with random initialization. Training steps: 200,000; Sequence length: 128
