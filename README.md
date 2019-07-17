@@ -435,10 +435,10 @@ Pre-trained models can learn high-quality word embeddings. Traditional word embe
 The example of using scripts/topn_words_indep.py (finding nearest neighbours for context-independent word embedding)：
 ```
 python3 scripts/topn_words_indep.py --pretrained_model_path models/bert_wiki_word_model.bin --vocab_path models/wiki_word_vocab.txt \
-                                    --cand_vocab_path models/google_vocab.txt --target_words_path target_characters.txt
+                                    --cand_vocab_path models/wiki_word_vocab.txt --target_words_path target_words.txt
 ```
-Contexct-independent word embedding is obtained model's embedding layer.
-The format of the target_characters.txt is as follows:
+Context-independent word embedding is obtained by model's embedding layer.
+The format of the target_words.txt is as follows:
 ```
 word-1
 word-2
@@ -448,10 +448,10 @@ word-n
 The example of using scripts/topn_words_dep.py (finding nearest neighbours for context-dependent word embedding)：
 ```
 python3 scripts/topn_words_dep.py --pretrained_model_path models/bert_wiki_word_model.bin --vocab_path models/wiki_word_vocab.txt \
-                                  --cand_vocab_path models/google_vocab.txt --sent_path target_characters_with_sentences.txt --config_path models/google_config.json \
-                                  --batch_size 256 --seq_length 32 --tokenizer bert
+                                  --cand_vocab_path models/wiki_word_vocab.txt --sent_path target_words_with_sentences.txt --config_path models/google_config.json \
+                                  --batch_size 256 --seq_length 32 --tokenizer space
 ```
-We substitute the target word with other words in the vocabulary and feed the sentences into the pretrained model. Hidden state is used as the context-dependent embedding of a word. Select proper tokenizer according to the sentence in target_characters_with_sentences.txt. The format of 
+We substitute the target word with other words in the vocabulary and feed the sentences into the pretrained model. Hidden state is used as the context-dependent embedding of a word. Users should do word segmentation manually and use space tokenizer if word-based model is used. The format of 
 target_words_with_sentences.txt is as follows:
 ```
 sent1 word1
