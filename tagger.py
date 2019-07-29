@@ -1,6 +1,6 @@
 # -*- encoding:utf -*-
 """
-  This script provides an exmaple to wrap UER-py for sequence labeling.
+  This script provides an example to wrap UER-py for NER.
 """
 import random
 import argparse
@@ -91,7 +91,7 @@ def main():
                         help="Path of the config file.")
 
     # Model options.
-    parser.add_argument("--batch_size", type=int, default=64,
+    parser.add_argument("--batch_size", type=int, default=32,
                         help="Batch_size.")
     parser.add_argument("--seq_length", default=128, type=int,
                         help="Sequence length.")
@@ -133,17 +133,21 @@ def main():
 
     set_seed(args.seed)
 
-     # Find tagging labels.
-    labels_map = {"NULL": 0, "O": 1} # ID for padding and non-entity.
+    labels_map = {"[PAD]": 0}
+    begin_ids = []
+
+    # Find tagging labels
     with open(args.train_path, mode="r", encoding="utf-8") as f:
         for line_id, line in enumerate(f):
             if line_id == 0:
                 continue
-            line = line.strip().split()
-            if len(line) != 2:
-                continue
-            if line[1] not in labels_map:
-                labels_map[line[1]] = len(labels_map)
+            labels = line.strip().split("\t")[1].split()
+            for l in labels:
+                if l not in labels_map:
+                    if l.startswith("B") or l.startswith("S"):
+                        begin_ids.append(len(labels_map))
+                    labels_map[l] = len(labels_map)
+    
 
     print("Labels: ", labels_map)
     args.labels_num = len(labels_map)
@@ -197,30 +201,22 @@ def main():
     def read_dataset(path):
         dataset = []
         with open(path, mode="r", encoding="utf-8") as f:
+            f.readline()
             tokens, labels = [], []
             for line_id, line in enumerate(f):
-                if line_id == 0:
-                    continue
-                line = line.strip().split()
-                if len(line) != 2:
-                    assert len(tokens) == len(labels)
-                    tokens = [vocab.get(t) for t in tokens]
-                    labels = [labels_map[l] for l in labels]
-                    mask = [1] * len(tokens)
-                    if len(tokens) > args.seq_length:
-                        tokens = tokens[:args.seq_length]
-                        labels = labels[:args.seq_length]
-                        mask = mask[:args.seq_length]
-                    while len(tokens) < args.seq_length:
-                        tokens.append(0)
-                        labels.append(0)
-                        mask.append(0)
-                    dataset.append([tokens, labels, mask])
-
-                    tokens, labels = [], []
-                    continue
-                tokens.append(line[0])
-                labels.append(line[1])
+                tokens, labels = line.strip().split("\t")
+                tokens = [vocab.get(t) for t in tokens.split(" ")]
+                labels = [labels_map[l] for l in labels.split(" ")]
+                mask = [1] * len(tokens)
+                if len(tokens) > args.seq_length:
+                    tokens = tokens[:args.seq_length]
+                    labels = labels[:args.seq_length]
+                    mask = mask[:args.seq_length]
+                while len(tokens) < args.seq_length:
+                    tokens.append(0)
+                    labels.append(0)
+                    mask.append(0)
+                dataset.append([tokens, labels, mask])
         
         return dataset
 
@@ -257,43 +253,39 @@ def main():
             mask_ids_batch = mask_ids_batch.to(device)
             loss, _, pred, gold = model(input_ids_batch, label_ids_batch, mask_ids_batch)
             
-            # Gold.
             for j in range(gold.size()[0]):
-                if (j > 0 and gold[j-1].item() <= 1 and gold[j].item() > 1) or (j == 0 and gold[j].item() > 1):
+                if gold[j].item() in begin_ids:
                     gold_entities_num += 1
-
-            # Predict.
+ 
             for j in range(pred.size()[0]):
-                if (j > 0 and pred[j-1].item() <= 1 and pred[j].item() > 1 and gold[j].item() != 0) or (j == 0 and pred[j].item() > 1):
+                if pred[j].item() in begin_ids and gold[j].item() != labels_map["[PAD]"]:
                     pred_entities_num += 1
 
             pred_entities_pos = []
             gold_entities_pos = []
             start, end = 0, 0
 
-            # Correct.
             for j in range(gold.size()[0]):
-                if (j > 0 and gold[j-1].item() <= 1 and gold[j].item() > 1) or (j == 0 and gold[j].item() > 1):
+                if gold[j].item() in begin_ids:
                     start = j
-                    for k in range(j, gold.size()[0]):
-                        if gold[k].item() <= 1:
+                    for k in range(j+1, gold.size()[0]):
+                        if gold[k].item() == labels_map["[PAD]"] or gold[k].item() == labels_map["O"] or gold[k].item() in begin_ids:
                             end = k - 1
                             break
                     else:
                         end = gold.size()[0] - 1
                     gold_entities_pos.append((start, end))
-
-            # Predict.
+            
             for j in range(pred.size()[0]):
-                if (j > 0 and pred[j-1].item() <= 1 and pred[j].item() > 1) or (j == 0 and pred[j].item() > 1):
-                        start = j
-                        for k in range(j, pred.size()[0]):
-                            if pred[k].item() <= 1:
-                                end = k - 1
-                                break
-                        else:
-                            end = pred.size()[0] - 1
-                        pred_entities_pos.append((start, end))
+                if pred[j].item() in begin_ids and gold[j].item() != labels_map["[PAD]"]:
+                    start = j
+                    for k in range(j+1, pred.size()[0]):
+                        if pred[k].item() == labels_map["[PAD]"] or pred[k].item() == labels_map["O"] or pred[k].item() in begin_ids:
+                            end = k - 1
+                            break
+                    else:
+                        end = pred.size()[0] - 1
+                    pred_entities_pos.append((start, end))
 
             for entity in pred_entities_pos:
                 if entity not in gold_entities_pos:
@@ -365,7 +357,7 @@ def main():
             best_f1 = f1
             save_model(model, args.output_model_path)
         else:
-            break
+            continue
 
 
     # Evaluation phase.
@@ -381,3 +373,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
