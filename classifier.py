@@ -452,7 +452,7 @@ def main():
             best_result = result
             save_model(model, args.output_model_path)
         else:
-            break
+            continue
 
 
     # Evaluation phase.
