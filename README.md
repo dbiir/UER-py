@@ -152,7 +152,18 @@ It turns out that the result of Google's model is 92.6; The result of *rmrb_mode
 <br/>
 
 ## Datasets
-This project includes a range of Chinese datasets. Small-scale datasets can be downloaded at [datasets_zh.zip](https://share.weiyun.com/5LQcJJP). datasets_zh.zip contains 7 datasets: XNLI, LCQMC, MSRA-NER, ChnSentiCorp, and nlpcc-dbqa are obtained from [Baidu ERNIE](https://github.com/PaddlePaddle/LARK/tree/develop/ERNIE); Book review (from BNU) and Shopping are two sentiment analysis datasets. Large-scale datasets can be found in [glyph's github project](https://github.com/zhangxiangxiao/glyph).
+This project includes a range of Chinese datasets: XNLI, LCQMC, MSRA-NER, ChnSentiCorp, and NLPCC-DBQA are obtained from [Baidu ERNIE](https://github.com/PaddlePaddle/LARK/tree/develop/ERNIE); Douban book review is obtained from [BNU](https://embedding.github.io/evaluation/) and Online shopping review are organized by ourself. Large-scale datasets can be found in [glyph's github project](https://github.com/zhangxiangxiao/glyph).
+
+<table>
+<tr align="center"><td> Dataset <td> Link
+<tr align="center"><td> ChnSentiCorp <td> https://share.weiyun.com/5x5yDeP
+<tr align="center"><td> Douban book review <td> https://share.weiyun.com/5w5ky3W 
+<tr align="center"><td> Online shopping review <td> https://share.weiyun.com/5xxYiig
+<tr align="center"><td> LCQMC <td> https://embedding.github.io/evaluation/
+<tr align="center"><td> XNLI <td> https://share.weiyun.com/5hQUfx8
+<tr align="center"><td> MSRA-NER <td> https://share.weiyun.com/54D8w7i
+<tr align="center"><td> NLPCC-DBQA <td> https://share.weiyun.com/5HJMbih
+</table>
 
 <br/>
 
@@ -475,7 +486,7 @@ where *story_beginning* contains the beginning of a text. One can use any models
 
 ## Scripts
 <table>
-<tr align="center"><th> Scripts <th> Function description
+<tr align="center"><th> Script <th> Function description
 <tr align="center"><td> average_model.py <td> Take the average of pre-trained models. A frequently-used ensemble strategy for deep learning models 
 <tr align="center"><td> build_vocab.py <td> Build vocabulary (multi-processing supported)
 <tr align="center"><td> check_model.py <td> Check the model (single GPU or multiple GPUs)
