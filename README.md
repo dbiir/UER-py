@@ -5,7 +5,7 @@
 
 <img src="uer-logo.jpg" width="390" hegiht="390" align=left />
 
-Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of different pre-training models (e.g. BERT), and provides interfaces for users to further extend upon. UER-py also incorporates many mechanisms for better performance and efficiency. It has been tested on several Chinese datasets and should match or even outperform Google's TF implementation.
+Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of different pre-training models (e.g. BERT, GPT, ELMO), and provides interfaces for users to further extend upon. With UER-py, a model zoo is built which contains pre-trained models based on different corpora, encoders, and targets. 
 
 **Update: Now [pretrained GPT model (512 length)](https://share.weiyun.com/51nTP8V) is available. One can use *generate.py* to generate text. 
 ELMO (bilstm encoder + bilm target) is supported by UER. 
@@ -29,12 +29,12 @@ Table of Contents
 
 ## Features
 UER-py has the following features:
-- __Reproducibility.__ UER-py is able to reproduce the results of existing pre-training models (such as [Google BERT](https://github.com/google-research/bert)).
+- __Reproducibility.__ UER-py has been tested on several datasets and should match the performances of the original implementations.
 - __Multi-GPU.__ UER-py supports CPU mode, single GPU mode, and distributed training mode. 
-- __Model modularity.__ UER-py is divided into multiple components: subencoder, encoder, target, and fine-tuning. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules with as few restrictions as possible.
-- __Efficiency.__ UER-py refines its pre-processing, pre-training, and fine-tuning stages, which largely improves speed and needs less memory. 
-- __SOTA results.__ Our works further improve the results upon Google BERT, providing new baselines for a range of datasets.
+- __Model modularity.__ UER-py is divided into multiple components: subencoder, encoder, target, and downstream task fine-tuning. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules with as few restrictions as possible.
+- __Efficiency.__ UER-py refines its pre-processing, pre-training, and fine-tuning stages, which largely improves speed and needs less memory.
 - __Chinese model zoo.__ We are pre-training models with different corpora, encoders, and targets. Selecting proper pre-training models is beneficial to the performance of downstream tasks.
+- __SOTA results.__ Our works further improve the results upon Google BERT, providing new baselines for a range of datasets.
 
 
 <br/>
@@ -159,7 +159,7 @@ This project includes a range of Chinese datasets: XNLI, LCQMC, MSRA-NER, ChnSen
 <tr align="center"><td> ChnSentiCorp <td> https://share.weiyun.com/5x5yDeP
 <tr align="center"><td> Douban book review <td> https://share.weiyun.com/5w5ky3W 
 <tr align="center"><td> Online shopping review <td> https://share.weiyun.com/5xxYiig
-<tr align="center"><td> LCQMC <td> https://embedding.github.io/evaluation/
+<tr align="center"><td> LCQMC <td> https://share.weiyun.com/5Fmf2SZ
 <tr align="center"><td> XNLI <td> https://share.weiyun.com/5hQUfx8
 <tr align="center"><td> MSRA-NER <td> https://share.weiyun.com/54D8w7i
 <tr align="center"><td> NLPCC-DBQA <td> https://share.weiyun.com/5HJMbih
