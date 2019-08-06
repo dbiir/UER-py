@@ -400,7 +400,7 @@ The example of using run_ner.py：
 ```
 python3 run_ner.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                   --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
-                  --epochs_num 5 --batch_size 32 --encoder bert
+                  --epochs_num 5 --batch_size 16 --encoder bert
 ```
 
 #### Machine reading comprehension
