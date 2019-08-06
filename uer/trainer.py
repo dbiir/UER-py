@@ -60,7 +60,7 @@ def worker(gpu_id, gpu_ranks, args, model):
     set_seed(args.seed)
 
     if gpu_ranks is None:
-        train_loader = globals()[args.target.capitalize() + "DataLoader"](args, args.dataset_path, args.batch_size, gpu_id, 1, True)
+        train_loader = globals()[args.target.capitalize() + "DataLoader"](args, args.dataset_path, args.batch_size, 0, 1, True)
     else:
         train_loader = globals()[args.target.capitalize() + "DataLoader"](args, args.dataset_path, args.batch_size, gpu_id, len(gpu_ranks), True)
 

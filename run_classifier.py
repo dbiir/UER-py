@@ -98,7 +98,7 @@ def main():
     parser.add_argument("--sub_layers_num", type=int, default=2, help="The number of subencoder layers.")
 
     # Tokenizer options.
-    parser.add_argument("--tokenizer", choices=["bert", "char", "word", "space"], default="bert",
+    parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
                         help="Specify the tokenizer." 
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."
