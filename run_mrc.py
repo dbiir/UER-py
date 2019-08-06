@@ -73,7 +73,7 @@ def main():
                         help="Path of the trainset.")
     parser.add_argument("--dev_path", type=str, required=True,
                         help="Path of the devset.") 
-    parser.add_argument("--test_path", type=str, required=True,
+    parser.add_argument("--test_path", type=str,
                         help="Path of the testset.")
     parser.add_argument("--config_path", default="./models/google_config.json", type=str,
                         help="Path of the config file.")
@@ -548,14 +548,15 @@ def main():
             break
 
     # Evaluation phase.
-    print("Start evaluation.")
+    if args.test_path:
+        print("Start evaluation.")
 
-    if torch.cuda.device_count() > 1:
-        model.module.load_state_dict(torch.load(args.output_model_path))
-    else:
-        model.load_state_dict(torch.load(args.output_model_path))
+        if torch.cuda.device_count() > 1:
+            model.module.load_state_dict(torch.load(args.output_model_path))
+        else:
+            model.load_state_dict(torch.load(args.output_model_path))
 
-    evaluate(args,False)
+        evaluate(args,False)
 
 if __name__ == "__main__":
     main()

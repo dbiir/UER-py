@@ -95,13 +95,13 @@ mv models/book_review_model.bin-20000 models/book_review_model.bin
 Notice that the model trained by *pretrain.py* is attacted with the suffix which records the training step. We could remove the suffix for ease of use.
 Finally, we do classification. We can use *google_model.bin*:
 ```
-python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+python3 run_classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                       --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
                       --epochs_num 3 --batch_size 32 --encoder bert
 ```
 or use our [*book_review_model.bin*](https://share.weiyun.com/52BEFs2), which is the output of pretrain.py：
 ```
-python3 classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_vocab.txt \
+python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_vocab.txt \
                       --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
                       --epochs_num 3 --batch_size 32 --encoder bert
 ``` 
@@ -119,7 +119,7 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.t
 
 mv models/book_review_mlm_model.bin-20000 models/book_review_mlm_model.bin
 
-python3 classifier.py --pretrained_model_path models/book_review_mlm_model.bin --vocab_path models/google_vocab.txt \
+python3 run_classifier.py --pretrained_model_path models/book_review_mlm_model.bin --vocab_path models/google_vocab.txt \
                       --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
                       --epochs_num 3 --batch_size 32 --encoder bert
 ```
@@ -129,21 +129,21 @@ We could search proper pre-trained models in [Chinese model zoo](#chinese_model_
 
 BERT is really slow. It could be great if we can speed up the model and still achieve competitive performance. We select a 2-layers LSTM encoder to substitute 12-layers Transformer encoder. We could download [a model pre-trained with LSTM encoder and language modeling (LM) + classification (CLS) targets](https://share.weiyun.com/5B671Ik):
 ```
-python3 classifier.py --pretrained_model_path models/lstm_reviews_model.bin --vocab_path models/google_vocab.txt \
+python3 run_classifier.py --pretrained_model_path models/lstm_reviews_model.bin --vocab_path models/google_vocab.txt \
                       --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
                       --epochs_num 3  --batch_size 64 --encoder lstm --pooling mean --config_path models/rnn_config.json --learning_rate 1e-3
 ```
 We can achieve 86.5 accuracy on testset, which is also a competitive result. Using LSTM without pre-training can only achieve 80.2 accuracy. In practice, above model is around 10 times faster than BERT. One can see Chinese model zoo section for more detailed information about above pre-trained LSTM model.
 
-Besides classification, UER-py also provides scripts for other downstream tasks. We could use tagger.py for sequence labeling:
+Besides classification, UER-py also provides scripts for other downstream tasks. We could run_ner.py for named entity recognition:
 ```
-python3 tagger.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+python3 run_ner.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                   --train_path datasets/msra/train.tsv --dev_path datasets/msra/dev.tsv --test_path datasets/msra/test.tsv \
                   --epochs_num 5 --batch_size 16 --encoder bert
 ```
 We could download [a model pre-trained on RenMinRiBao (as known as People's Daily, a news corpus)](https://share.weiyun.com/5JWVjSE) and finetune on it: 
 ```
-python3 tagger.py --pretrained_model_path models/rmrb_model.bin --vocab_path models/google_vocab.txt \
+python3 run_ner.py --pretrained_model_path models/rmrb_model.bin --vocab_path models/google_vocab.txt \
                   --train_path datasets/msra/train.tsv --dev_path datasets/msra/dev.tsv --test_path datasets/msra/test.tsv \
                   --epochs_num 5 --batch_size 16 --encoder bert
 ```
@@ -163,6 +163,8 @@ This project includes a range of Chinese datasets: XNLI, LCQMC, MSRA-NER, ChnSen
 <tr align="center"><td> XNLI <td> https://share.weiyun.com/5hQUfx8
 <tr align="center"><td> MSRA-NER <td> https://share.weiyun.com/54D8w7i
 <tr align="center"><td> NLPCC-DBQA <td> https://share.weiyun.com/5HJMbih
+<tr align="center"><td> Sina Weibo <td> https://share.weiyun.com/5lEsv0w
+<tr align="center"><td> THUCNews <td> https://share.weiyun.com/5jPpgBr
 </table>
 
 <br/>
@@ -190,10 +192,9 @@ UER-py/
     |
     |--preprocess.py
     |--pretrain.py
-    |--classifier.py
-    |--cloze.py
-    |--tagger.py
-    |--feature_extractor.py
+    |--run_classifier.py
+    |--run_mrc.py
+    |--run_ner.py
     |--README.md
 ```
 
@@ -335,9 +336,9 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.t
 Currently, UER-py consists of 4 downstream tasks, i.e. classification, sequence labeling, cloze test, feature extractor. The encoder of downstream task should be coincident with the pre-trained model.
 
 #### Classification
-classifier.py adds two feedforward layers upon encoder layer.
+run_classifier.py adds two feedforward layers upon encoder layer.
 ```
-usage: classifier.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
+usage: run_classifier.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                      [--output_model_path OUTPUT_MODEL_PATH]
                      [--vocab_path VOCAB_PATH] --train_path TRAIN_PATH
                      --dev_path DEV_PATH --test_path TEST_PATH
@@ -355,29 +356,29 @@ usage: classifier.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                      [--report_steps REPORT_STEPS] [--seed SEED]
                      [--mean_reciprocal_rank]
 ```
-The example of using classifier.py：
+The example of using run_classifier.py：
 ```
-python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+python3 run_classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                       --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
                       --epochs_num 3 --batch_size 64 --encoder bert
 ```
-The example of using classifier.py for pair classification:
+The example of using run_classifier.py for pair classification:
 ```
-python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+python3 run_classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                       --train_path datasets/lcqmc/train.tsv --dev_path datasets/lcqmc/dev.tsv --test_path datasets/lcqmc/test.tsv \
                       --epochs_num 3 --batch_size 64 --encoder bert
 ```
-The example of using classifier.py for dbqa:
+The example of using run_classifier.py for document-based question answering (DBQA):
 ```
-python3 classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+python3 run_classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                       --train_path datasets/dbqa/train.tsv --dev_path datasets/dbqa/dev.tsv --test_path datasets/dbqa/test.tsv \
                       --epochs_num 3 --batch_size 64 --encoder bert --mean_reciprocal_rank
 ```
 
 #### Sequence labeling
-tagger.py adds a feedforward layer upon encoder layer.
+run_ner.py adds two feedforward layers upon encoder layer.
 ```
-usage: tagger.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
+usage: run_ner.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                  [--output_model_path OUTPUT_MODEL_PATH]
                  [--vocab_path VOCAB_PATH] [--train_path TRAIN_PATH]
                  [--dev_path DEV_PATH] [--test_path TEST_PATH]
@@ -392,17 +393,49 @@ usage: tagger.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                  [--dropout DROPOUT] [--epochs_num EPOCHS_NUM]
                  [--report_steps REPORT_STEPS] [--seed SEED]
 ```
-The example of using tagger.py：
+The example of using run_ner.py：
 ```
-python3 tagger.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+python3 run_ner.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                   --train_path datasets/msra/train.tsv --dev_path datasets/msra/dev.tsv --test_path datasets/msra/test.tsv \
                   --epochs_num 5 --batch_size 32 --encoder bert
 ```
 
-#### Cloze test
-cloze.py predicts masked words. Top n words are returned.
+#### Machine reading comprehension
+run_mrc.py adds two feedforward layers upon encoder layer.
+The example of using run_mrc.py：
 ```
-usage: cloze.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
+python3 run_mrc.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt 
+                   --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json --test_path datasets/cmrc2018/test.json 
+                   --epochs_num 2 --batch_size 4 --seq_length 512 --encoder bert
+```
+The train.json, dev.json, and test.json are of squad-style. Trainset and devset are available [here](https://github.com/ymcui/cmrc2018). Testset is not publicly available. Users can remove --test_path option.
+
+<br/>
+
+## Scripts
+
+UER-py provides abundant tool scripts for pre-training models.
+This section firstly summarizes tool scripts and their functions, and then provides using examples of some scripts.
+
+### Scripts overview
+
+<table>
+<tr align="center"><th> Script <th> Function description
+<tr align="center"><td> average_model.py <td> Take the average of pre-trained models. A frequently-used ensemble strategy for deep learning models 
+<tr align="center"><td> build_vocab.py <td> Build vocabulary (multi-processing supported)
+<tr align="center"><td> check_model.py <td> Check the model (single GPU or multiple GPUs)
+<tr align="center"><td> diff_vocab.py <td> Compare two vocabularies
+<tr align="center"><td> dynamic_vocab_adapter.py <td> Change the pre-trained model according to the vocabulary. It can save memory in fine-tuning stage since task-specific vocabulary is much smaller than general-domain vocabulary 
+<tr align="center"><td> multi_single_convert.py <td> convert the model (single GPU or multiple GPUs)
+<tr align="center"><td> topn_words_indep.py <td> Finding nearest neighbours with context-independent word embedding
+<tr align="center"><td> topn_words_dep.py <td> Finding nearest neighbours with context-dependent word embedding
+</table>
+
+
+### Cloze test
+cloze_test.py predicts masked words. Top n words are returned.
+```
+usage: cloze_test.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                 [--vocab_path VOCAB_PATH] [--input_path INPUT_PATH]
                 [--output_path OUTPUT_PATH] [--config_path CONFIG_PATH]
                 [--batch_size BATCH_SIZE] [--seq_length SEQ_LENGTH]
@@ -412,14 +445,14 @@ usage: cloze.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                 [--subencoder_type {avg,lstm,gru,cnn}]
                 [--tokenizer {bert,char,word,space}] [--topn TOPN]
 ```
-The example of using cloze.py：
+The example of using cloze_test.py：
 ```
-python3 cloze.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+python3 scripts/cloze_test.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
                  --input_path datasets/cloze_input.txt --output_path output.txt
 
 ```
 
-#### Feature extractor
+### Feature extractor
 feature_extractor.py extracts sentence embeddings.
 ```
 usage: feature_extractor.py [-h] --input_path INPUT_PATH --model_path
@@ -437,7 +470,7 @@ usage: feature_extractor.py [-h] --input_path INPUT_PATH --model_path
 ```
 The example of using feature_extractor.py：
 ```
-python3 feature_extractor.py --input_path datasets/cloze_input.txt --pretrained_model_path models/google_model.bin \
+python3 scripts/feature_extractor.py --input_path datasets/cloze_input.txt --pretrained_model_path models/google_model.bin \
                              --vocab_path models/google_vocab.txt --output_path output.npy
 ```
 
@@ -475,27 +508,11 @@ Sentence and word are splitted by \t.
 ### Text generator
 We could use *generate.py* to generate text. Given a few words or sentences, *generate.py* can continue writing. The example of using *generate.py*:
 ```
-python3 generate.py --pretrained_model_path models/gpt_model.bin --vocab_path models/google_vocab.txt 
+python3 scripts/generate.py --pretrained_model_path models/gpt_model.bin --vocab_path models/google_vocab.txt 
                     --input_path story_beginning.txt --output_path story_full.txt --config_path models/google_config.json 
                     --encoder gpt --target lm --seq_length 128  
 ```
 where *story_beginning* contains the beginning of a text. One can use any models pre-trained with LM target, such as [GPT trained on mixed large corpus](https://share.weiyun.com/51nTP8V). By now we only provide a vanilla version of generator. More mechanisms will be added for better performance and efficiency.
-
-
-<br/>
-
-## Scripts
-<table>
-<tr align="center"><th> Script <th> Function description
-<tr align="center"><td> average_model.py <td> Take the average of pre-trained models. A frequently-used ensemble strategy for deep learning models 
-<tr align="center"><td> build_vocab.py <td> Build vocabulary (multi-processing supported)
-<tr align="center"><td> check_model.py <td> Check the model (single GPU or multiple GPUs)
-<tr align="center"><td> diff_vocab.py <td> Compare two vocabularies
-<tr align="center"><td> dynamic_vocab_adapter.py <td> Change the pre-trained model according to the vocabulary. It can save memory in fine-tuning stage since task-specific vocabulary is much smaller than general-domain vocabulary 
-<tr align="center"><td> multi_single_convert.py <td> convert the model (single GPU or multiple GPUs)
-<tr align="center"><td> topn_words_indep.py <td> Finding nearest neighbours with context-independent word embedding
-<tr align="center"><td> topn_words_dep.py <td> Finding nearest neighbours with context-dependent word embedding
-</table>
 
 
 <br/>
