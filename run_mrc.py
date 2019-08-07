@@ -274,7 +274,7 @@ def main():
 
 
     # Evaluation function.
-    def evaluate(args, is_dev):
+    def evaluate(args, is_test):
         # some calculation functions
         def mixed_segmentation(in_str, rm_punc=False):
             in_str = str(in_str).lower().strip()
@@ -373,12 +373,12 @@ def main():
                     best_end_prediction = score_list[i][2]
             return index_max, best_start_prediction,best_end_prediction
 
-        if is_dev:
-            examples = read_examples(args.dev_path)
+        if is_test:
+            examples = read_examples(args.test_path)
             dataset = convert_examples_to_dataset(examples,args)
 
         else:
-            examples = read_examples(args.test_path)
+            examples = read_examples(args.dev_path)
             dataset = convert_examples_to_dataset(examples,args)
         
         input_ids = torch.LongTensor([sample[0] for sample in dataset])
@@ -389,7 +389,7 @@ def main():
         batch_size = args.batch_size
         instances_num = input_ids.size()[0]
         
-        if not is_dev:
+        if is_test:
             print("The number of evaluation instances: ", instances_num)
         model.eval()
         start_logits_all = []
@@ -540,7 +540,7 @@ def main():
                 total_loss = 0.
             loss.backward()
             optimizer.step()
-        result = evaluate(args, True)
+        result = evaluate(args, False)
         if result > best_result:
             best_result = result
             save_model(model, args.output_model_path)
@@ -556,7 +556,7 @@ def main():
         else:
             model.load_state_dict(torch.load(args.output_model_path))
 
-        evaluate(args,False)
+        evaluate(args, True)
 
 if __name__ == "__main__":
     main()
