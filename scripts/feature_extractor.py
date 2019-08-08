@@ -7,6 +7,9 @@ import argparse
 import numpy as np
 import torch.nn as nn
 
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
+
 from uer.utils.vocab import Vocab
 from uer.utils.constants import *
 from uer.utils.config import load_hyperparam
