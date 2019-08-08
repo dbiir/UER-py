@@ -7,6 +7,10 @@ import sys
 import torch
 import argparse
 import random
+
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
+
 from uer.utils.act_fun import gelu
 from uer.utils.constants import *
 from uer.utils.tokenizer import *
