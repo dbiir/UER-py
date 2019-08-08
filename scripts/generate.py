@@ -1,12 +1,15 @@
 # -*- encoding:utf-8 -*-
 """
-  This script provides an exmaple to wrap UER-py for cloze test.
-  We randomly mask some characters and use BERT to predict.
+  This script provides an exmaple of text generator.
 """
 import sys
 import torch
 import argparse
 import random
+
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
+
 from uer.utils.act_fun import gelu
 from uer.utils.constants import *
 from uer.utils.tokenizer import *
