@@ -14,7 +14,7 @@ class ClsTarget(nn.Module):
         self.vocab_size = vocab_size
         self.hidden_size = args.hidden_size
 
-        self.linear_1 = nn.Linear(args.hidden_size, aargs.hidden_size)
+        self.linear_1 = nn.Linear(args.hidden_size, args.hidden_size)
         self.linear_2 = nn.Linear(args.hidden_size, args.labels_num)
         self.softmax = nn.LogSoftmax(dim=-1)
         self.criterion = nn.NLLLoss()
