@@ -10,6 +10,7 @@ import torch.distributed as dist
 import torch.multiprocessing as mp
 from torch.nn.parallel import DistributedDataParallel
 
+from uer.model_loader import load_model
 from uer.model_saver import save_model
 from uer.model_builder import build_model
 from uer.utils.optimizers import BertAdam
@@ -32,7 +33,7 @@ def train_and_validate(args):
     # Load or initialize parameters.
     if args.pretrained_model_path is not None:
         # Initialize with pretrained model.
-        model.load_state_dict(torch.load(args.pretrained_model_path), strict=False)  
+        model = load_model(model, args.pretrained_model_path) 
     else:
         # Initialize with normal distribution.
         for n, p in list(model.named_parameters()):

@@ -16,6 +16,7 @@ from uer.utils.constants import *
 from uer.utils.vocab import Vocab
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
+from uer.model_loader import load_model
 
 
 class BertTagger(nn.Module):
@@ -77,7 +78,7 @@ def main():
     # Path options.
     parser.add_argument("--pretrained_model_path", default=None, type=str,
                         help="Path of the pretrained model.")
-    parser.add_argument("--output_model_path", default="./models/tagger_model.bin", type=str,
+    parser.add_argument("--output_model_path", default="./models/ner_model.bin", type=str,
                         help="Path of the output model.")
     parser.add_argument("--vocab_path", default="./models/google_vocab.txt", type=str,
                         help="Path of the vocabulary file.")
@@ -85,7 +86,7 @@ def main():
                         help="Path of the trainset.")
     parser.add_argument("--dev_path", type=str, required=True,
                         help="Path of the devset.")
-    parser.add_argument("--test_path", type=str, required=True,
+    parser.add_argument("--test_path", type=str,
                         help="Path of the testset.")
     parser.add_argument("--config_path", default="./models/google_config.json", type=str,
                         help="Path of the config file.")
@@ -304,7 +305,6 @@ def main():
 
         return f1
 
-
     # Training phase.
     print("Start training.")
     instances = read_dataset(args.train_path)
@@ -359,16 +359,11 @@ def main():
         else:
             continue
 
-
     # Evaluation phase.
-    print("Start evaluation.")
-
-    if torch.cuda.device_count() > 1:
-        model.module.load_state_dict(torch.load(args.output_model_path))
-    else:
-        model.load_state_dict(torch.load(args.output_model_path))
-
-    evaluate(args, True)
+    if args.test_path is not None:
+        print("Test set evaluation.")
+        model = load_model(model, args.output_model_path)
+        evaluate(args, True)
 
 
 if __name__ == "__main__":

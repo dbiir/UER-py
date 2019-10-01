@@ -548,15 +548,11 @@ def main():
             break
 
     # Evaluation phase.
-    if args.test_path:
-        print("Start evaluation.")
-
-        if torch.cuda.device_count() > 1:
-            model.module.load_state_dict(torch.load(args.output_model_path))
-        else:
-            model.load_state_dict(torch.load(args.output_model_path))
-
+    if args.test_path is not None:
+        print("Test set evaluation.")
+        model = load_model(model, args.output_model_path)
         evaluate(args, True)
+
 
 if __name__ == "__main__":
     main()
