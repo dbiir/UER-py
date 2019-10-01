@@ -1,16 +1,9 @@
 # -*- encoding:utf-8 -*-
 import os
 import torch
-from uer.utils.constants import *
 from multiprocessing import Pool
-
-
-def count_line(corpus_path):
-    count = 0
-    with open(corpus_path, mode="r", encoding="utf-8") as f:
-        for line in f:
-            count += 1
-    return count
+from uer.utils.constants import *
+from uer.utils.misc import count_lines
 
 
 class Vocab(object):
@@ -101,7 +94,7 @@ class Vocab(object):
     def build(self, corpus_path, tokenizer, workers_num=1, min_count=1):
         """ Build vocabulary from the given corpus. """
         print("Start %d workers for building vocabulary..." % workers_num)
-        lines_num = count_line(corpus_path)
+        lines_num = count_lines(corpus_path)
         pool = Pool(workers_num)
         vocab_list = []
         for i in range(workers_num):

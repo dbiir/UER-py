@@ -8,6 +8,7 @@ from uer.utils.vocab import Vocab
 from uer.utils.data import *
 from uer.utils.tokenizer import *
 
+
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     

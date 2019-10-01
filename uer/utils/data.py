@@ -6,6 +6,7 @@ import random
 import pickle
 from multiprocessing import Pool
 from uer.utils.constants import *
+from uer.utils.misc import count_lines
 from uer.utils.seed import set_seed
 
 
@@ -55,14 +56,6 @@ def merge_dataset(dataset_path, workers_num, instances_buffer_size):
         tmp_dataset_reader.close()
         os.remove("dataset-tmp-"+str(i)+".pt")
     f_writer.close()
-
-
-def count_lines(file_path):
-    lines_num = 0
-    with open(file_path, mode="r", encoding="utf-8") as f:
-        for line in f:
-            lines_num += 1
-    return lines_num
 
 
 class BertDataset(object):
