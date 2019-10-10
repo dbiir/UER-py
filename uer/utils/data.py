@@ -477,7 +477,6 @@ class BilmDataLoader(DataLoader):
 
 
 class ClsDataset(Dataset):
-
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
         set_seed(self.seed)
@@ -642,4 +641,3 @@ class MlmDataLoader(DataLoader):
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt), \
                 torch.LongTensor(seg)
-

@@ -103,7 +103,6 @@ def main():
                         help="Specify the tokenizer." 
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."
-                             "Word tokenizer supports online word segmentation based on jieba segmentor."
                              "Space tokenizer segments sentences into words according to space."
                              )
 

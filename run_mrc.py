@@ -102,11 +102,10 @@ def main():
     parser.add_argument("--sub_layers_num", type=int, default=2, help="The number of subencoder layers.")
 
     # Tokenizer options.
-    parser.add_argument("--tokenizer", choices=["bert", "char", "word", "space"], default="char",
+    parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="char",
                         help="Specify the tokenizer." 
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."
-                             "Word tokenizer supports online word segmentation based on jieba segmentor."
                              "Space tokenizer segments sentences into words according to space."
                              )
 
@@ -545,7 +544,7 @@ def main():
             best_result = result
             save_model(model, args.output_model_path)
         else:
-            break
+            continue
 
     # Evaluation phase.
     if args.test_path is not None:
