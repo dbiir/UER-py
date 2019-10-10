@@ -37,7 +37,8 @@ class BilstmEncoder(nn.Module):
         emb_backward = flip(emb, 1)
         hidden_backward = self.init_hidden(emb_backward.size(0), emb_backward.device)
         output_backward, hidden_backward = self.rnn_backward(emb_backward, hidden_backward) 
-        output_backward = self.drop(output_backward) 
+        output_backward = self.drop(output_backward)
+        output_backward = flip(output_backward, 1)
 
         return torch.cat([output_forward, output_backward], 2)
 

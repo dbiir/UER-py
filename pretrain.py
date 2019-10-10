@@ -34,6 +34,8 @@ def main():
                         help="Specific steps to accumulate gradient.")
     parser.add_argument("--batch_size", type=int, default=32,
                         help="Training batch size. The actual batch_size is [batch_size x world_size x accumulation_steps].")
+    parser.add_argument("--instances_buffer_size", type=int, default=25600,
+                        help="The buffer size of instances in memory.")
 
     # Model options.
     parser.add_argument("--emb_size", type=int, default=768, help="Embedding dimension.")
@@ -50,7 +52,7 @@ def main():
                                                    "rcnn", "crnn", "gpt", "bilstm"], \
                                                    default="bert", help="Encoder type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s", "bilm"], default="bert",
+    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "bilm"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--labels_num", type=int, default=2, help="Specific to classification target.")
 

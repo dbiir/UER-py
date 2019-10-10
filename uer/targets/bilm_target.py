@@ -32,7 +32,7 @@ class BilmTarget(nn.Module):
         
         assert type(tgt) == tuple
         tgt_forward, tgt_backward = tgt[0], tgt[1]
-        tgt_backward = flip(tgt_backward, 1)
+        #tgt_backward = flip(tgt_backward, 1)
 
         # Forward.
         output_forward = self.output_layer(memory_bank[:,:,:self.hidden_size])        
