@@ -11,31 +11,29 @@ from uer.utils.seed import set_seed
 
 
 def mask_seq(src, vocab_size):
-        """
-        Mask input sequence for MLM task.
-        args:
-            src: a list of token ids.
-        """
-        tgt_mlm = []
-        for (i, token) in enumerate(src):
-            if token == CLS_ID or token == SEP_ID:
-                tgt_mlm.append(PAD_ID)
-                continue
-            prob = random.random()
-            if prob < 0.15:
-                prob /= 0.15
-                if prob < 0.8:
-                    src[i] = MASK_ID
-                elif prob < 0.9:
-                    while True:
-                        rdi = random.randint(1, vocab_size-1)
-                        if rdi not in [CLS_ID, SEP_ID, MASK_ID]:
-                            break
-                    src[i] = rdi
-                tgt_mlm.append(token)
-            else:
-                tgt_mlm.append(PAD_ID)
-        return src, tgt_mlm
+    """
+    mask input sequence for MLM task
+    args:
+        src: a list of tokens
+        vocab_size: the vocabulary size
+    """
+    tgt_mlm = []
+    for (i, token) in enumerate(src):
+        if token == CLS_ID or token == SEP_ID:
+            continue
+        prob = random.random()
+        if prob < 0.15:
+            prob /= 0.15
+            if prob < 0.8:
+                src[i] = MASK_ID
+            elif prob < 0.9:
+                while True:
+                    rdi = random.randint(1, vocab_size-1)
+                    if rdi not in [CLS_ID, SEP_ID, MASK_ID]:
+                        break
+                src[i] = rdi
+            tgt_mlm.append((i, token))
+    return src, tgt_mlm
 
 
 def merge_dataset(dataset_path, workers_num):
@@ -255,30 +253,28 @@ class BertDataset(Dataset):
                     # assert len(tokens_b) >= 1
 
                     src = []
-                    seg = []
+
                     src.append(CLS_ID)
-                    seg.append(1)
                     for token in tokens_a:
-                      src.append(token)
-                      seg.append(1)
+                        src.append(token)
 
                     src.append(SEP_ID)
-                    seg.append(1)
+
+                    seg_pos = [len(src)]
 
                     for token in tokens_b:
                         src.append(token)
-                        seg.append(2)
+            
                     src.append(SEP_ID)
-                    seg.append(2)
+
+                    seg_pos.append(len(src))
 
                     src, tgt_mlm = mask_seq(src, len(self.vocab))
                     
                     while len(src) != self.seq_length:
                         src.append(PAD_ID)
-                        tgt_mlm.append(PAD_ID)
-                        seg.append(PAD_ID)
 
-                    instance = (src, tgt_mlm, is_random_next, seg)
+                    instance = (src, tgt_mlm, is_random_next, seg_pos)
                     instances.append(instance)
                 current_chunk = []
                 current_length = 0
@@ -317,11 +313,20 @@ class BertDataLoader(DataLoader):
             tgt_mlm = []
             is_next = []
             seg = []
+
+            masked_words_num = 0
+            for ins in instances:
+                masked_words_num += len(ins[1])
+            if masked_words_num == 0:
+                continue
+            
             for ins in instances:
                 src.append(ins[0])
-                tgt_mlm.append(ins[1])
+                tgt_mlm.append([0]*len(ins[0]))
+                for mask in ins[1]:
+                    tgt_mlm[-1][mask[0]] = mask[1]
                 is_next.append(ins[2])
-                seg.append(ins[3])
+                seg.append([1]*ins[3][0] + [2]*(ins[3][1]-ins[3][0]) + [PAD_ID]*(len(ins[0])-ins[3][1]))
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt_mlm), \

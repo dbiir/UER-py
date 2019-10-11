@@ -51,19 +51,29 @@ def train_and_validate(args):
         worker(None, None, args, model)
 
 
-def worker(gpu_id, gpu_ranks, args, model):
+def worker(proc_id, gpu_ranks, args, model):
     """
     Args:
-        gpu_id: The id of GPU for single GPU mode;
-            The id of process (and GPU) for multiprocessing distributed mode.
+        proc_id: The id of GPU for single GPU mode;
+                 The id of process (and GPU) for multiprocessing distributed mode.
         gpu_ranks: List of ranks of each process.
     """
     set_seed(args.seed)
 
-    if gpu_ranks is None:
-        train_loader = globals()[args.target.capitalize() + "DataLoader"](args, args.dataset_path, args.batch_size, 0, 1, True)
+    if args.dist_train:
+        rank = gpu_ranks[proc_id]
+        gpu_id = proc_id
+    elif args.single_gpu:
+        rank = None
+        gpu_id = proc_id
     else:
-        train_loader = globals()[args.target.capitalize() + "DataLoader"](args, args.dataset_path, args.batch_size, gpu_id, len(gpu_ranks), True)
+        rank = None
+        gpu_id = None
+
+    if args.dist_train:
+        train_loader = globals()[args.target.capitalize() + "DataLoader"](args, args.dataset_path, args.batch_size, rank, args.world_size, True)
+    else:
+        train_loader = globals()[args.target.capitalize() + "DataLoader"](args, args.dataset_path, args.batch_size, 0, 1, True)
 
     if gpu_id is not None: 
         torch.cuda.set_device(gpu_id)
@@ -78,9 +88,7 @@ def worker(gpu_id, gpu_ranks, args, model):
     ]
     optimizer = BertAdam(optimizer_grouped_parameters, lr=args.learning_rate, warmup=args.warmup, t_total=args.total_steps)
 
-    rank = -1 # Each process has a unique rank in multiprocessing distributed mode.
     if args.dist_train:
-        rank = gpu_ranks[gpu_id]
         # Initialize multiprocessing distributed training environment.
         dist.init_process_group(backend=args.backend,
                                 init_method=args.master_ip,
@@ -104,6 +112,7 @@ def train_bert(args, gpu_id, rank, loader, model, optimizer):
     total_correct_nsp, total_instances = 0., 0.
     steps = 1
     total_steps = args.total_steps
+    done_tokens = 0
     loader_iter = iter(loader)
 
     while True:
@@ -121,7 +130,7 @@ def train_bert(args, gpu_id, rank, loader, model, optimizer):
         loss_info = model(src, (tgt_mlm, tgt_nsp), seg)
         loss_mlm, loss_nsp, correct_mlm, correct_nsp, denominator = loss_info
         
-        # Backward.
+         # Backward.
         loss = loss_mlm + loss_nsp
         total_loss += loss.item()
         total_loss_mlm += loss_mlm.item()
@@ -130,6 +139,7 @@ def train_bert(args, gpu_id, rank, loader, model, optimizer):
         total_correct_nsp += correct_nsp.item()
         total_denominator += denominator.item()
         total_instances += src.size(0)
+        done_tokens += src.size(0) * src.size(1)
 
         loss = loss / args.accumulation_steps
         loss.backward()
@@ -147,10 +157,8 @@ def train_bert(args, gpu_id, rank, loader, model, optimizer):
 
             elapsed = time.time() - start_time
 
-            done_tokens = \
-                args.batch_size * src.size(1) * args.report_steps * args.world_size \
-                if args.dist_train \
-                else args.batch_size * src.size(1) * args.report_steps
+            if args.dist_train:
+                done_tokens *= args.world_size
 
             print("| {:8d}/{:8d} steps"
                   "| {:8.2f} tokens/s"
@@ -168,6 +176,7 @@ def train_bert(args, gpu_id, rank, loader, model, optimizer):
                     total_correct_mlm / total_denominator,
                     total_correct_nsp  / total_instances))
             
+            done_tokens = 0
             total_loss, total_loss_mlm, total_loss_nsp = 0., 0., 0.
             total_correct_mlm, total_denominator = 0., 0.
             total_correct_nsp, total_instances = 0., 0.

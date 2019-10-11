@@ -3,7 +3,6 @@ import os
 import json
 import torch
 import argparse
-import torch.multiprocessing as mp
 import uer.trainer as trainer
 from uer.utils.config import load_hyperparam
 
@@ -13,7 +12,7 @@ def main():
     
     # Path options.
     parser.add_argument("--dataset_path", type=str, default="dataset.pt",
-                        help="Base path of the preprocessed dataset.")
+                        help="Path of the preprocessed dataset.")
     parser.add_argument("--vocab_path", type=str, required=True,
                         help="Path of the vocabulary file.")
     parser.add_argument("--pretrained_model_path", type=str, default=None,
@@ -43,7 +42,7 @@ def main():
     parser.add_argument("--feedforward_size", type=int, default=3072, help="Feed forward layer dimension.")
     parser.add_argument("--kernel_size", type=int, default=3,  help="Kernel size for CNN.")
     parser.add_argument("--block_size", type=int, default=2,  help="Block size for CNN.")
-    parser.add_argument("--heads_num", type=int, default=12, help="The number of heads in multiple-head attention.")
+    parser.add_argument("--heads_num", type=int, default=12, help="The number of heads in multi-head attention.")
     parser.add_argument("--layers_num", type=int, default=12, help="The number of encoder layers.")
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout value.")
     parser.add_argument("--seed", type=int, default=7,  help="Random seed.")
@@ -72,7 +71,7 @@ def main():
     # GPU options.
     parser.add_argument("--world_size", type=int, default=1, help="Total number of processes (GPUs) for training.")
     parser.add_argument("--gpu_ranks", default=[], nargs='+', type=int, help="List of ranks of each process."
-                        " Each process has a unique integer rank whose value in the interval [0, world_size], and runs in a single GPU.")
+                        " Each process has a unique integer rank whose value is in the interval [0, world_size), and runs in a single GPU.")
     parser.add_argument("--master_ip", default="tcp://localhost:12345", type=str, help="IP-Port of master for training.")
     parser.add_argument("--backend", choices=["nccl", "gloo"], default="nccl", type=str, help="Distributed backend.")
     
@@ -85,24 +84,24 @@ def main():
     ranks_num = len(args.gpu_ranks)
 
     if args.world_size > 1:
+        # Multiprocessing distributed mode.
         assert torch.cuda.is_available(), "No available GPUs." 
         assert ranks_num <= args.world_size, "Started processes exceed `world_size` upper limit." 
         assert ranks_num <= torch.cuda.device_count(), "Started processes exceeds the available GPUs." 
-        # Multiprocessing distributed mode.
         args.dist_train = True
         args.ranks_num = ranks_num
         print("Using distributed mode for training.")
     elif args.world_size == 1 and ranks_num == 1:
-        assert torch.cuda.is_available(), "No available GPUs." 
         # Single GPU mode.
-        gpu_id = args.gpu_ranks[0]
-        assert gpu_id <= torch.cuda.device_count(), "Invalid specified GPU device." 
+        assert torch.cuda.is_available(), "No available GPUs." 
+        args.gpu_id = args.gpu_ranks[0]
+        assert args.gpu_id < torch.cuda.device_count(), "Invalid specified GPU device." 
         args.dist_train = False
         args.single_gpu = True
-        args.gpu_id = gpu_id
-        print("Using single GPU:%d for training." % gpu_id)
+        print("Using single GPU:%d for training." % args.gpu_id)
     else:
         # CPU mode.
+        assert ranks_num == 0, "GPUs are specified, please check the arguments."
         args.dist_train = False
         args.single_gpu = False
         print("Using CPU mode for training.")
