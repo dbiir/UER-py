@@ -15,4 +15,3 @@ UNK_TOKEN = '[UNK]'
 CLS_TOKEN = '[CLS]'
 SEP_TOKEN = '[SEP]'
 MASK_TOKEN = '[MASK]'
-
