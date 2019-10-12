@@ -1,6 +1,7 @@
 # -*- encoding:utf-8 -*-
 from __future__ import unicode_literals
 
+
 # Special token ids.
 PAD_ID = 0
 UNK_ID = 100
