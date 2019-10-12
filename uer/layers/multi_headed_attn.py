@@ -17,6 +17,7 @@ class MultiHeadedAttention(nn.Module):
         self.linear_layers = nn.ModuleList([
                 nn.Linear(hidden_size, hidden_size) for _ in range(3)
             ])
+        
         self.dropout = nn.Dropout(dropout)
         self.final_linear = nn.Linear(hidden_size, hidden_size)
 
