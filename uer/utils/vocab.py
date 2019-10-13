@@ -82,7 +82,7 @@ class Vocab(object):
         w2i, i2w, w2c = {}, [], {}
         index = 0
         for v_p in vocab_list:
-            w2i_p, i2w_p, w2c_p = v_p
+            w2i_p, i2w_p, w2c_p = v_p.get()
             for w in i2w_p:
                 if w not in w2i:
                     w2i[w], w2c[w] = len(i2w), w2c_p[w]
