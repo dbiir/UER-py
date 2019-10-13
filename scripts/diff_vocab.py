@@ -1,8 +1,8 @@
 # -*- encoding:utf-8 -*-
 import sys
 import os
-import codecs
 import argparse
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -13,7 +13,7 @@ if __name__ == '__main__':
     vocab_set_1 = set()
     vocab_set_2 = set()
 
-    with codecs.open(args.vocab_1, 'r', 'utf-8') as f:
+    with open(args.vocab_1, mode='r', encoding='utf-8') as f:
         for line in f:
             try:
                 w = line.strip().split()[0]
@@ -21,7 +21,7 @@ if __name__ == '__main__':
             except:
                 pass
     
-    with codecs.open(args.vocab_2, 'r', 'utf-8') as f:
+    with open(args.vocab_2, mode='r', encoding='utf-8') as f:
         for line in f:
             try:
                 w = line.strip().split()[0]
