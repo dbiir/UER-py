@@ -1,10 +1,7 @@
 # -*- encoding:utf-8 -*-
-#-*- coding : utf-8 -*-
-# coding: utf-8
 import sys
 import os
 import torch
-import codecs
 import argparse
 
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -18,8 +15,6 @@ if __name__ == '__main__':
     # Path options. 
     parser.add_argument("--vocab_path", help=".")
     parser.add_argument("--pretrained_model_path", help=".")
-
-    # Output path.
     parser.add_argument("--output_word_embedding_path", help=".")
 
     args = parser.parse_args()
@@ -39,9 +34,8 @@ if __name__ == '__main__':
         word = vocab.i2w[i]
         word_embedding = embedding[vocab.get(word), :]
         word_embedding = word_embedding.cpu().numpy().tolist()
-        s = str(word)
-        for i in range(len(word_embedding)):
-            s = s + " " + str(word_embedding[i])
-        s += "\n"
-        f_out.write(s)
-        # print(word)
+        line = str(word)
+        for j in range(len(word_embedding)):
+            line = line + " " + str(word_embedding[j])
+        line += "\n"
+        f_out.write(line)
