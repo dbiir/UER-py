@@ -100,8 +100,7 @@ class Vocab(object):
         for i in range(workers_num):
             start = i * lines_num // workers_num
             end = (i+1) * lines_num // workers_num
-            vocab_p = pool.apply_async(func=self.worker, args=[corpus_path, tokenizer, start, end])
-            vocab_list.append(vocab_p.get())
+            vocab_list.append((pool.apply_async(func=self.worker, args=[corpus_path, tokenizer, start, end])))
         pool.close()
         pool.join()
         
