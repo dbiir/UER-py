@@ -4,10 +4,10 @@ import os
 import torch
 import argparse
 
-bert_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(bert_dir)
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
 
-from bert.model_saver import save_model
+from uer.model_saver import save_model
 
 
 def average_models(model_list_path):
