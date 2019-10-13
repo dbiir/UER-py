@@ -10,23 +10,21 @@ import argparse
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
-from uer.utils.tokenizer import *
-from uer.utils.vocab import Vocab
+from bert.utils.tokenizer import *
+from bert.utils.vocab import Vocab
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument("--corpus", required=True)
+    parser.add_argument("--corpus_path", required=True)
     parser.add_argument("--vocab_path", required=True)
     parser.add_argument("--workers_num", type=int, default=1, help="The number of processes to build vocabulary.")
     parser.add_argument("--min_count", type=int, default=1, help="The minimum count of words retained in the vocabulary.")
     # Tokenizer options.
-    parser.add_argument("--tokenizer", choices=["bert", "char", "word", "space"], default="bert",
+    parser.add_argument("--tokenizer", choices=["char", "space"], default="space",
                         help="Specify the tokenizer." 
-                             "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."
-                             "Word tokenizer supports online word segmentation based on jieba segmentor."
                              "Space tokenizer segments sentences into words according to space."
                              )
 
