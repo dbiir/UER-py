@@ -3,6 +3,7 @@
   This script provides an exmaple to wrap UER-py for cloze test.
   We randomly mask some characters and use BERT to predict.
 """
+import os
 import sys
 import torch
 import argparse
@@ -21,11 +22,11 @@ from uer.model_builder import build_model
 
 
 class ClozeModel(torch.nn.Module):
-    def __init__(self, args, bert_model):
+    def __init__(self, args, model):
         super(ClozeModel, self).__init__()
-        self.embedding = bert_model.embedding
-        self.encoder = bert_model.encoder
-        self.target = bert_model.target
+        self.embedding = model.embedding
+        self.encoder = model.encoder
+        self.target = model.target
         # Open eval mode.
         self.eval()
 
@@ -59,12 +60,14 @@ if __name__ == '__main__':
                         help="Batch size.")
     parser.add_argument("--seq_length", type=int, default=100,
                         help="Sequence length.")
+    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
+                        help="Emebdding type.")
     parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
                                                    "cnn", "gatedcnn", "attn", \
                                                    "rcnn", "crnn", "gpt"], \
                                                    default="bert", help="Encoder type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "nsp", "s2s"], default="bert",
+    parser.add_argument("--target", choices=["bert", "mlm"], default="bert",
                         help="The training target of the pretraining model.")
 
     # Subword options.
@@ -75,13 +78,11 @@ if __name__ == '__main__':
     parser.add_argument("--subencoder_type", choices=["avg", "lstm", "gru", "cnn"], default="avg",
                         help="Subencoder type.")
 
-
     # Tokenizer options.
-    parser.add_argument("--tokenizer", choices=["bert", "char", "word", "space"], default="bert",
+    parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
                         help="Specify the tokenizer."
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."
-                             "Word tokenizer supports online word segmentation based on jieba segmentor."
                              "Space tokenizer segments sentences into words according to space."
                              )
 
@@ -100,21 +101,17 @@ if __name__ == '__main__':
     args.vocab = vocab
 
     # Build bert model.
-    bert_model = build_model(args)
+    model = build_model(args)
 
     # Load pretrained model.
     pretrained_model = torch.load(args.pretrained_model_path)
-    bert_model.load_state_dict(pretrained_model, strict=True)
+    model.load_state_dict(pretrained_model, strict=False)
 
-    model = ClozeModel(args, bert_model)
+    model = ClozeModel(args, model)
 
     # Build tokenizer
-    if args.tokenizer == "mixed":
-        tokenizer = MixedTokenizer(vocab)
-    else:
-        tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
+    tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
 
-    
     # Construct input datasets.
     def mask_token(tokens):
         """

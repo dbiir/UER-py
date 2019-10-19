@@ -85,6 +85,8 @@ def main():
                         help="Sequence length.")
     parser.add_argument("--doc_stride", default=128, type=int,
                         help="When splitting up a long document into chunks, how much stride to take between chunks.")
+    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
+                        help="Emebdding type.")
     parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
                                                    "cnn", "gatedcnn", "attn", \
                                                    "rcnn", "crnn", "gpt"], \

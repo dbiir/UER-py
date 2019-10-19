@@ -452,31 +452,31 @@ usage: cloze_test.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
 ```
 The example of using cloze_test.py：
 ```
-python3 scripts/cloze_test.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
-                 --input_path datasets/cloze_input.txt --output_path output.txt
+python3 scripts/cloze_test.py --input_path datasets/cloze_input.txt --pretrained_model_path models/google_model.bin \
+                              --vocab_path models/google_vocab.txt --output_path output.txt
 
 ```
 
 ### Feature extractor
-feature_extractor.py extracts sentence embeddings.
+extract_feature.py extracts sentence embeddings.
 ```
-usage: feature_extractor.py [-h] --input_path INPUT_PATH --model_path
-                            MODEL_PATH --vocab_path VOCAB_PATH --output_path
-                            OUTPUT_PATH [--subword_type {none,char}]
-                            [--sub_vocab_path SUB_VOCAB_PATH]
-                            [--subencoder {avg,lstm,gru,cnn}]
-                            [--sub_layers_num SUB_LAYERS_NUM]
-                            [--seq_length SEQ_LENGTH]
-                            [--batch_size BATCH_SIZE]
-                            [--config_path CONFIG_PATH]
-                            [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt}]
-                            [--target {bert,lm,cls,mlm,nsp,s2s}]
-                            [--tokenizer {char,word,space,mixed}]
+usage: extract_feature.py [-h] --input_path INPUT_PATH --pretrained_model_path
+                          PRETRAINED_MODEL_PATH --vocab_path VOCAB_PATH
+                          --output_path OUTPUT_PATH [--seq_length SEQ_LENGTH]
+                          [--batch_size BATCH_SIZE]
+                          [--config_path CONFIG_PATH]
+                          [--embedding {bert,word}]
+                          [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt}]
+                          [--bidirectional] [--subword_type {none,char}]
+                          [--sub_vocab_path SUB_VOCAB_PATH]
+                          [--subencoder {avg,lstm,gru,cnn}]
+                          [--sub_layers_num SUB_LAYERS_NUM]
+                          [--tokenizer {bert,char,space}]
 ```
-The example of using feature_extractor.py：
+The example of using extract_feature.py：
 ```
-python3 scripts/feature_extractor.py --input_path datasets/cloze_input.txt --pretrained_model_path models/google_model.bin \
-                             --vocab_path models/google_vocab.txt --output_path output.npy
+python3 scripts/extract_feature.py --input_path datasets/cloze_input.txt --pretrained_model_path models/google_model.bin \
+                             --vocab_path models/google_vocab.txt --output_path output.pt
 ```
 
 ### Finding nearest neighbours
