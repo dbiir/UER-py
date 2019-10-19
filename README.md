@@ -95,13 +95,13 @@ Notice that the model trained by *pretrain.py* is attacted with the suffix which
 Finally, we do classification. We can use *google_model.bin*:
 ```
 python3 run_classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
-                      --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
+                      --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                       --epochs_num 3 --batch_size 32 --encoder bert
 ```
 or use our [*book_review_model.bin*](https://share.weiyun.com/52BEFs2), which is the output of pretrain.py：
 ```
 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_vocab.txt \
-                      --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
+                      --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                       --epochs_num 3 --batch_size 32 --encoder bert
 ``` 
 It turns out that the result of Google's model is 87.5; The result of *book_review_model.bin* is 88.1. It is also noticable that we don't need to specify the target in fine-tuning stage. Pre-training target is replaced with task-specific target.
@@ -119,7 +119,7 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.t
 mv models/book_review_mlm_model.bin-20000 models/book_review_mlm_model.bin
 
 python3 run_classifier.py --pretrained_model_path models/book_review_mlm_model.bin --vocab_path models/google_vocab.txt \
-                      --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
+                      --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                       --epochs_num 3 --batch_size 32 --encoder bert
 ```
 It turns out that the result of [*book_review_mlm_model.bin*](https://share.weiyun.com/5ScDjUO) is 88.3.
@@ -129,7 +129,7 @@ We could search proper pre-trained models in [Chinese model zoo](#chinese_model_
 BERT is really slow. It could be great if we can speed up the model and still achieve competitive performance. We select a 2-layers LSTM encoder to substitute 12-layers Transformer encoder. We could download [a model pre-trained with LSTM encoder and language modeling (LM) + classification (CLS) targets](https://share.weiyun.com/5B671Ik):
 ```
 python3 run_classifier.py --pretrained_model_path models/lstm_reviews_model.bin --vocab_path models/google_vocab.txt \
-                      --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
+                      --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                       --epochs_num 3  --batch_size 64 --encoder lstm --pooling mean --config_path models/rnn_config.json --learning_rate 1e-3
 ```
 We can achieve 86.5 accuracy on testset, which is also a competitive result. Using LSTM without pre-training can only achieve 80.2 accuracy. In practice, above model is around 10 times faster than BERT. One can see Chinese model zoo section for more detailed information about above pre-trained LSTM model.
@@ -207,11 +207,10 @@ usage: preprocess.py [-h] --corpus_path CORPUS_PATH --vocab_path VOCAB_PATH
                      [--processes_num PROCESSES_NUM]
                      [--target {bert,lm,cls,mlm,nsp,s2s,bilm}]
                      [--docs_buffer_size DOCS_BUFFER_SIZE]
-                     [--instances_buffer_size INSTANCES_BUFFER_SIZE]
                      [--seq_length SEQ_LENGTH] [--dup_factor DUP_FACTOR]
                      [--short_seq_prob SHORT_SEQ_PROB] [--seed SEED]
 ```
-*--docs_buffer_size* and *--instances_buffer_size* could be used to control memory consumption in pre-processing and pre-training stages. *--preprocesses_num n* denotes that n processes are used for pre-processing. The example of pre-processing on a single machine is as follows：
+*--docs_buffer_size* could be used to control memory consumption in pre-processing stage. *--preprocesses_num n* denotes that n processes are used for pre-processing. The example of pre-processing on a single machine is as follows：
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset.pt\
                       --processes_num 8 --target bert
@@ -236,14 +235,15 @@ usage: pretrain.py [-h] [--dataset_path DATASET_PATH] --vocab_path VOCAB_PATH
                    [--save_checkpoint_steps SAVE_CHECKPOINT_STEPS]
                    [--report_steps REPORT_STEPS]
                    [--accumulation_steps ACCUMULATION_STEPS]
-                   [--batch_size BATCH_SIZE] [--emb_size EMB_SIZE]
-                   [--hidden_size HIDDEN_SIZE]
+                   [--batch_size BATCH_SIZE]
+                   [--instances_buffer_size INSTANCES_BUFFER_SIZE]
+                   [--emb_size EMB_SIZE] [--hidden_size HIDDEN_SIZE]
                    [--feedforward_size FEEDFORWARD_SIZE]
                    [--kernel_size KERNEL_SIZE] [--block_size BLOCK_SIZE]
                    [--heads_num HEADS_NUM] [--layers_num LAYERS_NUM]
-                   [--dropout DROPOUT] [--seed SEED]
+                   [--dropout DROPOUT] [--seed SEED] [--embedding {bert,word}]
                    [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt,bilstm}]
-                   [--bidirectional] [--target {bert,lm,cls,mlm,nsp,s2s,bilm}]
+                   [--bidirectional] [--target {bert,lm,cls,mlm,bilm}]
                    [--labels_num LABELS_NUM] [--learning_rate LEARNING_RATE]
                    [--warmup WARMUP] [--subword_type {none,char}]
                    [--sub_vocab_path SUB_VOCAB_PATH]
@@ -253,7 +253,7 @@ usage: pretrain.py [-h] [--dataset_path DATASET_PATH] --vocab_path VOCAB_PATH
                    [--master_ip MASTER_IP] [--backend {nccl,gloo}]
 ```
 
-Notice that it is recommended to explicitly specify model's encoder and target. UER-py consists of the following encoder modules:
+*--instances_buffer_size* could be used to control memory consumption in pre-training stage. Notice that it is recommended to explicitly specify model's encoder and target. UER-py consists of the following encoder modules:
 - rnn_encoder.py: contains (bi-)LSTM and (bi-)GRU
 - birnn_encoder.py: contains bi-LSTM and bi-GRU (different from rnn_encoder.py with --bidirectional, see [here](https://github.com/pytorch/pytorch/issues/4930) for more details)
 - cnn_encoder.py: contains CNN and gatedCNN

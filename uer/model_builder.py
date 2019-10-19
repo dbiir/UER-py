@@ -1,6 +1,6 @@
 # -*- encoding:utf-8 -*-
 import torch
-from uer.layers.embeddings import BertEmbedding
+from uer.layers.embeddings import BertEmbedding, WordEmbedding
 from uer.encoders.bert_encoder import BertEncoder
 from uer.encoders.rnn_encoder import LstmEncoder, GruEncoder
 from uer.encoders.birnn_encoder import BilstmEncoder
@@ -35,7 +35,7 @@ def build_model(args):
     else:
         subencoder = None
 
-    embedding = BertEmbedding(args, len(args.vocab))
+    embedding = globals()[args.embedding.capitalize() + "Embedding"](args, len(args.vocab))
     encoder = globals()[args.encoder.capitalize() + "Encoder"](args)
     target = globals()[args.target.capitalize() + "Target"](args, len(args.vocab))
     model = Model(args, embedding, encoder, target, subencoder)
