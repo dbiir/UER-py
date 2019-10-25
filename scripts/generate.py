@@ -49,7 +49,7 @@ if __name__ == '__main__':
                         help="Path of the input file, containing the beginning of a story.")
     parser.add_argument("--output_path", type=str, required=True, 
                         help="Path of the output file, containing the entire story.")
-    parser.add_argument("--config_path", default="models/google_config.json", type=str,
+    parser.add_argument("--config_path", default="models/bert_base_config.json", type=str,
                         help="Path of the config file.")
 
     # Model options.

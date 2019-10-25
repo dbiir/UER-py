@@ -42,11 +42,12 @@ if __name__ == '__main__':
                         help="Path of the vocabulary file.")
     parser.add_argument("--output_path", required=True,
                         help="Path of the output file.")
+    parser.add_argument("--config_path", default="models/bert_base_config.json",
+                        help="Path of the config file.")
     
     # Model options.
     parser.add_argument("--seq_length", type=int, default=128, help="Sequence length.")
     parser.add_argument("--batch_size", type=int, default=8, help="Batch size.")
-    parser.add_argument("--config_path", default="models/google_config.json", help="Model config file.")
     parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
                         help="Emebdding type.")
     parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \

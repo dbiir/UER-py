@@ -464,7 +464,7 @@ python3 scripts/cloze_test.py --input_path datasets/cloze_input.txt --pretrained
 ```
 
 ### Feature extractor
-extract_feature.py extracts sentence embeddings.
+extract_feature.py extracts hidden states of the last encoder layer.
 ```
 usage: extract_feature.py [-h] --input_path INPUT_PATH --pretrained_model_path
                           PRETRAINED_MODEL_PATH --vocab_path VOCAB_PATH
@@ -486,9 +486,11 @@ python3 scripts/extract_feature.py --input_path datasets/cloze_input.txt --pretr
 ```
 
 ### Finding nearest neighbours
-Pre-trained models can learn high-quality word embeddings. Traditional word embeddings such as word2vec and GloVe assign each word a fixed vector. However, polysemy is a pervasive phenomenon in human language, and the meanings of a polysemous word depend on the context. To this end, we use a the hidden state in pre-trained models to represent a word. It is noticeable that Google BERT is a character-based model. To obtain real word embedding (not character embedding), Users should download our [word-based BERT model](https://share.weiyun.com/5s4HVMi) and [vocabulary](https://share.weiyun.com/5NWYbYn).
-The example of using scripts/topn_words_indep.py (finding nearest neighbours for context-independent word embedding)：
+Pre-trained models can learn high-quality word embeddings. Traditional word embeddings such as word2vec and GloVe assign each word a fixed vector (context-independent word embedding). However, polysemy is a pervasive phenomenon in human language, and the meanings of a polysemous word depend on the context. To this end, we use a the hidden state in pre-trained models to represent a word. It is noticeable that Google BERT is a character-based model. To obtain real word embedding (not character embedding), Users should download our [word-based BERT model](https://share.weiyun.com/5s4HVMi) and [vocabulary](https://share.weiyun.com/5NWYbYn).
+The example of using scripts/topn_words_indep.py to find nearest neighbours for context-independent word embedding (character-based and word-based models)：
 ```
+python3 scripts/topn_words_indep.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+                                    --cand_vocab_path models/google_vocab.txt --target_words_path target_words.txt
 python3 scripts/topn_words_indep.py --pretrained_model_path models/bert_wiki_word_model.bin --vocab_path models/wiki_word_vocab.txt \
                                     --cand_vocab_path models/wiki_word_vocab.txt --target_words_path target_words.txt
 ```
@@ -500,10 +502,13 @@ word-2
 ...
 word-n
 ```
-The example of using scripts/topn_words_dep.py (finding nearest neighbours for context-dependent word embedding)：
+The example of using scripts/topn_words_dep.py to find nearest neighbours for context-dependent word embedding (character-based and word-based models)：
 ```
+python3 scripts/topn_words_dep.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
+                                  --cand_vocab_path models/google_vocab.txt --sent_path target_words_with_sentences.txt --config_path models/bert_base_config.json \
+                                  --batch_size 256 --seq_length 32 --tokenizer bert
 python3 scripts/topn_words_dep.py --pretrained_model_path models/bert_wiki_word_model.bin --vocab_path models/wiki_word_vocab.txt \
-                                  --cand_vocab_path models/wiki_word_vocab.txt --sent_path target_words_with_sentences.txt --config_path models/google_config.json \
+                                  --cand_vocab_path models/wiki_word_vocab.txt --sent_path target_words_with_sentences.txt --config_path models/bert_base_config.json \
                                   --batch_size 256 --seq_length 32 --tokenizer space
 ```
 We substitute the target word with other words in the vocabulary and feed the sentences into the pretrained model. Hidden state is used as the context-dependent embedding of a word. Users should do word segmentation manually and use space tokenizer if word-based model is used. The format of 
@@ -520,7 +525,7 @@ Sentence and word are splitted by \t.
 We could use *generate.py* to generate text. Given a few words or sentences, *generate.py* can continue writing. The example of using *generate.py*:
 ```
 python3 scripts/generate.py --pretrained_model_path models/gpt_model.bin --vocab_path models/google_vocab.txt 
-                    --input_path story_beginning.txt --output_path story_full.txt --config_path models/google_config.json 
+                    --input_path story_beginning.txt --output_path story_full.txt --config_path models/bert_base_config.json 
                     --encoder gpt --target lm --seq_length 128  
 ```
 where *story_beginning* contains the beginning of a text. One can use any models pre-trained with LM target, such as [GPT trained on mixed large corpus](https://share.weiyun.com/51nTP8V). By now we only provide a vanilla version of generator. More mechanisms will be added for better performance and efficiency.
