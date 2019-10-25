@@ -224,7 +224,8 @@ We need to specify the model's target in pre-processing stage since different ta
 - bilm_target.py: bi-directional language model
 - bert_target.py: masked language model + next sentence prediction
 
-If multiple machines are available, each machine contains a part of corpus. The command is identical with the single machine case.
+If multiple machines are available, users can use preprocess.py on one machine and copy the dataset.pt to other machines. 
+
 
 ### Pretrain the model
 ```
@@ -278,6 +279,11 @@ The example of pre-training on a single machine with 8 GPUs：
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt \
                     --output_model_path models/output_model.bin --encoder bert --target bert --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 
+```
+If users could use CUDA_VISIBLE_DEVICES if they only want to use part of GPUs:
+```
+CUDA_VISIBLE_DEVICES=1,2,3,5 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt \
+                                                 --output_model_path models/output_model.bin --encoder bert --target bert --world_size 4 --gpu_ranks 0 1 2 3
 ```
 The example of pre-training on two machines, each has 8 GPUs (16 GPUs in total): 
 ```
@@ -365,7 +371,7 @@ usage: run_classifier.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
 The example of using run_classifier.py：
 ```
 python3 run_classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt \
-                      --train_path datasets/book_review/train.tsv --dev_path datasets/book_review/dev.tsv --test_path datasets/book_review/test.tsv \
+                      --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                       --epochs_num 3 --batch_size 64 --encoder bert
 ```
 The example of using run_classifier.py for pair classification:
@@ -410,10 +416,10 @@ run_mrc.py adds two feedforward layers upon encoder layer.
 The example of using run_mrc.py：
 ```
 python3 run_mrc.py --pretrained_model_path models/google_model.bin --vocab_path models/google_vocab.txt 
-                   --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json --test_path datasets/cmrc2018/test.json 
+                   --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json 
                    --epochs_num 2 --batch_size 4 --seq_length 512 --encoder bert
 ```
-The train.json, dev.json, and test.json are of squad-style. Trainset and devset are available [here](https://github.com/ymcui/cmrc2018). Testset is not publicly available. Users can remove --test_path option.
+The train.json and dev.json are of squad-style. Trainset and devset are available [here](https://github.com/ymcui/cmrc2018). --test_path option is not specified since testset is not publicly available.
 
 <br/>
 
