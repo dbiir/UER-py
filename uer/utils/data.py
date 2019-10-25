@@ -602,17 +602,16 @@ class MlmDataset(Dataset):
                         pos += 1
 
                     src = [self.vocab.get(w) for w in self.tokenizer.tokenize(line)]
-                    src, tgt = mask_seq(src, len(self.vocab))
-                    seg = [1] * len(src)
-                    if len(src) >= self.seq_length:
+
+                    if len(src) > self.seq_length:
                         src = src[:self.seq_length]
-                        tgt = tgt[:self.seq_length]
-                        seg = seg[:self.seq_length]
-                    else:
-                        while len(src) != self.seq_length:
-                            src.append(PAD_ID)
-                            tgt.append(PAD_ID)
-                            seg.append(PAD_ID)
+                    seg = [1] * len(src)
+
+                    src, tgt = mask_seq(src, len(self.vocab))
+
+                    while len(src) != self.seq_length:
+                        src.append(PAD_ID)
+                        seg.append(PAD_ID)
 
                     pickle.dump((src, tgt, seg), f_write)
 
@@ -633,15 +632,23 @@ class MlmDataLoader(DataLoader):
                 instances = self.buffer[self.start: self.start + self.batch_size]
 
             self.start += self.batch_size
-        
+
             src = []
             tgt = []
             seg = []
 
+            masked_words_num = 0
+            for ins in instances:
+                masked_words_num += len(ins[1])
+            if masked_words_num == 0:
+                continue
+
             for ins in instances:
                 src.append(ins[0])
-                tgt.append(ins[1])
                 seg.append(ins[2])
+                tgt.append([0]*len(ins[0]))
+                for mask in ins[1]:
+                    tgt[-1][mask[0]] = mask[1]
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt), \
