@@ -7,6 +7,7 @@
 
 Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py (Universal Encoder Representations) is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of different pre-training models (e.g. BERT, GPT, ELMO), and provides interfaces for users to further extend upon. With UER-py, we build a model zoo which contains pre-trained models based on different corpora, encoders, and targets. 
 ### Update: [BERT pretrained on mixed large corpus](https://share.weiyun.com/5QOzPqq) is available now. It outperforms many other open-source pre-trained models on a range of Chinese datasets.
+### [ELMO pretrained on mixed large corpus](https://share.weiyun.com/5Qihztq) is available now. It is much faster than BERT and performs well on many classification datasets. One can fine-tune it with the following options: --encoder bilstm --config_path models/birnn_config.json --learning_rate 5e-4 --pooling mean 
 
 
 
