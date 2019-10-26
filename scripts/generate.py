@@ -58,6 +58,8 @@ if __name__ == '__main__':
     parser.add_argument("--top_k", type=int, default=0)
     parser.add_argument("--top_p", type=float, default=0.6)
     parser.add_argument("--temperature", type=float, default=1.0)
+    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
+                        help="Emebdding type.")
     parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
                                               "cnn", "gatedcnn", "attn", \
                                               "rcnn", "crnn", "gpt", "bilstm"], \
@@ -74,11 +76,10 @@ if __name__ == '__main__':
                         help="Subencoder type.")
 
     # Tokenizer options.
-    parser.add_argument("--tokenizer", choices=["bert", "char", "word", "space"], default="bert",
+    parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
                         help="Specify the tokenizer."
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."
-                             "Word tokenizer supports online word segmentation based on jieba segmentor."
                              "Space tokenizer segments sentences into words according to space."
                              )
 
