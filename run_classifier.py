@@ -65,7 +65,7 @@ def main():
                         help="Path of the pretrained model.")
     parser.add_argument("--output_model_path", default="./models/classifier_model.bin", type=str,
                         help="Path of the output model.")
-    parser.add_argument("--vocab_path", default="./models/google_vocab.txt", type=str,
+    parser.add_argument("--vocab_path", type=str, required=True,
                         help="Path of the vocabulary file.")
     parser.add_argument("--train_path", type=str, required=True,
                         help="Path of the trainset.")

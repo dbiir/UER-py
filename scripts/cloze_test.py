@@ -46,7 +46,7 @@ if __name__ == '__main__':
     # Path options.
     parser.add_argument("--pretrained_model_path", default="models/google_model.bin", type=str, 
                         help="Path of the pretrained model.")
-    parser.add_argument("--vocab_path", default="models/google_vocab.txt", type=str,
+    parser.add_argument("--vocab_path", type=str, required=True,
                         help="Path of the vocabulary file.")
     parser.add_argument("--input_path", type=str, default="datasets/cloze_input.txt", 
                         help="Path of the input file for cloze test. One sentence per line.")
