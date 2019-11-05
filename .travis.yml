@@ -22,4 +22,4 @@ install:
 
 script:
 
-    python preprocess.py --corpus_path corpora/literature_mini_bert.txt --vocab_path models/google_vocab.txt --dataset_path dataset.pt --processes_num 8 --target bert
+    python preprocess.py --corpus_path corpora/literature_mini_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt --processes_num 8 --target bert
