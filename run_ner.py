@@ -11,7 +11,7 @@ from torch.nn import CrossEntropyLoss
 
 from uer.model_builder import build_model
 from uer.utils.config import load_hyperparam
-from uer.utils.optimizers import  BertAdam
+from uer.utils.optimizers import *
 from uer.utils.constants import *
 from uer.utils.vocab import Vocab
 from uer.utils.seed import set_seed
@@ -328,7 +328,8 @@ def main():
                 {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01},
                 {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.0}
     ]
-    optimizer = BertAdam(optimizer_grouped_parameters, lr=args.learning_rate, warmup=args.warmup, t_total=train_steps)
+    ooptimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
+    scheduler = WarmupLinearSchedule(optimizer, warmup_steps=train_steps*args.warmup, t_total=train_steps)
 
     total_loss = 0.
     f1 = 0.0
@@ -353,6 +354,7 @@ def main():
 
             loss.backward()
             optimizer.step()
+            scheduler.step()
 
         f1 = evaluate(args, False)
         if f1 > best_f1:

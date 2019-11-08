@@ -20,7 +20,7 @@ from uer.utils.vocab import Vocab
 from uer.utils.constants import *
 from uer.utils.tokenizer import * 
 from uer.model_builder import build_model
-from uer.utils.optimizers import  BertAdam
+from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
@@ -516,7 +516,8 @@ def main():
                 {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01},
                 {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.0}
     ]
-    optimizer = BertAdam(optimizer_grouped_parameters, lr=args.learning_rate, warmup=args.warmup, t_total=train_steps)
+    optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
+    scheduler = WarmupLinearSchedule(optimizer, warmup_steps=train_steps*args.warmup, t_total=train_steps)
 
     total_loss = 0.
     result = 0.0
@@ -541,6 +542,7 @@ def main():
                 total_loss = 0.
             loss.backward()
             optimizer.step()
+            scheduler.step()
         result = evaluate(args, False)
         if result > best_result:
             best_result = result

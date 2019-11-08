@@ -13,7 +13,7 @@ from torch.nn.parallel import DistributedDataParallel
 from uer.model_loader import load_model
 from uer.model_saver import save_model
 from uer.model_builder import build_model
-from uer.utils.optimizers import BertAdam
+from uer.utils.optimizers import *
 from uer.utils.data import *
 from uer.utils.vocab import Vocab
 from uer.utils.seed import set_seed
@@ -86,7 +86,8 @@ def worker(proc_id, gpu_ranks, args, model):
         {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01},
         {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.0}
     ]
-    optimizer = BertAdam(optimizer_grouped_parameters, lr=args.learning_rate, warmup=args.warmup, t_total=args.total_steps)
+    optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
+    scheduler = WarmupLinearSchedule(optimizer, warmup_steps=train_steps*args.warmup, t_total=train_steps)
 
     if args.dist_train:
         # Initialize multiprocessing distributed training environment.
@@ -99,10 +100,10 @@ def worker(proc_id, gpu_ranks, args, model):
     else:
         print("Worker is training ...")
     
-    globals().get("train_"+args.target)(args, gpu_id, rank, train_loader, model, optimizer)
+    globals().get("train_"+args.target)(args, gpu_id, rank, train_loader, model, optimizer, scheduler)
     
 
-def train_bert(args, gpu_id, rank, loader, model, optimizer):
+def train_bert(args, gpu_id, rank, loader, model, optimizer, scheduler):
     model.train()
     start_time = time.time()
     total_loss, total_loss_mlm, total_loss_nsp = 0., 0., 0.
@@ -146,6 +147,7 @@ def train_bert(args, gpu_id, rank, loader, model, optimizer):
 
         if steps % args.accumulation_steps == 0:
             optimizer.step()
+            scheduler.step()
             model.zero_grad()
         
         if steps % args.report_steps == 0  and \
@@ -190,7 +192,7 @@ def train_bert(args, gpu_id, rank, loader, model, optimizer):
         steps += 1
 
 
-def train_lm(args, gpu_id, rank, loader, model, optimizer):
+def train_lm(args, gpu_id, rank, loader, model, optimizer, scheduler):
     model.train()
     start_time = time.time()
     total_loss = 0.
@@ -225,6 +227,7 @@ def train_lm(args, gpu_id, rank, loader, model, optimizer):
 
         if steps % args.accumulation_steps == 0:
             optimizer.step()
+            scheduler.step()
             model.zero_grad()
         
         if steps % args.report_steps == 0  and \
@@ -261,7 +264,7 @@ def train_lm(args, gpu_id, rank, loader, model, optimizer):
         steps += 1
 
 
-def train_bilm(args, gpu_id, rank, loader, model, optimizer):
+def train_bilm(args, gpu_id, rank, loader, model, optimizer, scheduler):
     model.train()
     start_time = time.time()
     total_loss, total_loss_forward, total_loss_backward = 0., 0., 0.
@@ -300,6 +303,7 @@ def train_bilm(args, gpu_id, rank, loader, model, optimizer):
 
         if steps % args.accumulation_steps == 0:
             optimizer.step()
+            scheduler.step()
             model.zero_grad()
         
         if steps % args.report_steps == 0  and \
@@ -342,7 +346,7 @@ def train_bilm(args, gpu_id, rank, loader, model, optimizer):
         steps += 1
 
 
-def train_cls(args, gpu_id, rank, loader, model, optimizer):
+def train_cls(args, gpu_id, rank, loader, model, optimizer, scheduler):
     model.train()
     start_time = time.time()
     total_loss = 0.
@@ -375,6 +379,7 @@ def train_cls(args, gpu_id, rank, loader, model, optimizer):
 
         if steps % args.accumulation_steps == 0:
             optimizer.step()
+            scheduler.step()
             model.zero_grad()
         
         if steps % args.report_steps == 0  and \
@@ -412,7 +417,7 @@ def train_cls(args, gpu_id, rank, loader, model, optimizer):
         steps += 1
 
 
-def train_mlm(args, gpu_id, rank, loader, model, optimizer):
+def train_mlm(args, gpu_id, rank, loader, model, optimizer, scheduler):
     model.train()
     start_time = time.time()
     total_loss, total_loss_mlm, total_loss_nsp = 0., 0., 0.
@@ -448,6 +453,7 @@ def train_mlm(args, gpu_id, rank, loader, model, optimizer):
 
         if steps % args.accumulation_steps == 0:
             optimizer.step()
+            scheduler.step()
             model.zero_grad()
         
         if steps % args.report_steps == 0  and \
@@ -484,140 +490,140 @@ def train_mlm(args, gpu_id, rank, loader, model, optimizer):
         steps += 1
 
 
-def train_nsp(args, gpu_id, rank, loader, model, optimizer):
-    model.train()
-    start_time = time.time()
-    total_loss = 0.
-    total_correct, total_instances = 0., 0.
-    steps = 1
-    total_steps = args.total_steps
-    loader_iter = iter(loader)
+# def train_nsp(args, gpu_id, rank, loader, model, optimizer):
+#     model.train()
+#     start_time = time.time()
+#     total_loss = 0.
+#     total_correct, total_instances = 0., 0.
+#     steps = 1
+#     total_steps = args.total_steps
+#     loader_iter = iter(loader)
 
-    while True:
-        if steps == total_steps + 1:
-            break
-        src, tgt, seg = next(loader_iter)
+#     while True:
+#         if steps == total_steps + 1:
+#             break
+#         src, tgt, seg = next(loader_iter)
 
-        if gpu_id is not None:
-            src = src.cuda(gpu_id)
-            tgt = tgt.cuda(gpu_id)
-            seg = seg.cuda(gpu_id)
+#         if gpu_id is not None:
+#             src = src.cuda(gpu_id)
+#             tgt = tgt.cuda(gpu_id)
+#             seg = seg.cuda(gpu_id)
         
-        # Forward.
-        loss_info = model(src, tgt, seg)
-        loss, correct = loss_info
+#         # Forward.
+#         loss_info = model(src, tgt, seg)
+#         loss, correct = loss_info
         
-        # Backward.
-        total_loss += loss.item()
-        total_correct += correct.item()
-        total_instances += src.size(0)
+#         # Backward.
+#         total_loss += loss.item()
+#         total_correct += correct.item()
+#         total_instances += src.size(0)
 
-        loss = loss / args.accumulation_steps
-        loss.backward()
+#         loss = loss / args.accumulation_steps
+#         loss.backward()
 
-        if steps % args.accumulation_steps == 0:
-            optimizer.step()
-            model.zero_grad()
+#         if steps % args.accumulation_steps == 0:
+#             optimizer.step()
+#             model.zero_grad()
         
-        if steps % args.report_steps == 0  and \
-            (not args.dist_train or (args.dist_train and rank == 0)):
+#         if steps % args.report_steps == 0  and \
+#             (not args.dist_train or (args.dist_train and rank == 0)):
 
-            loss = total_loss / args.report_steps
+#             loss = total_loss / args.report_steps
 
-            elapsed = time.time() - start_time
+#             elapsed = time.time() - start_time
 
-            done_tokens = \
-                args.batch_size * src.size(1) * args.report_steps * args.world_size \
-                if args.dist_train \
-                else args.batch_size * src.size(1) * args.report_steps
+#             done_tokens = \
+#                 args.batch_size * src.size(1) * args.report_steps * args.world_size \
+#                 if args.dist_train \
+#                 else args.batch_size * src.size(1) * args.report_steps
 
-            print("| {:8d}/{:8d} steps"
-                  "| {:8.2f} tokens/s"
-                  "| loss {:7.2f}"
-                  "| acc: {:3.3f}".format(
-                    steps, 
-                    total_steps, 
-                    done_tokens / elapsed, 
-                    loss, 
-                    total_correct / total_instances))
+#             print("| {:8d}/{:8d} steps"
+#                   "| {:8.2f} tokens/s"
+#                   "| loss {:7.2f}"
+#                   "| acc: {:3.3f}".format(
+#                     steps, 
+#                     total_steps, 
+#                     done_tokens / elapsed, 
+#                     loss, 
+#                     total_correct / total_instances))
             
-            total_loss = 0.
-            total_correct = 0.
-            total_instances = 0.
+#             total_loss = 0.
+#             total_correct = 0.
+#             total_instances = 0.
 
-            start_time = time.time()
+#             start_time = time.time()
 
-        if steps % args.save_checkpoint_steps == 0 and \
-                (not args.dist_train or (args.dist_train and rank == 0)):
-            save_model(model, args.output_model_path + "-" + str(steps))
+#         if steps % args.save_checkpoint_steps == 0 and \
+#                 (not args.dist_train or (args.dist_train and rank == 0)):
+#             save_model(model, args.output_model_path + "-" + str(steps))
 
-        steps += 1
+#         steps += 1
 
 
-def train_s2s(args, gpu_id, rank, loader, model, optimizer):
-    model.train()
-    start_time = time.time()
-    total_loss= 0.
-    total_correct, total_denominator = 0., 0. 
-    steps = 1
-    total_steps = args.total_steps
-    loader_iter = iter(loader)
+# def train_s2s(args, gpu_id, rank, loader, model, optimizer):
+#     model.train()
+#     start_time = time.time()
+#     total_loss= 0.
+#     total_correct, total_denominator = 0., 0. 
+#     steps = 1
+#     total_steps = args.total_steps
+#     loader_iter = iter(loader)
 
-    while True:
-        if steps == total_steps + 1:
-            break
-        src, tgt, seg = next(loader_iter)
+#     while True:
+#         if steps == total_steps + 1:
+#             break
+#         src, tgt, seg = next(loader_iter)
 
-        if gpu_id is not None:
-            src = src.cuda(gpu_id)
-            tgt = tgt.cuda(gpu_id)
-            seg = seg.cuda(gpu_id)
+#         if gpu_id is not None:
+#             src = src.cuda(gpu_id)
+#             tgt = tgt.cuda(gpu_id)
+#             seg = seg.cuda(gpu_id)
         
-        # Forward.
-        loss_info = model(src, tgt, seg)
-        loss, correct, denominator = loss_info
+#         # Forward.
+#         loss_info = model(src, tgt, seg)
+#         loss, correct, denominator = loss_info
         
-        # Backward.
-        total_loss += loss.item()
-        total_correct += correct.item()
-        total_denominator += denominator.item()
+#         # Backward.
+#         total_loss += loss.item()
+#         total_correct += correct.item()
+#         total_denominator += denominator.item()
 
-        loss = loss / args.accumulation_steps
-        loss.backward()
+#         loss = loss / args.accumulation_steps
+#         loss.backward()
 
-        if steps % args.accumulation_steps == 0:
-            optimizer.step()
-            model.zero_grad()
+#         if steps % args.accumulation_steps == 0:
+#             optimizer.step()
+#             model.zero_grad()
         
-        if steps % args.report_steps == 0  and \
-            (not args.dist_train or (args.dist_train and rank == 0)):
+#         if steps % args.report_steps == 0  and \
+#             (not args.dist_train or (args.dist_train and rank == 0)):
 
-            loss = total_loss / args.report_steps
+#             loss = total_loss / args.report_steps
 
-            elapsed = time.time() - start_time
+#             elapsed = time.time() - start_time
 
-            done_tokens = \
-                args.batch_size * src.size(1) * args.report_steps * args.world_size \
-                if args.dist_train \
-                else args.batch_size * src.size(1) * args.report_steps
+#             done_tokens = \
+#                 args.batch_size * src.size(1) * args.report_steps * args.world_size \
+#                 if args.dist_train \
+#                 else args.batch_size * src.size(1) * args.report_steps
 
-            print("| {:8d}/{:8d} steps"
-                  "| {:8.2f} tokens/s"
-                  "| loss {:7.2f}"
-                  "| acc: {:3.3f}".format(
-                    steps, 
-                    total_steps, 
-                    done_tokens / elapsed, 
-                    loss, 
-                    total_correct / total_denominator))
+#             print("| {:8d}/{:8d} steps"
+#                   "| {:8.2f} tokens/s"
+#                   "| loss {:7.2f}"
+#                   "| acc: {:3.3f}".format(
+#                     steps, 
+#                     total_steps, 
+#                     done_tokens / elapsed, 
+#                     loss, 
+#                     total_correct / total_denominator))
             
-            total_loss = 0.
-            total_correct, total_denominator = 0., 0.
+#             total_loss = 0.
+#             total_correct, total_denominator = 0., 0.
 
-            start_time = time.time()
+#             start_time = time.time()
 
-        if steps % args.save_checkpoint_steps == 0 and \
-                (not args.dist_train or (args.dist_train and rank == 0)):
-            save_model(model, args.output_model_path + "-" + str(steps))
+#         if steps % args.save_checkpoint_steps == 0 and \
+#                 (not args.dist_train or (args.dist_train and rank == 0)):
+#             save_model(model, args.output_model_path + "-" + str(steps))
 
-        steps += 1
+#         steps += 1
