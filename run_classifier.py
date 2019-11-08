@@ -400,7 +400,7 @@ def main():
                     else:
                         rank.append(0)
             MRR = sum(rank) / len(rank)
-            print(MRR)
+            print("Mean Reciprocal Rank: {:.4f}".format(MRR))
             return MRR
 
     # Training phase.
