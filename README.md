@@ -763,6 +763,8 @@ For communication related to this project, please contact Zhe Zhao (helloworld@r
 This work is instructed by my enterprise mentors __Qi Ju__, __Haotang Deng__ and school mentors __Tao Liu__, __Xiaoyong Du__.
 
 I also got a lot of help from my Tencent colleagues Hui Chen, Jinbin Zhang, Zhiruo Wang, Weijie Liu, Peng Zhou, Haixiao Liu, and Weijian Wu. 
+
+## Citation
 Now we have a paper one can cite for UER-py:
 
 ```
