@@ -60,6 +60,11 @@ def main():
     # Optimizer options.
     parser.add_argument("--learning_rate", type=float, default=2e-5, help="Initial learning rate.")
     parser.add_argument("--warmup", type=float, default=0.1, help="Warm up value.")
+    parser.add_argument('--fp16', action='store_true',
+                        help="Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit")
+    parser.add_argument('--fp16_opt_level', type=str, default='O1',
+                        help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
+                             "See details at https://nvidia.github.io/apex/amp.html")
 
     # Subword options.
     parser.add_argument("--subword_type", choices=["none", "char"], default="none",

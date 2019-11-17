@@ -89,6 +89,14 @@ def worker(proc_id, gpu_ranks, args, model):
     optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
     scheduler = WarmupLinearSchedule(optimizer, warmup_steps=args.total_steps*args.warmup, t_total=args.total_steps)
 
+    if args.fp16:
+        try:
+            from apex import amp
+        except ImportError:
+            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
+        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
+        args.amp = amp
+
     if args.dist_train:
         # Initialize multiprocessing distributed training environment.
         dist.init_process_group(backend=args.backend,
@@ -143,7 +151,12 @@ def train_bert(args, gpu_id, rank, loader, model, optimizer, scheduler):
         done_tokens += src.size(0) * src.size(1)
 
         loss = loss / args.accumulation_steps
-        loss.backward()
+
+        if args.fp16:
+            with args.amp.scale_loss(loss, optimizer) as scaled_loss:
+                scaled_loss.backward()
+        else:
+            loss.backward()
 
         if steps % args.accumulation_steps == 0:
             optimizer.step()
@@ -223,7 +236,12 @@ def train_lm(args, gpu_id, rank, loader, model, optimizer, scheduler):
         total_denominator += denominator.item()
 
         loss = loss / args.accumulation_steps
-        loss.backward()
+
+        if args.fp16:
+            with args.amp.scale_loss(loss, optimizer) as scaled_loss:
+                scaled_loss.backward()
+        else:
+            loss.backward()
 
         if steps % args.accumulation_steps == 0:
             optimizer.step()
@@ -299,7 +317,12 @@ def train_bilm(args, gpu_id, rank, loader, model, optimizer, scheduler):
         total_denominator += denominator.item()
 
         loss = loss / args.accumulation_steps
-        loss.backward()
+
+        if args.fp16:
+            with args.amp.scale_loss(loss, optimizer) as scaled_loss:
+                scaled_loss.backward()
+        else:
+            loss.backward()
 
         if steps % args.accumulation_steps == 0:
             optimizer.step()
@@ -375,7 +398,12 @@ def train_cls(args, gpu_id, rank, loader, model, optimizer, scheduler):
         total_instances += src.size(0)
 
         loss = loss / args.accumulation_steps
-        loss.backward()
+
+        if args.fp16:
+            with args.amp.scale_loss(loss, optimizer) as scaled_loss:
+                scaled_loss.backward()
+        else:
+            loss.backward()
 
         if steps % args.accumulation_steps == 0:
             optimizer.step()
@@ -449,7 +477,12 @@ def train_mlm(args, gpu_id, rank, loader, model, optimizer, scheduler):
         total_denominator += denominator.item()
 
         loss = loss / args.accumulation_steps
-        loss.backward()
+
+        if args.fp16:
+            with args.amp.scale_loss(loss, optimizer) as scaled_loss:
+                scaled_loss.backward()
+        else:
+            loss.backward()
 
         if steps % args.accumulation_steps == 0:
             optimizer.step()
