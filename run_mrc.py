@@ -8,7 +8,6 @@ import json
 import sys
 import importlib
 importlib.reload(sys)
-import nltk
 import pdb
 
 import torch
@@ -116,6 +115,11 @@ def main():
                         help="Learning rate.")
     parser.add_argument("--warmup", type=float, default=0.1,
                         help="Warm up value.")
+    parser.add_argument('--fp16', action='store_true',
+                        help="Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit")
+    parser.add_argument('--fp16_opt_level', type=str, default='O1',
+                        help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
+                             "See details at https://nvidia.github.io/apex/amp.html")
 
     # Training options.
     parser.add_argument("--dropout", type=float, default=0.5,
@@ -156,10 +160,6 @@ def main():
 
     # For simplicity, we use DataParallel wrapper to use multiple GPUs.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    if torch.cuda.device_count() > 1:
-        print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
-        model = nn.DataParallel(model)
-
     model = model.to(device)
 
     # Dataset loader.
@@ -289,7 +289,7 @@ def main():
                     continue
                 if  re.search(r'[\u4e00-\u9fa5]', char) or char in sp_char:
                     if temp_str != "":
-                        ss = nltk.word_tokenize(temp_str)
+                        ss = tokenizer.tokenize(temp_str)
                         segs_out.extend(ss)
                         temp_str = ""
                     segs_out.append(char)
@@ -298,7 +298,7 @@ def main():
 
             #handling last part
             if temp_str != "":
-                ss = nltk.word_tokenize(temp_str)
+                ss = tokenizer.tokenize(temp_str)
                 segs_out.extend(ss)
 
             return segs_out
@@ -519,6 +519,17 @@ def main():
     optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
     scheduler = WarmupLinearSchedule(optimizer, warmup_steps=train_steps*args.warmup, t_total=train_steps)
 
+    if args.fp16:
+        try:
+            from apex import amp
+        except ImportError:
+            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
+        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
+
+    if torch.cuda.device_count() > 1:
+        print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
+        model = torch.nn.DataParallel(model)
+    
     total_loss = 0.
     result = 0.0
     best_result = 0.0
@@ -540,7 +551,13 @@ def main():
             if (i + 1) % args.report_steps == 0:
                 print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i+1, total_loss / args.report_steps))
                 total_loss = 0.
-            loss.backward()
+            
+            if args.fp16:
+                with amp.scale_loss(loss, optimizer) as scaled_loss:
+                    scaled_loss.backward()
+            else:
+                loss.backward()
+
             optimizer.step()
             scheduler.step()
         result = evaluate(args, False)
