@@ -6,7 +6,7 @@
 <img src="uer-logo.jpg" width="390" hegiht="390" align=left />
 
 Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py (Universal Encoder Representations) is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of different pre-training models (e.g. BERT, GPT, ELMO), and provides interfaces for users to further extend upon. With UER-py, we build a model zoo which contains pre-trained models based on different corpora, encoders, and targets. 
-#### Update: [BERT pretrained on mixed large corpus (bert-large 24-layers)](https://share.weiyun.com/5G90sMJ) is available now. It outperforms many other open-source pre-trained models on a range of Chinese datasets. The model is pretrained 500K steps upon RoBERTa-wwm-ext-large from https://github.com/ymcui/Chinese-BERT-wwm .
+#### Update: [BERT pretrained on mixed large corpus (bert-large 24-layers)](https://share.weiyun.com/5G90sMJ) is available now. It outperforms many other open-source pre-trained models on a range of Chinese datasets. The model is pretrained 500K steps upon RoBERTa-wwm-ext-large from https://github.com/ymcui/Chinese-BERT-wwm . It achieves SOTA results on [ChineseGLUE](http://106.13.187.75:8003/index). The detailed scripts are provided in fine-tuning section.
 #### Update: [BERT pretrained on mixed large corpus (bert-base 12-layers)](https://share.weiyun.com/5QOzPqq) is available now.
 #### [ELMO pretrained on mixed large corpus](https://share.weiyun.com/5Qihztq) is available now. It is much faster than BERT and performs well on many classification datasets. One can fine-tune it with the following options: --encoder bilstm --config_path models/birnn_config.json --learning_rate 5e-4 --pooling mean 
 
@@ -422,6 +422,24 @@ python3 run_mrc.py --pretrained_model_path models/google_model.bin --vocab_path 
                    --epochs_num 2 --batch_size 8 --seq_length 512 --encoder bert
 ```
 The train.json and dev.json are of squad-style. Trainset and devset are available [here](https://github.com/ymcui/cmrc2018). --test_path option is not specified since testset is not publicly available.
+
+#### ChineseGLUE
+The BERT-large model trained upon mixed large corpus achieves SOTA results on [ChineseGLUE](http://106.13.187.75:8003/leaderBorder). The detailed scripts are listed as follows:
+```
+CUDA_VISIBLE_DEVICES=0 /dockerdata/anaconda3/bin/python run_classifier.py --pretrained_model_path models/mixed_large_24_model.bin --vocab_path models/google_zh_vocab.txt --train_path datasets/tnews/train.tsv --dev_path datasets/tnews/dev.tsv --test_path datasets/tnews/test.tsv --epochs_num 3 --batch_size 32 --encoder bert --config_path models/bert_large_config.json --output_model_path tnews_classifier_16_64_1gpu_model.bin --seq_length 64
+```
+
+```
+ CUDA_VISIBLE_DEVICES=0,1 /dockerdata/anaconda3/bin/python run_classifier.py --pretrained_model_path models/mixed_large_24_model.bin --vocab_path models/google_zh_vocab.txt --train_path datasets/inews/train.tsv --dev_path datasets/inews/dev.tsv --test_path datasets/inews/test.tsv --epochs_num 3 --batch_size 16 --seq_length 512 --encoder bert --config_path models/bert_large_config.json --output_model_path inews_classifier_16_512_1gpu_model.bin
+```
+
+```
+ CUDA_VISIBLE_DEVICES=0 /dockerdata/anaconda3/bin/python run_classifier.py --pretrained_model_path models/mixed_large_24_model.bin --vocab_path models/google_zh_vocab.txt --train_path datasets/lcqmc/train.tsv --dev_path datasets/lcqmc/dev.tsv --test_path datasets/lcqmc/test.tsv --epochs_num 3 --batch_size 32 --encoder bert --config_path models/bert_large_config.json --output_model_path lcqmc_classifier_32_1gpu_model.bin
+```
+
+```
+ CUDA_VISIBLE_DEVICES=0 /dockerdata/anaconda3/bin/python run_classifier.py --pretrained_model_path models/mixed_large_24_model.bin --vocab_path models/google_zh_vocab.txt --train_path datasets/xnli/train.tsv --dev_path datasets/xnli/dev.tsv --test_path datasets/xnli/test.tsv --epochs_num 3 --batch_size 32 --encoder bert --config_path models/bert_large_config.json --output_model_path xnli_classifier_32_1gpu_model.bin
+```
 
 <br/>
 
