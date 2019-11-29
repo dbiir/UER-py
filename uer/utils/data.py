@@ -582,9 +582,9 @@ class MlmDataset(Dataset):
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
         set_seed(self.seed)
-        pos = 0
         f_write = open("dataset-tmp-" + str(proc_id) + ".pt", "wb")
         for _ in range(self.dup_factor):
+            pos = 0
             with open(self.corpus_path, mode="r", encoding="utf-8") as f:
                 while pos < start:
                     try:
@@ -618,7 +618,7 @@ class MlmDataset(Dataset):
                     if pos >= end - 1:
                         break
 
-            f_write.close()
+        f_write.close()
 
 
 class MlmDataLoader(DataLoader):
