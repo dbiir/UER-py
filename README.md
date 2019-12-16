@@ -9,7 +9,7 @@ Pre-training has become an essential part for NLP tasks and has led to remarkabl
 #### Update: [BERT pretrained on mixed large Chinese corpus (bert-large 24-layers)](https://share.weiyun.com/5G90sMJ) is available now. The model is pretrained 500K steps upon RoBERTa-wwm-ext-large from https://github.com/ymcui/Chinese-BERT-wwm . It achieves SOTA results on [ChineseGLUE](http://106.13.187.75:8003/index). The detailed scripts are provided in fine-tuning section.
 #### Update: [BERT pretrained on mixed large Chinese corpus (bert-base 12-layers)](https://share.weiyun.com/5QOzPqq) is available now.
 #### Update: [ELMO pretrained on mixed large Chinese corpus](https://share.weiyun.com/5Qihztq) is available now. It is much faster than BERT and performs well on many classification datasets. One can fine-tune it with the following options: --encoder bilstm --config_path models/birnn_config.json --learning_rate 5e-4 --pooling mean 
-#### Update: [BERT-tiny](https://share.weiyun.com/5J0oDBw) and [BERT-small](https://share.weiyun.com/5nurvlT) on pretrained on mixed large Chinese corpus are now available. One can use them by specifing --config_path models/bert_tiny_config.json or --config_path models/bert_small_config.json
+#### Update: [BERT-tiny 12x faster](https://share.weiyun.com/5J0oDBw) and [BERT-small 4x faster](https://share.weiyun.com/5nurvlT) pretrained on mixed large Chinese corpus are now available. One can use them by specifing --config_path models/bert_tiny_config.json or --config_path models/bert_small_config.json
 
 
 
