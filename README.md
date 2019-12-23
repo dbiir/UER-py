@@ -790,7 +790,8 @@ Now we have a paper one can cite for UER-py:
 @article{zhao2019uer,
   title={UER: An Open-Source Toolkit for Pre-training Models},
   author={Zhao, Zhe and Chen, Hui and Zhang, Jinbin and Zhao, Xin and Liu, Tao and Lu, Wei and Chen, Xi and Deng, Haotang and Ju, Qi and Du, Xiaoyong},
-  journal={arXiv preprint arXiv:1909.05658},
+  journal={EMNLP-IJCNLP 2019},
+  pages={241},
   year={2019}
 }
 ```
