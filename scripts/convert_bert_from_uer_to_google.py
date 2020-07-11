@@ -71,7 +71,6 @@ def main():
     output_model["cls/predictions/transform/dense/bias"] = input_model["target.mlm_linear_1.bias"]
     output_model["cls/predictions/transform/LayerNorm/gamma"] = input_model["target.layer_norm.gamma"]
     output_model["cls/predictions/transform/LayerNorm/beta"] = input_model["target.layer_norm.beta"]
-    output_model["cls/predictions/decoder/kernel"] = input_model["target.mlm_linear_2.weight"]
     output_model["cls/predictions/output_bias"] = input_model["target.mlm_linear_2.bias"]
 
     def assign_tf_var(tensor: np.ndarray, name: str):

@@ -6,9 +6,10 @@
 <img src="uer-logo.jpg" width="390" hegiht="390" align=left />
 
 Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py (Universal Encoder Representations) is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of different pre-training models (e.g. BERT, GPT, ELMO), and provides interfaces for users to further extend upon. With UER-py, we build a model zoo which contains pre-trained models based on different corpora, encoders, and targets. 
-#### Update: [BERT pretrained on mixed large corpus (bert-large 24-layers)](https://share.weiyun.com/5G90sMJ) is available now. The model is pretrained 500K steps upon RoBERTa-wwm-ext-large from https://github.com/ymcui/Chinese-BERT-wwm . It achieves SOTA results on [ChineseGLUE](http://106.13.187.75:8003/index). The detailed scripts are provided in fine-tuning section.
-#### Update: [BERT pretrained on mixed large corpus (bert-base 12-layers)](https://share.weiyun.com/5QOzPqq) is available now.
-#### Update: [ELMO pretrained on mixed large corpus](https://share.weiyun.com/5Qihztq) is available now. It is much faster than BERT and performs well on many classification datasets. One can fine-tune it with the following options: --encoder bilstm --config_path models/birnn_config.json --learning_rate 5e-4 --pooling mean 
+#### Update: [BERT pretrained on mixed large Chinese corpus (bert-large 24-layers)](https://share.weiyun.com/5G90sMJ) is available now. The model is pretrained 500K steps upon RoBERTa-wwm-ext-large from https://github.com/ymcui/Chinese-BERT-wwm . It achieves SOTA results on [ChineseGLUE](http://106.13.187.75:8003/index). The detailed scripts are provided in fine-tuning section.
+#### Update: [BERT pretrained on mixed large Chinese corpus (bert-base 12-layers)](https://share.weiyun.com/5QOzPqq) is available now.
+#### Update: [ELMO pretrained on mixed large Chinese corpus](https://share.weiyun.com/5Qihztq) is available now. It is much faster than BERT and performs well on many classification datasets. One can fine-tune it with the following options: --encoder bilstm --config_path models/birnn_config.json --learning_rate 5e-4 --pooling mean 
+#### Update: [BERT-tiny 12x faster](https://share.weiyun.com/5J0oDBw) and [BERT-small 4x faster](https://share.weiyun.com/5nurvlT) pretrained on mixed large Chinese corpus are now available. One can use them by specifing --config_path models/bert_tiny_config.json or --config_path models/bert_small_config.json
 
 
 
@@ -751,7 +752,7 @@ With the help of UER, we are pre-training models with different corpora, encoder
 <tr align="center"><td> Mixedlarge corpus+GptEncoder+LmTarget <td> https://share.weiyun.com/51nTP8V <td> Mixedlarge corpus contains baidubaike + wiki + webqa + RenMinRiBao + literature + reviews. Training steps: 500,000 (with sequence lenght of 128) + 100,000 (with sequence length of 512)
 <tr align="center"><td> Google-BERT-en-uncased-base <td> Model: https://share.weiyun.com/5hWivED Vocab: https://share.weiyun.com/5gBxBYD <td> Provided by Google.
 <tr align="center"><td> Google-BERT-en-cased-base <td> Model: https://share.weiyun.com/5SltATz Vocab: https://share.weiyun.com/5ouUo2q <td> Provided by Google.
-<tr align="center"><td> Reviews+LstmEncoder+LmTarget <td> https://share.weiyun.com/57dZhqo  <td> The training corpus is amazon reviews + JDbinary reviews + dainping reviews (11.4M reviews in total). Language model target is used. It is suitable for datasets related with reviews. It achieves over 5 percent improvements on some review datasets compared with random initialization. Training steps: 200,000; Sequence length: 128
+<tr align="center"><td> Reviews+LstmEncoder+LmTarget <td> https://share.weiyun.com/57dZhqo  <td> The training corpus is amazon reviews + JDbinary reviews + dainping reviews (11.4M reviews in total). Language model target is used. It is suitable for datasets related with reviews. It achieves over 5 percent improvements on some review datasets compared with random initialization. Set hidden_size in models/rnn_config.json to 512 before using it. Training steps: 200,000; Sequence length: 128;
 <tr align="center"><td> (Mixedlarge corpus & Amazon reviews)+LstmEncoder+(LmTarget & ClsTarget) <td> https://share.weiyun.com/5B671Ik  <td> Mixedlarge corpus contains baidubaike + wiki + webqa + RenMinRiBao. The model is trained on it with language model target. And then the model is trained on Amazon reviews with language model and classification targets. It is suitable for datasets related with reviews. It can achieve comparable results with BERT on some review datasets. Training steps: 500,000 + 100,000; Sequence length: 128
 
 <tr align="center"><td> IfengNews+BertEncoder+BertTarget <td> https://share.weiyun.com/5HVcUWO <td> The training corpus is news data from Ifeng website. We use news titles to predict news abstracts. Training steps: 100,000; Sequence length: 128
@@ -789,7 +790,8 @@ Now we have a paper one can cite for UER-py:
 @article{zhao2019uer,
   title={UER: An Open-Source Toolkit for Pre-training Models},
   author={Zhao, Zhe and Chen, Hui and Zhang, Jinbin and Zhao, Xin and Liu, Tao and Lu, Wei and Chen, Xi and Deng, Haotang and Ju, Qi and Du, Xiaoyong},
-  journal={arXiv preprint arXiv:1909.05658},
+  journal={EMNLP-IJCNLP 2019},
+  pages={241},
   year={2019}
 }
 ```
