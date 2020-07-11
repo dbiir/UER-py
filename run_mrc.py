@@ -87,7 +87,7 @@ def main():
     parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
                         help="Emebdding type.")
     parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
-                                                   "cnn", "gatedcnn", "attn", \
+                                                   "cnn", "gatedcnn", "attn", "synt", \
                                                    "rcnn", "crnn", "gpt"], \
                                                    default="bert", help="Encoder type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
