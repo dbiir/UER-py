@@ -1,0 +1,1 @@
+{"encoder": "synt", "emb_size": 768, "feedforward_size": 3072, "hidden_size": 768, "heads_num": 12, "layers_num": 12, "dropout": 0.1, "seq_length": 128, "synt_type": "dense", "vocab_path": "models/google_zh_vocab.txt"}

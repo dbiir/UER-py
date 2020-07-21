@@ -1,10 +1,16 @@
 # -*- encoding:utf-8 -*-
 import json
+from argparse import Namespace
 
 
 def load_hyperparam(args):
     with open(args.config_path, mode="r", encoding="utf-8") as f:
         param = json.load(f)
+
+    args_dict = vars(args)
+    args_dict.update(param)
+    args = Namespace(**args_dict)
+
     args.emb_size = param.get("emb_size", 768)
     args.hidden_size = param.get("hidden_size", 768)
     args.kernel_size = param.get("kernel_size", 3)
