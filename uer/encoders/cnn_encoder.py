@@ -73,7 +73,8 @@ class GatedcnnEncoder(nn.Module):
             hidden, gate = conv_i(hidden), gate_i(hidden)
             hidden = hidden * torch.sigmoid(gate)
             if (i + 1) % self.block_size:
-                hidden = hidden + res_input
+                if i != 0:
+                    hidden = hidden + res_input
                 res_input = hidden
             hidden = torch.cat([padding, hidden], dim=2)
 
