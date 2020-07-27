@@ -195,7 +195,7 @@ UER-py/
     |--preprocess.py
     |--pretrain.py
     |--run_classifier.py
-    |--run_mrc.py
+    |--run_cmrc.py
     |--run_ner.py
     |--README.md
 ```
@@ -415,10 +415,10 @@ python3 run_ner.py --pretrained_model_path models/google_model.bin --vocab_path 
 ```
 
 #### Machine reading comprehension
-run_mrc.py adds two feedforward layers upon encoder layer.
-The example of using run_mrc.py：
+run_cmrc.py adds two feedforward layers upon encoder layer.
+The example of using run_cmrc.py：
 ```
-python3 run_mrc.py --pretrained_model_path models/google_model.bin --vocab_path models/google_zh_vocab.txt 
+python3 run_cmrc.py --pretrained_model_path models/google_model.bin --vocab_path models/google_zh_vocab.txt 
                    --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json 
                    --epochs_num 2 --batch_size 8 --seq_length 512 --encoder bert
 ```
