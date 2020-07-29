@@ -141,13 +141,13 @@ Besides classification, UER-py also provides scripts for other downstream tasks.
 ```
 python3 run_ner.py --pretrained_model_path models/google_model.bin --vocab_path models/google_zh_vocab.txt \
                    --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
-                   --epochs_num 5 --batch_size 16 --encoder bert
+                   --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 --encoder bert
 ```
 We could download [a model pre-trained on RenMinRiBao (as known as People's Daily, a news corpus)](https://share.weiyun.com/5JWVjSE) and finetune on it: 
 ```
 python3 run_ner.py --pretrained_model_path models/rmrb_model.bin --vocab_path models/google_zh_vocab.txt \
                    --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
-                   --epochs_num 5 --batch_size 16 --encoder bert
+                   --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 --encoder bert
 ```
 It turns out that the result of Google's model is 92.6; The result of *rmrb_model.bin* is 94.4.
 
@@ -411,7 +411,7 @@ The example of using run_ner.py：
 ```
 python3 run_ner.py --pretrained_model_path models/google_model.bin --vocab_path models/google_zh_vocab.txt \
                    --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
-                   --epochs_num 5 --batch_size 16 --encoder bert
+                   --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 --encoder bert
 ```
 
 #### Machine reading comprehension
