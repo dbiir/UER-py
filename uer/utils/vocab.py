@@ -20,7 +20,6 @@ class Vocab(object):
         with open(vocab_path, mode="r", encoding="utf-8") as reader:
             for index, line in enumerate(reader):
                 try:
-                    # fix vocab loading bug
                     w = line.strip().split()[0]
                     self.w2i[w] = index
                     self.i2w.append(w)
