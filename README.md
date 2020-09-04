@@ -21,10 +21,10 @@ Table of Contents
   * [Requirements](#requirements)
   * [Quickstart](#quickstart)
   * [Datasets](#datasets)
+  * [Chinese_model_zoo](#chinese_model_zoo)
   * [Instructions](#instructions)
   * [Scripts](#scripts)
   * [Experiments](#experiments)
-  * [Chinese_model_zoo](#chinese_model_zoo)
   
   
 <br/>
@@ -138,7 +138,7 @@ BERT consists of next sentence prediction (NSP) target. However, NSP target is n
 python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
                       --processes_num 8 --target mlm
 
-python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_model.bin \
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
                     --output_model_path models/book_review_mlm_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
                     --total_steps 5000 --save_checkpoint_steps 1000 --encoder bert --target mlm
 
@@ -217,6 +217,53 @@ This project includes a range of Chinese datasets: XNLI, LCQMC, MSRA-NER, ChnSen
 <tr align="center"><td> NLPCC-DBQA <td> https://share.weiyun.com/5HJMbih
 <tr align="center"><td> Sina Weibo <td> https://share.weiyun.com/5lEsv0w
 <tr align="center"><td> THUCNews <td> https://share.weiyun.com/5jPpgBr
+</table>
+
+<br/>
+
+## Chinese_model_zoo
+With the help of UER, we pre-trained models with different corpora, encoders, and targets. All pre-trained models can be loaded by UER directly. More pre-trained models will be released in the near future. Unless otherwise noted, Chinese pre-trained models use *models/google_zh_vocab.txt* as vocabulary, which is used in original BERT project. *models/bert_base_config.json* is used as configuration file in default. Commonly-used vocabulary and configuration files are included in *models* folder and users do not need to download them. 
+<table>
+<tr align="center"><th> Pre-trained model <th> Link <th> Description 
+<tr align="center"><td> Wikizh+BertEncoder+BertTarget <td> https://share.weiyun.com/A1C49VPb <td> Google's pre-trained Chinese model from https://github.com/google-research/bert
+<tr align="center"><td> Wikizh(word-based)+BertEncoder+BertTarget <td> Model: https://share.weiyun.com/5s4HVMi Vocab: https://share.weiyun.com/5NWYbYn <td> Word-based BERT model pre-trained on Wikizh. Training steps: 500,000
+<tr align="center"><td> RenMinRiBao+BertEncoder+BertTarget <td> https://share.weiyun.com/5JWVjSE <td> The training corpus is news data from People's Daily (1946-2017).
+<tr align="center"><td> Webqa2019+BertEncoder+BertTarget <td> https://share.weiyun.com/5HYbmBh <td> The training corpus is WebQA, which is suitable for datasets related with social media, e.g. Accuracy (dev/test) on LCQMC is improved from 88.8/87.0 to 89.6/87.4; Accuracy (dev/test) on XNLI is improved from 78.1/77.2 to 79.0/78.8 (compared with Google BERT). Training steps: 500,000
+<tr align="center"><td> Weibo+BertEncoder+BertTarget <td> https://share.weiyun.com/5ZDZi4A <td> The training corpus is Weibo.
+<tr align="center"><td> Weibo+BertEncoder(large)+MlmTarget <td> https://share.weiyun.com/CFKyMkp3 <td> The training corpus is Weibo. The configuration file is bert_large_config.json
+<tr align="center"><td> Reviews+BertEncoder+MlmTarget <td> https://share.weiyun.com/tBgaSx77 <td> The training corpus is reviews.
+<tr align="center"><td> Reviews+BertEncoder(large)+MlmTarget <td> https://share.weiyun.com/hn7kp9bs <td> The training corpus is reviews. The configuration file is bert_large_config.json
+<tr align="center"><td> CLUECorpus+AlbertEncoder(base)+AlbertTarget <td> https://share.weiyun.com/UnKHNKRG <td> Google's pre-trained Chinese model from https://github.com/google-research/albert . The configuration file is albert_base_config.json
+<tr align="center"><td> CLUECorpus+AlbertEncoder(large)+AlbertTarget <td> https://share.weiyun.com/9tTUwALd <td> Google's pre-trained Chinese model from https://github.com/google-research/albert . The configuration file is albert_large_config.json
+<tr align="center"><td> CLUECorpus+AlbertEncoder(xlarge)+AlbertTarget <td> https://share.weiyun.com/mUamRQFR <td> Google's pre-trained Chinese model from https://github.com/google-research/albert . The configuration file is albert_xlarge_config.json
+<tr align="center"><td> CLUECorpus+AlbertEncoder(xxlarge)+AlbertTarget <td> https://share.weiyun.com/0i2lX62b <td> Google's pre-trained Chinese model from https://github.com/google-research/albert . The configuration file is albert_xxlarge_config.json
+<tr align="center"><td> MixedCorpus+BertEncoder(large)+BertTarget <td> https://share.weiyun.com/5G90sMJ <td> Pre-trained on mixed large Chinese corpus. The configuration file is bert_large_config.json
+<tr align="center"><td> MixedCorpus+BertEncoder(base)+BertTarget <td> https://share.weiyun.com/5QOzPqq <td> Pre-trained on mixed large Chinese corpus. The configuration file is bert_base_config.json
+<tr align="center"><td> MixedCorpus+BertEncoder(small)+BertTarget <td> https://share.weiyun.com/fhcUanfy <td> Pre-trained on mixed large Chinese corpus. The configuration file is bert_small_config.json
+<tr align="center"><td> MixedCorpus+BertEncoder(tiny)+BertTarget <td> https://share.weiyun.com/yXx0lfUg <td> Pre-trained on mixed large Chinese corpus. The configuration file is bert_tiny_config.json
+<tr align="center"><td> Mixedlarge corpus+GptEncoder+LmTarget <td> https://share.weiyun.com/51nTP8V <td> Mixedlarge corpus contains baidubaike + wiki + webqa + RenMinRiBao + literature + reviews. Training steps: 500,000 (with sequence lenght of 128) + 100,000 (with sequence length of 512)
+<tr align="center"><td> Google-BERT-en-uncased-base <td> Model: https://share.weiyun.com/5hWivED Vocab: https://share.weiyun.com/5gBxBYD <td> Provided by Google.
+<tr align="center"><td> Google-BERT-en-cased-base <td> Model: https://share.weiyun.com/5SltATz Vocab: https://share.weiyun.com/5ouUo2q <td> Provided by Google.
+<tr align="center"><td> Reviews+LstmEncoder+LmTarget <td> https://share.weiyun.com/57dZhqo  <td> The training corpus is amazon reviews + JDbinary reviews + dainping reviews (11.4M reviews in total). Language model target is used. It is suitable for datasets related with reviews. It achieves over 5 percent improvements on some review datasets compared with random initialization. Set hidden_size in models/rnn_config.json to 512 before using it. Training steps: 200,000; Sequence length: 128;
+<tr align="center"><td> (Mixedlarge corpus & Amazon reviews)+LstmEncoder+(LmTarget & ClsTarget) <td> https://share.weiyun.com/5B671Ik  <td> Mixedlarge corpus contains baidubaike + wiki + webqa + RenMinRiBao. The model is trained on it with language model target. And then the model is trained on Amazon reviews with language model and classification targets. It is suitable for datasets related with reviews. It can achieve comparable results with BERT on some review datasets. Training steps: 500,000 + 100,000; Sequence length: 128
+
+<tr align="center"><td> IfengNews+BertEncoder+BertTarget <td> https://share.weiyun.com/5HVcUWO <td> The training corpus is news data from Ifeng website. We use news titles to predict news abstracts. Training steps: 100,000; Sequence length: 128
+<tr align="center"><td> jdbinary+BertEncoder+ClsTarget <td> https://share.weiyun.com/596k2bu <td> The training corpus is review data from JD (jingdong). Classification target is used for pre-training. It is suitable for datasets related with shopping reviews, e.g. accuracy is improved on shopping datasets from 96.3 to 97.2 (compared with Google BERT). Training steps: 50,000; Sequence length: 128
+<tr align="center"><td> jdfull+BertEncoder+MlmTarget <td> https://share.weiyun.com/5L6EkUF <td> The training corpus is review data from JD (jingdong). Masked LM target is used for pre-training. Training steps: 50,000; Sequence length: 128
+<tr align="center"><td> Amazonreview+BertEncoder+ClsTarget <td> https://share.weiyun.com/5XuxtFA <td> The training corpus is review data from Amazon (including book reviews, movie reviews, and etc.). Classification target is used for pre-training. It is suitable for datasets related with reviews, e.g. accuracy is improved on Douban book review datasets from 87.6 to 88.5 (compared with Google BERT). Training steps: 20,000; Sequence length: 128
+<tr align="center"><td> XNLI+BertEncoder+ClsTarget <td> https://share.weiyun.com/5oXPugA <td> Infersent with BertEncoder
+<tr align="center"><td> <td> <td> 
+</table>
+
+We release the classification models on 5 large-scale datasets, i.e. Ifeng, Chinanews, Dianping, JDbinary, and
+JDfull. Users can use these models to reproduce results, or regard them as pre-training models for other datasets.
+<table>
+<tr align="center"><th> Datasets <th> Link  
+<tr align="center"><td> Ifeng <td> https://share.weiyun.com/5ZCp4wU 
+<tr align="center"><td> Chinanews <td> https://share.weiyun.com/5bSfeQ7
+<tr align="center"><td> Dianping <td> https://share.weiyun.com/5Ls8R02
+<tr align="center"><td> JDbinary <td> https://share.weiyun.com/5QNu4QF
+<tr align="center"><td> JDfull <td> https://share.weiyun.com/5bqchN1
 </table>
 
 <br/>
@@ -376,25 +423,25 @@ We recommend to load a pre-trained model. We can specify the pre-trained model b
 The example of pre-training on CPU and single GPU:
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
-                    --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
+                    --pretrained_model_path models/google_zh_model.bin --output_model_path models/output_model.bin \
                     --encoder bert --target bert
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
-                    --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
+                    --pretrained_model_path models/google_zh_model.bin --output_model_path models/output_model.bin \
                     --gpu_ranks 3 --encoder bert --target bert
 ```
 The example of pre-training on a single machine with 8 GPUs：
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
-                    --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
+                    --pretrained_model_path models/google_zh_model.bin --output_model_path models/output_model.bin \
                     --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder bert --target bert 
 ```
 The example of pre-training on two machines, each has 8 GPUs (16 GPUs in total):
 ```
 Node-0 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
-                             --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
+                             --pretrained_model_path models/google_zh_model.bin --output_model_path models/output_model.bin \
                              --encoder bert --target bert --world_size 16 --gpu_ranks 0 1 2 3 4 5 6 7 --master_ip tcp://9.73.138.133:12345
 Node-1 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
-                             --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
+                             --pretrained_model_path models/google_zh_model.bin --output_model_path models/output_model.bin \
                              --encoder bert --target bert --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 --master_ip tcp://9.73.138.133:12345
 ```
 The example of pre-training on three machines, each has 8 GPUs (24 GPUs in total):
@@ -527,19 +574,19 @@ usage: run_classifier.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
 ```
 The example of using run_classifier.py：
 ```
-python3 run_classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 run_classifier.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 3 --batch_size 64 --encoder bert
 ```
 The example of using run_classifier.py for pair classification:
 ```
-python3 run_classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 run_classifier.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                           --train_path datasets/lcqmc/train.tsv --dev_path datasets/lcqmc/dev.tsv --test_path datasets/lcqmc/test.tsv \
                           --epochs_num 3 --batch_size 64 --encoder bert
 ```
 The example of using run_classifier.py for document-based question answering (DBQA):
 ```
-python3 run_classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 run_classifier.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                           --train_path datasets/dbqa/train.tsv --dev_path datasets/dbqa/dev.tsv --test_path datasets/dbqa/test.tsv \
                           --epochs_num 3 --batch_size 64 --encoder bert --mean_reciprocal_rank
 ```
@@ -563,7 +610,7 @@ usage: run_ner.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
 ```
 The example of using run_ner.py：
 ```
-python3 run_ner.py --pretrained_model_path models/google_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 run_ner.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                    --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
                    --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 --encoder bert
 ```
@@ -572,7 +619,7 @@ python3 run_ner.py --pretrained_model_path models/google_model.bin --vocab_path 
 run_cmrc.py adds two feedforward layers upon encoder layer.
 The example of using run_cmrc.py：
 ```
-python3 run_cmrc.py --pretrained_model_path models/google_model.bin --vocab_path models/google_zh_vocab.txt 
+python3 run_cmrc.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt 
                    --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json 
                    --epochs_num 2 --batch_size 8 --seq_length 512 --encoder bert
 ```
@@ -664,14 +711,14 @@ usage: extract_feature.py [-h] --input_path INPUT_PATH --pretrained_model_path
 The example of using extract_feature.py：
 ```
 python3 scripts/extract_feature.py --input_path datasets/cloze_input.txt --vocab_path models/google_zh_vocab.txt \
-                                   --pretrained_model_path models/google_model.bin --output_path feature_output.pt
+                                   --pretrained_model_path models/google_zh_model.bin --output_path feature_output.pt
 ```
 
 ### Finding nearest neighbours
 Pre-trained models can learn high-quality word embeddings. Traditional word embeddings such as word2vec and GloVe assign each word a fixed vector (context-independent word embedding). However, polysemy is a pervasive phenomenon in human language, and the meanings of a polysemous word depend on the context. To this end, we use a the hidden state in pre-trained models to represent a word. It is noticeable that Google BERT is a character-based model. To obtain real word embedding (not character embedding), Users should download our [word-based BERT model](https://share.weiyun.com/5s4HVMi) and [vocabulary](https://share.weiyun.com/5NWYbYn).
 The example of using scripts/topn_words_indep.py to find nearest neighbours for context-independent word embedding (character-based and word-based models)：
 ```
-python3 scripts/topn_words_indep.py --pretrained_model_path models/google_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 scripts/topn_words_indep.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                                     --cand_vocab_path models/google_zh_vocab.txt --target_words_path target_words.txt
 python3 scripts/topn_words_indep.py --pretrained_model_path models/bert_wiki_word_model.bin --vocab_path models/wiki_word_vocab.txt \
                                     --cand_vocab_path models/wiki_word_vocab.txt --target_words_path target_words.txt
@@ -686,7 +733,7 @@ word-n
 ```
 The example of using scripts/topn_words_dep.py to find nearest neighbours for context-dependent word embedding (character-based and word-based models)：
 ```
-python3 scripts/topn_words_dep.py --pretrained_model_path models/google_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 scripts/topn_words_dep.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                                   --cand_vocab_path models/google_zh_vocab.txt --sent_path target_words_with_sentences.txt --config_path models/bert_base_config.json \
                                   --batch_size 256 --seq_length 32 --tokenizer bert
 python3 scripts/topn_words_dep.py --pretrained_model_path models/bert_wiki_word_model.bin --vocab_path models/wiki_word_vocab.txt \
@@ -889,43 +936,6 @@ We also provide the pre-trained models on different corpora, encoders, and targe
 <tr align="center"><th> Model/Dataset                     <th> MSRA-NER
 <tr align="center"><td> Wikizh corpus (Google)            <td> 93.0/92.4/92.7
 <tr align="center"><td> Renminribao corpus                <td> 94.4/94.4/94.4
-</table>
-
-
-<br/>
-
-## Chinese_model_zoo
-With the help of UER, we are pre-training models with different corpora, encoders, and targets.
-<table>
-<tr align="center"><th> pre-trained model <th> Link <th> Description 
-<tr align="center"><td> Wikizh+BertEncoder+BertTarget <td> https://share.weiyun.com/5s9AsfQ <td> The training corpus is Wiki_zh, trained by Google
-<tr align="center"><td> Wikizh(word-based)+BertEncoder+BertTarget <td> Model: https://share.weiyun.com/5s4HVMi Vocab: https://share.weiyun.com/5NWYbYn <td> Word-based BERT model trained on Wikizh. Training steps: 500,000
-<tr align="center"><td> RenMinRiBao+BertEncoder+BertTarget <td> https://share.weiyun.com/5JWVjSE <td> The training corpus is news data from People's Daily (1946-2017). It is suitable for datasets related with news, e.g. F1 is improved on MSRA-NER from 92.6 to 94.4 (compared with Google BERT). Training steps: 500,000
-<tr align="center"><td> Webqa2019+BertEncoder+BertTarget <td> https://share.weiyun.com/5HYbmBh <td> The training corpus is WebQA, which is suitable for datasets related with social media, e.g. Accuracy (dev/test) on LCQMC is improved from 88.8/87.0 to 89.6/87.4; Accuracy (dev/test) on XNLI is improved from 78.1/77.2 to 79.0/78.8 (compared with Google BERT). Training steps: 500,000
-<tr align="center"><td> Weibo+BertEncoder+BertTarget <td> https://share.weiyun.com/5ZDZi4A <td> The training corpus is Weibo. Training steps: 200,000
-<tr align="center"><td> Mixedlarge corpus+GptEncoder+LmTarget <td> https://share.weiyun.com/51nTP8V <td> Mixedlarge corpus contains baidubaike + wiki + webqa + RenMinRiBao + literature + reviews. Training steps: 500,000 (with sequence lenght of 128) + 100,000 (with sequence length of 512)
-<tr align="center"><td> Google-BERT-en-uncased-base <td> Model: https://share.weiyun.com/5hWivED Vocab: https://share.weiyun.com/5gBxBYD <td> Provided by Google.
-<tr align="center"><td> Google-BERT-en-cased-base <td> Model: https://share.weiyun.com/5SltATz Vocab: https://share.weiyun.com/5ouUo2q <td> Provided by Google.
-<tr align="center"><td> Reviews+LstmEncoder+LmTarget <td> https://share.weiyun.com/57dZhqo  <td> The training corpus is amazon reviews + JDbinary reviews + dainping reviews (11.4M reviews in total). Language model target is used. It is suitable for datasets related with reviews. It achieves over 5 percent improvements on some review datasets compared with random initialization. Set hidden_size in models/rnn_config.json to 512 before using it. Training steps: 200,000; Sequence length: 128;
-<tr align="center"><td> (Mixedlarge corpus & Amazon reviews)+LstmEncoder+(LmTarget & ClsTarget) <td> https://share.weiyun.com/5B671Ik  <td> Mixedlarge corpus contains baidubaike + wiki + webqa + RenMinRiBao. The model is trained on it with language model target. And then the model is trained on Amazon reviews with language model and classification targets. It is suitable for datasets related with reviews. It can achieve comparable results with BERT on some review datasets. Training steps: 500,000 + 100,000; Sequence length: 128
-
-<tr align="center"><td> IfengNews+BertEncoder+BertTarget <td> https://share.weiyun.com/5HVcUWO <td> The training corpus is news data from Ifeng website. We use news titles to predict news abstracts. Training steps: 100,000; Sequence length: 128
-<tr align="center"><td> jdbinary+BertEncoder+ClsTarget <td> https://share.weiyun.com/596k2bu <td> The training corpus is review data from JD (jingdong). Classification target is used for pre-training. It is suitable for datasets related with shopping reviews, e.g. accuracy is improved on shopping datasets from 96.3 to 97.2 (compared with Google BERT). Training steps: 50,000; Sequence length: 128
-<tr align="center"><td> jdfull+BertEncoder+MlmTarget <td> https://share.weiyun.com/5L6EkUF <td> The training corpus is review data from JD (jingdong). Masked LM target is used for pre-training. Training steps: 50,000; Sequence length: 128
-<tr align="center"><td> Amazonreview+BertEncoder+ClsTarget <td> https://share.weiyun.com/5XuxtFA <td> The training corpus is review data from Amazon (including book reviews, movie reviews, and etc.). Classification target is used for pre-training. It is suitable for datasets related with reviews, e.g. accuracy is improved on Douban book review datasets from 87.6 to 88.5 (compared with Google BERT). Training steps: 20,000; Sequence length: 128
-<tr align="center"><td> XNLI+BertEncoder+ClsTarget <td> https://share.weiyun.com/5oXPugA <td> Infersent with BertEncoder
-<tr align="center"><td> <td> <td> 
-</table>
-
-We release the classification models on 5 large-scale datasets, i.e. Ifeng, Chinanews, Dianping, JDbinary, and
-JDfull. Users can use these models to reproduce results, or regard them as pre-training models for other datasets.
-<table>
-<tr align="center"><th> Datasets <th> Link  
-<tr align="center"><td> Ifeng <td> https://share.weiyun.com/5ZCp4wU 
-<tr align="center"><td> Chinanews <td> https://share.weiyun.com/5bSfeQ7
-<tr align="center"><td> Dianping <td> https://share.weiyun.com/5Ls8R02
-<tr align="center"><td> JDbinary <td> https://share.weiyun.com/5QNu4QF
-<tr align="center"><td> JDfull <td> https://share.weiyun.com/5bqchN1
 </table>
 
 <br/>
