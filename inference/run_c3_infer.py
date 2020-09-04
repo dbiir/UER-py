@@ -1,5 +1,5 @@
 """
-  This script provides an exmaple to wrap BERT-PyTorch for C3 dataset (multiple choice) inference.
+  This script provides an exmaple to wrap UER-py for C3 (multiple choice dataset) inference.
 """
 import sys
 import os
@@ -51,8 +51,6 @@ def main():
                                               "rcnn", "crnn", "gpt", "bilstm"], \
                                               default="bert", help="Encoder type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
-                        help="Pooling type.")
     parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
 
@@ -69,13 +67,10 @@ def main():
     # Load the hyperparameters from the config file.
     args = load_hyperparam(args)
 
-    # Load vocabulary.
-    vocab = Vocab()
-    vocab.load(args.vocab_path)
-    args.vocab = vocab
+    # Build tokenizer.
+    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
 
     # Build classification model and load parameters.
-    args.soft_targets = False
     model = MultipleChoice(args)
     model = load_model(model, args.load_model_path)
 
@@ -85,9 +80,6 @@ def main():
     if torch.cuda.device_count() > 1:
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
-
-    # Build tokenizer.
-    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
 
     dataset = read_dataset(args, args.test_path)
 

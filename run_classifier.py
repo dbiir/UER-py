@@ -8,7 +8,7 @@ import collections
 import torch.nn as nn
 from uer.utils.vocab import Vocab
 from uer.utils.constants import *
-from uer.utils.tokenizer import * 
+from uer.utils.tokenizer import *
 from uer.layers.embeddings import *
 from uer.encoders.bert_encoder import *
 from uer.encoders.rnn_encoder import *
@@ -26,11 +26,12 @@ from uer.model_saver import save_model
 class Classifier(nn.Module):
     def __init__(self, args):
         super(Classifier, self).__init__()
-        self.embedding = globals()[args.embedding.capitalize() + "Embedding"](args, len(args.vocab))
+        self.embedding = globals()[args.embedding.capitalize() + "Embedding"](args, len(args.tokenizer.vocab))
         self.encoder = globals()[args.encoder.capitalize() + "Encoder"](args)
         self.labels_num = args.labels_num
         self.pooling = args.pooling
         self.soft_targets = args.soft_targets
+        self.soft_alpha = args.soft_alpha
         self.output_layer_1 = nn.Linear(args.hidden_size, args.hidden_size)
         self.output_layer_2 = nn.Linear(args.hidden_size, self.labels_num)
 
@@ -58,7 +59,8 @@ class Classifier(nn.Module):
         logits = self.output_layer_2(output)
         if tgt is not None:
             if self.soft_targets and soft_tgt is not None:
-                loss = nn.MSELoss()(logits, soft_tgt)
+                loss = self.soft_alpha * nn.MSELoss()(logits, soft_tgt) + \
+                       (1 - self.soft_alpha) * nn.NLLLoss()(nn.LogSoftmax(dim=-1)(logits), tgt.view(-1))
             else:
                 loss = nn.NLLLoss()(nn.LogSoftmax(dim=-1)(logits), tgt.view(-1))
             return loss, logits
@@ -139,15 +141,12 @@ def read_dataset(args, path):
                 soft_tgt = [float(value) for value in line[columns["logits"]].split(" ")]
             if "text_b" not in columns: # Sentence classification.
                 text_a = line[columns["text_a"]]
-                src = [args.vocab.get(t) for t in args.tokenizer.tokenize(text_a)]
-                src = [CLS_ID] + src
+                src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a))
                 seg = [1] * len(src)
             else: # Sentence-pair classification.
                 text_a, text_b = line[columns["text_a"]], line[columns["text_b"]]
-                src_a = [args.vocab.get(t) for t in args.tokenizer.tokenize(text_a)]
-                src_a = [CLS_ID] + src_a + [SEP_ID]
-                src_b = [args.vocab.get(t) for t in args.tokenizer.tokenize(text_b)]
-                src_b = src_b + [SEP_ID]
+                src_a = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a) + [SEP_TOKEN])
+                src_b = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(text_b) + [SEP_TOKEN])
                 src = src_a + src_b
                 seg = [1] * len(src_a) + [2] * len(src_b)
 
@@ -238,12 +237,14 @@ def main():
                         help="Path of the pretrained model.")
     parser.add_argument("--output_model_path", default="./models/classifier_model.bin", type=str,
                         help="Path of the output model.")
-    parser.add_argument("--vocab_path", type=str, required=True,
+    parser.add_argument("--vocab_path", default=None, type=str,
                         help="Path of the vocabulary file.")
+    parser.add_argument("--spm_model_path", default=None, type=str,
+                        help="Path of the sentence piece model.")
     parser.add_argument("--train_path", type=str, required=True,
                         help="Path of the trainset.")
     parser.add_argument("--dev_path", type=str, required=True,
-                        help="Path of the devset.") 
+                        help="Path of the devset.")
     parser.add_argument("--test_path", type=str,
                         help="Path of the testset.")
     parser.add_argument("--config_path", default="./models/bert_base_config.json", type=str,
@@ -277,6 +278,8 @@ def main():
     # Optimizer options.
     parser.add_argument("--soft_targets", action='store_true',
                         help="Train model with logits.")
+    parser.add_argument("--soft_alpha", type=float, default=0.5,
+                        help="Weight of the soft targets loss.")
     parser.add_argument("--learning_rate", type=float, default=2e-5,
                         help="Learning rate.")
     parser.add_argument("--warmup", type=float, default=0.1,
@@ -307,10 +310,8 @@ def main():
     # Count the number of labels. 
     args.labels_num = count_labels_num(args.train_path)
 
-    # Load vocabulary.
-    vocab = Vocab()
-    vocab.load(args.vocab_path)
-    args.vocab = vocab
+    # Build tokenizer.
+    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
 
     # Build classification model.
     model = Classifier(args)
@@ -320,10 +321,6 @@ def main():
     
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
-    args.model = model
-    
-    # Build tokenizer.
-    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
 
     # Training phase.
     trainset = read_dataset(args, args.train_path)
@@ -357,6 +354,7 @@ def main():
     if torch.cuda.device_count() > 1:
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
+    args.model = model
 
     total_loss, result, best_result = 0., 0., 0.
 

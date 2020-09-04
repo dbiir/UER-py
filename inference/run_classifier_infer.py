@@ -1,5 +1,5 @@
 """
-  This script provides an exmaple to wrap BERT-PyTorch for classification inference.
+  This script provides an exmaple to wrap UER-py for classification inference.
 """
 import sys
 import os
@@ -46,15 +46,12 @@ def read_dataset(args, path):
             line = line.strip().split('\t')
             if "text_b" not in columns: # Sentence classification.
                 text_a = line[columns["text_a"]]
-                src = [args.vocab.get(t) for t in args.tokenizer.tokenize(text_a)]
-                src = [CLS_ID] + src
+                src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a))
                 seg = [1] * len(src)
             else: # Sentence pair classification.
                 text_a, text_b = line[columns["text_a"]], line[columns["text_b"]]
-                src_a = [args.vocab.get(t) for t in args.tokenizer.tokenize(text_a)]
-                src_a = [CLS_ID] + src_a + [SEP_ID]
-                src_b = [args.vocab.get(t) for t in args.tokenizer.tokenize(text_b)]
-                src_b = src_b + [SEP_ID]
+                src_a = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a) + [SEP_TOKEN])
+                src_b = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(text_b) + [SEP_TOKEN])
                 src = src_a + src_b
                 seg = [1] * len(src_a) + [2] * len(src_b)
             
@@ -75,8 +72,10 @@ def main():
     # Path options.
     parser.add_argument("--load_model_path", default=None, type=str,
                         help="Path of the classfier model.")
-    parser.add_argument("--vocab_path", type=str, required=True,
+    parser.add_argument("--vocab_path", default=None, type=str,
                         help="Path of the vocabulary file.")
+    parser.add_argument("--spm_model_path", default=None, type=str,
+                        help="Path of the sentence piece model.")
     parser.add_argument("--test_path", type=str,
                         help="Path of the testset.")
     parser.add_argument("--prediction_path", default=None, type=str,
@@ -113,22 +112,21 @@ def main():
 
     # Output options.
     parser.add_argument("--output_logits", action="store_true", help="Write logits to output file.")
+    parser.add_argument("--output_prob", action="store_true", help="Write probabilities to output file.")
     
     args = parser.parse_args()
 
     # Load the hyperparameters from the config file.
     args = load_hyperparam(args)
 
-    # Load vocabulary.
-    vocab = Vocab()
-    vocab.load(args.vocab_path)
-    args.vocab = vocab
+    # Build tokenizer.
+    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
 
     # Build classification model and load parameters.
-    args.soft_targets = False
+    args.soft_targets, args.soft_alpha = False, False
     model = Classifier(args)
     model = load_model(model, args.load_model_path)
-    
+
     # For simplicity, we use DataParallel wrapper to use multiple GPUs.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
@@ -136,9 +134,6 @@ def main():
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
 
-    # Build tokenizer.
-    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
-    
     dataset = read_dataset(args, args.test_path)
 
     src = torch.LongTensor([sample[0] for sample in dataset])
@@ -152,10 +147,12 @@ def main():
     model.eval()
 
     with open(args.prediction_path, mode="w", encoding="utf-8") as f:
+        f.write("label")
         if args.output_logits:
-            f.write("label" + "\t" + "logits"  + "\n")
-        else:
-            f.write("label" + "\n")
+            f.write("\t" + "logits")
+        if args.output_prob:
+            f.write("\t" + "prob")
+        f.write("\n")
         for i, (src_batch, seg_batch) in enumerate(batch_loader(batch_size, src, seg)):
             src_batch = src_batch.to(device)
             seg_batch = seg_batch.to(device)
@@ -164,15 +161,18 @@ def main():
             
             pred = torch.argmax(logits, dim=1)
             pred = pred.cpu().numpy().tolist()
+            prob = nn.Softmax(dim=1)(logits)
             logits = logits.cpu().numpy().tolist()
+            prob = prob.cpu().numpy().tolist()
             
-            if args.output_logits:
-                for j in range(len(pred)):
-                    f.write(str(pred[j]) + "\t" + " ".join([str(v) for v in logits[j]]) + "\n")
-            else:
-                for j in range(len(pred)):
-                    f.write(str(pred[j]) + "\n")
- 
+            for j in range(len(pred)):
+                f.write(str(pred[j]))
+                if args.output_logits:
+                    f.write("\t" + " ".join([str(v) for v in logits[j]]))
+                if args.output_prob:
+                    f.write("\t" + " ".join([str(v) for v in prob[j]]))
+                f.write("\n")
+
 
 if __name__ == "__main__":
     main()

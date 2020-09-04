@@ -33,18 +33,20 @@ Table of Contents
 UER-py has the following features:
 - __Reproducibility.__ UER-py has been tested on several datasets and should match the performances of the original implementations.
 - __Multi-GPU.__ UER-py supports CPU mode, single GPU mode, and distributed training mode. 
-- __Model modularity.__ UER-py is divided into multiple components: subencoder, encoder, target, and downstream task fine-tuning. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules with as few restrictions as possible.
+- __Model modularity.__ UER-py is divided into multiple components: embedding, encoder, target, and downstream task fine-tuning. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules with as few restrictions as possible.
 - __Efficiency.__ UER-py refines its pre-processing, pre-training, and fine-tuning stages, which largely improves speed and needs less memory.
 - __Chinese model zoo.__ We are pre-training models with different corpora, encoders, and targets. Selecting proper pre-training models is beneficial to the performance of downstream tasks.
-- __SOTA results.__ Our works further improve the results upon Google BERT, providing new baselines for a range of datasets.
+- __SOTA results.__ Our works further improve the results upon Google BERT, providing new baselines on a range of datasets, such as text classification, sequence labeling, reading comprehension, and etc.
 
 
 <br/>
 
 ## Requirements
-Python3.6
-torch>=1.0
-argparse
+* Python 3.6
+* torch >= 1.0
+* For the mixed precision training you will need apex from NVIDIA
+* For the pre-trained model conversion (related with TensorFlow) you will need TensorFlow
+* For the tokenization with sentencepiece you will need sentencepiece
 
 
 <br/>
@@ -81,23 +83,23 @@ word-2
 word-n
 ```
 
-First of all, we preprocess the book review corpus. We need to specify the model's target in pre-processing stage (--target):
+First of all, we preprocess the book review corpus. We need to specify the model's target in pre-processing stage (*--target*):
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
                       --processes_num 8 --target bert
 ```
-Pre-processing is time-consuming. Multi-process can largely accelerate the pre-processing speed (--processes_num). The raw text is converted to dataset.pt, which is the input of pretrain.py. Then we download [Google's pre-trained Chinese model](https://share.weiyun.com/5s9AsfQ), and put it into *models* folder. We load Google's pre-trained model and train it on book review corpus. We should better explicitly specify model's encoder (--encoder) and target (--target). Suppose we have a machine with 8 GPUs.:
+Pre-processing is time-consuming. Multi-process can largely accelerate the pre-processing speed (*--processes_num*). The raw text is converted to dataset.pt, which is the input of pretrain.py. Then we download [Google's pre-trained Chinese model](https://share.weiyun.com/A1C49VPb), and put it into *models* folder. We load Google's pre-trained model and train it on book review corpus. We should better explicitly specify model's encoder (*--encoder*) and target (*--target*). Suppose we have a machine with 8 GPUs.:
 ```
-python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_vocab.txt --pretrained_model_path models/google_zh_model.bin \
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
                     --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
-                    --total_steps 20000 --save_checkpoint_steps 5000 --encoder bert --target bert
+                    --total_steps 5000 --save_checkpoint_steps 1000 --encoder bert --target bert
 
-mv models/book_review_model.bin-20000 models/book_review_model.bin
+mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
 Notice that the model trained by *pretrain.py* is attacted with the suffix which records the training step. We could remove the suffix for ease of use.
-Finally, we do classification. We can use *google_model.bin*:
+Finally, we do classification. We can use *google_zh_model.bin*:
 ```
-python3 run_classifier.py --pretrained_model_path models/google_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 run_classifier.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 3 --batch_size 32 --encoder bert
 ```
@@ -107,19 +109,40 @@ python3 run_classifier.py --pretrained_model_path models/book_review_model.bin -
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 3 --batch_size 32 --encoder bert
 ``` 
-It turns out that the result of Google's model is 87.5; The result of *book_review_model.bin* is 88.1. It is also noticable that we don't need to specify the target in fine-tuning stage. Pre-training target is replaced with task-specific target.
+It turns out that the result of Google's model is 87.5; The result of *book_review_model.bin* is 88.2. It is also noticable that we don't need to specify the target in fine-tuning stage. Pre-training target is replaced with task-specific target.
+
+The default path of the classifier model is *./models/* . Then we do inference with the classifier model. 
+```
+python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+                                          --test_path datasets/douban_book_review/test_nolabel.tsv \
+                                          --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 --encoder bert
+```
+*--test_path* denotes the path of the file to be predicted.
+*--prediction_path* denotes the path of the file with prediction results.
+We need to explicitly specify the number of labels by *--labels_num*. Douban book review is a two-way classification dataset.
+
+We recommend to use *CUDA_VISIBLE_DEVICES* to specify which GPUs are visible (all GPUs are used in default) :
+```
+CUDA_VISIBLE_DEVICES=0 python3 run_classifier.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
+                                                 --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
+                                                 --epochs_num 3 --batch_size 32 --encoder bert
+```
+```
+CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+                                                                 --test_path datasets/douban_book_review/test_nolabel.tsv \
+                                                                 --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 --encoder bert
+```
 
 BERT consists of next sentence prediction (NSP) target. However, NSP target is not suitable for sentence-level reviews since we have to split a review into two parts. UER-py facilitates the use of different targets. Using masked language modeling (MLM) as target could be a properer choice for pre-training of reviews:
-
 ```
 python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
                       --processes_num 8 --target mlm
 
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_model.bin \
                     --output_model_path models/book_review_mlm_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
-                    --total_steps 20000 --save_checkpoint_steps 5000 --encoder bert --target mlm
+                    --total_steps 5000 --save_checkpoint_steps 1000 --encoder bert --target mlm
 
-mv models/book_review_mlm_model.bin-20000 models/book_review_mlm_model.bin
+mv models/book_review_mlm_model.bin-5000 models/book_review_mlm_model.bin
 
 python3 run_classifier.py --pretrained_model_path models/book_review_mlm_model.bin --vocab_path models/google_zh_vocab.txt \
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
@@ -129,17 +152,22 @@ It turns out that the result of [*book_review_mlm_model.bin*](https://share.weiy
 
 We could search proper pre-trained models in [Chinese model zoo](#chinese_model_zoo) for further improvements. For example, we could download [a model pre-trained on Amazon corpus (over 4 million reviews) with BERT encoder and classification (CLS) target](https://share.weiyun.com/5XuxtFA). It achieves 88.5 accuracy on book review dataset.
 
-BERT is really slow. It could be great if we can speed up the model and still achieve competitive performance. We select a 2-layers LSTM encoder to substitute 12-layers Transformer encoder. We could download [a model pre-trained with LSTM encoder and language modeling (LM) + classification (CLS) targets](https://share.weiyun.com/5B671Ik):
+BERT is really slow. It could be great if we can speed up the model and still achieve competitive performance. We select a 2-layers LSTM encoder to substitute 12-layers Transformer encoder. We could download [the model pre-trained with LSTM encoder and language modeling (LM) + classification (CLS) targets](https://share.weiyun.com/5B671Ik):
 ```
 python3 run_classifier.py --pretrained_model_path models/lstm_reviews_model.bin --vocab_path models/google_zh_vocab.txt \
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 3  --batch_size 64 --encoder lstm --pooling mean --config_path models/rnn_config.json --learning_rate 1e-3
-```
-We can achieve 86.5 accuracy on testset, which is also a competitive result. Using LSTM without pre-training can only achieve 80.2 accuracy. In practice, above model is around 10 times faster than BERT. One can see Chinese model zoo section for more detailed information about above pre-trained LSTM model.
 
-Besides classification, UER-py also provides scripts for other downstream tasks. We could run_ner.py for named entity recognition:
+python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+                                          --config_path models/rnn_config.json --test_path datasets/douban_book_review/test_nolabel.tsv \
+                                          --prediction_path datasets/douban_book_review/prediction.tsv \
+                                          --labels_num 2 --encoder lstm --pooling mean
 ```
-python3 run_ner.py --pretrained_model_path models/google_model.bin --vocab_path models/google_zh_vocab.txt \
+We can achieve 86.5 accuracy on testset, which is a competitive result. Using LSTM without pre-training can only achieve 80.2 accuracy.
+
+Besides classification, UER-py also provides scripts for other downstream tasks. We could *run_ner.py* for named entity recognition:
+```
+python3 run_ner.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                    --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
                    --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 --encoder bert
 ```
@@ -149,21 +177,43 @@ python3 run_ner.py --pretrained_model_path models/rmrb_model.bin --vocab_path mo
                    --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
                    --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 --encoder bert
 ```
-It turns out that the result of Google's model is 92.6; The result of *rmrb_model.bin* is 94.4.
+The default path of the ner model is *./models/* . Then we do inference with the ner model:
+```
+python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --vocab_path models/google_zh_vocab.txt \
+                                   --test_path datasets/msra_ner/test_nolabel.tsv \
+                                   --prediction_path datasets/msra_ner/prediction.tsv \
+                                   --label2id_path datasets/msra_ner/label2id.json --encoder bert
+```
+
+We could run *run_cmrc.py* for machine reading comprehension:
+```
+python3 run_cmrc.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
+                    --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json \
+                    --epochs_num 2 --batch_size 8 --seq_length 512 --encoder bert
+```
+We don't specify the *--test_path* because CMRC2018 dataset doesn't provide labels for testset. 
+Then we do inference with the cmrc model:
+```
+python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vocab_path models/google_zh_vocab.txt \
+                                    --test_path datasets/cmrc2018/test.json  \
+                                    --prediction_path datasets/cmrc2018/prediction.tsv --seq_length 512 --encoder bert
+```
 
 <br/>
 
 ## Datasets
-This project includes a range of Chinese datasets: XNLI, LCQMC, MSRA-NER, ChnSentiCorp, and NLPCC-DBQA are obtained from [Baidu ERNIE](https://github.com/PaddlePaddle/LARK/tree/develop/ERNIE); Douban book review is obtained from [BNU](https://embedding.github.io/evaluation/); Online shopping review are organized by ourself; THUCNews is obtained from [here](https://github.com/gaussic/text-classification-cnn-rnn); Sina Weibo review is obtained from [here](https://github.com/SophonPlus/ChineseNlpCorpus); More Large-scale datasets can be found in [glyph's github project](https://github.com/zhangxiangxiao/glyph).
+This project includes a range of Chinese datasets: XNLI, LCQMC, MSRA-NER, ChnSentiCorp, and NLPCC-DBQA are from [Baidu ERNIE](https://github.com/PaddlePaddle/LARK/tree/develop/ERNIE); Douban book review is from [BNU](https://embedding.github.io/evaluation/); Online shopping review is annotated by ourself; THUCNews is from [text-classification-cnn-rnn project](https://github.com/gaussic/text-classification-cnn-rnn); Sina Weibo review is from [ChineseNlpCorpus project](https://github.com/SophonPlus/ChineseNlpCorpus); CMRC2018 and C3 are from [CLUE](https://www.cluebenchmarks.com/). More Large-scale datasets can be found in [glyph's github project](https://github.com/zhangxiangxiao/glyph).
 
 <table>
 <tr align="center"><td> Dataset <td> Link
-<tr align="center"><td> ChnSentiCorp <td> https://share.weiyun.com/5x5yDeP
-<tr align="center"><td> Douban book review <td> https://share.weiyun.com/5w5ky3W 
+<tr align="center"><td> ChnSentiCorp <td> in the project
+<tr align="center"><td> Douban book review <td> in the project
+<tr align="center"><td> CMRC2018 <td> in the project
+<tr align="center"><td> C3 <td> in the project
 <tr align="center"><td> Online shopping review <td> https://share.weiyun.com/5xxYiig
 <tr align="center"><td> LCQMC <td> https://share.weiyun.com/5Fmf2SZ
 <tr align="center"><td> XNLI <td> https://share.weiyun.com/5hQUfx8
-<tr align="center"><td> MSRA-NER <td> https://share.weiyun.com/54D8w7i
+<tr align="center"><td> MSRA-NER <td> in the project
 <tr align="center"><td> NLPCC-DBQA <td> https://share.weiyun.com/5HJMbih
 <tr align="center"><td> Sina Weibo <td> https://share.weiyun.com/5lEsv0w
 <tr align="center"><td> THUCNews <td> https://share.weiyun.com/5jPpgBr
@@ -179,11 +229,11 @@ UER-py/
     |--uer/
     |    |--encoders/: contains encoders such as RNN, CNN, Attention, CNN-RNN, BERT
     |    |--targets/: contains targets such as language modeling, masked language modeling, sentence prediction
-    |    |--subencoders/: contains subencoders such as RNN, CNN, and different pooling strategies
     |    |--layers/: contains frequently-used NN layers, such as embedding layer, normalization layer
-    |    |--models/: contains model.py, which combines subencoder, embedding, encoder, and target modules
+    |    |--models/: contains model.py, which combines embedding, encoder, and target modules
     |    |--utils/: contains frequently-used utilities
-    |    |--model_builder.py 
+    |    |--model_builder.py
+    |    |--model_loader.py
     |    |--model_saver.py
     |    |--trainer.py
     |
@@ -191,12 +241,16 @@ UER-py/
     |--datasets/: contains downstream tasks
     |--models/: contains pre-trained models, vocabularies, and config files
     |--scripts/: contains some useful scripts for pre-training models
+    |--inference/：contains inference scripts for downstream tasks
     |
     |--preprocess.py
     |--pretrain.py
     |--run_classifier.py
     |--run_cmrc.py
     |--run_ner.py
+    |--run_dbqa.py
+    |--run_c3.py
+    |--run_mt_classifier.py
     |--README.md
 ```
 
@@ -204,35 +258,45 @@ The code is well-organized. Users can use and extend upon it with little efforts
 
 ### Preprocess the data
 ```
-usage: preprocess.py [-h] --corpus_path CORPUS_PATH --vocab_path VOCAB_PATH
+usage: preprocess.py [-h] --corpus_path CORPUS_PATH [--vocab_path VOCAB_PATH]
+                     [--spm_model_path SPM_MODEL_PATH]
                      [--dataset_path DATASET_PATH]
                      [--tokenizer {bert,char,space}]
                      [--processes_num PROCESSES_NUM]
-                     [--target {bert,lm,cls,mlm,nsp,s2s,bilm}]
+                     [--target {bert,lm,cls,mlm,bilm,albert}]
                      [--docs_buffer_size DOCS_BUFFER_SIZE]
                      [--seq_length SEQ_LENGTH] [--dup_factor DUP_FACTOR]
-                     [--short_seq_prob SHORT_SEQ_PROB] [--seed SEED]
+                     [--short_seq_prob SHORT_SEQ_PROB] [--full_sentences]
+                     [--seed SEED] [--dynamic_masking] [--span_masking]
+                     [--span_geo_prob SPAN_GEO_PROB]
+                     [--span_max_length SPAN_MAX_LENGTH]
 ```
-*--docs_buffer_size* could be used to control memory consumption in pre-processing stage. *--preprocesses_num n* denotes that n processes are used for pre-processing. The example of pre-processing on a single machine is as follows：
+The example of pre-processing on a single machine is as follows：
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt\
                       --processes_num 8 --target bert
 ```
+If multiple machines are available, users can execute preprocess.py on one machine and copy the dataset.pt to other machines. 
+
 We need to specify the model's target in pre-processing stage since different targets require different data formats. Currently, UER-py consists of the following target modules:
 - lm_target.py: language model
 - mlm_target.py: masked language model (cloze test)
-- nsp_target.py: next sentence prediction
 - cls_target.py: classification
-- s2s_target.py: supports autoencoder and machine translation
 - bilm_target.py: bi-directional language model
 - bert_target.py: masked language model + next sentence prediction
+- albert_target.py: masked language model + sentence order prediction
 
-If multiple machines are available, users can use preprocess.py on one machine and copy the dataset.pt to other machines. 
+*--preprocesses_num n* denotes that n processes are used for pre-processing. More processes can speed up the preprocess but lead to more memory consumption.
 
+*--dynamic_masking* denotes that the words are masked during the pre-train stage, which is used in RoBERTa. 
+*--full_sentences* allows a sample to include contents from multiple documents, which is used in RoBERTa.
+*--span_masking* denotes that masking consecutive words in mlm target, which is used in SpanBERT. If dynamic masking is used, we should specify *--span_masking* in pre-training stage, otherwise we should specify *--span_masking* in pre-process stage.
+*--docs_buffer_size* specifies the buffer size in the memory in pre-processing stage.
 
 ### Pretrain the model
 ```
-usage: pretrain.py [-h] [--dataset_path DATASET_PATH] --vocab_path VOCAB_PATH
+usage: pretrain.py [-h] [--dataset_path DATASET_PATH]
+                   [--vocab_path VOCAB_PATH] [--spm_model_path SPM_MODEL_PATH]
                    [--pretrained_model_path PRETRAINED_MODEL_PATH]
                    --output_model_path OUTPUT_MODEL_PATH
                    [--config_path CONFIG_PATH] [--total_steps TOTAL_STEPS]
@@ -241,32 +305,31 @@ usage: pretrain.py [-h] [--dataset_path DATASET_PATH] --vocab_path VOCAB_PATH
                    [--accumulation_steps ACCUMULATION_STEPS]
                    [--batch_size BATCH_SIZE]
                    [--instances_buffer_size INSTANCES_BUFFER_SIZE]
-                   [--emb_size EMB_SIZE] [--hidden_size HIDDEN_SIZE]
-                   [--feedforward_size FEEDFORWARD_SIZE]
-                   [--kernel_size KERNEL_SIZE] [--block_size BLOCK_SIZE]
-                   [--heads_num HEADS_NUM] [--layers_num LAYERS_NUM]
                    [--dropout DROPOUT] [--seed SEED] [--embedding {bert,word}]
-                   [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt,bilstm}]
+                   [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,synt,rcnn,crnn,gpt,bilstm}]
                    [--bidirectional] [--target {bert,lm,cls,mlm,bilm}]
-                   [--labels_num LABELS_NUM] [--learning_rate LEARNING_RATE]
-                   [--warmup WARMUP] [--subword_type {none,char}]
-                   [--sub_vocab_path SUB_VOCAB_PATH]
-                   [--subencoder {avg,lstm,gru,cnn}]
-                   [--sub_layers_num SUB_LAYERS_NUM] [--world_size WORLD_SIZE]
+                   [--tie_weights] [--factorized_embedding_parameterization]
+                   [--parameter_sharing] [--span_masking]
+                   [--span_geo_prob SPAN_GEO_PROB]
+                   [--span_max_length SPAN_MAX_LENGTH]
+                   [--learning_rate LEARNING_RATE] [--warmup WARMUP]
+                   [--beta1 BETA1] [--beta2 BETA2] [--fp16]
+                   [--fp16_opt_level {O0,O1,O2,O3}] [--world_size WORLD_SIZE]
                    [--gpu_ranks GPU_RANKS [GPU_RANKS ...]]
                    [--master_ip MASTER_IP] [--backend {nccl,gloo}]
 ```
 
-*--instances_buffer_size* could be used to control memory consumption in pre-training stage. Notice that it is recommended to explicitly specify model's encoder and target. UER-py consists of the following encoder modules:
+*--instances_buffer_size* specifies the buffer size in the memory in pre-training stage.
+*--tie_weights* denotes the word embedding and softmax weights are tied.
+It is recommended to explicitly specify model's encoder and target. UER-py consists of the following encoder modules:
 - rnn_encoder.py: contains (bi-)LSTM and (bi-)GRU
-- birnn_encoder.py: contains bi-LSTM and bi-GRU (different from rnn_encoder.py with --bidirectional, see [here](https://github.com/pytorch/pytorch/issues/4930) for more details)
+- birnn_encoder.py: contains bi-LSTM and bi-GRU (different from rnn_encoder.py with --bidirectional, see [the issue](https://github.com/pytorch/pytorch/issues/4930) for more details)
 - cnn_encoder.py: contains CNN and gatedCNN
-- attn_encoder.py: contains attentionNN
 - gpt_encoder.py: contains GPT encoder
 - bert_encoder.py: contains BERT encoder
-- mixed_encoder.py: contains combinations of basic encoders, such as RCNN (RNN+CNN), CRNN (CNN+RNN)
 
 The target should be coincident with the target in pre-processing stage. Users can try different combinations of encoders and targets by *--encoder* and *--target*.
+*--config_path* denotes the path of the configuration file, which specifies the hyper-parameters of the pre-training model. We have put the commonly-used configuration files in *models* folder. Users should choose the proper one according to encoder they use.
 
 There are two strategies for pre-training: 1）random initialization 2）loading a pre-trained model.
 #### Random initialization
@@ -283,20 +346,30 @@ The example of pre-training on a single machine with 8 GPUs：
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
                     --output_model_path models/output_model.bin --encoder bert --target bert --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 
 ```
-If users could use CUDA_VISIBLE_DEVICES if they only want to use part of GPUs:
+*--world_size* specifies the number of processes (and GPUs) used for pre-training.
+*--gpu_ranks* specifies the ID for each process and GPU.
+Users could use CUDA_VISIBLE_DEVICES if they want to use part of GPUs:
 ```
 CUDA_VISIBLE_DEVICES=1,2,3,5 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
                                                  --output_model_path models/output_model.bin --encoder bert --target bert --world_size 4 --gpu_ranks 0 1 2 3
 ```
+
 The example of pre-training on two machines, each has 8 GPUs (16 GPUs in total): 
 ```
 Node-0 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
                              --output_model_path models/output_model.bin --encoder bert --target bert --world_size 16 --gpu_ranks 0 1 2 3 4 5 6 7 \
-                             --master_ip tcp://node-0-addr:port
+                             --total_steps 100000 --save_checkpoint_steps 10000 --report_steps 100 \
+                             --master_ip tcp://9.73.138.133:12345
 Node-1 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
                              --output_model_path models/output_model.bin --encoder bert --target bert --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 \
-                             --master_ip tcp://node-0-addr:port            
+                             --total_steps 100000 \
+                             --master_ip tcp://9.73.138.133:12345          
 ```
+The IP of Node-0 is 9.73.138.133 .
+*--total_steps* specifies the training steps.
+*--save_checkpoint_steps* specifies how often to save the model checkpoint. We don't need to specify the *--save_checkpoint_steps* in Node-1 since only master node saves the pre-trained model.
+*--report_steps* specifies how often to report the pre-training information. We don't need to specify the *--report_steps* in Node-1 since the information only appears in the master node.
+Notice that when specifying *--master_ip* one can not select the port that occupied by other programs
 
 #### Load a pre-trained model
 We recommend to load a pre-trained model. We can specify the pre-trained model by *--pretrained_model_path* .
@@ -307,45 +380,126 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_voca
                     --encoder bert --target bert
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
                     --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
-                    --encoder bert --target bert --gpu_ranks 3
+                    --gpu_ranks 3 --encoder bert --target bert
 ```
 The example of pre-training on a single machine with 8 GPUs：
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
                     --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
-                    --encoder bert --target bert --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder bert --target bert 
 ```
-The example of pre-training on two machines, each has 8 GPUs (16 GPUs in total): 
+The example of pre-training on two machines, each has 8 GPUs (16 GPUs in total):
 ```
 Node-0 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
                              --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
-                             --encoder bert --target bert --world_size 16 --gpu_ranks 0 1 2 3 4 5 6 7 --master_ip tcp://node-0-addr:port
+                             --encoder bert --target bert --world_size 16 --gpu_ranks 0 1 2 3 4 5 6 7 --master_ip tcp://9.73.138.133:12345
 Node-1 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
                              --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
-                             --encoder bert --target bert --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 --master_ip tcp://node-0-addr:port
+                             --encoder bert --target bert --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 --master_ip tcp://9.73.138.133:12345
+```
+The example of pre-training on three machines, each has 8 GPUs (24 GPUs in total):
+```
+Node-0: python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
+                            --pretrained_model_path models/google_zh_model.bin \
+                            --output_model_path models/output_model.bin --world_size 24 --gpu_ranks 0 1 2 3 4 5 6 7 \
+                            --master_ip tcp://9.73.138.133:12345 --encoder bert --target bert
+Node-1: python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
+                            --pretrained_model_path models/google_zh_model.bin \
+                            --output_model_path models/output_model.bin --world_size 24 --gpu_ranks 8 9 10 11 12 13 14 15 \
+                            --master_ip tcp://9.73.138.133:12345 --encoder bert --target bert
+Node-2: python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
+                            --pretrained_model_path models/google_zh_model.bin \
+                            --output_model_path models/output_model.bin --world_size 24 --gpu_ranks 16 17 18 19 20 21 22 23 \
+                            --master_ip tcp://9.73.138.133:12345 --encoder bert --target bert
 ```
 
-#### Try pre-training models with different targets and encoders
-UER-py allows users to combine different components (e.g. subencoders, encoders, and targets). Here is an example of trying different targets:
-
-In fact, NSP target and sentence-level reviews are incompatible to some extent. We could replace BERT target with MLM target on book review dataset:
+#### Pre-training model size
+In general, large model can achieve better results but lead to more resource consumption. We can specify the pre-trained model size by *--config_path*. Commonly-used configuration files are included in *models* folder. For example, we provide 4 configuration files for BERT model. They are bert_large_config.json, bert_base_config.json, bert_small_config.json, bert_tiny_config.json. We provide different pre-trained models according to different configuration files. See Chinese model zoo for more details.
+The example of doing incremental pre-training upon BERT-large model:
 ```
-python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt --processes_num 8 --target mlm
-
-python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_model.bin --output_model_path models/output_model.bin \
-                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --total_steps 20000 --save_checkpoint_steps 5000 --encoder bert --target mlm
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
+                    --pretrained_model_path models/mixed_corpus_bert_large_model.bin --config_path models/bert_large_config.json \
+                    --output_model_path models/output_model.bin --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder bert --target bert
 ```
-*book_review.txt* (instead of *book_review_bert.txt*) is used as training corpus when we use MLM target. Different targets correspond to different corpus formats. It is important to select proper format for a target. 
 
-If we want to change encoder, we need to specify *--encoder* and *--config_path* in pretrain.py. Here is an example of using LSTM for pre-training. 
+### Try pre-training models with different targets and encoders
+UER-py allows users to combine different components (e.g. embeddings, encoders, and targets). Here are some examples of trying different combinations.
+
+#### RoBERTa
+```
+python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt \
+                      --dataset_path dataset.pt --processes_num 12 \
+                      --dynamic_masking --target mlm
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder bert --target mlm
+```
+RoBERTa uses dynamic masking, mlm target, and allows a sample to contain contents from multiple documents.
+We don't recommend to use *--full_sentences* when the document is short (e.g. reviews).
+Notice that RoBERTa removes NSP target. The corpus for RoBERTa stores one document per line, which is different from corpus used by BERT.
+The example of doing incremental pre-training upon existing BERT model:
+```
+python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt \
+                      --dataset_path dataset.pt --processes_num 12 \
+                      --dynamic_masking --target mlm
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
+                    --pretrained_model_path models/google_zh_model.bin \
+                    --output_model_path models/output_model.bin \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder bert --target mlm
+```
+Nsp target is not suitable when document is short. We could replace BERT target with MLM target when handling corpus such as reviews.
+
+#### ALBERT
+```
+python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt \
+                      --dataset_path dataset.pt --processes_num 12 --target albert
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin \
+                    --config_path models/albert_base_config.json \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder bert --target albert \
+                    --factorized_embedding_parameterization --parameter_sharing
+```
+The corpus format of ALBERT is the identical with BERT.
+*--target albert* denotes that using ALBERT target, which consists of mlm and sop targets.
+*--factorized_embedding_parameterization* denotes that using factorized embedding parameterization to untie the embedding size from the hidden layer size.
+*--parameter_sharing* denotes that sharing all parameters (including feed-forward and attention parameters) across layers.
+we provide 4 configuration files for ALBERT model in *models* folder, albert_base_config.json, albert_large_config.json, albert_xlarge_config.json, albert_xxlarge_config.json.
+
+#### GPT
+```
+python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt \
+                      --dataset_path dataset.pt --processes_num 12 --target lm
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin \
+                    --config_path models/bert_base_config.json --learning_rate 1e-4 \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder gpt --target lm
+```
+The corpus format of GPT is the identical with RoBERTa. We can use GPT through *--encoder gpt* and *--target lm*.
+GPT can use the configuration file of BERT.
+
+#### More combinations
+The example of using LSTM encoder and LM target for pre-training:
 ```
 python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt --processes_num 8 --target lm
-
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin \
                     --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --total_steps 20000 --save_checkpoint_steps 5000 \ 
-                    --encoder lstm --target lm --learning_rate 1e-3 --config_path models/rnn_config.json
+                    --embedding word --encoder lstm --target lm --learning_rate 1e-3 --config_path models/rnn_config.json
+```
+*--embedding word* denotes using traditional word embedding. LSTM does not require position embedding.
+We use the *models/rnn_config.json* as configuration file.
+
+The example of using GatedCNN encoder and LM target for pre-training:
+```
+python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt --processes_num 8 --target lm
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --total_steps 20000 --save_checkpoint_steps 5000 \
+                    --embedding word --encoder gatedcnn --target lm --learning_rate 1e-4 --config_path models/gcnn_9_config.json
 ```
 
+The example of using Bi-LSTM encoder and BiLM target for pre-training:
+```
+python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt --processes_num 8 --target bilm
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt  --output_model_path models/output_model.bin \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --total_steps 20000 --save_checkpoint_steps 5000 \
+                    --embedding word --encoder bilstm --target bilm --learning_rate 5e-4 --config_path models/birnn_config.json
+```
 
 ### Fine-tune on downstream tasks
 Currently, UER-py consists of the following downstream tasks: text classification, pair classification, document-based question answering, sequence labeling, and machine reading comprehension. The encoder of the downstream task should be coincident with the pre-trained model.
@@ -487,7 +641,7 @@ usage: cloze_test.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
 The example of using cloze_test.py：
 ```
 python3 scripts/cloze_test.py --input_path datasets/cloze_input.txt --pretrained_model_path models/google_zh_model.bin \
-                              --vocab_path models/google_vocab.txt --output_path output.txt
+                              --vocab_path models/google_zh_vocab.txt --output_path output.txt
 
 ```
 

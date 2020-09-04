@@ -19,15 +19,9 @@ class Vocab(object):
     def load(self, vocab_path, is_quiet=False):
         with open(vocab_path, mode="r", encoding="utf-8") as reader:
             for index, line in enumerate(reader):
-                try:
-                    w = line.strip().split()[0]
-                    self.w2i[w] = index
-                    self.i2w.append(w)
-                except:
-                    self.w2i["???"+str(index)] = index
-                    self.i2w.append("???"+str(index))
-                    if not is_quiet:
-                        print("Vocabulary file line " + str(index+1) + " has bad format token.")
+                w = line.strip().split()[0] if line.strip() else " "
+                self.w2i[w] = index
+                self.i2w.append(w)
         if not is_quiet:
             print("Vocabulary size: ", len(self))
 
@@ -39,7 +33,7 @@ class Vocab(object):
         print("Vocabulary saving done.")
 
     def get(self, w):
-        return self.w2i.get(w, UNK_ID)
+        return self.w2i[w]
         
     def __len__(self):
         return len(self.i2w)

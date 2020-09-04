@@ -1,5 +1,5 @@
 """
-This script provides an exmaple to wrap bert-pytorch for machine reading comprehension.
+This script provides an exmaple to wrap UER-py for Chinese machine reading comprehension.
 """
 import re
 import argparse
@@ -28,7 +28,7 @@ from run_classifier import build_optimizer, load_or_initialize_parameters
 class MachineReadingComprehension(nn.Module):
     def __init__(self, args):
         super(MachineReadingComprehension, self).__init__()
-        self.embedding = globals()[args.embedding.capitalize() + "Embedding"](args, len(args.vocab))
+        self.embedding = globals()[args.embedding.capitalize() + "Embedding"](args, len(args.tokenizer.vocab))
         self.encoder = globals()[args.encoder.capitalize() + "Encoder"](args)
         self.output_layer_1 = nn.Linear(args.hidden_size, args.hidden_size)
         self.output_layer_2 = nn.Linear(args.hidden_size, 2)
@@ -110,10 +110,8 @@ def convert_examples_to_dataset(args, examples):
             if start_position > doc_span[1] + len(question) + 2 or end_position < len(question) + 2:
                 start_position, end_position = 0, 0
 
-            src_a = [args.vocab.get(t) for t in args.tokenizer.tokenize(question)]
-            src_a = [CLS_ID] + src_a + [SEP_ID]
-            src_b = [args.vocab.get(t) for t in args.tokenizer.tokenize(span_context)]
-            src_b = src_b + [SEP_ID]
+            src_a = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(question) + [SEP_TOKEN])
+            src_b = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(span_context) + [SEP_TOKEN])
             src = src_a + src_b
             seg = [1] * len(src_a) + [2] * len(src_b)
 
@@ -353,8 +351,10 @@ def main():
                         help="Path of the pretrained model.")
     parser.add_argument("--output_model_path", default="./models/cmrc_model.bin", type=str,
                         help="Path of the output model.")
-    parser.add_argument("--vocab_path", type=str, required=True,
+    parser.add_argument("--vocab_path", default=None, type=str,
                         help="Path of the vocabulary file.")
+    parser.add_argument("--spm_model_path", default=None, type=str,
+                        help="Path of the sentence piece model.")
     parser.add_argument("--train_path", type=str, required=True,
                         help="Path of the trainset.")
     parser.add_argument("--dev_path", type=str, required=True,
@@ -410,10 +410,8 @@ def main():
 
     set_seed(args.seed)
       
-    # Load vocabulary.
-    vocab = Vocab()
-    vocab.load(args.vocab_path)
-    args.vocab = vocab
+    # Build tokenizer.
+    args.tokenizer = CharTokenizer(args)
 
     # Build machine reading comprehension model.
     model = MachineReadingComprehension(args)
@@ -475,8 +473,6 @@ def main():
         if result > best_result:
             best_result = result
             save_model(model, args.output_model_path)
-        else:
-            break
 
     # Evaluation phase.
     if args.test_path is not None:

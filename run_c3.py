@@ -1,5 +1,5 @@
 """
-This script provides an exmaple to wrap UER-py for C3 (multiple choice).
+This script provides an exmaple to wrap UER-py for C3 (multiple choice dataset).
 """
 import argparse
 import json
@@ -27,7 +27,7 @@ from run_classifier import build_optimizer, load_or_initialize_parameters, train
 class MultipleChoice(nn.Module):
     def __init__(self, args):
         super(MultipleChoice, self).__init__()
-        self.embedding = globals()[args.embedding.capitalize() + "Embedding"](args, len(args.vocab))
+        self.embedding = globals()[args.embedding.capitalize() + "Embedding"](args, len(args.tokenizer.vocab))
         self.encoder = globals()[args.encoder.capitalize() + "Encoder"](args)
         self.dropout = nn.Dropout(args.dropout)
         self.output_layer = nn.Linear(args.hidden_size, 1)
@@ -88,9 +88,9 @@ def read_dataset(args, path):
 
         for k in range(args.max_choices_num):
 
-            src_a = [CLS_ID] + [args.vocab.get(t) for t in args.tokenizer.tokenize(example[k+2])] + [SEP_ID]
-            src_b = [args.vocab.get(t) for t in args.tokenizer.tokenize(example[1])] + [SEP_ID]
-            src_c = [args.vocab.get(t) for t in args.tokenizer.tokenize(example[0])] + [SEP_ID]
+            src_a = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(example[k+2]) + [SEP_TOKEN])
+            src_b = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(example[1]) + [SEP_TOKEN])
+            src_c = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(example[0]) + [SEP_TOKEN])
 
             src = src_a + src_b + src_c
             seg = [1] * (len(src_a) + len(src_b)) + [2] * len(src_c)
@@ -116,8 +116,10 @@ def main():
                         help="Path of the pretrained model.")
     parser.add_argument("--output_model_path", default="./models/multichoice_model.bin", type=str,
                         help="Path of the output model.")
-    parser.add_argument("--vocab_path", type=str, required=True,
+    parser.add_argument("--vocab_path", default=None, type=str,
                         help="Path of the vocabulary file.")
+    parser.add_argument("--spm_model_path", default=None, type=str,
+                        help="Path of the sentence piece model.")
     parser.add_argument("--train_path", type=str, required=True,
                         help="Path of the trainset.")
     parser.add_argument("--dev_path", type=str, required=True,
@@ -139,8 +141,6 @@ def main():
                                               "rcnn", "crnn", "gpt", "bilstm"], \
                                               default="bert", help="Encoder type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
-                        help="Pooling type.")
     parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
     parser.add_argument("--max_choices_num", default=4, type=int,
@@ -183,10 +183,8 @@ def main():
 
     set_seed(args.seed)
 
-    # Load vocabulary.
-    vocab = Vocab()
-    vocab.load(args.vocab_path)
-    args.vocab = vocab
+    # Build tokenizer.
+    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
 
     # Build multiple choice model.
     model = MultipleChoice(args)
@@ -196,10 +194,6 @@ def main():
 
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
-    args.model = model
-
-    # Build tokenizer.
-    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
 
     # Training phase.
     trainset = read_dataset(args, args.train_path)
@@ -229,6 +223,7 @@ def main():
     if torch.cuda.device_count() > 1:
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
+    args.model = model
 
     total_loss, result, best_result = 0., 0., 0.
 

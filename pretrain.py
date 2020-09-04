@@ -1,25 +1,24 @@
-# -*- encoding:utf-8 -*-
-import os
-import json
-import torch
 import argparse
+import torch
 import uer.trainer as trainer
 from uer.utils.config import load_hyperparam
 
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    
+
     # Path options.
     parser.add_argument("--dataset_path", type=str, default="dataset.pt",
                         help="Path of the preprocessed dataset.")
-    parser.add_argument("--vocab_path", type=str, required=True,
+    parser.add_argument("--vocab_path", default=None, type=str,
                         help="Path of the vocabulary file.")
+    parser.add_argument("--spm_model_path", default=None, type=str,
+                        help="Path of the sentence piece model.")
     parser.add_argument("--pretrained_model_path", type=str, default=None,
                         help="Path of the pretrained model.")
     parser.add_argument("--output_model_path", type=str, required=True,
                         help="Path of the output model.")
-    parser.add_argument("--config_path", type=str, default=None,
+    parser.add_argument("--config_path", type=str, default="models/bert_base_config.json",
                         help="Config file of model hyper-parameters.")
 
     # Training and saving options. 
@@ -37,13 +36,6 @@ def main():
                         help="The buffer size of instances in memory.")
 
     # Model options.
-    parser.add_argument("--emb_size", type=int, default=768, help="Embedding dimension.")
-    parser.add_argument("--hidden_size", type=int, default=768,  help="Hidden state dimension.")
-    parser.add_argument("--feedforward_size", type=int, default=3072, help="Feed forward layer dimension.")
-    parser.add_argument("--kernel_size", type=int, default=3,  help="Kernel size for CNN.")
-    parser.add_argument("--block_size", type=int, default=2,  help="Block size for CNN.")
-    parser.add_argument("--heads_num", type=int, default=12, help="The number of heads in multi-head attention.")
-    parser.add_argument("--layers_num", type=int, default=12, help="The number of encoder layers.")
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout value.")
     parser.add_argument("--seed", type=int, default=7,  help="Random seed.")
     parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
@@ -53,27 +45,31 @@ def main():
                                                    "rcnn", "crnn", "gpt", "bilstm"], \
                                                    default="bert", help="Encoder type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "bilm"], default="bert",
+    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "bilm", "albert"], default="bert",
                         help="The training target of the pretraining model.")
-    parser.add_argument("--labels_num", type=int, default=2, help="Specific to classification target.")
+    parser.add_argument("--tie_weights", action="store_true",
+                        help="Tie the word embedding and softmax weights.")
+    parser.add_argument("--factorized_embedding_parameterization", action="store_true",
+                        help="Factorized embedding parameterization.")
+    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
+
+    # Masking options.
+    parser.add_argument("--span_masking", action="store_true", help="Span masking.")
+    parser.add_argument("--span_geo_prob", type=float, default=0.2,
+                        help="Hyperparameter of geometric distribution for span masking.")
+    parser.add_argument("--span_max_length", type=int, default=10,
+                        help="Max length for span masking.")
 
     # Optimizer options.
     parser.add_argument("--learning_rate", type=float, default=2e-5, help="Initial learning rate.")
     parser.add_argument("--warmup", type=float, default=0.1, help="Warm up value.")
-    parser.add_argument('--fp16', action='store_true',
+    parser.add_argument("--beta1", type=float, default=0.9, help="Beta1 for Adam optimizer.")
+    parser.add_argument("--beta2", type=float, default=0.999, help="Beta2 for Adam optimizer.")
+    parser.add_argument("--fp16", action='store_true',
                         help="Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit")
-    parser.add_argument('--fp16_opt_level', type=str, default='O1',
+    parser.add_argument("--fp16_opt_level", choices=["O0", "O1", "O2", "O3" ], default='O1',
                         help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
                              "See details at https://nvidia.github.io/apex/amp.html")
-
-    # Subword options.
-    parser.add_argument("--subword_type", choices=["none", "char"], default="none",
-                        help="Subword feature type.")
-    parser.add_argument("--sub_vocab_path", type=str, default="models/sub_vocab.txt",
-                        help="Path of the subword vocabulary file.")
-    parser.add_argument("--subencoder", choices=["avg", "lstm", "gru", "cnn"], default="avg",
-                        help="Subencoder type.")
-    parser.add_argument("--sub_layers_num", type=int, default=2, help="The number of subencoder layers.")
 
     # GPU options.
     parser.add_argument("--world_size", type=int, default=1, help="Total number of processes (GPUs) for training.")
@@ -105,7 +101,7 @@ def main():
         assert args.gpu_id < torch.cuda.device_count(), "Invalid specified GPU device." 
         args.dist_train = False
         args.single_gpu = True
-        print("Using single GPU:%d for training." % args.gpu_id)
+        print("Using GPU %d for training." % args.gpu_id)
     else:
         # CPU mode.
         assert ranks_num == 0, "GPUs are specified, please check the arguments."

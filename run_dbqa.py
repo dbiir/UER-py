@@ -1,5 +1,5 @@
 """
-This script provides an exmaple to wrap UER-pyfor document-based question answering.
+This script provides an exmaple to wrap UER-py for document-based question answering.
 """
 import torch
 import random
@@ -8,7 +8,15 @@ import collections
 import torch.nn as nn
 from uer.utils.vocab import Vocab
 from uer.utils.constants import *
-from uer.utils.tokenizer import * 
+from uer.utils.tokenizer import *
+from uer.layers.embeddings import *
+from uer.encoders.bert_encoder import *
+from uer.encoders.rnn_encoder import *
+from uer.encoders.birnn_encoder import *
+from uer.encoders.cnn_encoder import *
+from uer.encoders.attn_encoder import *
+from uer.encoders.gpt_encoder import *
+from uer.encoders.mixed_encoder import *
 from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
@@ -28,10 +36,8 @@ def read_dataset(args, path):
             qid = int(line[columns["qid"]])
             tgt = int(line[columns["label"]])
             text_a, text_b = line[columns["text_a"]], line[columns["text_b"]]
-            src_a = [args.vocab.get(t) for t in args.tokenizer.tokenize(text_a)]
-            src_a = [CLS_ID] + src_a + [SEP_ID]
-            src_b = [args.vocab.get(t) for t in args.tokenizer.tokenize(text_b)]
-            src_b = src_b + [SEP_ID]
+            src_a = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a) + [SEP_TOKEN])
+            src_b = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(text_b) + [SEP_TOKEN])
             src = src_a + src_b
             seg = [1] * len(src_a) + [2] * len(src_b)
             
@@ -127,8 +133,10 @@ def main():
                         help="Path of the pretrained model.")
     parser.add_argument("--output_model_path", default="./models/dbqa_model.bin", type=str,
                         help="Path of the output model.")
-    parser.add_argument("--vocab_path", type=str, required=True,
+    parser.add_argument("--vocab_path", default=None, type=str,
                         help="Path of the vocabulary file.")
+    parser.add_argument("--spm_model_path", default=None, type=str,
+                        help="Path of the sentence piece model.")
     parser.add_argument("--train_path", type=str, required=True,
                         help="Path of the trainset.")
     parser.add_argument("--dev_path", type=str, required=True,
@@ -166,6 +174,8 @@ def main():
     # Optimizer options.
     parser.add_argument("--soft_targets", action='store_true',
                         help="Train model with logits.")
+    parser.add_argument("--soft_alpha", type=float, default=0.5,
+                        help="Weight of the soft targets loss.")
     parser.add_argument("--learning_rate", type=float, default=2e-5,
                         help="Learning rate.")
     parser.add_argument("--warmup", type=float, default=0.1,
@@ -196,10 +206,8 @@ def main():
     # Count the number of labels. 
     args.labels_num = count_labels_num(args.train_path)
 
-    # Load vocabulary.
-    vocab = Vocab()
-    vocab.load(args.vocab_path)
-    args.vocab = vocab
+    # Build tokenizer.
+    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
 
     # Build classification model.
     model = Classifier(args)
@@ -209,10 +217,6 @@ def main():
     
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
-    args.model = model
-    
-    # Build tokenizer.
-    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
 
     # Training phase.
     trainset = read_dataset(args, args.train_path)
@@ -242,6 +246,7 @@ def main():
     if torch.cuda.device_count() > 1:
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
+    args.model = model
 
     total_loss, result, best_result = 0., 0., 0.
 

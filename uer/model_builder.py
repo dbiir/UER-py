@@ -31,14 +31,9 @@ def build_model(args):
     We could select suitable one for downstream tasks.
     """
 
-    if args.subword_type != "none":
-        subencoder = globals()[args.subencoder.capitalize() + "Subencoder"](args, len(args.sub_vocab))
-    else:
-        subencoder = None
-
     embedding = globals()[args.embedding.capitalize() + "Embedding"](args, len(args.vocab))
     encoder = globals()[args.encoder.capitalize() + "Encoder"](args)
     target = globals()[args.target.capitalize() + "Target"](args, len(args.vocab))
-    model = Model(args, embedding, encoder, target, subencoder)
+    model = Model(args, embedding, encoder, target)
 
     return model

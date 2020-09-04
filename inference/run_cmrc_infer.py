@@ -1,5 +1,5 @@
 """
-  This script provides an example to wrap UER-py for CMRC inference.
+  This script provides an example to wrap UER-py for Chinese machine reading comprehension inference.
 """
 import sys
 import os
@@ -14,9 +14,11 @@ sys.path.append(uer_dir)
 
 from uer.utils.config import load_hyperparam
 from uer.utils.constants import *
+from uer.utils.tokenizer import * 
 from uer.utils.vocab import Vocab
 from uer.model_loader import load_model
 from run_cmrc import *
+
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -24,8 +26,10 @@ def main():
     # Path options.
     parser.add_argument("--load_model_path", default=None, type=str,
                         help="Path of the classfier model.")
-    parser.add_argument("--vocab_path", type=str, required=True,
+    parser.add_argument("--vocab_path", default=None, type=str,
                         help="Path of the vocabulary file.")
+    parser.add_argument("--spm_model_path", default=None, type=str,
+                        help="Path of the sentence piece model.")
     parser.add_argument("--test_path", type=str,
                         help="Path of the testset.")
     parser.add_argument("--prediction_path", default=None, type=str,
@@ -56,10 +60,8 @@ def main():
     # Load the hyperparameters from the config file.
     args = load_hyperparam(args)
 
-    # Load vocabulary.
-    vocab = Vocab()
-    vocab.load(args.vocab_path)
-    args.vocab = vocab
+    # Build tokenizer.
+    args.tokenizer = CharTokenizer(args)
 
     # Build model and load parameters.
     model = MachineReadingComprehension(args)
@@ -71,9 +73,6 @@ def main():
     if torch.cuda.device_count() > 1:
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
-
-    # Build tokenizer.
-    args.tokenizer = CharTokenizer(args)
 
     dataset, examples = read_dataset(args, args.test_path)
 

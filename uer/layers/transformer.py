@@ -1,4 +1,3 @@
-# -*- encoding:utf-8 -*-
 import torch.nn as nn
 from uer.layers.layer_norm import LayerNorm
 from uer.layers.position_ffn import PositionwiseFeedForward
@@ -21,7 +20,7 @@ class TransformerLayer(nn.Module):
         self.layer_norm_1 = LayerNorm(args.hidden_size)
         # Feed forward layer.
         self.feed_forward = PositionwiseFeedForward(
-            args.hidden_size, args.feedforward_size
+            args.hidden_size, args.feedforward_size, args.hidden_act
         )
         self.dropout_2 = nn.Dropout(args.dropout)
         self.layer_norm_2 = LayerNorm(args.hidden_size)
@@ -31,7 +30,6 @@ class TransformerLayer(nn.Module):
         Args:
             hidden: [batch_size x seq_length x emb_size]
             mask: [batch_size x 1 x seq_length x seq_length]
-
         Returns:
             output: [batch_size x seq_length x hidden_size]
         """
