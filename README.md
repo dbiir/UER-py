@@ -609,6 +609,16 @@ python3 inference/run_classifier_infer.py --load_model_path models/classifier_mo
                                           --parameter_sharing --factorized_embedding_parameterization --encoder bert
 ```
 
+UER-py supports multi-task learning. Embedding and encoder layers are shared by different tasks.
+The example of training two sentiment analysis datasets:
+```
+python3 run_mt_classifier.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
+                             --dataset_path_list datasets/douban_book_review/ datasets/chnsenticorp/ \
+                             --epochs_num 1 --batch_size 64 --encoder bert
+```
+--dataset_path_list specifies folder path list of different tasks. Each folder should contains train set *train.tsv* and development set *dev.tsv* .
+
+
 UER-py supports distillation for classification tasks. 
 First of all, we fine-tune upon a Chinese BERT-large model (provided in Chinese model zoo):
 ```
@@ -1057,7 +1067,7 @@ For communication related to this project, please contact Zhe Zhao (helloworld@r
 
 This work is instructed by my enterprise mentors __Qi Ju__, __Haotang Deng__ and school mentors __Tao Liu__, __Xiaoyong Du__.
 
-I also got a lot of help from my Tencent colleagues Hui Chen, Jinbin Zhang, Zhiruo Wang, Weijie Liu, Peng Zhou, Haixiao Liu, and Weijian Wu. 
+I also got a lot of help from my Tencent colleagues Yudong Li, Hui Chen, Jinbin Zhang, Zhiruo Wang, Weijie Liu, Peng Zhou, Haixiao Liu, and Weijian Wu. 
 
 ## Citation
 Now we have a paper one can cite for UER-py:
