@@ -202,7 +202,7 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 <br/>
 
 ## Datasets
-This project includes a range of Chinese datasets: XNLI, LCQMC, MSRA-NER, ChnSentiCorp, and NLPCC-DBQA are from [Baidu ERNIE](https://github.com/PaddlePaddle/LARK/tree/develop/ERNIE); Douban book review is from [BNU](https://embedding.github.io/evaluation/); Online shopping review is annotated by ourself; THUCNews is from [text-classification-cnn-rnn project](https://github.com/gaussic/text-classification-cnn-rnn); Sina Weibo review is from [ChineseNlpCorpus project](https://github.com/SophonPlus/ChineseNlpCorpus); CMRC2018 and C3 are from [CLUE](https://www.cluebenchmarks.com/). More Large-scale datasets can be found in [glyph's github project](https://github.com/zhangxiangxiao/glyph).
+This project includes a range of Chinese datasets: XNLI, LCQMC, MSRA-NER, ChnSentiCorp, and NLPCC-DBQA are from [Baidu ERNIE](https://github.com/PaddlePaddle/LARK/tree/develop/ERNIE); Douban book review is from [BNU](https://embedding.github.io/evaluation/); Online shopping review is annotated by ourself; THUCNews is from [text-classification-cnn-rnn project](https://github.com/gaussic/text-classification-cnn-rnn); Sina Weibo review is from [ChineseNlpCorpus project](https://github.com/SophonPlus/ChineseNlpCorpus); CMRC2018 is from [HIT CMRC2018 project](https://github.com/ymcui/cmrc2018) and C3 is from [CLUE](https://www.cluebenchmarks.com/). More Large-scale datasets can be found in [glyph's github project](https://github.com/zhangxiangxiao/glyph).
 
 <table>
 <tr align="center"><td> Dataset <td> Link
@@ -646,34 +646,96 @@ run_ner.py adds two feedforward layers upon encoder layer.
 ```
 usage: run_ner.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                   [--output_model_path OUTPUT_MODEL_PATH]
-                  [--vocab_path VOCAB_PATH] --train_path TRAIN_PATH --dev_path
-                  DEV_PATH --test_path TEST_PATH [--config_path CONFIG_PATH]
-                  [--batch_size BATCH_SIZE] [--seq_length SEQ_LENGTH]
-                  [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt,bilstm}]
-                  [--bidirectional] [--subword_type {none,char}]
-                  [--sub_vocab_path SUB_VOCAB_PATH]
-                  [--subencoder {avg,lstm,gru,cnn}]
-                  [--sub_layers_num SUB_LAYERS_NUM]
-                  [--learning_rate LEARNING_RATE] [--warmup WARMUP]
+                  [--vocab_path VOCAB_PATH] [--spm_model_path SPM_MODEL_PATH]
+                  --train_path TRAIN_PATH --dev_path DEV_PATH
+                  [--test_path TEST_PATH] [--config_path CONFIG_PATH]
+                  --label2id_path LABEL2ID_PATH [--batch_size BATCH_SIZE]
+                  [--seq_length SEQ_LENGTH] [--embedding {bert,word}]
+                  [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,synt,rcnn,crnn,gpt,bilstm}]
+                  [--bidirectional] [--factorized_embedding_parameterization]
+                  [--parameter_sharing] [--learning_rate LEARNING_RATE]
+                  [--warmup WARMUP] [--fp16] [--fp16_opt_level {O0,O1,O2,O3}]
                   [--dropout DROPOUT] [--epochs_num EPOCHS_NUM]
                   [--report_steps REPORT_STEPS] [--seed SEED]
 ```
-The example of using run_ner.py：
+The example of using *run_ner.py*:
 ```
 python3 run_ner.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                    --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
                    --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 --encoder bert
 ```
+The example of doing inference:
+```
+python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --vocab_path models/google_zh_vocab.txt \
+                                          --test_path datasets/msra_ner/test_nolabel.tsv \
+                                          --prediction_path datasets/msra_ner/prediction.tsv \
+                                          --label2id_path datasets/msra_ner/label2id.json --encoder bert
+```
+The example of using ALBERT for NER:
+```
+python3 run_ner.py --pretrained_model_path models/albert_base_zh_model.bin --vocab_path models/google_zh_vocab.txt \
+                   --config_path models/albert_base_config.json \
+                   --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
+                   --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 \
+                   --parameter_sharing --factorized_embedding_parameterization --encoder bert
+```
+The example of doing inference for ALBERT:
+```
+python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --vocab_path models/google_zh_vocab.txt \
+                                          --config_path models/albert_base_config.json \
+                                          --test_path datasets/msra_ner/test_nolabel.tsv \
+                                          --prediction_path datasets/msra_ner/prediction.tsv \
+                                          --label2id_path datasets/msra_ner/label2id.json \
+                                          --parameter_sharing --factorized_embedding_parameterization --encoder bert
+```
 
 #### Machine reading comprehension
 run_cmrc.py adds two feedforward layers upon encoder layer.
-The example of using run_cmrc.py：
+```
+usage: run_cmrc.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
+                   [--output_model_path OUTPUT_MODEL_PATH]
+                   [--vocab_path VOCAB_PATH] [--spm_model_path SPM_MODEL_PATH]
+                   --train_path TRAIN_PATH --dev_path DEV_PATH
+                   [--test_path TEST_PATH] [--config_path CONFIG_PATH]
+                   [--batch_size BATCH_SIZE] [--seq_length SEQ_LENGTH]
+                   [--doc_stride DOC_STRIDE] [--embedding {bert,word}]
+                   [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,synt,rcnn,crnn,gpt,bilstm}]
+                   [--bidirectional] [--factorized_embedding_parameterization]
+                   [--parameter_sharing] [--learning_rate LEARNING_RATE]
+                   [--warmup WARMUP] [--fp16] [--fp16_opt_level {O0,O1,O2,O3}]
+                   [--dropout DROPOUT] [--epochs_num EPOCHS_NUM]
+                   [--report_steps REPORT_STEPS] [--seed SEED]
+```
+The example of using *run_cmrc.py*:
 ```
 python3 run_cmrc.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt 
                    --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json 
                    --epochs_num 2 --batch_size 8 --seq_length 512 --encoder bert
 ```
 The train.json and dev.json are of squad-style. Trainset and devset are available [here](https://github.com/ymcui/cmrc2018). --test_path option is not specified since testset is not publicly available.
+
+The example of doing inference:
+```
+python3  inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vocab_path models/google_zh_vocab.txt \
+                                     --test_path datasets/cmrc2018/test.json \
+                                     --prediction_path datasets/cmrc2018/prediction.json --encoder bert
+```
+The example of using ALBERT for CMRC:
+```
+python3 run_cmrc.py --pretrained_model_path models/albert_base_zh_model.bin --vocab_path models/google_zh_vocab.txt \
+                    --config_path models/bert_large_config.json \
+                    --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json \
+                    --epochs_num 2 --batch_size 8 --seq_length 512 \
+                    --parameter_sharing --factorized_embedding_parameterization --encoder bert
+```
+The example of doing inference for ALBERT:
+```
+python3  inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vocab_path models/google_zh_vocab.txt \
+                                     --config_path models/albert_base_config.json \
+                                     --test_path datasets/cmrc2018/test.json \
+                                     --prediction_path datasets/cmrc2018/prediction.json \
+                                     --parameter_sharing --factorized_embedding_parameterization --encoder bert
+```
 
 #### ChineseGLUE
 The BERT-large model trained upon mixed large corpus achieves SOTA results on [ChineseGLUE](http://106.13.187.75:8003/leaderBorder). The detailed scripts are listed as follows:

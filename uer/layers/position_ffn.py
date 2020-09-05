@@ -17,6 +17,6 @@ class PositionwiseFeedForward(nn.Module):
             raise ValueError("Activation function should be relu or gelu.")
 
     def forward(self, x):
-        inter = gelu(self.linear_1(x))
+        inter = self.act(self.linear_1(x))
         output = self.linear_2(inter)
         return output
