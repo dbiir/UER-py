@@ -228,10 +228,10 @@ Pre-trained Chinese models from Google (in UER format):
 <table>
 <tr align="center"><th> Pre-trained model <th> Link <th> Description 
 <tr align="center"><td> Wikizh+BertEncoder+BertTarget <td> https://share.weiyun.com/A1C49VPb <td> Google's pre-trained Chinese model from https://github.com/google-research/bert
-<tr align="center"><td> CLUECorpus+<br>AlbertEncoder(base)+AlbertTarget <td> https://share.weiyun.com/UnKHNKRG <td> Google's pre-trained Chinese model from https://github.com/google-research/albert . The configuration file is albert_base_config.json
-<tr align="center"><td> CLUECorpus+<br>AlbertEncoder(large)+AlbertTarget <td> https://share.weiyun.com/9tTUwALd <td> Google's pre-trained Chinese model from https://github.com/google-research/albert . The configuration file is albert_large_config.json
-<tr align="center"><td> CLUECorpus+<br>AlbertEncoder(xlarge)+AlbertTarget <td> https://share.weiyun.com/mUamRQFR <td> Google's pre-trained Chinese model from https://github.com/google-research/albert . The configuration file is albert_xlarge_config.json
-<tr align="center"><td> CLUECorpus+<br>AlbertEncoder(xxlarge)+AlbertTarget <td> https://share.weiyun.com/0i2lX62b <td> Google's pre-trained Chinese model from https://github.com/google-research/albert . The configuration file is albert_xxlarge_config.json
+<tr align="center"><td> CLUECorpus+<br>AlbertEncoder(base)+AlbertTarget <td> https://share.weiyun.com/UnKHNKRG <td> Google's pre-trained Chinese model from https://github.com/google-research/albert . <br>The configuration file is albert_base_config.json
+<tr align="center"><td> CLUECorpus+<br>AlbertEncoder(large)+AlbertTarget <td> https://share.weiyun.com/9tTUwALd <td> Google's pre-trained Chinese model from https://github.com/google-research/albert . <br>The configuration file is albert_large_config.json
+<tr align="center"><td> CLUECorpus+<br>AlbertEncoder(xlarge)+AlbertTarget <td> https://share.weiyun.com/mUamRQFR <td> Google's pre-trained Chinese model from https://github.com/google-research/albert . <br>The configuration file is albert_xlarge_config.json
+<tr align="center"><td> CLUECorpus+<br>AlbertEncoder(xxlarge)+AlbertTarget <td> https://share.weiyun.com/0i2lX62b <td> Google's pre-trained Chinese model from https://github.com/google-research/albert . <br>The configuration file is albert_xxlarge_config.json
 </table>
 
 Models pre-trained by UER:
@@ -250,15 +250,14 @@ Models pre-trained by UER:
 <tr align="center"><td> MixedCorpus+BertEncoder(tiny)+BertTarget <td> https://share.weiyun.com/yXx0lfUg <td> Pre-trained on mixed large Chinese corpus. The configuration file is bert_tiny_config.json
 <tr align="center"><td> MixedCorpus+GptEncoder+LmTarget <td> https://share.weiyun.com/51nTP8V <td> Pre-trained on mixed large Chinese corpus. Training steps: 500,000 (with sequence lenght of 128) + 100,000 (with sequence length of 512)
 <tr align="center"><td> Reviews+LstmEncoder+LmTarget <td> https://share.weiyun.com/57dZhqo  <td> The training corpus is amazon reviews + JDbinary reviews + dainping reviews (11.4M reviews in total). Language model target is used. It is suitable for datasets related with reviews. It achieves over 5 percent improvements on some review datasets compared with random initialization. Set hidden_size in models/rnn_config.json to 512 before using it. Training steps: 200,000; Sequence length: 128;
-<tr align="center"><td> (Mixedlarge corpus & Amazon reviews)+LstmEncoder+(LmTarget & ClsTarget) <td> https://share.weiyun.com/5B671Ik  <td> Firstly pre-trained on mixed large Chinese corpus with LM target. And then is pre-trained on Amazon reviews with lm target and cls target. It is suitable for datasets related with reviews. It can achieve comparable results with BERT on some review datasets. Training steps: 500,000 + 100,000; Sequence length: 128
+<tr align="center"><td> (MixedCorpus & Amazon reviews)+LstmEncoder+(LmTarget & ClsTarget) <td> https://share.weiyun.com/5B671Ik  <td> Firstly pre-trained on mixed large Chinese corpus with LM target. And then is pre-trained on Amazon reviews with lm target and cls target. It is suitable for datasets related with reviews. It can achieve comparable results with BERT on some review datasets. Training steps: 500,000 + 100,000; Sequence length: 128
 <tr align="center"><td> IfengNews+BertEncoder+BertTarget <td> https://share.weiyun.com/5HVcUWO <td> The training corpus is news data from Ifeng website. We use news title to predict news abstract. Training steps: 100,000; Sequence length: 128
-<tr align="center"><td> jdbinary+BertEncoder+ClsTarget <td> https://share.weiyun.com/596k2bu <td> The training corpus is review data from JD (jingdong). Classification target is used for pre-training. It is suitable for datasets related with shopping reviews, e.g. accuracy is improved on shopping datasets from 96.3 to 97.2 (compared with Google BERT). Training steps: 50,000; Sequence length: 128
-<tr align="center"><td> jdfull+BertEncoder+MlmTarget <td> https://share.weiyun.com/5L6EkUF <td> The training corpus is review data from JD (jingdong). Masked LM target is used for pre-training. Training steps: 50,000; Sequence length: 128
+<tr align="center"><td> jdbinary+BertEncoder+ClsTarget <td> https://share.weiyun.com/596k2bu <td> The training corpus is review data from JD (jingdong). CLS target is used for pre-training. It is suitable for datasets related with shopping reviews. Training steps: 50,000; Sequence length: 128
+<tr align="center"><td> jdfull+BertEncoder+MlmTarget <td> https://share.weiyun.com/5L6EkUF <td> The training corpus is review data from JD (jingdong). MLM target is used for pre-training. Training steps: 50,000; Sequence length: 128
 <tr align="center"><td> Amazonreview+BertEncoder+ClsTarget <td> https://share.weiyun.com/5XuxtFA <td> The training corpus is review data from Amazon (including book reviews, movie reviews, and etc.). Classification target is used for pre-training. It is suitable for datasets related with reviews, e.g. accuracy is improved on Douban book review datasets from 87.6 to 88.5 (compared with Google BERT). Training steps: 20,000; Sequence length: 128
 <tr align="center"><td> XNLI+BertEncoder+ClsTarget <td> https://share.weiyun.com/5oXPugA <td> Infersent with BertEncoder
-<tr align="center"><td> <td> <td> 
 </table>
-Mixedcorpus contains baidubaike + Wikizh + WebQA + RenMinRiBao + literature + reviews
+MixedCorpus contains baidubaike, Wikizh, WebQA, RenMinRiBao, literature, and reviews.
 
 <br/>
 
@@ -549,41 +548,98 @@ Currently, UER-py consists of the following downstream tasks: text classificatio
 run_classifier.py adds two feedforward layers upon encoder layer.
 ```
 usage: run_classifier.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
-                     [--output_model_path OUTPUT_MODEL_PATH]
-                     [--vocab_path VOCAB_PATH] --train_path TRAIN_PATH
-                     --dev_path DEV_PATH --test_path TEST_PATH
-                     [--config_path CONFIG_PATH] [--batch_size BATCH_SIZE]
-                     [--seq_length SEQ_LENGTH]
-                     [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,rcnn,crnn,gpt,bilstm}]
-                     [--bidirectional] [--pooling {mean,max,first,last}]
-                     [--subword_type {none,char}]
-                     [--sub_vocab_path SUB_VOCAB_PATH]
-                     [--subencoder {avg,lstm,gru,cnn}]
-                     [--sub_layers_num SUB_LAYERS_NUM]
-                     [--tokenizer {bert,char,space}]
-                     [--learning_rate LEARNING_RATE] [--warmup WARMUP]
-                     [--dropout DROPOUT] [--epochs_num EPOCHS_NUM]
-                     [--report_steps REPORT_STEPS] [--seed SEED]
-                     [--mean_reciprocal_rank]
+                         [--output_model_path OUTPUT_MODEL_PATH]
+                         [--vocab_path VOCAB_PATH]
+                         [--spm_model_path SPM_MODEL_PATH] --train_path
+                         TRAIN_PATH --dev_path DEV_PATH
+                         [--test_path TEST_PATH] [--config_path CONFIG_PATH]
+                         [--batch_size BATCH_SIZE] [--seq_length SEQ_LENGTH]
+                         [--embedding {bert,word}]
+                         [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,synt,rcnn,crnn,gpt,bilstm}]
+                         [--bidirectional] [--pooling {mean,max,first,last}]
+                         [--factorized_embedding_parameterization]
+                         [--parameter_sharing] [--tokenizer {bert,char,space}]
+                         [--soft_targets] [--soft_alpha SOFT_ALPHA]
+                         [--learning_rate LEARNING_RATE] [--warmup WARMUP]
+                         [--fp16] [--fp16_opt_level {O0,O1,O2,O3}]
+                         [--dropout DROPOUT] [--epochs_num EPOCHS_NUM]
+                         [--report_steps REPORT_STEPS] [--seed SEED]
 ```
-The example of using run_classifier.py：
+The example of using *run_classifier.py*：
 ```
 python3 run_classifier.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 3 --batch_size 64 --encoder bert
 ```
-The example of using run_classifier.py for pair classification:
+The example of using *run_classifier.py* for pair classification:
 ```
 python3 run_classifier.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                           --train_path datasets/lcqmc/train.tsv --dev_path datasets/lcqmc/dev.tsv --test_path datasets/lcqmc/test.tsv \
                           --epochs_num 3 --batch_size 64 --encoder bert
 ```
-The example of using run_classifier.py for document-based question answering (DBQA):
+The example of using *inference/run_classifier_infer.py* to do inference:
 ```
-python3 run_classifier.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
-                          --train_path datasets/dbqa/train.tsv --dev_path datasets/dbqa/dev.tsv --test_path datasets/dbqa/test.tsv \
-                          --epochs_num 3 --batch_size 64 --encoder bert --mean_reciprocal_rank
+python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+                                          --test_path datasets/douban_book_review/test_nolabel.tsv \
+                                          --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
+                                          --seq_length 128 --output_logits --output_prob --encoder bert
 ```
+*--labels_num* specifies the number of labels.
+*--output_logits* denotes the predicted logits are outputted，whose column name is logits.
+*--output_prob* denotes the predicted probability are outputted，whose column name is prob.
+*--seq_length* specifies the sequence length, which should be the same with training.
+
+The example of using ALBERT for classification:
+```
+python3 run_classifier.py --pretrained_model_path models/albert_base_zh_model.bin --vocab_path models/google_zh_vocab.txt \
+                          --config_path models/albert_base_config.json \
+                          --train_path datasets/douban_book_review/train.tsv \
+                          --dev_path datasets/douban_book_review/dev.tsv \
+                          --test_path datasets/douban_book_review/test.tsv \ 
+                          --learning_rate 4e-5
+                          --epochs_num 5 --batch_size 32 --parameter_sharing --factorized_embedding_parameterization --encoder bert
+```
+The performance of ALBERT is sensitive to hyper-parameter settings.
+The example of doing inference for ALBERT:
+```
+python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+                                          --config_path models/albert_base_config.json \
+                                          --test_path datasets/douban_book_review/test_nolabel.tsv \
+                                          --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
+                                          --parameter_sharing --factorized_embedding_parameterization --encoder bert
+```
+
+UER-py supports distillation for classification tasks. 
+First of all, we fine-tune upon a Chinese BERT-large model (provided in Chinese model zoo):
+```
+python3 run_classifier.py --pretrained_model_path models/bert_large_model.bin --vocab_path models/google_zh_vocab.txt \
+                          --config_path models/bert_large_config.json \
+                          --output_model_path models/teacher_classifier_model.bin \
+                          --train_path datasets/douban_book_review/train.tsv \
+                          --dev_path datasets/douban_book_review/dev.tsv \
+                          --test_path datasets/douban_book_review/test.tsv \
+                          --epochs_num 3 --batch_size 32 --encoder bert
+```
+Then we use the teacher model to do inference. The pesudo labels and logits are generated:
+```
+python3 inference/run_classifier_infer.py --load_model_path models/teacher_classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+                                          --config_path models/bert_large_config.json --test_path text.tsv \
+                                          --prediction_path label_logits.tsv --labels_num 2 --output_logits --encoder bert
+```
+The input file *text.tsv* contains text to be predicted (see *datasets/douban_book_review/test_nolabel.tsv*). *text.tsv* could be trainset and related external data. Larger transfer set often leads to better performance.
+The output file *label_logits.tsv* contains label column and logits column. Then we obtain *text_label_logits.tsv* by combining *text.tsv* and *label_logits.tsv* . *text_label_logits.tsv* contains text_a column (text_a column and text_b column for pair classification), label column (hard label), and logits column (soft label).
+Student model is a 3-layers BERT-tiny model. The pre-trained model is provided in Chinese model zoo.
+Then the student model learns the outputs (hard and soft labels) of the teacher model:
+```
+python3 run_classifier.py --pretrained_model_path bert_tiny_model.bin --vocab_path models/google_zh_vocab.txt \
+                          --config_path models/bert_tiny_config.json \
+                          --train_path text_label_logits.tsv \
+                          --dev_path datasets/douban_book_review/dev.tsv \
+                          --test_path datasets/douban_book_review/test.tsv \
+                          --epochs_num 3 --batch_size 64 --soft_targets --soft_alpha 0.5 --encoder bert
+```
+*--soft_targets* denotes that the model uses logits (soft label) for training. Mean-squared-error(MSE) is used as loss function.
+*--soft_alpha* specifies the weight of the soft label loss. The loss function is weighted average of cross-entropy loss (for hard label) and mean-squared-error loss (for soft label).
 
 #### Sequence labeling
 run_ner.py adds two feedforward layers upon encoder layer.
