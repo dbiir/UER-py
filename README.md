@@ -6,12 +6,17 @@
 <img src="logo.jpg" width="390" hegiht="390" align=left />
 
 Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py (Universal Encoder Representations) is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of different pre-training models (e.g. BERT, GPT, ELMO), and provides interfaces for users to further extend upon. With UER-py, we build a model zoo which contains pre-trained models based on different corpora, encoders, and targets. 
-#### Update: [BERT pretrained on mixed large Chinese corpus (bert-large 24-layers)](https://share.weiyun.com/5G90sMJ) is available now. The model is pretrained 500K steps upon RoBERTa-wwm-ext-large from https://github.com/ymcui/Chinese-BERT-wwm . It achieves SOTA results on [ChineseGLUE](http://106.13.187.75:8003/index). The detailed scripts are provided in fine-tuning section.
-#### Update: [BERT pretrained on mixed large Chinese corpus (bert-base 12-layers)](https://share.weiyun.com/5QOzPqq) is available now.
-#### Update: [ELMO pretrained on mixed large Chinese corpus](https://share.weiyun.com/5Qihztq) is available now. It is much faster than BERT and performs well on many classification datasets. One can fine-tune it with the following options: --encoder bilstm --config_path models/birnn_config.json --learning_rate 5e-4 --pooling mean 
-#### Update: [BERT-tiny 12x faster](https://share.weiyun.com/5J0oDBw) and [BERT-small 4x faster](https://share.weiyun.com/5nurvlT) pretrained on mixed large Chinese corpus are now available. One can use them by specifing --config_path models/bert_tiny_config.json or --config_path models/bert_small_config.json
 
-
+#### We have a paper one can cite for UER-py:
+```
+@article{zhao2019uer,
+  title={UER: An Open-Source Toolkit for Pre-training Models},
+  author={Zhao, Zhe and Chen, Hui and Zhang, Jinbin and Zhao, Xin and Liu, Tao and Lu, Wei and Chen, Xi and Deng, Haotang and Ju, Qi and Du, Xiaoyong},
+  journal={EMNLP-IJCNLP 2019},
+  pages={241},
+  year={2019}
+}
+```
 
 <br>
 
@@ -21,22 +26,22 @@ Table of Contents
   * [Requirements](#requirements)
   * [Quickstart](#quickstart)
   * [Datasets](#datasets)
-  * [Chinese_model_zoo](#chinese_model_zoo)
+  * [Modelzoo](#modelzoo)
   * [Instructions](#instructions)
   * [Scripts](#scripts)
   * [Experiments](#experiments)
-  
-  
+
+
 <br/>
 
 ## Features
 UER-py has the following features:
-- __Reproducibility.__ UER-py has been tested on several datasets and should match the performances of the original implementations.
+- __Reproducibility.__ UER-py has been tested on many datasets and should match the performances of the original pre-training model implementations.
 - __Multi-GPU.__ UER-py supports CPU mode, single GPU mode, and distributed training mode. 
 - __Model modularity.__ UER-py is divided into multiple components: embedding, encoder, target, and downstream task fine-tuning. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules with as few restrictions as possible.
 - __Efficiency.__ UER-py refines its pre-processing, pre-training, and fine-tuning stages, which largely improves speed and needs less memory.
-- __Chinese model zoo.__ We are pre-training models with different corpora, encoders, and targets. Selecting proper pre-training models is beneficial to the performance of downstream tasks.
-- __SOTA results.__ Our works further improve the results upon Google BERT, providing new baselines on a range of datasets, such as text classification, sequence labeling, reading comprehension, and etc.
+- __Model zoo.__ With the help of UER-py, we pre-trained models with different corpora, encoders, and targets. Proper selection of pre-trained models is important to the downstream task performances.
+- __SOTA results.__ UER-py supports comprehensive downstream tasks (e.g. classification and machine reading comprehension) and has been used in winning solutions of many NLP competitions.
 
 
 <br/>
@@ -44,15 +49,16 @@ UER-py has the following features:
 ## Requirements
 * Python 3.6
 * torch >= 1.0
+* six
 * For the mixed precision training you will need apex from NVIDIA
 * For the pre-trained model conversion (related with TensorFlow) you will need TensorFlow
-* For the tokenization with sentencepiece you will need sentencepiece
+* For the tokenization with sentencepiece model you will need SentencePiece
 
 
 <br/>
 
 ## Quickstart
-We use BERT model and [Douban book review classification dataset](https://embedding.github.io/evaluation/) to demonstrate how to use UER-py. We firstly pre-train model on book review corpus and then fine-tune it on classification dataset. There are three input files: book review corpus, book review dataset, and vocabulary. All files are encoded in UTF-8 and are included in this project.
+We use BERT model and [Douban book review classification dataset](https://embedding.github.io/evaluation/) to demonstrate how to use UER-py. We firstly pre-train model on book review corpus and then fine-tune it on classification dataset. There are three input files: book review corpus, book review classification dataset, and vocabulary. All files are encoded in UTF-8 and are included in this project.
 
 The format of the corpus for BERT is as follows：
 ```
@@ -65,15 +71,16 @@ doc2-sent1
 doc3-sent1
 doc3-sent2
 ```
-The book review corpus is obtained by book review dataset. We remove labels and split a review into two parts from the middle (See *book_review_bert.txt* in *corpora* folder). 
+The book review corpus is obtained by book review classification dataset. We remove labels and split a review into two parts from the middle (See *book_review_bert.txt* in *corpora* folder). 
 
-The format of the classification dataset is as follows (label and instance are separated by \t):
+The format of the classification dataset is as follows:
 ```
 label    text_a
 1        instance1
 0        instance2
 1        instance3
 ```
+Label and instance are separated by \t . The first row is a list of column names. The label ID should be an integer between (and including) 0 and n-1 for n-way classification.
 
 We use Google's Chinese vocabulary file, which contains 21128 Chinese characters. The format of the vocabulary is as follows:
 ```
@@ -88,7 +95,7 @@ First of all, we preprocess the book review corpus. We need to specify the model
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
                       --processes_num 8 --target bert
 ```
-Pre-processing is time-consuming. Multi-process can largely accelerate the pre-processing speed (*--processes_num*). The raw text is converted to dataset.pt, which is the input of pretrain.py. Then we download [Google's pre-trained Chinese model](https://share.weiyun.com/A1C49VPb), and put it into *models* folder. We load Google's pre-trained model and train it on book review corpus. We should better explicitly specify model's encoder (*--encoder*) and target (*--target*). Suppose we have a machine with 8 GPUs.:
+Pre-processing is time-consuming. Using multiple processes can largely accelerate the pre-processing speed (*--processes_num*). After pre-processing, the raw text is converted to *dataset.pt*, which is the input of *pretrain.py*. Then we download [Google's pre-trained Chinese model](https://share.weiyun.com/A1C49VPb), and put it in *models* folder. We load Google's pre-trained Chinese model and train it on book review corpus. We should explicitly specify model's encoder (*--encoder*) and target (*--target*). Suppose we have a machine with 8 GPUs.:
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
                     --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
@@ -97,33 +104,34 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_voca
 mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
 Notice that the model trained by *pretrain.py* is attacted with the suffix which records the training step. We could remove the suffix for ease of use.
-Finally, we do classification. We can use *google_zh_model.bin*:
+
+Then we fine-tune pre-trained models on downstream classification dataset. We can use *google_zh_model.bin*:
 ```
 python3 run_classifier.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 3 --batch_size 32 --encoder bert
 ```
-or use our [*book_review_model.bin*](https://share.weiyun.com/52BEFs2), which is the output of pretrain.py：
+or use our [*book_review_model.bin*](https://share.weiyun.com/52BEFs2), which is the output of *pretrain.py*：
 ```
 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_zh_vocab.txt \
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 3 --batch_size 32 --encoder bert
 ``` 
-It turns out that the result of Google's model is 87.5; The result of *book_review_model.bin* is 88.2. It is also noticable that we don't need to specify the target in fine-tuning stage. Pre-training target is replaced with task-specific target.
+It turns out that the result of Google's model is 87.5; The result of *book_review_model.bin* is 88.2. It is also noticeable that we don't need to specify the target in fine-tuning stage. Pre-training target is replaced with task-specific target.
 
-The default path of the classifier model is *./models/* . Then we do inference with the classifier model. 
+The default path of the fine-tuned classifier model is *./models/classifier_model.bin* . Then we do inference with the classifier model. 
 ```
 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
                                           --test_path datasets/douban_book_review/test_nolabel.tsv \
                                           --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 --encoder bert
 ```
-*--test_path* denotes the path of the file to be predicted.
-*--prediction_path* denotes the path of the file with prediction results.
+*--test_path* specifies the path of the file to be predicted.
+*--prediction_path* specifies the path of the file with prediction results.
 We need to explicitly specify the number of labels by *--labels_num*. Douban book review is a two-way classification dataset.
 
 We recommend to use *CUDA_VISIBLE_DEVICES* to specify which GPUs are visible (all GPUs are used in default) :
 ```
-CUDA_VISIBLE_DEVICES=0 python3 run_classifier.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
+CUDA_VISIBLE_DEVICES=0 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_zh_vocab.txt \
                                                  --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                                                  --epochs_num 3 --batch_size 32 --encoder bert
 ```
@@ -133,7 +141,7 @@ CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_pa
                                                                  --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 --encoder bert
 ```
 
-BERT consists of next sentence prediction (NSP) target. However, NSP target is not suitable for sentence-level reviews since we have to split a review into two parts. UER-py facilitates the use of different targets. Using masked language modeling (MLM) as target could be a properer choice for pre-training of reviews:
+BERT consists of next sentence prediction (NSP) target. However, NSP target is not suitable for sentence-level reviews since we have to split a sentence into multiple parts. UER-py facilitates the use of different targets. Using masked language modeling (MLM) as target could be a properer choice for pre-training of reviews:
 ```
 python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
                       --processes_num 8 --target mlm
@@ -150,8 +158,6 @@ python3 run_classifier.py --pretrained_model_path models/book_review_mlm_model.b
 ```
 It turns out that the result of [*book_review_mlm_model.bin*](https://share.weiyun.com/5ScDjUO) is 88.3.
 
-We could search proper pre-trained models in [Chinese model zoo](#chinese_model_zoo) for further improvements. For example, we could download [a model pre-trained on Amazon corpus (over 4 million reviews) with BERT encoder and classification (CLS) target](https://share.weiyun.com/5XuxtFA). It achieves 88.5 accuracy on book review dataset.
-
 BERT is really slow. It could be great if we can speed up the model and still achieve competitive performance. We select a 2-layers LSTM encoder to substitute 12-layers Transformer encoder. We could download [the model pre-trained with LSTM encoder and language modeling (LM) + classification (CLS) targets](https://share.weiyun.com/5B671Ik):
 ```
 python3 run_classifier.py --pretrained_model_path models/lstm_reviews_model.bin --vocab_path models/google_zh_vocab.txt \
@@ -165,19 +171,14 @@ python3 inference/run_classifier_infer.py --load_model_path models/classifier_mo
 ```
 We can achieve 86.5 accuracy on testset, which is a competitive result. Using LSTM without pre-training can only achieve 80.2 accuracy.
 
-Besides classification, UER-py also provides scripts for other downstream tasks. We could *run_ner.py* for named entity recognition:
+Besides classification, UER-py also provides scripts for other downstream tasks. We could use *run_ner.py* for named entity recognition:
 ```
 python3 run_ner.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                    --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
                    --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 --encoder bert
 ```
-We could download [a model pre-trained on RenMinRiBao (as known as People's Daily, a news corpus)](https://share.weiyun.com/5JWVjSE) and finetune on it: 
-```
-python3 run_ner.py --pretrained_model_path models/rmrb_model.bin --vocab_path models/google_zh_vocab.txt \
-                   --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
-                   --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 --encoder bert
-```
-The default path of the ner model is *./models/* . Then we do inference with the ner model:
+*--label2id_path* specifies the path of label2id file for named entity recognition.
+The default path of the fine-tuned ner model is *./models/ner_model.bin* . Then we do inference with the ner model:
 ```
 python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --vocab_path models/google_zh_vocab.txt \
                                    --test_path datasets/msra_ner/test_nolabel.tsv \
@@ -185,7 +186,7 @@ python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --voca
                                    --label2id_path datasets/msra_ner/label2id.json --encoder bert
 ```
 
-We could run *run_cmrc.py* for machine reading comprehension:
+We could use *run_cmrc.py* for machine reading comprehension:
 ```
 python3 run_cmrc.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                     --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json \
@@ -221,7 +222,7 @@ This project includes a range of Chinese datasets: XNLI, LCQMC, MSRA-NER, ChnSen
 
 <br/>
 
-## Chinese_model_zoo
+## Modelzoo
 With the help of UER, we pre-trained models with different corpora, encoders, and targets. All pre-trained models can be loaded by UER directly. More pre-trained models will be released in the near future. Unless otherwise noted, Chinese pre-trained models use *models/google_zh_vocab.txt* as vocabulary, which is used in original BERT project. *models/bert_base_config.json* is used as configuration file in default. Commonly-used vocabulary and configuration files are included in *models* folder and users do not need to download them.
 
 Pre-trained Chinese models from Google (in UER format):
@@ -1068,18 +1069,5 @@ For communication related to this project, please contact Zhe Zhao (helloworld@r
 This work is instructed by my enterprise mentors __Qi Ju__, __Haotang Deng__ and school mentors __Tao Liu__, __Xiaoyong Du__.
 
 I also got a lot of help from my Tencent colleagues Yudong Li, Hui Chen, Jinbin Zhang, Zhiruo Wang, Weijie Liu, Peng Zhou, Haixiao Liu, and Weijian Wu. 
-
-## Citation
-Now we have a paper one can cite for UER-py:
-
-```
-@article{zhao2019uer,
-  title={UER: An Open-Source Toolkit for Pre-training Models},
-  author={Zhao, Zhe and Chen, Hui and Zhang, Jinbin and Zhao, Xin and Liu, Tao and Lu, Wei and Chen, Xi and Deng, Haotang and Ju, Qi and Du, Xiaoyong},
-  journal={EMNLP-IJCNLP 2019},
-  pages={241},
-  year={2019}
-}
-```
 
 

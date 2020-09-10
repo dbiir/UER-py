@@ -424,7 +424,7 @@ class MlmDataset(Dataset):
                     line = f.readline()
                     pos += 1
 
-                    document = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line)) + [self.vocab.get(SEP_TOKEN)]
+                    document = [self.vocab.get(CLS_TOKEN)] + self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line)) + [self.vocab.get(SEP_TOKEN)]
 
                     if self.full_sentences:
                         if len(document) > 0:
