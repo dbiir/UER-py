@@ -469,28 +469,27 @@ class MlmDataset(Dataset):
         instances_num = len(all_documents) // self.seq_length
         for i in range(instances_num):
             src = all_documents[i * self.seq_length : (i+1) * self.seq_length]
-            seg = [1] * len(src)
+            seg_pos = [len(src)]
 
             if not self.dynamic_masking:
                 src, tgt = mask_seq(src, self.vocab, self.span_masking, self.span_geo_prob, self.span_max_length)
-                instance = (src, tgt, seg)    
+                instance = (src, tgt, seg_pos)    
             else:
-                instance = (src, seg)
+                instance = (src, seg_pos)
 
             instances.append(instance)
 
         src = all_documents[instances_num * self.seq_length: ]
-        seg = [1] * len(src)
+        seg_pos = [len(src)]
 
         while len(src) != self.seq_length:
             src.append(PAD_ID)
-            seg.append(PAD_ID)
 
         if not self.dynamic_masking:
             src, tgt = mask_seq(src, self.vocab, self.span_masking, self.span_geo_prob, self.span_max_length)
-            instance = (src, tgt, seg)    
+            instance = (src, tgt, seg_pos)    
         else:
-            instance = (src, seg)
+            instance = (src, seg_pos)
 
         instances.append(instance)
         return instances
@@ -521,7 +520,7 @@ class MlmDataLoader(DataLoader):
                     tgt.append([0]*len(ins[0]))
                     for mask in ins[1]:
                         tgt[-1][mask[0]] = mask[1]
-                    seg.append(ins[2])
+                    seg.append([1]*ins[2][0] + [PAD_ID]*(len(ins[0])-ins[2][0]))
                 else:
                     src_single, tgt_single = mask_seq(ins[0], self.vocab, self.span_masking, self.span_geo_prob, self.span_max_length)
                     masked_words_num += len(tgt_single)
@@ -529,7 +528,7 @@ class MlmDataLoader(DataLoader):
                     tgt.append([0]*len(ins[0]))
                     for mask in tgt_single:
                         tgt[-1][mask[0]] = mask[1]
-                    seg.append(ins[1])
+                    seg.append([1]*ins[1][0] + [PAD_ID]*(len(ins[0])-ins[1][0]))
             
             if masked_words_num == 0:
                 continue       
@@ -673,20 +672,20 @@ class LmDataset(Dataset):
                 f.readline()
                 pos += 1
             while True:
-                f.readline()
+                line = f.readline()
                 pos += 1
 
                 document = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line))
 
-                instances_num = len(all_documents) // self.seq_length
+                instances_num = len(document) // self.seq_length
                 for i in range(instances_num):
-                    src = documents[i * self.seq_length : (i+1) * self.seq_length]
-                    tgt = src[1:] + [self.vocab.get(SEP_TOKEN)]
-                    src = [self.vocab.get(CLS_TOKEN)] + src[:-1]
+                    src = document[i * self.seq_length : (i+1) * self.seq_length]
+                    tgt = src + [self.vocab.get(SEP_TOKEN)]
+                    src = [self.vocab.get(CLS_TOKEN)] + src
                     seg = [1] * len(src)
                     pickle.dump((src, tgt, seg), dataset_writer)
 
-                src = documents[instances_num * self.seq_length: ]
+                src = document[instances_num * self.seq_length: ]
                 tgt = src[1:] + [self.vocab.get(SEP_TOKEN)]
                 src = [self.vocab.get(CLS_TOKEN)] + src[:-1]
                 seg = [1] * len(src)
@@ -739,20 +738,20 @@ class BilmDataset(Dataset):
                 f.readline()
                 pos += 1
             while True:
-                f.readline()
+                line = f.readline()
                 pos += 1
 
                 document = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line))
 
-                instances_num = len(all_documents) // self.seq_length
+                instances_num = len(document) // self.seq_length
                 for i in range(instances_num):
-                    src = documents[i * self.seq_length : (i+1) * self.seq_length]
+                    src = document[i * self.seq_length : (i+1) * self.seq_length]
                     tgt_forward = src[1:] + [self.vocab.get(SEP_TOKEN)]
                     tgt_backward = [self.vocab.get(CLS_TOKEN)] + src[:-1]
                     seg = [1] * len(src)
                     pickle.dump((src, tgt_forward, tgt_backward, seg), dataset_writer)
 
-                src = documents[instances_num * self.seq_length: ]
+                src = document[instances_num * self.seq_length: ]
                 if len(src) < 1:
                     continue
                 tgt_forward = src[1:] + [self.vocab.get(SEP_TOKEN)]
