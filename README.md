@@ -127,8 +127,8 @@ python3 inference/run_classifier_infer.py --load_model_path models/classifier_mo
                                           --test_path datasets/douban_book_review/test_nolabel.tsv \
                                           --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 --encoder bert
 ```
-*--test_path* specifies the path of the file to be predicted.
-*--prediction_path* specifies the path of the file with prediction results.
+*--test_path* specifies the path of the file to be predicted. <br>
+*--prediction_path* specifies the path of the file with prediction results. <br>
 We need to explicitly specify the number of labels by *--labels_num*. Douban book review is a two-way classification dataset.
 
 We recommend to use *CUDA_VISIBLE_DEVICES* to specify which GPUs are visible (all GPUs are used in default) :
@@ -173,7 +173,7 @@ python3 inference/run_classifier_infer.py --load_model_path models/classifier_mo
 ```
 We can achieve over 86 accuracy on testset, which is a competitive result. Using the same LSTM encoder without pre-training can only achieve around 81 accuracy.
 
-UER-py also provides many other encoders and corresponding pre-trained models.
+UER-py also provides many other encoders and corresponding pre-trained models. <br>
 The example of pre-training and fine-tuning ELMo on Chnsenticorp dataset:
 ```
 python3 preprocess.py --corpus_path corpora/chnsenticorp.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
@@ -371,11 +371,10 @@ We need to specify the model's target in pre-processing stage since different ta
 - bert_target.py: masked language model + next sentence prediction
 - albert_target.py: masked language model + sentence order prediction
 
-*--preprocesses_num n* denotes that n processes are used for pre-processing. More processes can speed up the preprocess but lead to more memory consumption.
-
-*--dynamic_masking* denotes that the words are masked during the pre-train stage, which is used in RoBERTa. 
-*--full_sentences* allows a sample to include contents from multiple documents, which is used in RoBERTa.
-*--span_masking* denotes that masking consecutive words in mlm target, which is used in SpanBERT. If dynamic masking is used, we should specify *--span_masking* in pre-training stage, otherwise we should specify *--span_masking* in pre-process stage.
+*--preprocesses_num n* denotes that n processes are used for pre-processing. More processes can speed up the preprocess but lead to more memory consumption. <br>
+*--dynamic_masking* denotes that the words are masked during the pre-train stage, which is used in RoBERTa. <br>
+*--full_sentences* allows a sample to include contents from multiple documents, which is used in RoBERTa. <br>
+*--span_masking* denotes that masking consecutive words in mlm target, which is used in SpanBERT. If dynamic masking is used, we should specify *--span_masking* in pre-training stage, otherwise we should specify *--span_masking* in pre-process stage. <br>
 *--docs_buffer_size* specifies the buffer size in the memory in pre-processing stage.
 
 ### Pretrain the model
@@ -404,8 +403,8 @@ usage: pretrain.py [-h] [--dataset_path DATASET_PATH]
                    [--master_ip MASTER_IP] [--backend {nccl,gloo}]
 ```
 
-*--instances_buffer_size* specifies the buffer size in the memory in pre-training stage.
-*--tie_weights* denotes the word embedding and softmax weights are tied.
+*--instances_buffer_size* specifies the buffer size in the memory in pre-training stage. <br>
+*--tie_weights* denotes the word embedding and softmax weights are tied. <br>
 It is recommended to explicitly specify model's encoder and target. UER-py consists of the following encoder modules:
 - rnn_encoder.py: contains (bi-)LSTM and (bi-)GRU
 - birnn_encoder.py: contains bi-LSTM and bi-GRU (different from rnn_encoder.py with --bidirectional, see [the issue](https://github.com/pytorch/pytorch/issues/4930) for more details)
@@ -451,9 +450,9 @@ Node-1 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/googl
                              --master_ip tcp://9.73.138.133:12345          
 ```
 The IP of Node-0 is 9.73.138.133 .
-*--total_steps* specifies the training steps.
-*--save_checkpoint_steps* specifies how often to save the model checkpoint. We don't need to specify the *--save_checkpoint_steps* in Node-1 since only master node saves the pre-trained model.
-*--report_steps* specifies how often to report the pre-training information. We don't need to specify the *--report_steps* in Node-1 since the information only appears in the master node.
+*--total_steps* specifies the training steps. <br>
+*--save_checkpoint_steps* specifies how often to save the model checkpoint. We don't need to specify the *--save_checkpoint_steps* in Node-1 since only master node saves the pre-trained model. <br>
+*--report_steps* specifies how often to report the pre-training information. We don't need to specify the *--report_steps* in Node-1 since the information only appears in the master node. <br>
 Notice that when specifying *--master_ip* one can not select the port that occupied by other programs
 
 #### Load a pre-trained model
@@ -543,9 +542,9 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_voca
                     --factorized_embedding_parameterization --parameter_sharing
 ```
 The corpus format of ALBERT is the identical with BERT.
-*--target albert* denotes that using ALBERT target, which consists of mlm and sop targets.
-*--factorized_embedding_parameterization* denotes that using factorized embedding parameterization to untie the embedding size from the hidden layer size.
-*--parameter_sharing* denotes that sharing all parameters (including feed-forward and attention parameters) across layers.
+*--target albert* denotes that using ALBERT target, which consists of mlm and sop targets. <br>
+*--factorized_embedding_parameterization* denotes that using factorized embedding parameterization to untie the embedding size from the hidden layer size. <br>
+*--parameter_sharing* denotes that sharing all parameters (including feed-forward and attention parameters) across layers. <br>
 we provide 4 configuration files for ALBERT model in *models* folder, albert_base_config.json, albert_large_config.json, albert_xlarge_config.json, albert_xxlarge_config.json.
 
 #### GPT
@@ -567,7 +566,7 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_voca
                     --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --total_steps 20000 --save_checkpoint_steps 5000 \ 
                     --embedding word --encoder lstm --target lm --learning_rate 1e-3 --config_path models/rnn_config.json
 ```
-*--embedding word* denotes using traditional word embedding. LSTM does not require position embedding.
+*--embedding word* denotes using traditional word embedding. LSTM does not require position embedding. <br>
 We use the *models/rnn_config.json* as configuration file.
 
 The example of using GatedCNN encoder and LM target for pre-training:
@@ -629,9 +628,9 @@ python3 inference/run_classifier_infer.py --load_model_path models/classifier_mo
                                           --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
                                           --seq_length 128 --output_logits --output_prob --encoder bert
 ```
-*--labels_num* specifies the number of labels.
-*--output_logits* denotes the predicted logits are outputted，whose column name is logits.
-*--output_prob* denotes the predicted probability are outputted，whose column name is prob.
+*--labels_num* specifies the number of labels. <br>
+*--output_logits* denotes the predicted logits are outputted，whose column name is logits. <br>
+*--output_prob* denotes the predicted probability are outputted，whose column name is prob. <br>
 *--seq_length* specifies the sequence length, which should be the same with training.
 
 The example of using ALBERT for classification:
@@ -644,7 +643,7 @@ python3 run_classifier.py --pretrained_model_path models/albert_base_zh_model.bi
                           --learning_rate 4e-5
                           --epochs_num 5 --batch_size 32 --parameter_sharing --factorized_embedding_parameterization --encoder bert
 ```
-The performance of ALBERT is sensitive to hyper-parameter settings.
+The performance of ALBERT is sensitive to hyper-parameter settings. <br>
 The example of doing inference for ALBERT:
 ```
 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
@@ -654,7 +653,7 @@ python3 inference/run_classifier_infer.py --load_model_path models/classifier_mo
                                           --parameter_sharing --factorized_embedding_parameterization --encoder bert
 ```
 
-UER-py supports multi-task learning. Embedding and encoder layers are shared by different tasks.
+UER-py supports multi-task learning. Embedding and encoder layers are shared by different tasks. <br>
 The example of training two sentiment analysis datasets:
 ```
 python3 run_mt_classifier.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
@@ -664,7 +663,7 @@ python3 run_mt_classifier.py --pretrained_model_path models/google_zh_model.bin 
 --dataset_path_list specifies folder path list of different tasks. Each folder should contains train set *train.tsv* and development set *dev.tsv* .
 
 
-UER-py supports distillation for classification tasks. 
+UER-py supports distillation for classification tasks. <br>
 First of all, we fine-tune upon a Chinese BERT-large model (provided in Chinese model zoo):
 ```
 python3 run_classifier.py --pretrained_model_path models/bert_large_model.bin --vocab_path models/google_zh_vocab.txt \
@@ -681,8 +680,8 @@ python3 inference/run_classifier_infer.py --load_model_path models/teacher_class
                                           --config_path models/bert_large_config.json --test_path text.tsv \
                                           --prediction_path label_logits.tsv --labels_num 2 --output_logits --encoder bert
 ```
-The input file *text.tsv* contains text to be predicted (see *datasets/douban_book_review/test_nolabel.tsv*). *text.tsv* could be trainset and related external data. Larger transfer set often leads to better performance.
-The output file *label_logits.tsv* contains label column and logits column. Then we obtain *text_label_logits.tsv* by combining *text.tsv* and *label_logits.tsv* . *text_label_logits.tsv* contains text_a column (text_a column and text_b column for pair classification), label column (hard label), and logits column (soft label).
+The input file *text.tsv* contains text to be predicted (see *datasets/douban_book_review/test_nolabel.tsv*). *text.tsv* could be trainset and related external data. Larger transfer set often leads to better performance. <br>
+The output file *label_logits.tsv* contains label column and logits column. Then we obtain *text_label_logits.tsv* by combining *text.tsv* and *label_logits.tsv* . *text_label_logits.tsv* contains text_a column (text_a column and text_b column for pair classification), label column (hard label), and logits column (soft label). <br>
 Student model is a 3-layers BERT-tiny model. The pre-trained model is provided in Chinese model zoo.
 Then the student model learns the outputs (hard and soft labels) of the teacher model:
 ```
@@ -693,7 +692,7 @@ python3 run_classifier.py --pretrained_model_path bert_tiny_model.bin --vocab_pa
                           --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 3 --batch_size 64 --soft_targets --soft_alpha 0.5 --encoder bert
 ```
-*--soft_targets* denotes that the model uses logits (soft label) for training. Mean-squared-error(MSE) is used as loss function.
+*--soft_targets* denotes that the model uses logits (soft label) for training. Mean-squared-error(MSE) is used as loss function. <br>
 *--soft_alpha* specifies the weight of the soft label loss. The loss function is weighted average of cross-entropy loss (for hard label) and mean-squared-error loss (for soft label).
 
 #### Sequence labeling
