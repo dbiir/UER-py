@@ -197,7 +197,7 @@ python3 inference/run_classifier_infer.py --load_model_path models/classifier_mo
                                           --prediction_path datasets/chnsenticorp/prediction.tsv \
                                           --labels_num 2 --embedding word --encoder bilstm --pooling mean
 ```
-Users can download mixed_corpus_elmo_model.bin from [here](https://share.weiyun.com/5Qihztq).
+Users can download *mixed_corpus_elmo_model.bin* from [here](https://share.weiyun.com/5Qihztq).
 
 The example of fine-tuning GatedCNN on Chnsenticorp dataset:
 ```
@@ -213,7 +213,7 @@ CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_pa
                                           --prediction_path datasets/chnsenticorp/prediction.tsv \
                                           --labels_num 2 --embedding word --encoder gatedcnn --pooling max
 ```
-Users can download wikizh_gatedcnn_model.bin from [here](https://share.weiyun.com/W2gmPPeA).
+Users can download *wikizh_gatedcnn_model.bin* from [here](https://share.weiyun.com/W2gmPPeA).
 
 Besides classification, UER-py also provides scripts for other downstream tasks. We could use *run_ner.py* for named entity recognition:
 ```
@@ -324,8 +324,8 @@ UER-py/
     |
     |--corpora/: contains corpora for pre-training
     |--datasets/: contains downstream tasks
-    |--models/: contains pre-trained models, vocabularies, and config files
-    |--scripts/: contains some useful scripts for pre-training models
+    |--models/: contains pre-trained models, vocabularies, and configuration files
+    |--scripts/: contains useful scripts for pre-training models
     |--inference/：contains inference scripts for downstream tasks
     |
     |--preprocess.py
@@ -356,14 +356,14 @@ usage: preprocess.py [-h] --corpus_path CORPUS_PATH [--vocab_path VOCAB_PATH]
                      [--span_geo_prob SPAN_GEO_PROB]
                      [--span_max_length SPAN_MAX_LENGTH]
 ```
-The example of pre-processing on a single machine is as follows：
+The example of pre-processing on a single machine：
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt\
                       --processes_num 8 --target bert
 ```
-If multiple machines are available, users can execute preprocess.py on one machine and copy the dataset.pt to other machines. 
+If multiple machines are available, users can run preprocess.py on one machine and copy the dataset.pt to other machines. 
 
-We need to specify the model's target in pre-processing stage since different targets require different data formats. Currently, UER-py consists of the following target modules:
+We need to specify model's target in pre-processing stage since different targets require different data formats. Currently, UER-py consists of the following target modules:
 - lm_target.py: language model
 - mlm_target.py: masked language model (cloze test)
 - cls_target.py: classification
@@ -371,11 +371,12 @@ We need to specify the model's target in pre-processing stage since different ta
 - bert_target.py: masked language model + next sentence prediction
 - albert_target.py: masked language model + sentence order prediction
 
-*--preprocesses_num n* denotes that n processes are used for pre-processing. More processes can speed up the preprocess but lead to more memory consumption. <br>
-*--dynamic_masking* denotes that the words are masked during the pre-train stage, which is used in RoBERTa. <br>
+*--preprocesses_num n* denotes that n processes are used for pre-processing. More processes can speed up the preprocess stage but lead to more memory consumption. <br>
+*--dynamic_masking* denotes that the words are masked during the pre-training stage, which is used in RoBERTa. <br>
 *--full_sentences* allows a sample to include contents from multiple documents, which is used in RoBERTa. <br>
-*--span_masking* denotes that masking consecutive words in mlm target, which is used in SpanBERT. If dynamic masking is used, we should specify *--span_masking* in pre-training stage, otherwise we should specify *--span_masking* in pre-process stage. <br>
-*--docs_buffer_size* specifies the buffer size in the memory in pre-processing stage.
+*--span_masking* denotes that masking consecutive words, which is used in SpanBERT. If dynamic masking is used, we should specify *--span_masking* in pre-training stage, otherwise we should specify *--span_masking* in pre-processing stage. <br>
+*--docs_buffer_size* specifies the buffer size in memory in pre-processing stage.
+Sequence length is specified in pre-processing stage by *--seq_length* . The default value is 128.
 
 ### Pretrain the model
 ```
@@ -403,7 +404,7 @@ usage: pretrain.py [-h] [--dataset_path DATASET_PATH]
                    [--master_ip MASTER_IP] [--backend {nccl,gloo}]
 ```
 
-*--instances_buffer_size* specifies the buffer size in the memory in pre-training stage. <br>
+*--instances_buffer_size* specifies the buffer size in memory in pre-training stage. <br>
 *--tie_weights* denotes the word embedding and softmax weights are tied. <br>
 It is recommended to explicitly specify model's encoder and target. UER-py consists of the following encoder modules:
 - rnn_encoder.py: contains (bi-)LSTM and (bi-)GRU
@@ -415,30 +416,37 @@ It is recommended to explicitly specify model's encoder and target. UER-py consi
 The target should be coincident with the target in pre-processing stage. Users can try different combinations of encoders and targets by *--encoder* and *--target*.
 *--config_path* denotes the path of the configuration file, which specifies the hyper-parameters of the pre-training model. We have put the commonly-used configuration files in *models* folder. Users should choose the proper one according to encoder they use.
 
-There are two strategies for pre-training: 1）random initialization 2）loading a pre-trained model.
+There are two strategies for parameter initialization of pre-training: 1）random initialization; 2）loading a pre-trained model.
 #### Random initialization
 The example of pre-training on CPU：
 ```
-python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin --encoder bert --target bert
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin \
+                    --encoder bert --target bert
 ```
+The input of pre-training is specified by *--dataset_path* .
 The example of pre-training on single GPU (the id of GPU is 3)：
 ```
-python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin --encoder bert --target bert --gpu_ranks 3
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin --gpu_ranks 3 \
+                    --encoder bert --target bert
 ```
 The example of pre-training on a single machine with 8 GPUs：
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
-                    --output_model_path models/output_model.bin --encoder bert --target bert --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 
+                    --output_model_path models/output_model.bin --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
+                    --encoder bert --target bert
 ```
-*--world_size* specifies the number of processes (and GPUs) used for pre-training.
-*--gpu_ranks* specifies the ID for each process and GPU.
+*--world_size* specifies the number of processes (and GPUs) used for pre-training. <br>
+*--gpu_ranks* specifies the ID for each process and GPU. The IDs are from *0* to *n-1*, where *n* is the number of processes used for pre-training. <br>
 Users could use CUDA_VISIBLE_DEVICES if they want to use part of GPUs:
 ```
 CUDA_VISIBLE_DEVICES=1,2,3,5 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
-                                                 --output_model_path models/output_model.bin --encoder bert --target bert --world_size 4 --gpu_ranks 0 1 2 3
+                                                 --output_model_path models/output_model.bin --world_size 4 --gpu_ranks 0 1 2 3 \
+                                                 --encoder bert --target bert
 ```
+*--world_size* is set to 4 since only 4 GPUs are used. The IDs of 4 processes (and GPUs) is 0, 1, 2, and 3, which are specified by *--gpu_ranks* .
 
-The example of pre-training on two machines, each has 8 GPUs (16 GPUs in total): 
+The example of pre-training on two machines, each has 8 GPUs (16 GPUs in total).
+We run *pretrain.py* on two machines (Node-0 and Node-1) respectively. *--master_ip* specifies the ip:port of the master mode, which contains process (and GPU) of ID 0.
 ```
 Node-0 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
                              --output_model_path models/output_model.bin --encoder bert --target bert --world_size 16 --gpu_ranks 0 1 2 3 4 5 6 7 \
@@ -449,37 +457,40 @@ Node-1 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/googl
                              --total_steps 100000 \
                              --master_ip tcp://9.73.138.133:12345          
 ```
-The IP of Node-0 is 9.73.138.133 .
+The IP of Node-0 is 9.73.138.133 . <br>
 *--total_steps* specifies the training steps. <br>
-*--save_checkpoint_steps* specifies how often to save the model checkpoint. We don't need to specify the *--save_checkpoint_steps* in Node-1 since only master node saves the pre-trained model. <br>
-*--report_steps* specifies how often to report the pre-training information. We don't need to specify the *--report_steps* in Node-1 since the information only appears in the master node. <br>
-Notice that when specifying *--master_ip* one can not select the port that occupied by other programs
+*--save_checkpoint_steps* specifies how often to save the model checkpoint. We don't need to specify *--save_checkpoint_steps* in Node-1 since only master node saves the pre-trained model. <br>
+*--report_steps* specifies how often to report the pre-training information. We don't need to specify *--report_steps* in Node-1 since the information only appears in master node. <br>
+Notice that when specifying *--master_ip* one can not select the port that occupied by other programs. <br>
+For random initialization, pre-training usually requires larger learning rate. We recommend to use *--learning_rate 1e-4*. The default value is *2e-5* .
 
-#### Load a pre-trained model
+#### Loading a pre-trained model
 We recommend to load a pre-trained model. We can specify the pre-trained model by *--pretrained_model_path* .
 The example of pre-training on CPU and single GPU:
 ```
-python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
-                    --pretrained_model_path models/google_zh_model.bin --output_model_path models/output_model.bin \
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
+                    --output_model_path models/output_model.bin \
                     --encoder bert --target bert
-python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
-                    --pretrained_model_path models/google_zh_model.bin --output_model_path models/output_model.bin \
-                    --gpu_ranks 3 --encoder bert --target bert
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
+                    --output_model_path models/output_model.bin --gpu_ranks 3 \
+                    --encoder bert --target bert
 ```
 The example of pre-training on a single machine with 8 GPUs：
 ```
-python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
-                    --pretrained_model_path models/google_zh_model.bin --output_model_path models/output_model.bin \
-                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder bert --target bert 
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
+                    --output_model_path models/output_model.bin --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
+                    --encoder bert --target bert 
 ```
 The example of pre-training on two machines, each has 8 GPUs (16 GPUs in total):
 ```
 Node-0 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
-                             --pretrained_model_path models/google_zh_model.bin --output_model_path models/output_model.bin \
-                             --encoder bert --target bert --world_size 16 --gpu_ranks 0 1 2 3 4 5 6 7 --master_ip tcp://9.73.138.133:12345
+                             --pretrained_model_path models/google_zh_model.bin \
+                             --output_model_path models/output_model.bin --world_size 16 --gpu_ranks 0 1 2 3 4 5 6 7 \
+                             --master_ip tcp://9.73.138.133:12345 --encoder bert --target bert  
 Node-1 : python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
-                             --pretrained_model_path models/google_zh_model.bin --output_model_path models/output_model.bin \
-                             --encoder bert --target bert --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 --master_ip tcp://9.73.138.133:12345
+                             --pretrained_model_path models/google_zh_model.bin \
+                             --output_model_path models/output_model.bin --world_size 16 --gpu_ranks 8 9 10 11 12 13 14 15 \
+                             --master_ip tcp://9.73.138.133:12345 --encoder bert --target bert  
 ```
 The example of pre-training on three machines, each has 8 GPUs (24 GPUs in total):
 ```
@@ -498,39 +509,52 @@ Node-2: python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google
 ```
 
 #### Pre-training model size
-In general, large model can achieve better results but lead to more resource consumption. We can specify the pre-trained model size by *--config_path*. Commonly-used configuration files are included in *models* folder. For example, we provide 4 configuration files for BERT model. They are bert_large_config.json, bert_base_config.json, bert_small_config.json, bert_tiny_config.json. We provide different pre-trained models according to different configuration files. See Chinese model zoo for more details.
+In general, large model can achieve better results but lead to more resource consumption. We can specify the pre-trained model size by *--config_path*. Commonly-used configuration files are included in *models* folder. For example, we provide 4 configuration files for BERT model. They are *bert_large_config.json*, *bert_base_config.json*, *bert_small_config.json*, *bert_tiny_config.json*. We provide different pre-trained models according to different configuration files. See model zoo for more details.
 The example of doing incremental pre-training upon BERT-large model:
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
                     --pretrained_model_path models/mixed_corpus_bert_large_model.bin --config_path models/bert_large_config.json \
                     --output_model_path models/output_model.bin --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder bert --target bert
 ```
+The example of doing incremental pre-training upon BERT-small model:
+```
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
+                    --pretrained_model_path models/mixed_corpus_bert_small_model.bin --config_path models/bert_small_config.json \
+                    --output_model_path models/output_model.bin --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder bert --target bert
+```
+The example of doing incremental pre-training upon BERT-tiny model:
+```
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
+                    --pretrained_model_path models/mixed_corpus_bert_tiny_model.bin --config_path models/bert_tiny_config.json \
+                    --output_model_path models/output_model.bin --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder bert --target bert
+```
 
-### Try pre-training models with different targets and encoders
+### Pre-training models with different encoders and targets
 UER-py allows users to combine different components (e.g. embeddings, encoders, and targets). Here are some examples of trying different combinations.
 
 #### RoBERTa
+The example of pre-processing and pre-training RoBERTa:
 ```
 python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt \
-                      --dataset_path dataset.pt --processes_num 12 \
+                      --dataset_path dataset.pt --processes_num 8 \
                       --dynamic_masking --target mlm
-python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin \
-                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder bert --target mlm
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
+                    --output_model_path models/output_model.bin \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --learning_rate 1e-4 --encoder bert --target mlm
 ```
-RoBERTa uses dynamic masking, mlm target, and allows a sample to contain contents from multiple documents.
-We don't recommend to use *--full_sentences* when the document is short (e.g. reviews).
-Notice that RoBERTa removes NSP target. The corpus for RoBERTa stores one document per line, which is different from corpus used by BERT.
-The example of doing incremental pre-training upon existing BERT model:
+RoBERTa uses dynamic masking, mlm target, and allows a sample to contain contents from multiple documents. <br>
+We don't recommend to use *--full_sentences* when the document is short (e.g. reviews). <br>
+Notice that RoBERTa removes NSP target. The corpus for RoBERTa stores one document per line, which is different from corpus used by BERT. <br>
+RoBERTa can load BERT models for incremental pre-training (and vice versa). The example of doing incremental pre-training upon existing BERT model:
 ```
 python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt \
-                      --dataset_path dataset.pt --processes_num 12 \
+                      --dataset_path dataset.pt --processes_num 8 \
                       --dynamic_masking --target mlm
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
                     --pretrained_model_path models/google_zh_model.bin \
                     --output_model_path models/output_model.bin \
-                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder bert --target mlm
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --learning_rate 2e-5 --encoder bert --target mlm
 ```
-Nsp target is not suitable when document is short. We could replace BERT target with MLM target when handling corpus such as reviews.
 
 #### ALBERT
 ```
