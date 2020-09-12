@@ -7,6 +7,7 @@
 
 Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py (Universal Encoder Representations) is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of different pre-training models (e.g. BERT, GPT, ELMO), and provides interfaces for users to further extend upon. With UER-py, we build a model zoo which contains pre-trained models based on different corpora, encoders, and targets. 
 
+<br/>
 
 #### We have a paper one can cite for UER-py:
 ```
@@ -19,7 +20,7 @@ Pre-training has become an essential part for NLP tasks and has led to remarkabl
 }
 ```
 
-<br>
+<br/>
 
 Table of Contents
 =================
@@ -112,7 +113,7 @@ python3 run_classifier.py --pretrained_model_path models/google_zh_model.bin --v
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 3 --batch_size 32 --encoder bert
 ```
-or use our [*book_review_model.bin*](https://share.weiyun.com/52BEFs2), which is the output of *pretrain.py*：
+or use our [*book_review_model.bin*](https://share.weiyun.com/xOFsYxZA), which is the output of *pretrain.py*：
 ```
 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_zh_vocab.txt \
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
@@ -157,11 +158,11 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier.py --pretrained_model_path model
                                                    --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                                                    --epochs_num 3 --batch_size 32 --encoder bert
 ```
-It turns out that the result of [*book_review_mlm_model.bin*](https://share.weiyun.com/5ScDjUO) is 88.3.
+It turns out that the result of [*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV) is around 88.3.
 
 BERT is slow. It could be great if we can speed up the model and still achieve competitive performance. To achieve this goal, we select a 2-layers LSTM encoder to substitute 12-layers Transformer encoder. We firstly download [pre-trained model](https://share.weiyun.com/5B671Ik) for 2-layers LSTM encoder. Then we fine-tune it on downstream classification dataset:
 ```
-python3 run_classifier.py --pretrained_model_path models/lstm_reviews_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/rnn_config.json \
+python3 run_classifier.py --pretrained_model_path models/reviews_lstm_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/rnn_config.json \
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 3  --batch_size 64 --learning_rate 1e-3 --embedding word --encoder lstm --pooling mean
 
@@ -197,6 +198,22 @@ python3 inference/run_classifier_infer.py --load_model_path models/classifier_mo
                                           --labels_num 2 --embedding word --encoder bilstm --pooling mean
 ```
 Users can download mixed_corpus_elmo_model.bin from [here](https://share.weiyun.com/5Qihztq).
+
+The example of fine-tuning GatedCNN on Chnsenticorp dataset:
+```
+CUDA_VISIBLE_DEVICES=0 python3 run_classifier.py --pretrained_model_path models/wikizh_gatedcnn_model.bin --vocab_path models/google_zh_vocab.txt \
+                                                 --config_path models/gatedcnn_9_config.json \
+                                                 --train_path datasets/chnsenticorp/train.tsv --dev_path datasets/chnsenticorp/dev.tsv --test_path datasets/chnsenticorp/test.tsv \
+                                                 --epochs_num 5  --batch_size 64 --learning_rate 5e-5 \
+                                                 --embedding word --encoder gatedcnn --pooling max
+
+CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+                                          --config_path models/gatedcnn_9_config.json \
+                                          --test_path datasets/chnsenticorp/test_nolabel.tsv \
+                                          --prediction_path datasets/chnsenticorp/prediction.tsv \
+                                          --labels_num 2 --embedding word --encoder gatedcnn --pooling max
+```
+Users can download wikizh_gatedcnn_model.bin from [here](https://share.weiyun.com/W2gmPPeA).
 
 Besides classification, UER-py also provides scripts for other downstream tasks. We could use *run_ner.py* for named entity recognition:
 ```
