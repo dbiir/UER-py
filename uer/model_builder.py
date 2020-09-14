@@ -14,6 +14,7 @@ from uer.targets.cls_target import ClsTarget
 from uer.targets.mlm_target import MlmTarget
 from uer.targets.nsp_target import NspTarget
 from uer.targets.bilm_target import BilmTarget
+from uer.targets.albert_target import AlbertTarget
 from uer.subencoders.avg_subencoder import AvgSubencoder
 from uer.subencoders.rnn_subencoder import LstmSubencoder
 from uer.subencoders.cnn_subencoder import CnnSubencoder

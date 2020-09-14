@@ -30,6 +30,8 @@ def main():
                         help="Path of the multiple choice model.")
     parser.add_argument("--vocab_path", type=str, required=True,
                         help="Path of the vocabulary file.")
+    parser.add_argument("--spm_model_path", default=None, type=str,
+                        help="Path of the sentence piece model.")
     parser.add_argument("--test_path", type=str,
                         help="Path of the testset.")
     parser.add_argument("--prediction_path", default=None, type=str,

@@ -375,7 +375,7 @@ We need to specify model's target in pre-processing stage since different target
 *--dynamic_masking* denotes that the words are masked during the pre-training stage, which is used in RoBERTa. <br>
 *--full_sentences* allows a sample to include contents from multiple documents, which is used in RoBERTa. <br>
 *--span_masking* denotes that masking consecutive words, which is used in SpanBERT. If dynamic masking is used, we should specify *--span_masking* in pre-training stage, otherwise we should specify *--span_masking* in pre-processing stage. <br>
-*--docs_buffer_size* specifies the buffer size in memory in pre-processing stage.
+*--docs_buffer_size* specifies the buffer size in memory in pre-processing stage. <br>
 Sequence length is specified in pre-processing stage by *--seq_length* . The default value is 128.
 
 ### Pretrain the model
@@ -533,7 +533,7 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_voca
 UER-py allows users to combine different components (e.g. embeddings, encoders, and targets). Here are some examples of trying different combinations.
 
 #### RoBERTa
-The example of pre-processing and pre-training RoBERTa:
+The example of pre-processing and pre-training for RoBERTa:
 ```
 python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt \
                       --dataset_path dataset.pt --processes_num 8 \
@@ -557,60 +557,120 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_voca
 ```
 
 #### ALBERT
+The example of pre-processing and pre-training for ALBERT:
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt \
-                      --dataset_path dataset.pt --processes_num 12 --target albert
-python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin \
+                      --dataset_path dataset.pt --processes_num 8 --target albert
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
+                    --output_model_path models/output_model.bin \
                     --config_path models/albert_base_config.json \
-                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder bert --target albert \
-                    --factorized_embedding_parameterization --parameter_sharing
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --learning_rate 1e-4 \
+                    --factorized_embedding_parameterization --parameter_sharing --encoder bert --target albert
 ```
-The corpus format of ALBERT is the identical with BERT.
+The corpus format of ALBERT is the identical with BERT. <br>
 *--target albert* denotes that using ALBERT target, which consists of mlm and sop targets. <br>
 *--factorized_embedding_parameterization* denotes that using factorized embedding parameterization to untie the embedding size from the hidden layer size. <br>
 *--parameter_sharing* denotes that sharing all parameters (including feed-forward and attention parameters) across layers. <br>
-we provide 4 configuration files for ALBERT model in *models* folder, albert_base_config.json, albert_large_config.json, albert_xlarge_config.json, albert_xxlarge_config.json.
+we provide 4 configuration files for ALBERT model in *models* folder, albert_base_config.json, albert_large_config.json, albert_xlarge_config.json, albert_xxlarge_config.json. <br>
+The example of doing incremental pre-training upon Google's ALBERT pre-trained models of different sizes (See model zoo for pre-trained weights):
+```
+python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt \
+                      --dataset_path dataset.pt --processes_num 8 --target albert 
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
+                    --pretrained_model_path models/google_zh_albert_base_model.bin \
+                    --output_model_path models/output_model.bin \
+                    --config_path models/albert_base_config.json \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --learning_rate 2e-5 \
+                    --factorized_embedding_parameterization --parameter_sharing  --encoder bert --target albert
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
+                    --pretrained_model_path models/google_zh_albert_xxlarge_model.bin \
+                    --output_model_path models/output_model.bin \
+                    --config_path models/albert_xxlarge_config.json \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --learning_rate 2e-5 \
+                    --factorized_embedding_parameterization --parameter_sharing --encoder bert --target albert
+```
 
-#### GPT
+#### SpanBERT
+SpanBERT introduces span masking and span boundary objective. We only consider span masking here.
+The example of pre-processing and pre-training for SpanBERT (static masking):
 ```
 python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt \
-                      --dataset_path dataset.pt --processes_num 12 --target lm
+                      --dataset_path dataset.pt --processes_num 8 --target mlm --dup_factor 20 \
+                      --span_masking --span_geo_prob 0.3 --span_max_length 5 --target mlm
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
+                    --output_model_path models/output_model.bin \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7  --learning_rate 1e-4 \
+                    --total_steps 10000 --save_checkpoint 5000 --encoder bert --target mlm
+```
+*--dup_factor* specifies the number of times to duplicate the input data (with different masks). The default value is 5 .
+The example of pre-processing and pre-training for SpanBERT (dynamic masking):
+```
+python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt \
+                      --dataset_path dataset.pt --processes_num 8 \
+                      --dynamic_masking --target mlm
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
+                    --output_model_path models/output_model.bin \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7  --learning_rate 1e-4 \
+                    --span_masking --span_geo_prob 0.3 --span_max_length 5 \
+                    --total_steps 10000 --save_checkpoint 5000 --encoder bert --target mlm
+```
+
+#### GPT
+The example of pre-processing and pre-training for GPT:
+```
+python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt \
+                      --dataset_path dataset.pt --processes_num 8 --target lm
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin \
                     --config_path models/bert_base_config.json --learning_rate 1e-4 \
                     --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder gpt --target lm
 ```
-The corpus format of GPT is the identical with RoBERTa. We can use GPT through *--encoder gpt* and *--target lm*.
+The corpus format of GPT is the identical with RoBERTa. We can pre-training GPT through *--encoder gpt* and *--target lm*.
 GPT can use the configuration file of BERT.
+
+#### ELMo
+The example of pre-processing and pre-training for ELMo:
+```
+python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt \
+                      --dataset_path dataset.pt --processes_num 8 --target bilm
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin \
+                    --config_path models/birnn_config.json --learning_rate 5e-4 \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --embedding word --encoder bilstm --target bilm
+```
+The corpus format of ELMo is the identical with GPT. We can pre-training ELMo through *--embedding word*, *--encoder bilstm*, and *--target bilm*. <br>
+*--embedding word* denotes using traditional word embedding. LSTM does not require position embedding.
 
 #### More combinations
 The example of using LSTM encoder and LM target for pre-training:
 ```
 python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt --processes_num 8 --target lm
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin \
-                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --total_steps 20000 --save_checkpoint_steps 5000 \ 
-                    --embedding word --encoder lstm --target lm --learning_rate 1e-3 --config_path models/rnn_config.json
+                    --config_path models/rnn_config.json --learning_rate 1e-3 \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --total_steps 20000 --save_checkpoint_steps 5000 \
+                    --embedding word --encoder lstm --target lm
 ```
-*--embedding word* denotes using traditional word embedding. LSTM does not require position embedding. <br>
 We use the *models/rnn_config.json* as configuration file.
+
+The example of using GRU encoder and LM target for pre-training:
+```
+python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt --processes_num 8 --target lm
+python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin \
+                    --config_path models/rnn_config.json --learning_rate 1e-3 \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --total_steps 20000 --save_checkpoint_steps 5000 \
+                    --embedding word --encoder gru --target lm
+```
 
 The example of using GatedCNN encoder and LM target for pre-training:
 ```
 python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt --processes_num 8 --target lm
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/output_model.bin \
+                    --config_path models/gatedcnn_9_config.json --learning_rate 1e-4 \
                     --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --total_steps 20000 --save_checkpoint_steps 5000 \
-                    --embedding word --encoder gatedcnn --target lm --learning_rate 1e-4 --config_path models/gcnn_9_config.json
+                    --embedding word --encoder gatedcnn --target lm
 ```
 
-The example of using Bi-LSTM encoder and BiLM target for pre-training:
-```
-python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt --processes_num 8 --target bilm
-python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt  --output_model_path models/output_model.bin \
-                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --total_steps 20000 --save_checkpoint_steps 5000 \
-                    --embedding word --encoder bilstm --target bilm --learning_rate 5e-4 --config_path models/birnn_config.json
-```
 
 ### Fine-tune on downstream tasks
-Currently, UER-py consists of the following downstream tasks: text classification, pair classification, document-based question answering, sequence labeling, and machine reading comprehension. The encoder used for downstream task should be coincident with the pre-trained model.
+Currently, UER-py supports the many downstream tasks, including text classification, pair classification, document-based question answering, sequence labeling, machine reading comprehension, etc. The encoder used for downstream task should be coincident with the pre-trained model.
 
 #### Classification
 run_classifier.py adds two feedforward layers upon encoder layer.
@@ -652,20 +712,24 @@ python3 inference/run_classifier_infer.py --load_model_path models/classifier_mo
                                           --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
                                           --seq_length 128 --output_logits --output_prob --encoder bert
 ```
+For classification, texts in *text_a* column are predicted. For pair classification, texts in *text_a* and *text_b* columns are are predicted. <br>
 *--labels_num* specifies the number of labels. <br>
 *--output_logits* denotes the predicted logits are outputted，whose column name is logits. <br>
-*--output_prob* denotes the predicted probability are outputted，whose column name is prob. <br>
-*--seq_length* specifies the sequence length, which should be the same with training.
+*--output_prob* denotes the predicted probabilities are outputted，whose column name is prob. <br>
+*--seq_length* specifies the sequence length, which should be the same with setting in training stage.
+
+Notice that BERT and RoBERTa have the same encoder. There is no difference between loading BERT and RoBERTa.
 
 The example of using ALBERT for classification:
 ```
-python3 run_classifier.py --pretrained_model_path models/albert_base_zh_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 run_classifier.py --pretrained_model_path models/google_zh_albert_base_model.bin --vocab_path models/google_zh_vocab.txt \
                           --config_path models/albert_base_config.json \
                           --train_path datasets/douban_book_review/train.tsv \
                           --dev_path datasets/douban_book_review/dev.tsv \
-                          --test_path datasets/douban_book_review/test.tsv \ 
-                          --learning_rate 4e-5
-                          --epochs_num 5 --batch_size 32 --parameter_sharing --factorized_embedding_parameterization --encoder bert
+                          --test_path datasets/douban_book_review/test.tsv \
+                          --learning_rate 4e-5 \
+                          --epochs_num 5 --batch_size 32 \
+                          --factorized_embedding_parameterization --parameter_sharing --encoder bert
 ```
 The performance of ALBERT is sensitive to hyper-parameter settings. <br>
 The example of doing inference for ALBERT:
@@ -674,7 +738,7 @@ python3 inference/run_classifier_infer.py --load_model_path models/classifier_mo
                                           --config_path models/albert_base_config.json \
                                           --test_path datasets/douban_book_review/test_nolabel.tsv \
                                           --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
-                                          --parameter_sharing --factorized_embedding_parameterization --encoder bert
+                                          --factorized_embedding_parameterization --parameter_sharing --encoder bert
 ```
 
 UER-py supports multi-task learning. Embedding and encoder layers are shared by different tasks. <br>
@@ -684,13 +748,14 @@ python3 run_mt_classifier.py --pretrained_model_path models/google_zh_model.bin 
                              --dataset_path_list datasets/douban_book_review/ datasets/chnsenticorp/ \
                              --epochs_num 1 --batch_size 64 --encoder bert
 ```
---dataset_path_list specifies folder path list of different tasks. Each folder should contains train set *train.tsv* and development set *dev.tsv* .
+*--dataset_path_list* specifies folder path list of different tasks. Each folder should contains train set *train.tsv* and development set *dev.tsv* .
 
 
 UER-py supports distillation for classification tasks. <br>
-First of all, we fine-tune upon a Chinese BERT-large model (provided in Chinese model zoo):
+First of all, we train a teacher model. We fine-tune upon a Chinese BERT-large model (provided in model zoo):
 ```
-python3 run_classifier.py --pretrained_model_path models/bert_large_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 run_classifier.py --pretrained_model_path models/mixed_corpus_bert_large_model.bin \
+                          --vocab_path models/google_zh_vocab.txt \
                           --config_path models/bert_large_config.json \
                           --output_model_path models/teacher_classifier_model.bin \
                           --train_path datasets/douban_book_review/train.tsv \
@@ -704,23 +769,78 @@ python3 inference/run_classifier_infer.py --load_model_path models/teacher_class
                                           --config_path models/bert_large_config.json --test_path text.tsv \
                                           --prediction_path label_logits.tsv --labels_num 2 --output_logits --encoder bert
 ```
-The input file *text.tsv* contains text to be predicted (see *datasets/douban_book_review/test_nolabel.tsv*). *text.tsv* could be trainset and related external data. Larger transfer set often leads to better performance. <br>
+The input file *text.tsv* contains text to be predicted (see *datasets/douban_book_review/test_nolabel.tsv*). *text.tsv* could be downstream dataset, e.g. using *datasets/douban_book_review/train.tsv* as input (*--test_path*), or related external data. Larger transfer set often leads to better performance. <br>
 The output file *label_logits.tsv* contains label column and logits column. Then we obtain *text_label_logits.tsv* by combining *text.tsv* and *label_logits.tsv* . *text_label_logits.tsv* contains text_a column (text_a column and text_b column for pair classification), label column (hard label), and logits column (soft label). <br>
-Student model is a 3-layers BERT-tiny model. The pre-trained model is provided in Chinese model zoo.
+Student model is a 3-layers BERT-tiny model. The pre-trained model is provided in model zoo.
 Then the student model learns the outputs (hard and soft labels) of the teacher model:
 ```
-python3 run_classifier.py --pretrained_model_path bert_tiny_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 run_classifier.py --pretrained_model_path mixed_corpus_bert_tiny_model.bin --vocab_path models/google_zh_vocab.txt \
                           --config_path models/bert_tiny_config.json \
                           --train_path text_label_logits.tsv \
                           --dev_path datasets/douban_book_review/dev.tsv \
                           --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 3 --batch_size 64 --soft_targets --soft_alpha 0.5 --encoder bert
 ```
-*--soft_targets* denotes that the model uses logits (soft label) for training. Mean-squared-error(MSE) is used as loss function. <br>
+*--soft_targets* denotes that the model uses logits (soft label) for training. Mean-squared-error (MSE) is used as loss function. <br>
 *--soft_alpha* specifies the weight of the soft label loss. The loss function is weighted average of cross-entropy loss (for hard label) and mean-squared-error loss (for soft label).
 
+#### Document-based question answering
+*run_dbqa.py* uses the same network architecture with *run_classifier.py* .
+```
+usage: run_dbqa.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
+                   [--output_model_path OUTPUT_MODEL_PATH]
+                   [--vocab_path VOCAB_PATH] [--spm_model_path SPM_MODEL_PATH]
+                   --train_path TRAIN_PATH --dev_path DEV_PATH
+                   [--test_path TEST_PATH] [--config_path CONFIG_PATH]
+                   [--batch_size BATCH_SIZE] [--seq_length SEQ_LENGTH]
+                   [--embedding {bert,word}]
+                   [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,synt,rcnn,crnn,gpt,bilstm}]
+                   [--bidirectional] [--pooling {mean,max,first,last}]
+                   [--factorized_embedding_parameterization]
+                   [--parameter_sharing] [--tokenizer {bert,char,space}]
+                   [--soft_targets] [--soft_alpha SOFT_ALPHA]
+                   [--learning_rate LEARNING_RATE] [--warmup WARMUP] [--fp16]
+                   [--fp16_opt_level {O0,O1,O2,O3}] [--dropout DROPOUT]
+                   [--epochs_num EPOCHS_NUM] [--report_steps REPORT_STEPS]
+                   [--seed SEED]
+```
+The document-based question answering (DBQA) can be converted to classification task. Column text_a contains question and column text_b contains sentence which may has answer.
+The example of using *run_dbqa.py*:
+```
+python3 run_dbqa.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
+                    --train_path datasets/nlpcc-dbqa/train.tsv \
+                    --dev_path datasets/nlpcc-dbqa/dev.tsv \
+                    --test datasets/nlpcc-dbqa/test.tsv \
+                    --epochs_num 3 --batch_size 64 --encoder bert
+```
+The example of using *inference/run_classifier_infer.py* to do inference for DBQA:
+```
+python3 inference/run_classifier_infer.py --load_model_path models/dbqa_model.bin --vocab_path models/google_zh_vocab.txt \
+                                          --test_path datasets/nlpcc-dbqa/test_nolabel.tsv \
+                                          --prediction_path datasets/nlpcc-dbqa/prediction.tsv --labels_num 2 \
+                                          --output_logits --output_prob --encoder bert
+```
+The example of using ALBERT for DBQA:
+```
+python3 run_dbqa.py --pretrained_model_path models/google_zh_albert_base_model.bin --vocab_path models/google_zh_vocab.txt \
+                    --config_path models/albert_base_config.json \
+                    --train_path datasets/nlpcc-dbqa/train.tsv \
+                    --dev_path datasets/nlpcc-dbqa/dev.tsv \
+                    --test datasets/nlpcc-dbqa/test.tsv \
+                    --epochs_num 3 --batch_size 64 \
+                    --factorized_embedding_parameterization --parameter_sharing --encoder bert
+```
+The example of doing inference for ALBERT:
+```
+python3 inference/run_classifier_infer.py --load_model_path models/dbqa_model.bin --vocab_path models/google_zh_vocab.txt \
+                                          --config_path models/albert_base_config.json \
+                                          --test_path datasets/nlpcc-dbqa/test_nolabel.tsv \
+                                          --prediction_path datasets/nlpcc-dbqa/prediction.tsv --labels_num 2 \
+                                          --factorized_embedding_parameterization --parameter_sharing --encoder bert
+```
+
 #### Sequence labeling
-run_ner.py adds two feedforward layers upon encoder layer.
+*run_ner.py* adds one feedforward layer upon encoder layer.
 ```
 usage: run_ner.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                   [--output_model_path OUTPUT_MODEL_PATH]
@@ -751,11 +871,11 @@ python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --voca
 ```
 The example of using ALBERT for NER:
 ```
-python3 run_ner.py --pretrained_model_path models/albert_base_zh_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 run_ner.py --pretrained_model_path models/google_zh_albert_base_model.bin --vocab_path models/google_zh_vocab.txt \
                    --config_path models/albert_base_config.json \
                    --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
                    --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 \
-                   --parameter_sharing --factorized_embedding_parameterization --encoder bert
+                   --learning_rate 1e-4 --factorized_embedding_parameterization --parameter_sharing --encoder bert
 ```
 The example of doing inference for ALBERT:
 ```
@@ -764,7 +884,7 @@ python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --voca
                                           --test_path datasets/msra_ner/test_nolabel.tsv \
                                           --prediction_path datasets/msra_ner/prediction.tsv \
                                           --label2id_path datasets/msra_ner/label2id.json \
-                                          --parameter_sharing --factorized_embedding_parameterization --encoder bert
+                                          --factorized_embedding_parameterization --parameter_sharing --encoder bert
 ```
 
 #### Machine reading comprehension
@@ -784,13 +904,13 @@ usage: run_cmrc.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
                    [--dropout DROPOUT] [--epochs_num EPOCHS_NUM]
                    [--report_steps REPORT_STEPS] [--seed SEED]
 ```
-The example of using *run_cmrc.py*:
+The example of using *run_cmrc.py* for Chinese Machine Reading Comprehension (CMRC):
 ```
-python3 run_cmrc.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt 
-                   --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json 
+python3 run_cmrc.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
+                   --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json \
                    --epochs_num 2 --batch_size 8 --seq_length 512 --encoder bert
 ```
-The train.json and dev.json are of squad-style. Trainset and devset are available [here](https://github.com/ymcui/cmrc2018). --test_path option is not specified since testset is not publicly available.
+The *train.json* and *dev.json* are of squad-style. Train set and development set are available [here](https://github.com/ymcui/cmrc2018). *--test_path* option is not specified since test set is not publicly available.
 
 The example of doing inference:
 ```
@@ -798,40 +918,84 @@ python3  inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --v
                                      --test_path datasets/cmrc2018/test.json \
                                      --prediction_path datasets/cmrc2018/prediction.json --encoder bert
 ```
-The example of using ALBERT for CMRC:
+The example of using ALBERT-xxlarge for CMRC:
 ```
-python3 run_cmrc.py --pretrained_model_path models/albert_base_zh_model.bin --vocab_path models/google_zh_vocab.txt \
-                    --config_path models/bert_large_config.json \
+python3 run_cmrc.py --pretrained_model_path models/google_zh_albert_xxlarge_model.bin \
+                    --vocab_path models/google_zh_vocab.txt \
+                    --config_path models/albert_xxlarge_config.json \
                     --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json \
-                    --epochs_num 2 --batch_size 8 --seq_length 512 \
-                    --parameter_sharing --factorized_embedding_parameterization --encoder bert
+                    --epochs_num 2 --batch_size 8 --seq_length 512 --learning_rate 1e-5 \
+                    --factorized_embedding_parameterization --parameter_sharing --encoder bert
 ```
 The example of doing inference for ALBERT:
 ```
-python3  inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vocab_path models/google_zh_vocab.txt \
-                                     --config_path models/albert_base_config.json \
+python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vocab_path models/google_zh_vocab.txt \
+                                     --config_path models/albert_xxlarge_config.json \
                                      --test_path datasets/cmrc2018/test.json \
                                      --prediction_path datasets/cmrc2018/prediction.json \
-                                     --parameter_sharing --factorized_embedding_parameterization --encoder bert
+                                     --factorized_embedding_parameterization --parameter_sharing --encoder bert
 ```
 
-#### ChineseGLUE
-The BERT-large model trained upon mixed large corpus achieves SOTA results on [ChineseGLUE](http://106.13.187.75:8003/leaderBorder). The detailed scripts are listed as follows:
+#### Multiple choice
+run_c3.py adds one feedforward layer upon encoder layer.
 ```
-CUDA_VISIBLE_DEVICES=0 /dockerdata/anaconda3/bin/python run_classifier.py --pretrained_model_path models/mixed_large_24_model.bin --vocab_path models/google_zh_vocab.txt --train_path datasets/tnews/train.tsv --dev_path datasets/tnews/dev.tsv --test_path datasets/tnews/test.tsv --epochs_num 3 --batch_size 32 --encoder bert --config_path models/bert_large_config.json --output_model_path tnews_classifier_16_64_1gpu_model.bin --seq_length 64
+usage: run_c3.py [-h] [--pretrained_model_path PRETRAINED_MODEL_PATH]
+                 [--output_model_path OUTPUT_MODEL_PATH]
+                 [--vocab_path VOCAB_PATH] [--spm_model_path SPM_MODEL_PATH]
+                 --train_path TRAIN_PATH --dev_path DEV_PATH
+                 [--test_path TEST_PATH] [--config_path CONFIG_PATH]
+                 [--batch_size BATCH_SIZE] [--seq_length SEQ_LENGTH]
+                 [--embedding {bert,word}]
+                 [--encoder {bert,lstm,gru,cnn,gatedcnn,attn,synt,rcnn,crnn,gpt,bilstm}]
+                 [--bidirectional] [--factorized_embedding_parameterization]
+                 [--parameter_sharing] [--max_choices_num MAX_CHOICES_NUM]
+                 [--tokenizer {bert,char,space}]
+                 [--learning_rate LEARNING_RATE] [--warmup WARMUP] [--fp16]
+                 [--fp16_opt_level {O0,O1,O2,O3}] [--dropout DROPOUT]
+                 [--epochs_num EPOCHS_NUM] [--report_steps REPORT_STEPS]
+                 [--seed SEED]
+```
+The example of using *run_cmrc.py* for multiple choice task:
+```
+python3 run_c3.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
+                  --train_path datasets/c3/train.json --dev_path datasets/c3/dev.json \
+                  --epochs_num 8 --batch_size 16 --seq_length 512 --max_choices_num 4 --encoder bert
+```
+*--test_path* option is not specified since test set of C3 dataset is not publicly available. <br>
+The actual batch size is *--batch_size* times *--max_choices_num* . <br>
+The question in C3 dataset contains at most 4 candidate answers. *--max_choices_num* is set to 4.
+
+The example of doing inference:
+```
+python3 inference/run_c3_infer.py --load_model_path models/multichoice_model.bin --vocab_path models/google_zh_vocab.txt \
+                                  --test_path datasets/c3/test.json \
+                                  --prediction_path datasets/c3/prediction.json --max_choices_num 4 --encoder bert
+```
+The example of using ALBERT-xlarge for C3:
+```
+python3 run_c3.py --pretrained_model_path models/google_zh_albert_xlarge_model.bin --vocab_path models/google_zh_vocab.txt \
+                  --config_path models/albert_xlarge_config.json \
+                  --train_path datasets/c3/train.json --dev_path datasets/c3/dev.json \
+                  --epochs_num 8 --batch_size 8 --seq_length 512 --max_choices_num 4 \
+                  --factorized_embedding_parameterization --parameter_sharing --encoder bert
 ```
 
+The example of doing inference for ALBERT-large:
 ```
-CUDA_VISIBLE_DEVICES=0,1 /dockerdata/anaconda3/bin/python run_classifier.py --pretrained_model_path models/mixed_large_24_model.bin --vocab_path models/google_zh_vocab.txt --train_path datasets/inews/train.tsv --dev_path datasets/inews/dev.tsv --test_path datasets/inews/test.tsv --epochs_num 3 --batch_size 16 --seq_length 512 --encoder bert --config_path models/bert_large_config.json --output_model_path inews_classifier_16_512_1gpu_model.bin
+python3  inference/run_c3_infer.py --load_model_path models/multichoice_model.bin --vocab_path models/google_zh_vocab.txt \
+                                   --config_path models/albert_xlarge_config.json \
+                                   --test_path datasets/c3/test.json \
+                                   --prediction_path datasets/c3/prediction.json --max_choices_num 4 \
+                                   --factorized_embedding_parameterization --parameter_sharing --encoder bert
 ```
 
-```
-CUDA_VISIBLE_DEVICES=0 /dockerdata/anaconda3/bin/python run_classifier.py --pretrained_model_path models/mixed_large_24_model.bin --vocab_path models/google_zh_vocab.txt --train_path datasets/lcqmc/train.tsv --dev_path datasets/lcqmc/dev.tsv --test_path datasets/lcqmc/test.tsv --epochs_num 3 --batch_size 32 --encoder bert --config_path models/bert_large_config.json --output_model_path lcqmc_classifier_32_1gpu_model.bin
-```
+### Tokenization and Vocabulary
+UER-py supports multiple tokenization strategies. The most commonly used, and default strategy is BertTokenizer. There are two ways to use BertTokenizer: the first is to specify the vocabulary path through *--vocab_path* and then use BERT's original tokenization strategy to segment sentences according to the vocabulary; the second is to specify the sentencepiece model path by *--spm_model_path* . We import sentencepiece, load the sentencepiece model, and segment the sentence. If user specifies *--spm_model_path*, sentencepiece is used for tokenization. Otherwise, user must specify *--vocab_path* and BERT's original tokenization strategy is used for tokenization. <br>
+In addition, the project also provides CharTokenizer and SpaceTokenizer. CharTokenizer tokenizes the text by character. If the text is all Chinese character, CharTokenizer and BertTokenizer are equivalent. CharTokenizer is simple and is faster than BertTokenizer. SpaceTokenizer separates the text by space. One can preprocess the text in advance (such as word segmentation), separate the text by space, and then use SpaceTokenizer. If user specifies *--spm_model_path*, sentencepiece is used for tokenization. Otherwise, user must specify *--vocab_path* and BERT's original tokenization strategy is used for tokenization. For CharTokenizer and SpaceTokenizer, if user specifies *--spm_model_path*, then the vocabulary in sentencepiece model is used. Otherwise, user must specify the vocabulary through *--vocab_path*.
 
-```
-CUDA_VISIBLE_DEVICES=0 /dockerdata/anaconda3/bin/python run_classifier.py --pretrained_model_path models/mixed_large_24_model.bin --vocab_path models/google_zh_vocab.txt --train_path datasets/xnli/train.tsv --dev_path datasets/xnli/dev.tsv --test_path datasets/xnli/test.tsv --epochs_num 3 --batch_size 32 --encoder bert --config_path models/bert_large_config.json --output_model_path xnli_classifier_32_1gpu_model.bin
-```
+
+The pre-processing, pre-training, and fine-tuning stages all need vocabulary, which is provided through *--vocab_path* or *--smp_model_path*. If you use your own vocabulary, you need to ensure the following: 1) The ID of the padding character is 0; 2) The starting character, separator character, and mask character are "[CLS]", "[SEP]", "[MASK]"; 3) If *--vocab_path* is specified, the unknown character is "[UNK]". If *--spm_model_path* is spcified, the unknown character is "\<unk\>" .
+
 
 <br/>
 
