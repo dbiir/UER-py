@@ -421,8 +421,8 @@ def main():
     
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
-    args.model = model
 
+    # Build tokenizer.
     args.tokenizer = CharTokenizer(args)
 
     # Training phase.
@@ -449,9 +449,11 @@ def main():
         except ImportError:
             raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
         model, optimizer = amp.initialize(model, optimizer,opt_level = args.fp16_opt_level)
+
     if torch.cuda.device_count() > 1:
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
+    args.model = model
 
     total_loss = 0.
     result = 0.0

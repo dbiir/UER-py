@@ -135,7 +135,7 @@ def read_dataset(args, path):
                 for i, column_name in enumerate(line.strip().split("\t")):
                     columns[column_name] = i
                 continue
-            line = line.strip().split('\t')
+            line = line[:-1].split('\t')
             tgt = int(line[columns["label"]])
             if args.soft_targets and "logits" in columns.keys():
                 soft_tgt = [float(value) for value in line[columns["logits"]].split(" ")]
