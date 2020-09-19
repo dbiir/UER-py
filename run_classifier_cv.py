@@ -1,5 +1,5 @@
 """
-This script provides an exmaple to wrap UER-py for classification (corss validation).
+This script provides an exmaple to wrap UER-py for classification (cross validation).
 """
 import torch
 import random
@@ -194,8 +194,8 @@ def main():
             f1.append(2*p*r/(p+r))
 
         marco_f1 += sum(f1)/len(f1)/args.folds_num
-        print("Acc. : {:.4f}".format(result[0]))
-        print("Marco F1 : {:.4f}".format(sum(f1)/len(f1)))
+        # print("Acc. : {:.4f}".format(result[0]))
+        # print("Marco F1 : {:.4f}".format(sum(f1)/len(f1)))
         
     train_features = np.array(train_features)
     np.save(args.train_features_path, train_features)

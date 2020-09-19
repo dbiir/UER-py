@@ -215,6 +215,57 @@ CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_pa
 ```
 Users can download *wikizh_gatedcnn_model.bin* from [here](https://share.weiyun.com/W2gmPPeA).
 
+UER-py supports cross validation for classification. The example of using cross validation on [SMP2020-EWECT](http://39.97.118.137/), a competition's dataset:
+```
+CUDA_VISIBLE_DEVICES=0 python3 run_classifier_cv.py --pretrained_model_path models/google_zh_model.bin \
+                                                    --vocab_path models/google_zh_vocab.txt \
+                                                    --config_path models/bert_base_config.json \
+                                                    --output_model_path models/classifier_model.bin \
+                                                    --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
+                                                    --train_path datasets/smp2020-ewect/virus/train.tsv \
+                                                    --epochs_num 3 --batch_size 64 --folds_num 5 --encoder bert
+```
+The results of *google_zh_model.bin* are *79.0/63.6* (Accuracy/Marco F1). <br>
+*--folds_num* specifies the number of rounds of cross-validation. <br>
+*--output_path* specifies the path of the fine-tuned model. *--folds_num* models are saved and the *fold id* suffix is added to the model's name. <br>
+*--train_features_path* specifies the path of out-of-fold (OOF) predictions. *run_classifier_cv.py* generates probabilities over classes on each fold of the dataset by training a model on the other folds in the dataset. *train_features.npy* can be used for stacking. The details of stacking and competition are introduced in *Instruction* section. <br>
+
+We can further try different pre-trained models. For example, we download [RoBERTa-wwm-ext-large](https://github.com/ymcui/Chinese-BERT-wwm) and convert it into UER's format:
+```
+python3 scripts/convert_bert_from_huggingface_to_uer.py --input_model_path models/chinese_roberta_wwm_large_ext_pytorch/pytorch_model.bin \
+                                                        --output_model_path models/chinese_roberta_wwm_large_ext_pytorch/pytorch_model_uer.bin \
+                                                        --layers_num 24
+
+CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path models/chinese_roberta_wwm_large_ext_pytorch/pytorch_model_uer.bin \
+                                                      --vocab_path models/google_zh_vocab.txt \
+                                                      --config_path models/bert_large_config.json \
+                                                      --train_path datasets/smp2020-ewect/virus/train.tsv \
+                                                      --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
+                                                      --epochs_num 3 --batch_size 64 --folds_num 5 --encoder bert
+```
+The result of *RoBERTa-wwm-ext-large* provided by HIT are *80.3/66.8* (Accuracy/Marco F1). <br>
+The example of using our pre-trained model *Reviews+BertEncoder(large)+MlmTarget* (see model zoo for more details):
+```
+CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path models/reviews_bert_large_model.bin \
+                                                      --vocab_path models/google_zh_vocab.txt \
+                                                      --config_path models/bert_large_config.json \
+                                                      --train_path datasets/smp2020-ewect/virus/train.tsv \
+                                                      --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
+                                                      --folds_num 5 --epochs_num 3 --batch_size 64 --seed 17 --encoder bert
+```
+The results are *81.3/68.4* (Accuracy/Marco F1), which are much higher than pre-trained models provided by other projects. Sometimes large model does not converge. We need to try different random seed by specifying *--seed*. <br>
+The example of using ELMo for cross validation:
+```
+CUDA_VISIBLE_DEVICES=0 python3 run_classifier_cv.py --pretrained_model_path models/mixed_corpus_elmo_model.bin \
+                                                    --vocab_path models/google_zh_vocab.txt \
+                                                    --config_path models/birnn_config.json \
+                                                    --train_path datasets/smp2020-ewect/virus/train.tsv \
+                                                    --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
+                                                    --epochs_num 3  --batch_size 64 --learning_rate 5e-4 --folds_num 5 \
+                                                    --embedding word --encoder bilstm --pooling mean
+```
+The results are *76.4/59.9* (Accuracy/Marco F1).
+
 Besides classification, UER-py also provides scripts for other downstream tasks. We could use *run_ner.py* for named entity recognition:
 ```
 python3 run_ner.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
@@ -990,7 +1041,7 @@ python3  inference/run_c3_infer.py --load_model_path models/multichoice_model.bi
 ```
 
 ### Tokenization and Vocabulary
-UER-py supports multiple tokenization strategies. The most commonly used, and default strategy is BertTokenizer. There are two ways to use BertTokenizer: the first is to specify the vocabulary path through *--vocab_path* and then use BERT's original tokenization strategy to segment sentences according to the vocabulary; the second is to specify the sentencepiece model path by *--spm_model_path* . We import sentencepiece, load the sentencepiece model, and segment the sentence. If user specifies *--spm_model_path*, sentencepiece is used for tokenization. Otherwise, user must specify *--vocab_path* and BERT's original tokenization strategy is used for tokenization. <br>
+UER-py supports multiple tokenization strategies. The most commonly used strategy is BertTokenizer (which is also the default strategy). There are two ways to use BertTokenizer: the first is to specify the vocabulary path through *--vocab_path* and then use BERT's original tokenization strategy to segment sentences according to the vocabulary; the second is to specify the sentencepiece model path by *--spm_model_path* . We import sentencepiece, load the sentencepiece model, and segment the sentence. If user specifies *--spm_model_path*, sentencepiece is used for tokenization. Otherwise, user must specify *--vocab_path* and BERT's original tokenization strategy is used for tokenization. <br>
 In addition, the project also provides CharTokenizer and SpaceTokenizer. CharTokenizer tokenizes the text by character. If the text is all Chinese character, CharTokenizer and BertTokenizer are equivalent. CharTokenizer is simple and is faster than BertTokenizer. SpaceTokenizer separates the text by space. One can preprocess the text in advance (such as word segmentation), separate the text by space, and then use SpaceTokenizer. If user specifies *--spm_model_path*, sentencepiece is used for tokenization. Otherwise, user must specify *--vocab_path* and BERT's original tokenization strategy is used for tokenization. For CharTokenizer and SpaceTokenizer, if user specifies *--spm_model_path*, then the vocabulary in sentencepiece model is used. Otherwise, user must specify the vocabulary through *--vocab_path*.
 
 

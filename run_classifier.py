@@ -226,7 +226,7 @@ def evaluate(args, dataset, print_confusion_matrix=False):
             print("Label {}: {:.3f}, {:.3f}, {:.3f}".format(i,p,r,f1))
 
     print("Acc. (Correct/Total): {:.4f} ({}/{}) ".format(correct/len(dataset), correct, len(dataset)))
-    return correct/len(dataset)
+    return correct/len(dataset), confusion
 
 
 def main():
@@ -370,8 +370,8 @@ def main():
                 total_loss = 0.
 
         result = evaluate(args, read_dataset(args, args.dev_path))
-        if result > best_result:
-            best_result = result
+        if result[0] > best_result:
+            best_result = result[0]
             save_model(model, args.output_model_path)
 
     # Evaluation phase.
