@@ -18,9 +18,11 @@ def main():
 
     args = parser.parse_args()
 
-    input_model = torch.load(args.input_model_path)
+    input_model = torch.load(args.input_model_path, map_location='cpu')
 
     session = tf.Session()
+    tf.keras.backend.set_session(session)
+    
     output_model = collections.OrderedDict()
 
     output_model["bert/embeddings/word_embeddings"] = input_model["embedding.word_embedding.weight"]
@@ -74,11 +76,8 @@ def main():
     output_model["cls/predictions/output_bias"] = input_model["target.mlm_linear_2.bias"]
 
     def assign_tf_var(tensor: np.ndarray, name: str):
-        tmp_var = tf.Variable(initial_value=tensor)
-        tf_var = tf.get_variable(dtype=tmp_var.dtype, shape=tmp_var.shape, name=name)
-        op = tf.assign(ref=tf_var, value=tmp_var)
-        session.run(tf.variables_initializer([tmp_var, tf_var]))
-        session.run(fetches=[op, tf_var])
+        tf_var = tf.get_variable(dtype=tensor.dtype, shape=tensor.shape, name=name)
+        tf.keras.backend.set_value(tf_var, tensor)
         return tf_var
     tf_vars = []
     tensors_to_transopse = (
