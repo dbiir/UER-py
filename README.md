@@ -51,7 +51,7 @@ UER-py has the following features:
 ## Requirements
 * Python 3.6
 * torch >= 1.0
-* six
+* six >= 1.12.0
 * For the mixed precision training you will need apex from NVIDIA
 * For the pre-trained model conversion (related with TensorFlow) you will need TensorFlow
 * For the tokenization with sentencepiece model you will need SentencePiece
@@ -97,6 +97,8 @@ First of all, we preprocess the book review corpus. We need to specify the model
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
                       --processes_num 8 --target bert
 ```
+Notice that ``six>=1.12.0`` is required.
+
 Pre-processing is time-consuming. Using multiple processes can largely accelerate the pre-processing speed (*--processes_num*). After pre-processing, the raw text is converted to *dataset.pt*, which is the input of *pretrain.py*. Then we download [Google's pre-trained Chinese model](https://share.weiyun.com/A1C49VPb), and put it in *models* folder. We load Google's pre-trained Chinese model and train it on book review corpus. We should explicitly specify model's encoder (*--encoder*) and target (*--target*). Suppose we have a machine with 8 GPUs.:
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
