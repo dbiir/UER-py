@@ -52,6 +52,7 @@ UER-py has the following features:
 * Python 3.6
 * torch >= 1.0
 * six >= 1.12.0
+* packaging
 * For the mixed precision training you will need apex from NVIDIA
 * For the pre-trained model conversion (related with TensorFlow) you will need TensorFlow
 * For the tokenization with sentencepiece model you will need SentencePiece
