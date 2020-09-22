@@ -1,42 +1,25 @@
-# -*- encoding:utf-8 -*-
 import torch
 import torch.nn as nn
-from uer.utils.constants import *
-from uer.utils.subword import *
 
 
 class Model(nn.Module):
     """
-    BertModel consists of three parts:
-        - embedding: token embedding, position embedding, segment embedding
-        - encoder: multi-layer transformer encoders
-        - target: mlm and nsp tasks
+    Pretraining models consist of three parts:
+        - embedding
+        - encoder
+        - target
     """
-    def __init__(self, args, embedding, encoder, target, subencoder = None):
+    def __init__(self, args, embedding, encoder, target):
         super(Model, self).__init__()
         self.embedding = embedding
         self.encoder = encoder
         self.target = target
-        
-        # Subencoder.
-        if subencoder is not None:
-            self.vocab, self.sub_vocab = args.vocab, args.sub_vocab
-            self.subword_type = args.subword_type
-            self.subencoder = subencoder
-        else:
-            self.subencoder = None
+
+        if args.tie_weights:
+            self.target.mlm_linear_2.weight = self.embedding.word_embedding.weight
 
     def forward(self, src, tgt, seg):
-        # [batch_size, seq_length, emb_size]
-
-        emb = self.embedding(src, seg) 
-
-        if self.subencoder is not None:
-            sub_ids = word2sub(src, self.vocab, self.sub_vocab, self.subword_type)
-            emb = emb + self.subencoder(sub_ids).contiguous().view(*emb.size())
-
-        output = self.encoder(emb, seg)            
-
+        emb = self.embedding(src, seg)
+        output = self.encoder(emb, seg)
         loss_info = self.target(output, tgt)
-            
         return loss_info

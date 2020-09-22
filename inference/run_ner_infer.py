@@ -1,0 +1,159 @@
+"""
+  This script provides an example to wrap UER-py for NER inference.
+"""
+import sys
+import os
+import random
+import argparse
+import json
+import torch
+import torch.nn as nn
+
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
+
+from uer.utils.config import load_hyperparam
+from uer.utils.constants import *
+from uer.utils.tokenizer import *
+from uer.utils.vocab import Vocab
+from uer.model_loader import load_model
+from run_ner import NerTagger
+
+
+def read_dataset(args, path):
+    dataset, columns = [], {}
+    with open(path, mode="r", encoding="utf-8") as f:
+        for line_id, line in enumerate(f):
+            if line_id == 0:
+                for i, column_name in enumerate(line.strip().split("\t")):
+                    columns[column_name] = i
+                continue
+            line = line.strip().split('\t')
+            text_a = line[columns["text_a"]]
+            src = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(text_a))
+            seg = [1] * len(src)
+
+            if len(src) > args.seq_length:
+                src = src[:args.seq_length]
+                seg = seg[:args.seq_length]
+            while len(src) < args.seq_length:
+                src.append(0)
+                seg.append(0)
+            dataset.append([src, seg])
+
+    return dataset
+
+
+def batch_loader(batch_size, src, seg):
+    instances_num = src.size()[0]
+    for i in range(instances_num // batch_size):
+        src_batch = src[i*batch_size: (i+1)*batch_size, :]
+        seg_batch = seg[i*batch_size: (i+1)*batch_size, :]
+        yield src_batch, seg_batch
+    if instances_num > instances_num // batch_size * batch_size:
+        src_batch = src[instances_num//batch_size*batch_size:, :]
+        seg_batch = seg[instances_num//batch_size*batch_size:, :]
+        yield src_batch, seg_batch
+
+
+def main():
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+    # Path options.
+    parser.add_argument("--load_model_path", default=None, type=str,
+                        help="Path of the NER model.")
+    parser.add_argument("--vocab_path", default=None, type=str,
+                        help="Path of the vocabulary file.")
+    parser.add_argument("--spm_model_path", default=None, type=str,
+                        help="Path of the sentence piece model.")
+    parser.add_argument("--test_path", type=str,
+                        help="Path of the testset.")
+    parser.add_argument("--prediction_path", default=None, type=str,
+                        help="Path of the prediction file.")
+    parser.add_argument("--config_path", default="./models/bert_base_config.json", type=str,
+                        help="Path of the config file.")
+    parser.add_argument("--label2id_path", type=str, required=True,
+                        help="Path of the label2id file.")
+    
+    # Model options.
+    parser.add_argument("--batch_size", type=int, default=128,
+                        help="Batch_size.")
+    parser.add_argument("--seq_length", default=128, type=int,
+                        help="Sequence length.")
+    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
+                        help="Emebdding type.")
+    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
+                                              "cnn", "gatedcnn", "attn", "synt", \
+                                              "rcnn", "crnn", "gpt", "bilstm"], \
+                                              default="bert", help="Encoder type.")
+    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
+    parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
+    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
+    
+    args = parser.parse_args()
+
+    # Load the hyperparameters of the config file.
+    args = load_hyperparam(args)
+
+    with open(args.label2id_path, mode="r", encoding="utf-8") as f:
+        l2i = json.load(f)
+        print("Labels: ", l2i)
+        l2i["[PAD]"] = len(l2i)
+
+    i2l = {}
+    for key, value in l2i.items():
+        i2l[value] = key
+
+    args.l2i = l2i
+
+    args.labels_num = len(l2i)
+
+    # Load tokenizer.
+    args.tokenizer = SpaceTokenizer(args)
+
+    # Build sequence labeling model.
+    model = NerTagger(args)
+    model = load_model(model, args.load_model_path)
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+    if torch.cuda.device_count() > 1:
+        print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
+        model = torch.nn.DataParallel(model)
+    
+    instances = read_dataset(args, args.test_path)
+
+    src = torch.LongTensor([ins[0] for ins in instances])
+    seg = torch.LongTensor([ins[1] for ins in instances])
+
+    instances_num = src.size(0)
+    batch_size = args.batch_size
+
+    print("The number of prediction instances: ", instances_num)
+
+    model.eval()
+
+    with open(args.prediction_path, mode="w", encoding="utf-8") as f:
+        f.write("pred_label" + "\n")
+        for i, (src_batch, seg_batch) in enumerate(batch_loader(batch_size, src, seg)):
+            src_batch = src_batch.to(device)
+            seg_batch = seg_batch.to(device)
+            with torch.no_grad():
+                _, logits = model(src_batch, None, seg_batch)
+            pred = logits.argmax(dim=-1)
+            # Storing sequence length of instances in a batch.
+            seq_length_batch = []
+            for seg in seg_batch.cpu().numpy().tolist():
+                for j in range(len(seg)-1, -1, -1):
+                    if seg[j] != 0:
+                        break
+                seq_length_batch.append(j+1)
+            pred = pred.cpu().numpy().tolist()
+            for j in range(0, len(pred), args.seq_length):
+                for label_id in pred[j: j+seq_length_batch[j//args.seq_length]]:
+                    f.write(i2l[label_id] + " ")
+                f.write("\n")
+            
+
+if __name__ == "__main__":
+    main()
