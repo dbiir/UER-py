@@ -52,6 +52,7 @@ UER-py has the following features:
 * Python 3.6
 * torch >= 1.0
 * six >= 1.12.0
+* argparse
 * packaging
 * For the mixed precision training you will need apex from NVIDIA
 * For the pre-trained model conversion (related with TensorFlow) you will need TensorFlow
@@ -581,6 +582,32 @@ The example of doing incremental pre-training upon BERT-tiny model:
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
                     --pretrained_model_path models/mixed_corpus_bert_tiny_model.bin --config_path models/bert_tiny_config.json \
                     --output_model_path models/output_model.bin --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 --encoder bert --target bert
+```
+
+#### Word-based pre-training model
+UER-py provides word-based pre-training model. We can download *wiki_bert_word_model.bin* and its vocabulary *wiki_word_vocab.txt* from model zoo. <br>
+The following steps show an example of doing incremental pre-training upon *wiki_bert_word_model.bin* : <br>
+Suppose that the training corpus is news data from People's Daily. First we do segmentation and obtain *rmrb_seg_bert.txt* . *rmrb_seg_bert.txt* is of bert format and words are separated by space. Then we build vocabulary upon the corpus:
+```
+python3 scripts/build_vocab.py --corpus_path corpora/rmrb_seg_bert.txt --vocab_path models/rmrb_word_vocab.txt --tokenizer space --min_count 50
+```
+Then we adapt the pre-trained model *wiki_bert_word_model.bin* . Embedding layer and output layer before softmax are adapted according to the difference between the old vocabulary and the new vocabulary. New embeddings are randomly initialized:
+```
+python3 scripts/dynamic_vocab_adapter.py --old_model_path models/wiki_bert_word_model.bin --old_vocab_path models/wiki_word_vocab.txt \
+                                         --new_vocab_path models/rmrb_word_vocab.txt --new_model_path models/rmrb_bert_word_model.bin
+```
+Finally, we do incremental pre-training upon the adapted model *rmrb_bert_word_model.bin* :
+```
+python3 preprocess.py --corpus_path corpora/rmrb_seg_bert.txt --vocab_path models/rmrb_word_vocab.txt \
+                      --dataset_path rmrb_word_dataset.pt --processes_num 8 \
+                      --target bert --tokenizer space --dynamic_masking --seq_length 256
+
+python3 pretrain.py --dataset_path rmrb_word_dataset.pt --vocab_path models/rmrb_word_vocab.txt \
+                    --pretrained_model_path models/rmrb_bert_word_model.bin \
+                    --output_model_path models/rmrb_bert_word_incremental_model.bin \
+                    --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
+                    --total_steps 250000 --save_checkpoint_steps 50000 --report_steps 1000 \
+                    --encoder bert --target bert
 ```
 
 ### Pre-training models with different encoders and targets

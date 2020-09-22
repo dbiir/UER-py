@@ -50,8 +50,11 @@ class CharTokenizer(Tokenizer):
   def __init__(self, args):
     super().__init__(args)
 
-  def tokenize(self, text):
-    return [token if token in self.vocab else "[UNK]" for token in list(text.strip())]
+  def tokenize(self, text, use_vocab=True):
+    if use_vocab:
+      return [token if token in self.vocab else "[UNK]" for token in list(text.strip())]
+    else:
+      return [token for token in list(text.strip())]
 
 
 class SpaceTokenizer(Tokenizer):
@@ -59,8 +62,11 @@ class SpaceTokenizer(Tokenizer):
   def __init__(self, args):
     super().__init__(args)
 
-  def tokenize(self, text):
-    return [token if token in self.vocab else "[UNK]" for token in text.strip().split(" ")]
+  def tokenize(self, text, use_vocab=True):
+    if use_vocab:
+      return [token if token in self.vocab else "[UNK]" for token in text.strip().split(" ")]
+    else:
+      return [token for token in text.strip().split(" ")]
 
 
 SPIECE_UNDERLINE = u"▁".encode("utf-8")
