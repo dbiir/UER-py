@@ -2,6 +2,11 @@ import argparse
 import torch
 from uer.utils.data import *
 from uer.utils.tokenizer import *
+import six
+from packaging import version
+
+
+assert version.parse(six.__version__) >= version.parse("1.12.0")
 
 
 def main():
