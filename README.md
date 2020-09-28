@@ -89,7 +89,7 @@ python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path mo
 ```
 Notice that ``six>=1.12.0`` is required.
 
-Pre-processing is time-consuming. Using multiple processes can largely accelerate the pre-processing speed (*--processes_num*). After pre-processing, the raw text is converted to *dataset.pt*, which is the input of *pretrain.py*. Then we download [Google's pre-trained Chinese model](https://share.weiyun.com/A1C49VPb), and put it in *models* folder. We load Google's pre-trained Chinese model and train it on book review corpus. We should explicitly specify model's encoder (*--encoder*) and target (*--target*). Suppose we have a machine with 8 GPUs.:
+Pre-processing is time-consuming. Using multiple processes can largely accelerate the pre-processing speed (*--processes_num*). After pre-processing, the raw text is converted to *dataset.pt*, which is the input of *pretrain.py*. Then we download Google's pre-trained Chinese model [*google_zh_model.bin*](https://share.weiyun.com/A1C49VPb), and put it in *models* folder. We load Google's pre-trained Chinese model and train it on book review corpus. We should explicitly specify model's encoder (*--encoder*) and target (*--target*). Suppose we have a machine with 8 GPUs.:
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
                     --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
@@ -128,12 +128,12 @@ We recommend to use *CUDA_VISIBLE_DEVICES* to specify which GPUs are visible (al
 CUDA_VISIBLE_DEVICES=0 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_zh_vocab.txt \
                                                  --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                                                  --epochs_num 3 --batch_size 32 --encoder bert
-```
-```
+
 CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
                                                                  --test_path datasets/douban_book_review/test_nolabel.tsv \
                                                                  --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 --encoder bert
 ```
+<br>
 
 BERT consists of next sentence prediction (NSP) target. However, NSP target is not suitable for sentence-level reviews since we have to split a sentence into multiple parts. UER-py facilitates the use of different targets. Using masked language modeling (MLM) as target could be a properer choice for pre-training of reviews:
 ```
@@ -148,22 +148,25 @@ mv models/book_review_mlm_model.bin-5000 models/book_review_mlm_model.bin
 
 CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier.py --pretrained_model_path models/book_review_mlm_model.bin --vocab_path models/google_zh_vocab.txt \
                                                    --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
-                                                   --epochs_num 3 --batch_size 32 --encoder bert
+                                                   --epochs_num 3 --batch_size 64 --encoder bert
 ```
-It turns out that the result of [*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV) is around 88.3.
+The actual batch size of pre-training is *--batch_size* times *--world_size* . <br>
+It turns out that the result of [*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV) is around 88.5.
+<br>
 
-BERT is slow. It could be great if we can speed up the model and still achieve competitive performance. To achieve this goal, we select a 2-layers LSTM encoder to substitute 12-layers Transformer encoder. We firstly download [pre-trained model](https://share.weiyun.com/5B671Ik) for 2-layers LSTM encoder. Then we fine-tune it on downstream classification dataset:
+BERT is slow. It could be great if we can speed up the model and still achieve competitive performance. To achieve this goal, we select a 2-layers LSTM encoder to substitute 12-layers Transformer encoder. We firstly download [*reviews_lstm_lm_model.bin*](https://share.weiyun.com/57dZhqo) for 2-layers LSTM encoder. Then we fine-tune it on downstream classification dataset:
 ```
-python3 run_classifier.py --pretrained_model_path models/reviews_lstm_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/rnn_config.json \
+python3 run_classifier.py --pretrained_model_path models/reviews_lstm_lm_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/rnn_config.json \
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
-                          --epochs_num 3  --batch_size 64 --learning_rate 1e-3 --embedding word --encoder lstm --pooling mean
+                          --epochs_num 5  --batch_size 64 --learning_rate 1e-3 --embedding word --encoder lstm --pooling mean
 
 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
                                           --config_path models/rnn_config.json --test_path datasets/douban_book_review/test_nolabel.tsv \
                                           --prediction_path datasets/douban_book_review/prediction.tsv \
                                           --labels_num 2 --embedding word --encoder lstm --pooling mean
 ```
-We can achieve over 86 accuracy on testset, which is a competitive result. Using the same LSTM encoder without pre-training can only achieve around 81 accuracy.
+We can achieve over 85.4 accuracy on testset, which is a competitive result. Using the same LSTM encoder without pre-training can only achieve around 81 accuracy.
+<br>
 
 UER-py also provides many other encoders and corresponding pre-trained models. <br>
 The example of pre-training and fine-tuning ELMo on Chnsenticorp dataset:
@@ -202,6 +205,7 @@ CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_pa
                                           --labels_num 2 --embedding word --encoder gatedcnn --pooling max
 ```
 Users can download *wikizh_gatedcnn_model.bin* from [here](https://share.weiyun.com/W2gmPPeA).
+<br>
 
 UER-py supports cross validation for classification. The example of using cross validation on [SMP2020-EWECT](http://39.97.118.137/), a competition's dataset:
 ```
@@ -241,7 +245,8 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path mo
                                                       --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
                                                       --folds_num 5 --epochs_num 3 --batch_size 64 --seed 17 --encoder bert
 ```
-The results are *81.3/68.4* (Accuracy/Marco F1), which are much higher than pre-trained models provided by other projects. Sometimes large model does not converge. We need to try different random seed by specifying *--seed*. <br>
+The results are *81.3/68.4* (Accuracy/Marco F1), which are much higher than pre-trained models provided by other projects. Sometimes large model does not converge. We need to try different random seed by specifying *--seed*. 
+<br>
 
 Besides classification, UER-py also provides scripts for other downstream tasks. We could use *run_ner.py* for named entity recognition:
 ```
@@ -257,6 +262,7 @@ python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --voca
                                    --prediction_path datasets/msra_ner/prediction.tsv \
                                    --label2id_path datasets/msra_ner/label2id.json --encoder bert
 ```
+<br>
 
 We could use *run_cmrc.py* for machine reading comprehension:
 ```
@@ -275,7 +281,7 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 <br/>
 
 ## Datasets
-We collected a range of [datasets](https://github.com/dbiir/UER-py/wiki/Datasets) and converted them into format that UER can load directly.
+We collected a range of [downstream datasets](https://github.com/dbiir/UER-py/wiki/Datasets) and converted them into format that UER can load directly.
 
 <br/>
 
@@ -352,6 +358,6 @@ We conducted a variety of experiments to test UER's performace. See [experiments
 ## Contact information
 For communication related to this project, please contact Zhe Zhao (helloworld@ruc.edu.cn; nlpzhezhao@tencent.com) or Yudong Li (liyudong123@hotmail.com) or Xin Zhao (zhaoxinruc@ruc.edu.cn).
 
-This work is instructed by my enterprise mentors __Qi Ju__, __Haotang Deng__ and school mentors __Tao Liu__, __Xiaoyong Du__.
+This work is instructed by my enterprise mentors __Qi Ju__, __Xuefeng Yang__, __Haotang Deng__ and school mentors __Tao Liu__, __Xiaoyong Du__.
 
 I also got a lot of help from my Tencent colleagues Hui Chen, Jinbin Zhang, Zhiruo Wang, Weijie Liu, Peng Zhou, Haixiao Liu, and Weijian Wu. 
