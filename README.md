@@ -3,22 +3,10 @@
 [![codebeat badge](https://codebeat.co/badges/f75fab90-6d00-44b4-bb42-d19067400243)](https://codebeat.co/projects/github-com-dbiir-uer-py-master)
 ![](https://img.shields.io/badge/license-MIT-000000.svg)
 
-<img src="logo.jpg" width="390" hegiht="390" align=left />
+<img src="logo.jpg" width="350" hegiht="390" align=left />
 
 Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py (Universal Encoder Representations) is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of different pre-training models (e.g. BERT, GPT, ELMO), and provides interfaces for users to further extend upon. With UER-py, we build a model zoo which contains pre-trained models based on different corpora, encoders, and targets. 
 
-<br/>
-
-#### We have a paper one can cite for UER-py:
-```
-@article{zhao2019uer,
-  title={UER: An Open-Source Toolkit for Pre-training Models},
-  author={Zhao, Zhe and Chen, Hui and Zhang, Jinbin and Zhao, Xin and Liu, Tao and Lu, Wei and Chen, Xi and Deng, Haotang and Ju, Qi and Du, Xiaoyong},
-  journal={EMNLP-IJCNLP 2019},
-  pages={241},
-  year={2019}
-}
-```
 
 <br/>
 
@@ -195,17 +183,13 @@ python3 run_classifier.py --pretrained_model_path models/chnsenticorp_elmo_model
                           --train_path datasets/chnsenticorp/train.tsv --dev_path datasets/chnsenticorp/dev.tsv --test_path datasets/chnsenticorp/test.tsv \
                           --epochs_num 5  --batch_size 64 --seq_length 192 --learning_rate 5e-4 \
                           --embedding word --encoder bilstm --pooling mean
-
-python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
-                                          --config_path models/birnn_config.json --test_path datasets/chnsenticorp/test_nolabel.tsv \
-                                          --prediction_path datasets/chnsenticorp/prediction.tsv \
-                                          --labels_num 2 --embedding word --encoder bilstm --pooling mean
 ```
 Users can download *mixed_corpus_elmo_model.bin* from [here](https://share.weiyun.com/5Qihztq).
 
 The example of fine-tuning GatedCNN on Chnsenticorp dataset:
 ```
-CUDA_VISIBLE_DEVICES=0 python3 run_classifier.py --pretrained_model_path models/wikizh_gatedcnn_model.bin --vocab_path models/google_zh_vocab.txt \
+CUDA_VISIBLE_DEVICES=0 python3 run_classifier.py --pretrained_model_path models/wikizh_gatedcnn_model.bin \
+                                                 --vocab_path models/google_zh_vocab.txt \
                                                  --config_path models/gatedcnn_9_config.json \
                                                  --train_path datasets/chnsenticorp/train.tsv --dev_path datasets/chnsenticorp/dev.tsv --test_path datasets/chnsenticorp/test.tsv \
                                                  --epochs_num 5  --batch_size 64 --learning_rate 5e-5 \
@@ -258,17 +242,6 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path mo
                                                       --folds_num 5 --epochs_num 3 --batch_size 64 --seed 17 --encoder bert
 ```
 The results are *81.3/68.4* (Accuracy/Marco F1), which are much higher than pre-trained models provided by other projects. Sometimes large model does not converge. We need to try different random seed by specifying *--seed*. <br>
-The example of using ELMo for cross validation:
-```
-CUDA_VISIBLE_DEVICES=0 python3 run_classifier_cv.py --pretrained_model_path models/mixed_corpus_elmo_model.bin \
-                                                    --vocab_path models/google_zh_vocab.txt \
-                                                    --config_path models/birnn_config.json \
-                                                    --train_path datasets/smp2020-ewect/virus/train.tsv \
-                                                    --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
-                                                    --epochs_num 3  --batch_size 64 --learning_rate 5e-4 --folds_num 5 \
-                                                    --embedding word --encoder bilstm --pooling mean
-```
-The results are *76.4/59.9* (Accuracy/Marco F1).
 
 Besides classification, UER-py also provides scripts for other downstream tasks. We could use *run_ner.py* for named entity recognition:
 ```
@@ -302,11 +275,14 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 <br/>
 
 ## Datasets
+We collected a range of [datasets](https://github.com/dbiir/UER-py/wiki/Datasets) and converted them into format that UER can load directly.
 
-We have provided some data sets in the project for users to run examples, see [Datasets](https://github.com/dbiir/UER-py/wiki/Datasets).
+<br/>
 
 ## Modelzoo
-With the help of UER, we pre-trained models with different corpora, encoders, and targets. All pre-trained models can be loaded by UER directly. More pre-trained models will be released in the near future. Detailed introduction of pre-trained models and download links can be found in [Modelzoo](https://github.com/dbiir/UER-py/wiki/Modelzoo). 
+With the help of UER, we pre-trained models with different corpora, encoders, and targets. All pre-trained models can be loaded by UER directly. More pre-trained models will be released in the future. Detailed introduction of pre-trained models and download links can be found in [modelzoo](https://github.com/dbiir/UER-py/wiki/Modelzoo).
+
+<br/>
 
 ## Instructions
 ### UER-py's framework
@@ -333,25 +309,43 @@ UER-py/
     |--preprocess.py
     |--pretrain.py
     |--run_classifier.py
+    |--run_classifier_cv.py
+    |--run_mt_classifier.py
     |--run_cmrc.py
     |--run_ner.py
     |--run_dbqa.py
     |--run_c3.py
-    |--run_mt_classifier.py
     |--README.md
+
 ```
 
 The code is well-organized. Users can use and extend upon it with little efforts.
 
-Examples of pre-training and fine-tuning on downstream tasks can be found in [Instructions](https://github.com/dbiir/UER-py/wiki/Instructions), which help users quickly implement models such as BERT, ALBERT, RoBERTa and GPT also provide examples of a variety of downstream tasks.
+More examples of using UER can be found in [instructions](https://github.com/dbiir/UER-py/wiki/Instructions), which help users quickly implement pre-training models such as BERT, GPT, ELMO and fine-tune pre-trained models on a range of downstream tasks. 
+
+<br/>
 
 ## Competition solutions
+UER-py has been used in winning solutions of many NLP competitions. In this section, we provide some examples of using UER-py to achieve SOTA results on NLP competitions and learderboards. See [competition solutions](https://github.com/dbiir/UER-py/wiki/Competition-solutions) for more detailed information.
 
-UER-py has been used in winning solutions of many NLP competitions. In this section, we provide some examples of using UER-py to achieve SOTA results on NLP competitions and learderboards. See [Competition solutions](https://github.com/dbiir/UER-py/wiki/Competition-solutions).
+<br/>
 
 ## Experiments
+We conducted a variety of experiments to test UER's performace. See [experiments](https://github.com/dbiir/UER-py/wiki/Experiments) for more experimental results.
 
-We have conducted various performance tests and experiments on UER-py, see [Experiments](https://github.com/dbiir/UER-py/wiki/Experiments) for results.
+<br/>
+
+## Citation
+#### We have a paper one can cite for [UER-py](https://arxiv.org/pdf/1909.05658.pdf):
+```
+@article{zhao2019uer,
+  title={UER: An Open-Source Toolkit for Pre-training Models},
+  author={Zhao, Zhe and Chen, Hui and Zhang, Jinbin and Zhao, Xin and Liu, Tao and Lu, Wei and Chen, Xi and Deng, Haotang and Ju, Qi and Du, Xiaoyong},
+  journal={EMNLP-IJCNLP 2019},
+  pages={241},
+  year={2019}
+}
+```
 
 ## Contact information
 For communication related to this project, please contact Zhe Zhao (helloworld@ruc.edu.cn; nlpzhezhao@tencent.com) or Yudong Li (liyudong123@hotmail.com) or Xin Zhao (zhaoxinruc@ruc.edu.cn).
@@ -359,4 +353,3 @@ For communication related to this project, please contact Zhe Zhao (helloworld@r
 This work is instructed by my enterprise mentors __Qi Ju__, __Haotang Deng__ and school mentors __Tao Liu__, __Xiaoyong Du__.
 
 I also got a lot of help from my Tencent colleagues Hui Chen, Jinbin Zhang, Zhiruo Wang, Weijie Liu, Peng Zhou, Haixiao Liu, and Weijian Wu. 
-
