@@ -3,7 +3,7 @@
 [![codebeat badge](https://codebeat.co/badges/f75fab90-6d00-44b4-bb42-d19067400243)](https://codebeat.co/projects/github-com-dbiir-uer-py-master)
 ![](https://img.shields.io/badge/license-MIT-000000.svg)
 
-<img src="logo.jpg" width="350" hegiht="390" align=left />
+<img src="logo.jpg" width="390" hegiht="390" align=left />
 
 Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py (Universal Encoder Representations) is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of different pre-training models (e.g. BERT, GPT, ELMO), and provides interfaces for users to further extend upon. With UER-py, we build a model zoo which contains pre-trained models based on different corpora, encoders, and targets. 
 
@@ -45,7 +45,7 @@ UER-py has the following features:
 * For the mixed precision training you will need apex from NVIDIA
 * For the pre-trained model conversion (related with TensorFlow) you will need TensorFlow
 * For the tokenization with sentencepiece model you will need SentencePiece
-
+* For developing a stacking model you will need LightGBM and [BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
 
 <br/>
 
@@ -346,6 +346,8 @@ We conducted a variety of experiments to test UER's performace. See [experiments
   year={2019}
 }
 ```
+
+<br/>
 
 ## Contact information
 For communication related to this project, please contact Zhe Zhao (helloworld@ruc.edu.cn; nlpzhezhao@tencent.com) or Yudong Li (liyudong123@hotmail.com) or Xin Zhao (zhaoxinruc@ruc.edu.cn).
