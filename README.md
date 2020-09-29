@@ -191,23 +191,23 @@ Users can download *mixed_corpus_elmo_model.bin* from [here](https://share.weiyu
 
 The example of fine-tuning GatedCNN on Chnsenticorp dataset:
 ```
-CUDA_VISIBLE_DEVICES=0 python3 run_classifier.py --pretrained_model_path models/wikizh_gatedcnn_model.bin \
-                                                 --vocab_path models/google_zh_vocab.txt \
-                                                 --config_path models/gatedcnn_9_config.json \
-                                                 --train_path datasets/chnsenticorp/train.tsv --dev_path datasets/chnsenticorp/dev.tsv --test_path datasets/chnsenticorp/test.tsv \
-                                                 --epochs_num 5  --batch_size 64 --learning_rate 5e-5 \
-                                                 --embedding word --encoder gatedcnn --pooling max
+python3 run_classifier.py --pretrained_model_path models/wikizh_gatedcnn_lm_model.bin \
+                          --vocab_path models/google_zh_vocab.txt \
+                          --config_path models/gatedcnn_9_config.json \
+                          --train_path datasets/chnsenticorp/train.tsv --dev_path datasets/chnsenticorp/dev.tsv --test_path datasets/chnsenticorp/test.tsv \
+                          --epochs_num 5  --batch_size 64 --learning_rate 5e-5 \
+                          --embedding word --encoder gatedcnn --pooling max
 
-CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
                                           --config_path models/gatedcnn_9_config.json \
                                           --test_path datasets/chnsenticorp/test_nolabel.tsv \
                                           --prediction_path datasets/chnsenticorp/prediction.tsv \
                                           --labels_num 2 --embedding word --encoder gatedcnn --pooling max
 ```
-Users can download *wikizh_gatedcnn_model.bin* from [here](https://share.weiyun.com/W2gmPPeA).
+Users can download *wikizh_gatedcnn_lm_model.bin* from [here](https://share.weiyun.com/W2gmPPeA).
 <br>
 
-UER-py supports cross validation for classification. The example of using cross validation on [SMP2020-EWECT](http://39.97.118.137/), a competition's dataset:
+UER-py supports cross validation for classification. The example of using cross validation on [SMP2020-EWECT](http://39.97.118.137/), a competition dataset:
 ```
 CUDA_VISIBLE_DEVICES=0 python3 run_classifier_cv.py --pretrained_model_path models/google_zh_model.bin \
                                                     --vocab_path models/google_zh_vocab.txt \
@@ -215,14 +215,14 @@ CUDA_VISIBLE_DEVICES=0 python3 run_classifier_cv.py --pretrained_model_path mode
                                                     --output_model_path models/classifier_model.bin \
                                                     --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
                                                     --train_path datasets/smp2020-ewect/virus/train.tsv \
-                                                    --epochs_num 3 --batch_size 64 --folds_num 5 --encoder bert
+                                                    --epochs_num 3 --batch_size 32 --folds_num 5 --encoder bert
 ```
-The results of *google_zh_model.bin* are *79.0/63.6* (Accuracy/Marco F1). <br>
+The results of *google_zh_model.bin* are 79.1/63.8 (Accuracy/Marco F1). <br>
 *--folds_num* specifies the number of rounds of cross-validation. <br>
 *--output_path* specifies the path of the fine-tuned model. *--folds_num* models are saved and the *fold id* suffix is added to the model's name. <br>
-*--train_features_path* specifies the path of out-of-fold (OOF) predictions. *run_classifier_cv.py* generates probabilities over classes on each fold of the dataset by training a model on the other folds in the dataset. *train_features.npy* can be used for stacking. The details of stacking and competition are introduced in *Instruction* section. <br>
+*--train_features_path* specifies the path of out-of-fold (OOF) predictions. *run_classifier_cv.py* generates probabilities over classes on each fold by training a model on the other folds in the dataset. *train_features.npy* can be used as features for stacking. More details are introduced in *Competition solutions* section. <br>
 
-We can further try different pre-trained models. For example, we download [RoBERTa-wwm-ext-large](https://github.com/ymcui/Chinese-BERT-wwm) and convert it into UER's format:
+We can further try different pre-trained models. For example, we download [*RoBERTa-wwm-ext-large from HIT*](https://github.com/ymcui/Chinese-BERT-wwm) and convert it into UER's format:
 ```
 python3 scripts/convert_bert_from_huggingface_to_uer.py --input_model_path models/chinese_roberta_wwm_large_ext_pytorch/pytorch_model.bin \
                                                         --output_model_path models/chinese_roberta_wwm_large_ext_pytorch/pytorch_model_uer.bin \
@@ -235,17 +235,18 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path mo
                                                       --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
                                                       --epochs_num 3 --batch_size 64 --folds_num 5 --encoder bert
 ```
-The result of *RoBERTa-wwm-ext-large* provided by HIT are *80.3/66.8* (Accuracy/Marco F1). <br>
-The example of using our pre-trained model *Reviews+BertEncoder(large)+MlmTarget* (see model zoo for more details):
+The results of *RoBERTa-wwm-ext-large* are 80.3/66.8 (Accuracy/Marco F1). <br>
+The example of using our pre-trained model [*Reviews+BertEncoder(large)+MlmTarget*](https://share.weiyun.com/hn7kp9bs) (see model zoo for more details):
 ```
-CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path models/reviews_bert_large_model.bin \
+CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path models/reviews_bert_large_mlm_model.bin \
                                                       --vocab_path models/google_zh_vocab.txt \
                                                       --config_path models/bert_large_config.json \
                                                       --train_path datasets/smp2020-ewect/virus/train.tsv \
                                                       --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
                                                       --folds_num 5 --epochs_num 3 --batch_size 64 --seed 17 --encoder bert
 ```
-The results are *81.3/68.4* (Accuracy/Marco F1), which are much higher than pre-trained models provided by other projects. Sometimes large model does not converge. We need to try different random seed by specifying *--seed*. 
+The results are 81.3/68.4 (Accuracy/Marco F1), which has very competitive advantage compared with other open-source pre-trained weights. <br>
+Sometimes large model does not converge. We need to try different random seeds by specifying *--seed*. 
 <br>
 
 Besides classification, UER-py also provides scripts for other downstream tasks. We could use *run_ner.py* for named entity recognition:
@@ -281,12 +282,12 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 <br/>
 
 ## Datasets
-We collected a range of [downstream datasets](https://github.com/dbiir/UER-py/wiki/Datasets) and converted them into format that UER can load directly.
+We collected a range of [__downstream datasets__](https://github.com/dbiir/UER-py/wiki/Datasets) and converted them into format that UER can load directly.
 
 <br/>
 
 ## Modelzoo
-With the help of UER, we pre-trained models with different corpora, encoders, and targets. All pre-trained models can be loaded by UER directly. More pre-trained models will be released in the future. Detailed introduction of pre-trained models and download links can be found in [modelzoo](https://github.com/dbiir/UER-py/wiki/Modelzoo).
+With the help of UER, we pre-trained models with different corpora, encoders, and targets. All pre-trained models can be loaded by UER directly. More pre-trained models will be released in the future. Detailed introduction of pre-trained models and download links can be found in [__modelzoo__](https://github.com/dbiir/UER-py/wiki/Modelzoo).
 
 <br/>
 
@@ -327,17 +328,17 @@ UER-py/
 
 The code is well-organized. Users can use and extend upon it with little efforts.
 
-More examples of using UER can be found in [instructions](https://github.com/dbiir/UER-py/wiki/Instructions), which help users quickly implement pre-training models such as BERT, GPT, ELMO and fine-tune pre-trained models on a range of downstream tasks. 
+More examples of using UER can be found in [__instructions__](https://github.com/dbiir/UER-py/wiki/Instructions), which help users quickly implement pre-training models such as BERT, GPT, ELMO and fine-tune pre-trained models on a range of downstream tasks. 
 
 <br/>
 
 ## Competition solutions
-UER-py has been used in winning solutions of many NLP competitions. In this section, we provide some examples of using UER-py to achieve SOTA results on NLP competitions and learderboards. See [competition solutions](https://github.com/dbiir/UER-py/wiki/Competition-solutions) for more detailed information.
+UER-py has been used in winning solutions of many NLP competitions. In this section, we provide some examples of using UER-py to achieve SOTA results on NLP competitions and learderboards. See [__competition solutions__](https://github.com/dbiir/UER-py/wiki/Competition-solutions) for more detailed information.
 
 <br/>
 
 ## Experiments
-We conducted a variety of experiments to test UER's performace. See [experiments](https://github.com/dbiir/UER-py/wiki/Experiments) for more experimental results.
+We conducted a variety of experiments to test UER's performace. See [__experiments__](https://github.com/dbiir/UER-py/wiki/Experiments) for more experimental results.
 
 <br/>
 
