@@ -219,7 +219,7 @@ CUDA_VISIBLE_DEVICES=0 python3 run_classifier_cv.py --pretrained_model_path mode
 ```
 The results of *google_zh_model.bin* are 79.1/63.8 (Accuracy/Marco F1). <br>
 *--folds_num* specifies the number of rounds of cross-validation. <br>
-*--output_path* specifies the path of the fine-tuned model. *--folds_num* models are saved and the *fold id* suffix is added to the model's name. <br>
+*--output_path* specifies the path of the fine-tuned model. *--folds_num* models are saved and the *fold ID* suffix is added to the model's name. <br>
 *--train_features_path* specifies the path of out-of-fold (OOF) predictions. *run_classifier_cv.py* generates probabilities over classes on each fold by training a model on the other folds in the dataset. *train_features.npy* can be used as features for stacking. More details are introduced in *Competition solutions* section. <br>
 
 We can further try different pre-trained models. For example, we download [*RoBERTa-wwm-ext-large from HIT*](https://github.com/ymcui/Chinese-BERT-wwm) and convert it into UER's format:
@@ -333,7 +333,7 @@ More examples of using UER can be found in [__instructions__](https://github.com
 <br/>
 
 ## Competition solutions
-UER-py has been used in winning solutions of many NLP competitions. In this section, we provide some examples of using UER-py to achieve SOTA results on NLP competitions and learderboards. See [__competition solutions__](https://github.com/dbiir/UER-py/wiki/Competition-solutions) for more detailed information.
+UER-py has been used in winning solutions of many NLP competitions. In this section, we provide some examples of using UER-py to achieve SOTA results on NLP competitions, such as CLUE. See [__competition solutions__](https://github.com/dbiir/UER-py/wiki/Competition-solutions) for more detailed information.
 
 <br/>
 
