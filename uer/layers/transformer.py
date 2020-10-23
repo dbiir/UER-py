@@ -41,7 +41,7 @@ class TransformerLayer(nn.Module):
 
 class GptBlock(nn.Module):
     def __init__(self, args):
-        super(TransformerLayer, self).__init__()
+        super(GptBlock, self).__init__()
 
         # Multi-headed self-attention.
         self.self_attn = MultiHeadedAttention(

@@ -8,14 +8,15 @@ from uer.layers.transformer import GptBlock
 
 class Gpt2Encoder(nn.Module):
     """
-    BERT encoder exploits 12 or 24 transformer layers to extract features.
+    GPT2 encoder exploits 12 or 24 gptblock layers to extract features.
     """
     def __init__(self, args):
-        super(GptEncoder, self).__init__()
+        super(Gpt2Encoder, self).__init__()
         self.layers_num = args.layers_num
-        self.transformer = nn.ModuleList([
+        self.block = nn.ModuleList([
             GptBlock(args) for _ in range(self.layers_num)
         ])
+        self.layer_norm = LayerNorm(args.hidden_size)
         
     def forward(self, emb, seg):
         """
@@ -37,5 +38,5 @@ class Gpt2Encoder(nn.Module):
 
         hidden = emb
         for i in range(self.layers_num):
-            hidden = self.transformer[i](hidden, mask)
-        return hidden
+            hidden = self.block[i](hidden, mask)
+        return self.layer_norm(hidden)
