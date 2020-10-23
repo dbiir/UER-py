@@ -9,8 +9,7 @@ Pre-training has become an essential part for NLP tasks and has led to remarkabl
 
 
 <br/>
-We recently pre-trained a 36-layers BERT (see models/bert_xlarge_config.json for detailed configuration) with Tencent Cloud TI-ONE. The 36-layers BERT achieves improvements on some downstream tasks such as XNLI and CMRC2018. Models with more corpora and training steps will be released in the near future.
-[36-layers BERT](https://share.weiyun.com/ofnss4AN)
+Recently we received a [Chinese 36-layers RoBERTa model](https://share.weiyun.com/ofnss4AN) (see models/bert_xlarge_config.json for detailed configuration) pre-trained with Tencent Cloud TI-ONE. We were told that the 36-layers RoBERTa achieves improvements on some downstream tasks such as XNLI and CMRC2018 and models with more corpora and training steps will be released in the near future. We look forward to user feedback on this model.
 <br>
 
 Table of Contents
