@@ -38,7 +38,7 @@ def main():
     # Model options.
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout value.")
     parser.add_argument("--seed", type=int, default=7,  help="Random seed.")
-    parser.add_argument("--embedding", choices=["bert", "word", "gpt2"], default="bert",
+    parser.add_argument("--embedding", choices=["bert", "word", "gpt"], default="bert",
                         help="Emebdding type.")
     parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
                                                    "cnn", "gatedcnn", "attn", "synt", \
