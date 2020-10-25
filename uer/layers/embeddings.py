@@ -1,4 +1,4 @@
-# -*- encoding:utf-8 -*-
+#-*- encoding:utf-8 -*-
 import torch
 import torch.nn as nn
 from uer.layers.layer_norm import LayerNorm
@@ -55,7 +55,6 @@ class Gpt2Embedding(nn.Module):
         self.max_length = 1024
         self.word_embedding = nn.Embedding(vocab_size, args.emb_size)
         self.position_embedding = nn.Embedding(self.max_length, args.emb_size)
-        self.layer_norm = LayerNorm(args.emb_size)
 
     def forward(self, src, seg):
         word_emb = self.word_embedding(src)
@@ -63,6 +62,6 @@ class Gpt2Embedding(nn.Module):
                                           dtype=torch.long).unsqueeze(0).repeat(word_emb.size(0), 1))
 
         emb = word_emb + pos_emb
-        emb = self.dropout(self.layer_norm(emb))
+        emb = self.dropout(emb)
         return emb
 

@@ -15,8 +15,6 @@ class Model(nn.Module):
         self.encoder = encoder
         self.target = target
 
-        if args.tie_weights:
-            self.target.mlm_linear_2.weight = self.embedding.word_embedding.weight
 
     def forward(self, src, tgt, seg):
         emb = self.embedding(src, seg)
