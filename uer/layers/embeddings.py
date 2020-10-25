@@ -1,4 +1,4 @@
-#-*- encoding:utf-8 -*-
+# -*- encoding:utf-8 -*-
 import torch
 import torch.nn as nn
 from uer.layers.layer_norm import LayerNorm
