@@ -15,7 +15,7 @@ class LmTarget(nn.Module):
         self.hidden_size = args.hidden_size
 
         self.softmax = nn.LogSoftmax(dim=-1)
-        self.output_layer = nn.Linear(self.hidden_size, self.vocab_size)
+        self.output_layer = nn.Linear(self.hidden_size, self.vocab_size, bias = args.has_lm_target_bias)
 
     def forward(self, memory_bank, tgt):
         """
