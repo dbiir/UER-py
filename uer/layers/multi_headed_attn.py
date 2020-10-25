@@ -36,7 +36,6 @@ class MultiHeadedAttention(nn.Module):
         heads_num = self.heads_num
         per_head_size = self.per_head_size
 
-
         def shape(x):
             return x. \
                    contiguous(). \
@@ -55,7 +54,6 @@ class MultiHeadedAttention(nn.Module):
                              transpose(1, 2) \
                              for l, x in zip(self.linear_layers, (query, key, value))
                             ]
-
 
         scores = torch.matmul(query, key.transpose(-2, -1))
         scores = scores / math.sqrt(float(per_head_size)) 
