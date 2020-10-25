@@ -44,13 +44,13 @@ class WordEmbedding(nn.Module):
         return emb
 
 
-class Gpt2Embedding(nn.Module):
+class GptEmbedding(nn.Module):
     """
     BERT embedding consists of three parts:
     word embedding, position embedding, and segment embedding.
     """
     def __init__(self, args, vocab_size):
-        super(Gpt2Embedding, self).__init__()
+        super(GptEmbedding, self).__init__()
         self.dropout = nn.Dropout(args.dropout)
         self.max_length = 1024
         self.word_embedding = nn.Embedding(vocab_size, args.emb_size)
