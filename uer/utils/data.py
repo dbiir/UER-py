@@ -679,7 +679,7 @@ class LmDataset(Dataset):
 
                 instances_num = len(document) // self.seq_length
                 for i in range(instances_num):
-                    src = document[i * self.seq_length : (i+1) * self.seq_length]
+                    src = document[i * self.seq_length : (i+1) * self.seq_length - 1 ]
                     tgt = src + [self.vocab.get(SEP_TOKEN)]
                     src = [self.vocab.get(CLS_TOKEN)] + src
                     seg = [1] * len(src)
