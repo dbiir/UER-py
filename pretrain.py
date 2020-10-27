@@ -51,8 +51,8 @@ def main():
                         help="Tie the word embedding and softmax weights.")
     parser.add_argument("--factorized_embedding_parameterization", action="store_true",
                         help="Factorized embedding parameterization.")
-    parser.add_argument("--has_lm_target_bias", action="store_true",
-                        help="Whether add bias on output_layer for lm target.")
+    parser.add_argument("--has_lmtarget_bias", action="store_true",
+                        help="Add bias on output_layer for lm target.")
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
 
     # Masking options.
