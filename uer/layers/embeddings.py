@@ -56,7 +56,7 @@ class GptEmbedding(nn.Module):
         self.word_embedding = nn.Embedding(vocab_size, args.emb_size)
         self.position_embedding = nn.Embedding(self.max_length, args.emb_size)
 
-    def forward(self, src, seg):
+    def forward(self, src, _):
         word_emb = self.word_embedding(src)
         pos_emb = self.position_embedding(torch.arange(0, word_emb.size(1), device=word_emb.device, \
                                           dtype=torch.long).unsqueeze(0).repeat(word_emb.size(0), 1))
