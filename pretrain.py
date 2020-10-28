@@ -38,11 +38,11 @@ def main():
     # Model options.
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout value.")
     parser.add_argument("--seed", type=int, default=7,  help="Random seed.")
-    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
+    parser.add_argument("--embedding", choices=["bert", "word", "gpt"], default="bert",
                         help="Emebdding type.")
     parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
                                                    "cnn", "gatedcnn", "attn", "synt", \
-                                                   "rcnn", "crnn", "gpt", "bilstm"], \
+                                                   "rcnn", "crnn", "gpt", "gpt2", "bilstm"], \
                                                    default="bert", help="Encoder type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "bilm", "albert"], default="bert",
@@ -51,6 +51,8 @@ def main():
                         help="Tie the word embedding and softmax weights.")
     parser.add_argument("--factorized_embedding_parameterization", action="store_true",
                         help="Factorized embedding parameterization.")
+    parser.add_argument("--has_lmtarget_bias", action="store_true",
+                        help="Add bias on output_layer for lm target.")
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
 
     # Masking options.

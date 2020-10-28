@@ -62,5 +62,4 @@ class MultiHeadedAttention(nn.Module):
         probs = self.dropout(probs)
         output = unshape(torch.matmul(probs, value))
         output = self.final_linear(output)
-        
         return output
