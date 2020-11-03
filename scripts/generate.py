@@ -41,29 +41,39 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     # Path options.
-    parser.add_argument("--pretrained_model_path", type=str, required=True, 
+    parser.add_argument("--pretrained_model_path", type=str, required=True,
                         help="Path of the pretrained model.")
-    parser.add_argument("--vocab_path", default="models/google_vocab.txt", type=str,
+    #change default models/google_vocab.txt->models/google_zh_vocab.txt
+    parser.add_argument("--vocab_path", default="models/google_zh_vocab.txt", type=str,
                         help="Path of the vocabulary file.")
-    parser.add_argument("--input_path", type=str, required=True, 
+    parser.add_argument("--input_path", type=str, required=True,
                         help="Path of the input file, containing the beginning of a story.")
-    parser.add_argument("--output_path", type=str, required=True, 
+    parser.add_argument("--output_path", type=str, required=True,
                         help="Path of the output file, containing the entire story.")
     parser.add_argument("--config_path", default="models/bert_base_config.json", type=str,
                         help="Path of the config file.")
-
+    #add
+    parser.add_argument("--has_lmtarget_bias", action="store_true",
+                        help="Add bias on output_layer for lm target.")
+    #add
+    parser.add_argument("--tie_weights", action="store_true",
+                        help="Tie the word embedding and softmax weights.")
     # Model options.
     parser.add_argument("--seq_length", type=int, default=128,
                         help="Sequence length.")
-    parser.add_argument("--top_k", type=int, default=0)
-    parser.add_argument("--top_p", type=float, default=0.6)
+    #change default 0->70
+    parser.add_argument("--top_k", type=int, default=70)
+    #change default 0.6->0
+    parser.add_argument("--top_p", type=float, default=0)
     parser.add_argument("--temperature", type=float, default=1.0)
-    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
+    #change add choice gpt
+    parser.add_argument("--embedding", choices=["bert", "word","gpt"], default="gpt",
                         help="Emebdding type.")
+    #change add choice gpt2
     parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
                                               "cnn", "gatedcnn", "attn", \
-                                              "rcnn", "crnn", "gpt", "bilstm"], \
-                                     default="bert", help="Encoder type.")
+                                              "rcnn", "crnn", "gpt", "bilstm","gpt2"], \
+                                     default="gpt2", help="Encoder type.")
     parser.add_argument("--target", choices=["lm"], default="lm",
                         help="The training target of the pretraining model.")
 
@@ -74,6 +84,9 @@ if __name__ == '__main__':
                         help="Path of the subword vocabulary file.")
     parser.add_argument("--subencoder_type", choices=["avg", "lstm", "gru", "cnn"], default="avg",
                         help="Subencoder type.")
+    #add
+    parser.add_argument("--spm_model_path", default=None, type=str,
+                        help="Path of the sentence piece model.")
 
     # Tokenizer options.
     parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
@@ -129,7 +142,14 @@ if __name__ == '__main__':
 
     with open(args.input_path, mode="r", encoding="utf-8") as f:
         line = f.readline().strip()
-        src = [vocab.get(t) for t in tokenizer.tokenize(line.strip())]
+###### change
+        src=[]
+        src.append(143)
+        src.append(144)
+        src1 = [vocab.get(t) for t in tokenizer.tokenize(line.strip())]
+        for tok in src1:
+            src.append(tok)
+######
         seg = [1] * len(src)
         start_length = len(src)
         if len(src) > args.seq_length:
