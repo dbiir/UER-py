@@ -677,7 +677,7 @@ class LmDataset(Dataset):
 
                 document = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line))
 
-                instances_num = len(document) // self.seq_length
+                instances_num = len(document) // (self.seq_length-1)
                 for i in range(instances_num):
                     src = document[i * (self.seq_length - 1) : (i+1) * (self.seq_length - 1)]
                     tgt = src + [self.vocab.get(SEP_TOKEN)]
@@ -685,15 +685,16 @@ class LmDataset(Dataset):
                     seg = [1] * len(src)
                     pickle.dump((src, tgt, seg), dataset_writer)
 
-                src = document[instances_num * self.seq_length: ]
-                tgt = src[1:] + [self.vocab.get(SEP_TOKEN)]
-                src = [self.vocab.get(CLS_TOKEN)] + src[:-1]
-                seg = [1] * len(src)
-                while len(src) != self.seq_length:
+                src = document[instances_num * (self.seq_length-1): ]
+                if len(src) > 0:
+                    tgt = src + [self.vocab.get(SEP_TOKEN)]
+                    src = [self.vocab.get(CLS_TOKEN)] + src
+                    seg = [1] * len(src)
+                    while len(src) != self.seq_length:
                         src.append(PAD_ID)
                         tgt.append(PAD_ID)
                         seg.append(PAD_ID)
-                pickle.dump((src, tgt, seg), dataset_writer)
+                    pickle.dump((src, tgt, seg), dataset_writer)
 
                 if pos >= end - 1:
                     break
