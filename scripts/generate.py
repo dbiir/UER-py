@@ -142,14 +142,9 @@ if __name__ == '__main__':
 
     with open(args.input_path, mode="r", encoding="utf-8") as f:
         line = f.readline().strip()
-###### change
-        src=[]
-        src.append(143)
-        src.append(144)
-        src1 = [vocab.get(t) for t in tokenizer.tokenize(line.strip())]
-        for tok in src1:
-            src.append(tok)
-######
+
+        src = [vocab.get(t) for t in tokenizer.tokenize(line.strip())]
+
         seg = [1] * len(src)
         start_length = len(src)
         if len(src) > args.seq_length:
