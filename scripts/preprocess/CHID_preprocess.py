@@ -302,8 +302,6 @@ def convert_examples_to_features(examples, tokenizer, max_seq_length=128, max_nu
             segment_ids.append([0] * max_seq_length)
             choice_masks.append(0)
 
-        print(len(input_ids),max_num_choices)
-
         assert len(input_ids) == max_num_choices
         assert len(input_masks) == max_num_choices
         assert len(segment_ids) == max_num_choices
