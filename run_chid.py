@@ -67,7 +67,8 @@ def add_tokens_around(tokens, idiom_index, tokens_num):
 
 
 def read_dataset(args, data_path, answer_path):
-    answers = json.load(open(answer_path))
+    if answer_path is not None:
+        answers = json.load(open(answer_path))
     dataset = []
     max_tokens_for_doc = args.seq_length - 3
 
@@ -78,7 +79,10 @@ def read_dataset(args, data_path, answer_path):
             chid_tokens = tokenize_chid(context)
             tags = [token for token in chid_tokens if '#idiom' in token]
             for tag in tags:
-                tgt = answers[tag]
+                if answer_path is not None:
+                    tgt = answers[tag]
+                else:
+                    tgt = -1
                 tokens = []
                 for i, token in enumerate(chid_tokens):
                     if '#idiom' in token:
@@ -88,7 +92,7 @@ def read_dataset(args, data_path, answer_path):
                     for sub_token in sub_tokens:
                         tokens.append(sub_token)
                 idiom_index = tokens.index(tag)
-                left_tokens, right_tokens = add_tokens_around(tokens, idiom_index, max_tokens_for_doc)
+                left_tokens, right_tokens = add_tokens_around(tokens, idiom_index, max_tokens_for_doc-1)
 
                 for i in range(len(left_tokens)):
                     if '#idiom' in left_tokens[i] and left_tokens[i] != tag:
@@ -97,7 +101,7 @@ def read_dataset(args, data_path, answer_path):
                     if '#idiom' in right_tokens[i] and right_tokens[i] != tag:
                         right_tokens[i] = "[MASK]"
 
-                dataset.append(([], tgt, []))
+                dataset.append(([], tgt, [], tag))
 
                 for option in options:
                     option_tokens = args.tokenizer.tokenize(option)
