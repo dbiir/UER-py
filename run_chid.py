@@ -72,7 +72,7 @@ def read_dataset(args, data_path, answer_path):
     dataset = []
     max_tokens_for_doc = args.seq_length - 3
 
-    for line in open(data_path):
+    for line in open(data_path, mode="r", encoding="utf-8"):
         example = json.loads(line)
         options = example['candidates']
         for context in example['content']:
