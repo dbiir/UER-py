@@ -45,7 +45,7 @@ def main():
                         help="Batch size.")
     parser.add_argument("--seq_length", type=int, default=512,
                         help="Sequence length.")
-    parser.add_argument("--max_choices_num", default=4, type=int,
+    parser.add_argument("--max_choices_num", default=10, type=int,
                         help="The maximum number of cadicate answer, shorter than this will be padded.")
     parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
                         help="Emebdding type.")
