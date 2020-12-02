@@ -23,7 +23,6 @@ from uer.utils.seed import set_seed
 from uer.model_saver import save_model
 from run_c3 import MultipleChoice
 from run_classifier import build_optimizer, load_or_initialize_parameters, train_model, batch_loader, evaluate
-import sys
 
 
 def tokenize_chid(text):
@@ -71,6 +70,7 @@ def read_dataset(args, data_path, answer_path):
         answers = json.load(open(answer_path))
     dataset = []
     max_tokens_for_doc = args.seq_length - 3
+    group_index = 0
 
     for line in open(data_path, mode="r", encoding="utf-8"):
         example = json.loads(line)
@@ -101,7 +101,7 @@ def read_dataset(args, data_path, answer_path):
                     if '#idiom' in right_tokens[i] and right_tokens[i] != tag:
                         right_tokens[i] = "[MASK]"
 
-                dataset.append(([], tgt, [], tag))
+                dataset.append(([], tgt, [], tag, group_index))
 
                 for option in options:
                     option_tokens = args.tokenizer.tokenize(option)
@@ -120,6 +120,7 @@ def read_dataset(args, data_path, answer_path):
                 while len(dataset[-1][0]) < args.max_choices_num:
                     dataset[-1][0].append([0]*args.seq_length)
                     dataset[-1][2].append([0]*args.seq_length)
+        group_index += 1
 
     return dataset 
 
@@ -148,9 +149,9 @@ def main():
                         help="Path of the config file.")
 
     # Model options.
-    parser.add_argument("--batch_size", type=int, default=4,
+    parser.add_argument("--batch_size", type=int, default=8,
                         help="Batch size.")
-    parser.add_argument("--seq_length", type=int, default=128,
+    parser.add_argument("--seq_length", type=int, default=64,
                         help="Sequence length.")
     parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
                         help="Emebdding type.")
@@ -165,7 +166,7 @@ def main():
                         help="The maximum number of cadicate answer, shorter than this will be padded.")
 
     # Tokenizer options.
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
+    parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="char",
                         help="Specify the tokenizer."
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."
