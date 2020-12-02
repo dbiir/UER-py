@@ -8,6 +8,7 @@ import json
 import random
 import argparse
 import collections
+import numpy as np
 import torch.nn as nn
 
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -21,6 +22,30 @@ from uer.model_loader import load_model
 from run_classifier import batch_loader
 from run_c3 import MultipleChoice
 from run_chid import read_dataset
+
+
+def postprocess_chid_predictions(results):
+    index2tag = {index: tag for index, (tag, logits) in enumerate(results)}
+    logits_matrix = [logits for _, logits in results]
+
+    logits_matrix = np.transpose(np.array(logits_matrix))
+    logits_matrix_list = []
+    for i, row in enumerate(logits_matrix):
+        for j, value in enumerate(row):
+            logits_matrix_list.append((i, j, value))
+    else:
+        choices = set(range(i + 1))
+        blanks = set(range(j + 1))
+    logits_matrix_list = sorted(logits_matrix_list, key=lambda x: x[2], reverse=True)
+    results = []
+    for i, j, v in logits_matrix_list:
+        if (j in blanks) and (i in choices):
+            results.append((i, j))
+            blanks.remove(j)
+            choices.remove(i)
+    results = sorted(results, key=lambda x: x[1], reverse=False)
+    results = [[index2tag[j], i] for i, j in results]
+    return results
 
 
 def main():
@@ -43,7 +68,7 @@ def main():
     # Model options.
     parser.add_argument("--batch_size", type=int, default=32,
                         help="Batch size.")
-    parser.add_argument("--seq_length", type=int, default=512,
+    parser.add_argument("--seq_length", type=int, default=64,
                         help="Sequence length.")
     parser.add_argument("--max_choices_num", default=10, type=int,
                         help="The maximum number of cadicate answer, shorter than this will be padded.")
@@ -58,7 +83,7 @@ def main():
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
 
     # Tokenizer options.
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
+    parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="char",
                         help="Specify the tokenizer."
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."
@@ -86,35 +111,40 @@ def main():
 
     dataset = read_dataset(args, args.test_path, None)
 
-    src = torch.LongTensor([example[0] for example in dataset])
-    tgt = torch.LongTensor([example[1] for example in dataset])
-    seg = torch.LongTensor([example[2] for example in dataset])
-
-    batch_size = args.batch_size
-    instances_num = src.size()[0]
-
-    print("The number of prediction instances: ", instances_num)
-
     model.eval()
+    batch_size = args.batch_size
+    results_final = []
+    dataset_by_group = {}
+    print("The number of prediction instances: ", len(dataset))
 
-    index = 0
-    results = {}
-    for i, (src_batch, _, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
+    for example in dataset:
+        if example[-1] not in dataset_by_group:
+            dataset_by_group[example[-1]] = [example]
+        else:
+            dataset_by_group[example[-1]].append(example)
 
-        src_batch = src_batch.to(device)
-        seg_batch = seg_batch.to(device)
+    for group_index, examples in dataset_by_group.items():
+        src = torch.LongTensor([example[0] for example in examples])
+        tgt = torch.LongTensor([example[1] for example in examples])
+        seg = torch.LongTensor([example[2] for example in examples])
+        index = 0
+        results = []
+        for i, (src_batch, _, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
 
-        with torch.no_grad():
-            _, logits = model(src_batch, None, seg_batch)
+            src_batch = src_batch.to(device)
+            seg_batch = seg_batch.to(device)
 
-            pred = torch.argmax(logits, dim=1)
-            pred = pred.cpu().numpy().tolist()
-            for j in range(len(pred)):
-                results[dataset[index][-1]] = int(pred[j])
-                index += 1
+            with torch.no_grad():
+                _, logits = model(src_batch, None, seg_batch)
+                pred = torch.argmax(logits, dim=1)
+                pred = pred.cpu().numpy().tolist()
+                for j in range(len(pred)):
+                    results.append((examples[index][-2], logits[index].cpu().numpy()))
+                    index += 1
+        results_final.extend(postprocess_chid_predictions(results))
 
     with open(args.prediction_path, 'w') as f:
-        json.dump(results, f, indent=2)
+        json.dump({tag: pred for tag, pred in results_final}, f, indent=2)
 
 
 if __name__ == "__main__":
