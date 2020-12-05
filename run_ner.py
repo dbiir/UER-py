@@ -21,6 +21,7 @@ from uer.utils.vocab import Vocab
 from uer.utils.seed import set_seed
 from uer.utils.tokenizer import *
 from uer.model_saver import save_model
+from uer.opts import finetune_opts
 from run_classifier import build_optimizer, load_or_initialize_parameters
 
 
@@ -208,63 +209,15 @@ def evaluate(args, dataset):
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    # Path options.
-    parser.add_argument("--pretrained_model_path", default=None, type=str,
-                        help="Path of the pretrained model.")
-    parser.add_argument("--output_model_path", default="./models/ner_model.bin", type=str,
-                        help="Path of the output model.")
-    parser.add_argument("--vocab_path", default=None, type=str,
-                        help="Path of the vocabulary file.")
-    parser.add_argument("--spm_model_path", default=None, type=str,
-                        help="Path of the sentence piece model.")
-    parser.add_argument("--train_path", type=str, required=True,
-                        help="Path of the trainset.")
-    parser.add_argument("--dev_path", type=str, required=True,
-                        help="Path of the devset.")
-    parser.add_argument("--test_path", type=str,
-                        help="Path of the testset.")
-    parser.add_argument("--config_path", default="./models/bert_base_config.json", type=str,
-                        help="Path of the config file.")
+    finetune_opts(parser)
+
     parser.add_argument("--label2id_path", type=str, required=True,
                         help="Path of the label2id file.")
 
-    # Model options.
-    parser.add_argument("--batch_size", type=int, default=32,
-                        help="Batch_size.")
-    parser.add_argument("--seq_length", default=128, type=int,
-                        help="Sequence length.")
-    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
-                        help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
-                                              "cnn", "gatedcnn", "attn", "synt", \
-                                              "rcnn", "crnn", "gpt", "bilstm"], \
-                                              default="bert", help="Encoder type.")
-    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
-    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
-    
-    # Optimizer options.
-    parser.add_argument("--learning_rate", type=float, default=2e-5,
-                        help="Learning rate.")
-    parser.add_argument("--warmup", type=float, default=0.1,
-                        help="Warm up value.")
-    parser.add_argument("--fp16", action='store_true',
-                        help="Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit")
-    parser.add_argument("--fp16_opt_level", choices=["O0", "O1", "O2", "O3" ], default='O1',
-                        help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
-                             "See details at https://nvidia.github.io/apex/amp.html")
-
-    # Training options.
-    parser.add_argument("--dropout", type=float, default=0.1,
-                        help="Dropout.")
-    parser.add_argument("--epochs_num", type=int, default=3,
-                        help="Number of epochs.")
-    parser.add_argument("--report_steps", type=int, default=100,
-                        help="Specific steps to print prompt.")
-    parser.add_argument("--seed", type=int, default=7,
-                        help="Random seed.")
-    
     args = parser.parse_args()
+
+    if args.output_model_path == None:
+        args.output_model_path = "./models/ner_model.bin"
 
     # Load the hyperparameters of the config file.
     args = load_hyperparam(args)

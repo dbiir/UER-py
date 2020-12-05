@@ -17,43 +17,16 @@ from uer.utils.constants import *
 from uer.utils.tokenizer import * 
 from uer.utils.vocab import Vocab
 from uer.model_loader import load_model
+from uer.opts import infer_opts
 from run_cmrc import *
 
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    # Path options.
-    parser.add_argument("--load_model_path", default=None, type=str,
-                        help="Path of the classfier model.")
-    parser.add_argument("--vocab_path", default=None, type=str,
-                        help="Path of the vocabulary file.")
-    parser.add_argument("--spm_model_path", default=None, type=str,
-                        help="Path of the sentence piece model.")
-    parser.add_argument("--test_path", type=str,
-                        help="Path of the testset.")
-    parser.add_argument("--prediction_path", default=None, type=str,
-                        help="Path of the prediction file.")
-    parser.add_argument("--config_path", default="./models/bert_base_config.json", type=str,
-                        help="Path of the config file.")
-
-    # Model options.
-    parser.add_argument("--batch_size", type=int, default=64,
-                        help="Batch size.")
-    parser.add_argument("--seq_length", type=int, default=512,
-                        help="Sequence length.")
+    infer_opts(parser)
     parser.add_argument("--doc_stride", default=128, type=int,
                         help="When splitting up a long document into chunks, how much stride to take between chunks.")
-    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
-                        help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
-                                              "cnn", "gatedcnn", "attn", "synt", \
-                                              "rcnn", "crnn", "gpt", "bilstm"], \
-                                              default="bert", help="Encoder type.")
-    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
-    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
-
 
     args = parser.parse_args()
 
@@ -120,6 +93,7 @@ def main():
             output[question_id] = prediction
 
         f.write(json.dumps(output, indent=4, ensure_ascii=False) + "\n")
+
 
 if __name__ == "__main__":
     main()

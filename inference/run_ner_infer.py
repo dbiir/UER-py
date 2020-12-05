@@ -17,6 +17,7 @@ from uer.utils.constants import *
 from uer.utils.tokenizer import *
 from uer.utils.vocab import Vocab
 from uer.model_loader import load_model
+from uer.opts import infer_opts
 from run_ner import NerTagger
 
 
@@ -59,36 +60,10 @@ def batch_loader(batch_size, src, seg):
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    # Path options.
-    parser.add_argument("--load_model_path", default=None, type=str,
-                        help="Path of the NER model.")
-    parser.add_argument("--vocab_path", default=None, type=str,
-                        help="Path of the vocabulary file.")
-    parser.add_argument("--spm_model_path", default=None, type=str,
-                        help="Path of the sentence piece model.")
-    parser.add_argument("--test_path", type=str,
-                        help="Path of the testset.")
-    parser.add_argument("--prediction_path", default=None, type=str,
-                        help="Path of the prediction file.")
-    parser.add_argument("--config_path", default="./models/bert_base_config.json", type=str,
-                        help="Path of the config file.")
+    infer_opts(parser)
+
     parser.add_argument("--label2id_path", type=str, required=True,
                         help="Path of the label2id file.")
-    
-    # Model options.
-    parser.add_argument("--batch_size", type=int, default=128,
-                        help="Batch_size.")
-    parser.add_argument("--seq_length", default=128, type=int,
-                        help="Sequence length.")
-    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
-                        help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
-                                              "cnn", "gatedcnn", "attn", "synt", \
-                                              "rcnn", "crnn", "gpt", "bilstm"], \
-                                              default="bert", help="Encoder type.")
-    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
-    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
     
     args = parser.parse_args()
 
@@ -153,7 +128,7 @@ def main():
                 for label_id in pred[j: j+seq_length_batch[j//args.seq_length]]:
                     f.write(i2l[label_id] + " ")
                 f.write("\n")
-            
+        
 
 if __name__ == "__main__":
     main()
