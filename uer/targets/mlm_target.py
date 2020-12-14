@@ -15,6 +15,7 @@ class MlmTarget(nn.Module):
         super(MlmTarget, self).__init__()
         self.vocab_size = vocab_size
         self.hidden_size = args.hidden_size
+        self.emb_size = args.emb_size
         self.factorized_embedding_parameterization = args.factorized_embedding_parameterization
         
         if self.factorized_embedding_parameterization:
@@ -34,7 +35,10 @@ class MlmTarget(nn.Module):
         # Masked language modeling (MLM) with full softmax prediction.
         output_mlm = gelu(self.mlm_linear_1(memory_bank))
         output_mlm = self.layer_norm(output_mlm)
-        output_mlm = output_mlm.contiguous().view(-1, self.hidden_size)
+        if self.factorized_embedding_parameterization:
+            output_mlm = output_mlm.contiguous().view(-1, self.emb_size)
+        else:
+            output_mlm = output_mlm.contiguous().view(-1, self.hidden_size)
         tgt_mlm = tgt_mlm.contiguous().view(-1)
         output_mlm = output_mlm[tgt_mlm>0,:]
         tgt_mlm = tgt_mlm[tgt_mlm>0]
