@@ -15,10 +15,16 @@ class MlmTarget(nn.Module):
         super(MlmTarget, self).__init__()
         self.vocab_size = vocab_size
         self.hidden_size = args.hidden_size
-
-        self.mlm_linear_1 = nn.Linear(args.hidden_size, args.hidden_size)
-        self.layer_norm = LayerNorm(args.hidden_size)
-        self.mlm_linear_2 = nn.Linear(args.hidden_size, self.vocab_size)
+        self.factorized_embedding_parameterization = args.factorized_embedding_parameterization
+        
+        if self.factorized_embedding_parameterization:
+            self.mlm_linear_1 = nn.Linear(args.hidden_size, args.emb_size)
+            self.layer_norm = LayerNorm(args.emb_size)
+            self.mlm_linear_2 = nn.Linear(args.emb_size, self.vocab_size)
+        else：
+            self.mlm_linear_1 = nn.Linear(args.hidden_size, args.hidden_size)
+            self.layer_norm = LayerNorm(args.hidden_size)
+            self.mlm_linear_2 = nn.Linear(args.hidden_size, self.vocab_size)
 
         self.softmax = nn.LogSoftmax(dim=-1)
 
