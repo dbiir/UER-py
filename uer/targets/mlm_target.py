@@ -21,7 +21,7 @@ class MlmTarget(nn.Module):
             self.mlm_linear_1 = nn.Linear(args.hidden_size, args.emb_size)
             self.layer_norm = LayerNorm(args.emb_size)
             self.mlm_linear_2 = nn.Linear(args.emb_size, self.vocab_size)
-        else：
+        else:
             self.mlm_linear_1 = nn.Linear(args.hidden_size, args.hidden_size)
             self.layer_norm = LayerNorm(args.hidden_size)
             self.mlm_linear_2 = nn.Linear(args.hidden_size, self.vocab_size)
