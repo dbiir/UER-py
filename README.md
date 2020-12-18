@@ -308,8 +308,8 @@ UER-py is organized as follows：
 ```
 UER-py/
     |--uer/
-    |    |--encoders/: contains encoders such as RNN, CNN, Attention, CNN-RNN, BERT
-    |    |--targets/: contains targets such as language modeling, masked language modeling, sentence prediction
+    |    |--encoders/: contains encoders such as RNN, CNN, BERT
+    |    |--targets/: contains targets such as language modeling, masked language modeling
     |    |--layers/: contains frequently-used NN layers, such as embedding layer, normalization layer
     |    |--models/: contains model.py, which combines embedding, encoder, and target modules
     |    |--utils/: contains frequently-used utilities
@@ -333,6 +333,7 @@ UER-py/
     |--run_ner.py
     |--run_dbqa.py
     |--run_c3.py
+    |--run_chid.py
     |--README.md
 
 ```
