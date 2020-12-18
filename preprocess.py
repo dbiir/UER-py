@@ -1,7 +1,7 @@
 import argparse
 import torch
 from uer.utils.data import *
-from uer.utils.tokenizer import *
+from uer.utils import *
 import six
 from packaging import version
 
@@ -32,7 +32,7 @@ def main():
     parser.add_argument("--processes_num", type=int, default=1,
                         help="Split the whole dataset into `processes_num` parts, "
                              "and each part is fed to a single process in training step.")
-    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "bilm", "albert"], default="bert",
+    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--docs_buffer_size", type=int, default=100000,
                         help="The buffer size of documents in memory, specific to targets that require negative sampling.")
@@ -60,10 +60,10 @@ def main():
         args.dup_factor = 1
 
     # Build tokenizer.
-    tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
+    tokenizer = str2tokenizer[args.tokenizer](args)
 
     # Build and save dataset.
-    dataset = globals()[args.target.capitalize() + "Dataset"](args, tokenizer.vocab, tokenizer)
+    dataset = str2dataset[args.target](args, tokenizer.vocab, tokenizer)
     dataset.build_and_save(args.processes_num)
 
 

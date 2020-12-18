@@ -38,14 +38,18 @@ def main():
     # Model options.
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout value.")
     parser.add_argument("--seed", type=int, default=7,  help="Random seed.")
-    parser.add_argument("--embedding", choices=["bert", "word", "gpt"], default="bert",
+    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg"], default="word_pos_seg",
                         help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
-                                                   "cnn", "gatedcnn", "attn", "synt", \
-                                                   "rcnn", "crnn", "gpt", "gpt2", "bilstm"], \
-                                                   default="bert", help="Encoder type.")
+    parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
+                                              "birnn", "bilstm", "bigru", \
+                                              "gatedcnn"], \
+                                              default="transformer", help="Encoder type.")
+    parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
+                        help="Mask type.")
+    parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
+                        help="Layernorm positioning.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "bilm", "albert"], default="bert",
+    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--tie_weights", action="store_true",
                         help="Tie the word embedding and softmax weights.")
@@ -87,7 +91,7 @@ def main():
         load_hyperparam(args)
 
     ranks_num = len(args.gpu_ranks)
-
+    
     if args.world_size > 1:
         # Multiprocessing distributed mode.
         assert torch.cuda.is_available(), "No available GPUs." 

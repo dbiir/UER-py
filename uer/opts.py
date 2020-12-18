@@ -18,12 +18,16 @@ def finetune_opts(parser):
                         help="Path of the config file.")
 
     # Model options.
-    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
+    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg"], default="word_pos_seg",
                         help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
-                                              "cnn", "gatedcnn", "attn", "synt", \
-                                              "rcnn", "crnn", "gpt", "bilstm"], \
-                                              default="bert", help="Encoder type.")
+    parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
+                                              "birnn", "bilstm", "bigru", \
+                                              "gatedcnn"], \
+                                              default="transformer", help="Encoder type.")
+    parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
+                        help="Mask type.")
+    parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
+                        help="Layernorm positioning.") 
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
@@ -70,12 +74,16 @@ def infer_opts(parser):
                         help="Path of the config file.")
 
     # Model options.
-    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
+    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg"], default="word_pos_seg",
                         help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
-                                              "cnn", "gatedcnn", "attn", "synt", \
-                                              "rcnn", "crnn", "gpt", "bilstm"], \
-                                              default="bert", help="Encoder type.")
+    parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
+                                              "birnn", "bilstm", "bigru", \
+                                              "gatedcnn"], \
+                                              default="transformer", help="Encoder type.")
+    parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
+                        help="Mask type.")
+    parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
+                        help="Layernorm positioning.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")

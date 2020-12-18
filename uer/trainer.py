@@ -13,7 +13,7 @@ from uer.model_loader import load_model
 from uer.model_saver import save_model
 from uer.model_builder import build_model
 from uer.utils.optimizers import *
-from uer.utils.data import *
+from uer.utils import *
 from uer.utils.vocab import Vocab
 from uer.utils.seed import set_seed
 
@@ -61,66 +61,6 @@ def train_and_validate(args):
         worker(None, None, args, model)
 
 
-def worker(proc_id, gpu_ranks, args, model):
-    """
-    Args:
-        proc_id: The id of GPU for single GPU mode;
-                 The id of process (and GPU) for multiprocessing distributed mode.
-        gpu_ranks: List of ranks of each process.
-    """
-    set_seed(args.seed)
-
-    if args.dist_train:
-        rank = gpu_ranks[proc_id]
-        gpu_id = proc_id
-    elif args.single_gpu:
-        rank = None
-        gpu_id = proc_id
-    else:
-        rank = None
-        gpu_id = None
-
-    if args.dist_train:
-        train_loader = globals()[args.target.capitalize() + "DataLoader"](args, args.dataset_path, args.batch_size, rank, args.world_size, True)
-    else:
-        train_loader = globals()[args.target.capitalize() + "DataLoader"](args, args.dataset_path, args.batch_size, 0, 1, True)
-
-    if gpu_id is not None: 
-        torch.cuda.set_device(gpu_id)
-        model.cuda(gpu_id)
-
-    # Build optimizer.
-    param_optimizer = list(model.named_parameters())
-    no_decay = ['bias', 'gamma', 'beta']
-    optimizer_grouped_parameters = [
-        {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01},
-        {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.0}
-    ]
-    optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, betas=(args.beta1, args.beta2), correct_bias=False)
-    scheduler = WarmupLinearSchedule(optimizer, warmup_steps=args.total_steps*args.warmup, t_total=args.total_steps)
-
-    if args.fp16:
-        try:
-            from apex import amp
-        except ImportError:
-            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
-        args.amp = amp
-
-    if args.dist_train:
-        # Initialize multiprocessing distributed training environment.
-        dist.init_process_group(backend=args.backend,
-                                init_method=args.master_ip,
-                                world_size=args.world_size,
-                                rank=rank)
-        model = DistributedDataParallel(model, device_ids=[gpu_id])
-        print("Worker %d is training ... " % rank)
-    else:
-        print("Worker is training ...")
-    
-    globals().get("train_"+args.target)(args, gpu_id, rank, train_loader, model, optimizer, scheduler)
-    
-
 def train_bert(args, gpu_id, rank, loader, model, optimizer, scheduler):
     model.train()
     start_time = time.time()
@@ -144,7 +84,7 @@ def train_bert(args, gpu_id, rank, loader, model, optimizer, scheduler):
             tgt_mlm = tgt_mlm.cuda(gpu_id)
             tgt_nsp = tgt_nsp.cuda(gpu_id)
             seg = seg.cuda(gpu_id)
-        
+
         # Forward.
         loss_info = model(src, (tgt_mlm, tgt_nsp), seg)
         loss_mlm, loss_nsp, correct_mlm, correct_nsp, denominator = loss_info
@@ -545,6 +485,68 @@ def train_bilm(args, gpu_id, rank, loader, model, optimizer, scheduler):
 
         steps += 1
 
+
+str2trainer = {"bert": train_bert, "lm": train_lm, "mlm": train_mlm,
+               "bilm": train_bilm, "albert": train_albert}
+
+def worker(proc_id, gpu_ranks, args, model):
+    """
+    Args:
+        proc_id: The id of GPU for single GPU mode;
+                 The id of process (and GPU) for multiprocessing distributed mode.
+        gpu_ranks: List of ranks of each process.
+    """
+    set_seed(args.seed)
+
+    if args.dist_train:
+        rank = gpu_ranks[proc_id]
+        gpu_id = proc_id
+    elif args.single_gpu:
+        rank = None
+        gpu_id = proc_id
+    else:
+        rank = None
+        gpu_id = None
+
+    if args.dist_train:
+        train_loader = str2dataloader[args.target](args, args.dataset_path, args.batch_size, rank, args.world_size, True)
+    else:
+        train_loader = str2dataloader[args.target](args, args.dataset_path, args.batch_size, 0, 1, True)
+
+    if gpu_id is not None:
+        torch.cuda.set_device(gpu_id)
+        model.cuda(gpu_id)
+
+    # Build optimizer.
+    param_optimizer = list(model.named_parameters())
+    no_decay = ['bias', 'gamma', 'beta']
+    optimizer_grouped_parameters = [
+        {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01},
+        {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.0}
+    ]
+    optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, betas=(args.beta1, args.beta2), correct_bias=False)
+    scheduler = WarmupLinearSchedule(optimizer, warmup_steps=args.total_steps*args.warmup, t_total=args.total_steps)
+
+    if args.fp16:
+        try:
+            from apex import amp
+        except ImportError:
+            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
+        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
+        args.amp = amp
+
+    if args.dist_train:
+        # Initialize multiprocessing distributed training environment.
+        dist.init_process_group(backend=args.backend,
+                                init_method=args.master_ip,
+                                world_size=args.world_size,
+                                rank=rank)
+        model = DistributedDataParallel(model, device_ids=[gpu_id])
+        print("Worker %d is training ... " % rank)
+    else:
+        print("Worker is training ...")
+
+    str2trainer[args.target](args, gpu_id, rank, train_loader, model, optimizer, scheduler)
 
 # def train_cls(args, gpu_id, rank, loader, model, optimizer, scheduler):
 #     model.train()

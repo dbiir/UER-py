@@ -7,17 +7,11 @@ import json
 import torch
 import random
 import torch.nn as nn
+from uer.layers import *
+from uer.encoders import *
 from uer.utils.vocab import Vocab
 from uer.utils.constants import *
-from uer.utils.tokenizer import * 
-from uer.layers.embeddings import *
-from uer.encoders.bert_encoder import *
-from uer.encoders.rnn_encoder import *
-from uer.encoders.birnn_encoder import *
-from uer.encoders.cnn_encoder import *
-from uer.encoders.attn_encoder import *
-from uer.encoders.gpt_encoder import *
-from uer.encoders.mixed_encoder import *
+from uer.utils.tokenizers import * 
 from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
@@ -29,8 +23,8 @@ from run_classifier import build_optimizer, load_or_initialize_parameters
 class MachineReadingComprehension(nn.Module):
     def __init__(self, args):
         super(MachineReadingComprehension, self).__init__()
-        self.embedding = globals()[args.embedding.capitalize() + "Embedding"](args, len(args.tokenizer.vocab))
-        self.encoder = globals()[args.encoder.capitalize() + "Encoder"](args)
+        self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
+        self.encoder = str2encoder[args.encoder](args)
         self.output_layer_1 = nn.Linear(args.hidden_size, args.hidden_size)
         self.output_layer_2 = nn.Linear(args.hidden_size, 2)
 

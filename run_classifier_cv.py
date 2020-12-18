@@ -7,17 +7,11 @@ import argparse
 import collections
 import torch.nn as nn
 import numpy as np
+from uer.layers import *
+from uer.encoders import *
 from uer.utils.vocab import Vocab
 from uer.utils.constants import *
-from uer.utils.tokenizer import *
-from uer.layers.embeddings import *
-from uer.encoders.bert_encoder import *
-from uer.encoders.rnn_encoder import *
-from uer.encoders.birnn_encoder import *
-from uer.encoders.cnn_encoder import *
-from uer.encoders.attn_encoder import *
-from uer.encoders.gpt_encoder import *
-from uer.encoders.mixed_encoder import *
+from uer.utils import *
 from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
@@ -49,12 +43,16 @@ def main():
                         help="Batch size.")
     parser.add_argument("--seq_length", type=int, default=128,
                         help="Sequence length.")
-    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
+    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg"], default="word_pos_seg",
                         help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
-                                              "cnn", "gatedcnn", "attn", "synt", \
-                                              "rcnn", "crnn", "gpt", "bilstm"], \
-                                              default="bert", help="Encoder type.")
+    parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
+                                              "birnn", "bilstm", "bigru", \
+                                              "gatedcnn"], \
+                                              default="transformer", help="Encoder type.")
+    parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
+                        help="Mask type.")
+    parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="pre",
+                        help="Layernorm positioning.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
                         help="Pooling type.")
@@ -109,7 +107,7 @@ def main():
     args.labels_num = count_labels_num(args.train_path)
 
     # Build tokenizer.
-    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
+    args.tokenizer = str2tokenizer[args.tokenizer](args)
 
     # Training phase.
     dataset = read_dataset(args, args.train_path)

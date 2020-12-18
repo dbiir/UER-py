@@ -95,7 +95,7 @@ Pre-processing is time-consuming. Using multiple processes can largely accelerat
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
                     --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
-                    --total_steps 5000 --save_checkpoint_steps 1000 --encoder bert --target bert
+                    --total_steps 5000 --save_checkpoint_steps 1000 --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert
 
 mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
@@ -105,13 +105,13 @@ Then we fine-tune pre-trained models on downstream classification dataset. We ca
 ```
 python3 run_classifier.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
-                          --epochs_num 3 --batch_size 32 --encoder bert
+                          --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 or use our [*book_review_model.bin*](https://share.weiyun.com/xOFsYxZA), which is the output of *pretrain.py*：
 ```
 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_zh_vocab.txt \
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
-                          --epochs_num 3 --batch_size 32 --encoder bert
+                          --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ``` 
 It turns out that the result of Google's model is 87.5; The result of *book_review_model.bin* is 88.2. It is also noticeable that we don't need to specify the target in fine-tuning stage. Pre-training target is replaced with task-specific target.
 
@@ -119,7 +119,8 @@ The default path of the fine-tuned classifier model is *./models/classifier_mode
 ```
 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
                                           --test_path datasets/douban_book_review/test_nolabel.tsv \
-                                          --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 --encoder bert
+                                          --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
+                                          --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 *--test_path* specifies the path of the file to be predicted. <br>
 *--prediction_path* specifies the path of the file with prediction results. <br>
@@ -129,11 +130,12 @@ We recommend to use *CUDA_VISIBLE_DEVICES* to specify which GPUs are visible (al
 ```
 CUDA_VISIBLE_DEVICES=0 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_zh_vocab.txt \
                                                  --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
-                                                 --epochs_num 3 --batch_size 32 --encoder bert
+                                                 --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
 
 CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
                                                                  --test_path datasets/douban_book_review/test_nolabel.tsv \
-                                                                 --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 --encoder bert
+                                                                 --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
+                                                                 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 <br>
 
@@ -144,13 +146,13 @@ python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/
 
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
                     --output_model_path models/book_review_mlm_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
-                    --total_steps 5000 --save_checkpoint_steps 2500 --batch_size 64 --encoder bert --target mlm
+                    --total_steps 5000 --save_checkpoint_steps 2500 --batch_size 64 --embedding word_pos_seg --encoder transformer --mask fully_visible --target mlm
 
 mv models/book_review_mlm_model.bin-5000 models/book_review_mlm_model.bin
 
 CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier.py --pretrained_model_path models/book_review_mlm_model.bin --vocab_path models/google_zh_vocab.txt \
                                                    --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
-                                                   --epochs_num 3 --batch_size 64 --encoder bert
+                                                   --epochs_num 3 --batch_size 64 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 The actual batch size of pre-training is *--batch_size* times *--world_size* . <br>
 It turns out that the result of [*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV) is around 88.5.
@@ -217,7 +219,8 @@ CUDA_VISIBLE_DEVICES=0 python3 run_classifier_cv.py --pretrained_model_path mode
                                                     --output_model_path models/classifier_model.bin \
                                                     --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
                                                     --train_path datasets/smp2020-ewect/virus/train.tsv \
-                                                    --epochs_num 3 --batch_size 32 --folds_num 5 --encoder bert
+                                                    --epochs_num 3 --batch_size 32 --folds_num 5 \
+                                                    --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 The results of *google_zh_model.bin* are 79.1/63.8 (Accuracy/Marco F1). <br>
 *--folds_num* specifies the number of rounds of cross-validation. <br>
@@ -235,7 +238,8 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path mo
                                                       --config_path models/bert_large_config.json \
                                                       --train_path datasets/smp2020-ewect/virus/train.tsv \
                                                       --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
-                                                      --epochs_num 3 --batch_size 64 --folds_num 5 --encoder bert
+                                                      --epochs_num 3 --batch_size 64 --folds_num 5 \
+                                                      --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 The results of *RoBERTa-wwm-ext-large* are 80.3/66.8 (Accuracy/Marco F1). <br>
 The example of using our pre-trained model [*Reviews+BertEncoder(large)+MlmTarget*](https://share.weiyun.com/hn7kp9bs) (see model zoo for more details):
@@ -245,7 +249,8 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path mo
                                                       --config_path models/bert_large_config.json \
                                                       --train_path datasets/smp2020-ewect/virus/train.tsv \
                                                       --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
-                                                      --folds_num 5 --epochs_num 3 --batch_size 64 --seed 17 --encoder bert
+                                                      --folds_num 5 --epochs_num 3 --batch_size 64 --seed 17 \
+                                                      --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 The results are 81.3/68.4 (Accuracy/Marco F1), which has very competitive advantage compared with other open-source pre-trained weights. <br>
 Sometimes large model does not converge. We need to try different random seeds by specifying *--seed*. 
@@ -255,7 +260,8 @@ Besides classification, UER-py also provides scripts for other downstream tasks.
 ```
 python3 run_ner.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                    --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
-                   --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 --encoder bert
+                   --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 \
+                   --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 *--label2id_path* specifies the path of label2id file for named entity recognition.
 The default path of the fine-tuned ner model is *./models/ner_model.bin* . Then we do inference with the ner model:
@@ -263,7 +269,8 @@ The default path of the fine-tuned ner model is *./models/ner_model.bin* . Then 
 python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --vocab_path models/google_zh_vocab.txt \
                                    --test_path datasets/msra_ner/test_nolabel.tsv \
                                    --prediction_path datasets/msra_ner/prediction.tsv \
-                                   --label2id_path datasets/msra_ner/label2id.json --encoder bert
+                                   --label2id_path datasets/msra_ner/label2id.json \
+                                   --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 <br>
 
@@ -271,14 +278,16 @@ We could use *run_cmrc.py* for machine reading comprehension:
 ```
 python3 run_cmrc.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                     --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json \
-                    --epochs_num 2 --batch_size 8 --seq_length 512 --encoder bert
+                    --epochs_num 2 --batch_size 8 --seq_length 512 \
+                    --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 We don't specify the *--test_path* because CMRC2018 dataset doesn't provide labels for testset. 
 Then we do inference with the cmrc model:
 ```
 python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vocab_path models/google_zh_vocab.txt \
                                     --test_path datasets/cmrc2018/test.json  \
-                                    --prediction_path datasets/cmrc2018/prediction.json --seq_length 512 --encoder bert
+                                    --prediction_path datasets/cmrc2018/prediction.json --seq_length 512 \
+                                    --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 
 <br/>

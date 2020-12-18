@@ -6,17 +6,11 @@ import random
 import argparse
 import collections
 import torch.nn as nn
+from uer.layers import *
+from uer.encoders import *
 from uer.utils.vocab import Vocab
 from uer.utils.constants import *
-from uer.utils.tokenizer import *
-from uer.layers.embeddings import *
-from uer.encoders.bert_encoder import *
-from uer.encoders.rnn_encoder import *
-from uer.encoders.birnn_encoder import *
-from uer.encoders.cnn_encoder import *
-from uer.encoders.attn_encoder import *
-from uer.encoders.gpt_encoder import *
-from uer.encoders.mixed_encoder import *
+from uer.utils import *
 from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
@@ -160,7 +154,7 @@ def main():
     args.labels_num = count_labels_num(args.train_path)
 
     # Build tokenizer.
-    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
+    args.tokenizer = str2tokenizer[args.tokenizer](args)
 
     # Build classification model.
     model = Classifier(args)
