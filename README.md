@@ -52,7 +52,7 @@ UER-py has the following features:
 <br/>
 
 ## Quickstart
-We use BERT model and [Douban book review classification dataset](https://embedding.github.io/evaluation/) to demonstrate how to use UER-py. We firstly pre-train model on book review corpus and then fine-tune it on classification dataset. There are three input files: book review corpus, book review classification dataset, and vocabulary. All files are encoded in UTF-8 and are included in this project.
+We firstly use BERT model and [Douban book review classification dataset](https://embedding.github.io/evaluation/) to demonstrate how to use UER-py. We pre-train model on book review corpus and then fine-tune it on classification dataset. There are three input files: book review corpus, book review classification dataset, and vocabulary. All files are encoded in UTF-8 and are included in this project.
 
 The format of the corpus for BERT is as follows：
 ```
@@ -76,22 +76,16 @@ label    text_a
 ```
 Label and instance are separated by \t . The first row is a list of column names. The label ID should be an integer between (and including) 0 and n-1 for n-way classification.
 
-We use Google's Chinese vocabulary file, which contains 21128 Chinese characters. The format of the vocabulary is as follows:
-```
-word-1
-word-2
-...
-word-n
-```
+We use Google's Chinese vocabulary file *models/google_zh_vocab.txt*, which contains 21128 Chinese characters.
 
-First of all, we preprocess the book review corpus. We need to specify the model's target in pre-processing stage (*--target*):
+We firstly preprocess the book review corpus. We need to specify the model's target in pre-processing stage (*--target*):
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
                       --processes_num 8 --target bert
 ```
 Notice that ``six>=1.12.0`` is required.
 
-Pre-processing is time-consuming. Using multiple processes can largely accelerate the pre-processing speed (*--processes_num*). After pre-processing, the raw text is converted to *dataset.pt*, which is the input of *pretrain.py*. Then we download Google's pre-trained Chinese model [*google_zh_model.bin*](https://share.weiyun.com/A1C49VPb), and put it in *models* folder. We load Google's pre-trained Chinese model and train it on book review corpus. We should explicitly specify model's encoder (*--encoder*) and target (*--target*). Suppose we have a machine with 8 GPUs.:
+Pre-processing is time-consuming. Using multiple processes can largely accelerate the pre-processing speed (*--processes_num*). After pre-processing, the raw text is converted to *dataset.pt*, which is the input of *pretrain.py*. Then we download Google's pre-trained Chinese model [*google_zh_model.bin*](https://share.weiyun.com/A1C49VPb), and put it in *models* folder. We load Google's pre-trained Chinese model and train it on book review corpus. We should explicitly specify model's embedding (*--embedding*), encoder (*--encoder* and *--mask*), and target (*--target*). Suppose we have a machine with 8 GPUs.:
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
                     --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
@@ -99,7 +93,9 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_voca
 
 mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
+*--mask* specifies the attention mask types. BERT uses bidirectional LM. The word token can attend to all tokens and therefore we use *fully_visible* mask type.
 Notice that the model trained by *pretrain.py* is attacted with the suffix which records the training step. We could remove the suffix for ease of use.
+
 
 Then we fine-tune pre-trained models on downstream classification dataset. We can use *google_zh_model.bin*:
 ```
