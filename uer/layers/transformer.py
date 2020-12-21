@@ -48,6 +48,48 @@ class TransformerLayer(nn.Module):
             output = self.dropout_2(self.feed_forward(output)) + hidden
         return output
 
+
+class TransformerDecoderLayer(nn.Module):
+    def __init__(self, args):
+        super(TransformerDecoderLayer, self).__init__()
+
+        self.self_attn = MultiHeadedAttention(
+            args.hidden_size, args.heads_num, args.dropout
+        )
+        self.context_attn = MultiHeadedAttention(
+            args.hidden_size, args.heads_num, args.dropout
+        )
+        self.layer_norm_1 = LayerNorm(args.hidden_size)
+        self.layer_norm_2 = LayerNorm(args.hidden_size)
+        self.layer_norm_3 = LayerNorm(args.hidden_size)
+        self.feed_forward = PositionwiseFeedForward(
+            args.hidden_size, args.feedforward_size, args.hidden_act
+        )
+
+    def forward(self, hidden, encoder_hidden, mask_decoder, mask_encoder):
+        """
+        Args:
+            emb: [batch_size x seq_length x emb_size]
+            hidden: [batch_size x seq_length x emb_size]
+            mask_encoder: [batch_size x 1 x seq_length x seq_length]
+            mask_decoder: [batch_size x 1 x seq_length x seq_length]
+        Returns:
+            output: [batch_size x seq_length x hidden_size]
+        """
+        x = hidden
+        inter = self.layer_norm_1(hidden)
+        inter = self.self_attn(inter, inter, inter, mask_decoder)
+        inter = x + inter
+        x = inter
+        inter = self.layer_norm_2(inter)
+        inter = self.context_attn(encoder_hidden, encoder_hidden, inter, mask_encoder)
+        inter = x + inter
+        x = inter
+        inter = self.layer_norm_3(inter)
+        inter = self.feed_forward(inter)
+
+        return x + inter 
+
 #class GptBlock(nn.Module):
 #    def __init__(self, args):
 #        super(GptBlock, self).__init__()

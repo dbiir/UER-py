@@ -14,6 +14,10 @@ def main():
                         help="Path of the vocabulary file.")
     parser.add_argument("--spm_model_path", default=None, type=str,
                         help="Path of the sentence piece model.")
+    parser.add_argument("--tgt_vocab_path", default=None, type=str,
+                        help="Path of the target vocabulary file.")
+    parser.add_argument("--tgt_spm_model_path", default=None, type=str,
+                        help="Path of the target sentence piece model.")
     parser.add_argument("--pretrained_model_path", type=str, default=None,
                         help="Path of the pretrained model.")
     parser.add_argument("--output_model_path", type=str, required=True,
@@ -40,24 +44,28 @@ def main():
     parser.add_argument("--seed", type=int, default=7,  help="Random seed.")
     parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg"], default="word_pos_seg",
                         help="Emebdding type.")
+    parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg"], default="word_pos_seg",
+                        help="Target embedding type.")
     parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
                                               "birnn", "bilstm", "bigru", \
                                               "gatedcnn"], \
                                               default="transformer", help="Encoder type.")
+    parser.add_argument("--decoder", choices=["transformer"], \
+                                              default="transformer", help="Decoder type.")
     parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
                         help="Mask type.")
     parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
                         help="Layernorm positioning.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert"], default="bert",
+    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "mt"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--tie_weights", action="store_true",
                         help="Tie the word embedding and softmax weights.")
     parser.add_argument("--factorized_embedding_parameterization", action="store_true",
                         help="Factorized embedding parameterization.")
+    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
     parser.add_argument("--has_lmtarget_bias", action="store_true",
                         help="Add bias on output_layer for lm target.")
-    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
 
     # Masking options.
     parser.add_argument("--span_masking", action="store_true", help="Span masking.")

@@ -32,10 +32,19 @@ def train_and_validate(args):
         sp_model.Load(args.spm_model_path)
         args.vocab = {sp_model.IdToPiece(i): i for i
                       in range(sp_model.GetPieceSize())}
+        if args.target == "mt":
+            tgt_sp_model = spm.SentencePieceProcessor()
+            tgt_sp_model.Load(args.tgt_spm_model_path)
+            args.tgt_vocab = {tgt_sp_model.IdToPiece(i): i for i
+                              in range(tgt_sp_model.GetPieceSize())}
     else:
         vocab = Vocab()
         vocab.load(args.vocab_path)
         args.vocab = vocab.w2i
+        if args.target == "mt":
+            tgt_vocab = Vocab()
+            tgt_vocab.load(args.tgt_vocab_path)
+            args.tgt_vocab = tgt_vocab.w2i
 
     # Build model.
     model = build_model(args)
@@ -486,8 +495,81 @@ def train_bilm(args, gpu_id, rank, loader, model, optimizer, scheduler):
         steps += 1
 
 
+def train_mt(args, gpu_id, rank, loader, model, optimizer, scheduler):
+    model.train()
+    start_time = time.time()
+    total_loss = 0.
+    total_correct, total_denominator = 0., 0.
+    steps = 1
+    total_steps = args.total_steps
+    loader_iter = iter(loader)
+
+    while True:
+        if steps == total_steps + 1:
+            break
+        src, tgt_in, tgt_out, seg = next(loader_iter)
+        if gpu_id is not None:
+            src = src.cuda(gpu_id)
+            tgt_in = tgt_in.cuda(gpu_id)
+            tgt_out = tgt_out.cuda(gpu_id)
+            seg = seg.cuda(gpu_id)
+        # Forward.
+        loss_info = model(src, (tgt_in, tgt_out, src), seg)
+        loss, correct, denominator = loss_info
+        # Backward.
+        total_loss += loss.item()
+        total_correct += correct.item()
+        total_denominator += denominator.item()
+
+        loss = loss / args.accumulation_steps
+
+        if args.fp16:
+            with args.amp.scale_loss(loss, optimizer) as scaled_loss:
+                scaled_loss.backward()
+        else:
+            loss.backward()
+
+        if steps % args.accumulation_steps == 0:
+            optimizer.step()
+            scheduler.step()
+            model.zero_grad()
+
+        if steps % args.report_steps == 0  and \
+            (not args.dist_train or (args.dist_train and rank == 0)):
+
+            loss = total_loss / args.report_steps
+
+            elapsed = time.time() - start_time
+
+            done_tokens = \
+                args.batch_size * src.size(1) * args.report_steps * args.world_size \
+                if args.dist_train \
+                else args.batch_size * src.size(1) * args.report_steps
+
+            print("| {:8d}/{:8d} steps"
+                  "| {:8.2f} tokens/s"
+                  "| loss {:7.2f}"
+                  "| acc: {:3.3f}".format(
+                    steps,
+                    total_steps,
+                    done_tokens / elapsed,
+                    loss,
+                    total_correct / total_denominator))
+
+            total_loss = 0.
+            total_correct, total_denominator = 0., 0.
+
+            start_time = time.time()
+
+        if steps % args.save_checkpoint_steps == 0 and \
+                (not args.dist_train or (args.dist_train and rank == 0)):
+            save_model(model, args.output_model_path + "-" + str(steps))
+
+        steps += 1 
+
+
 str2trainer = {"bert": train_bert, "lm": train_lm, "mlm": train_mlm,
-               "bilm": train_bilm, "albert": train_albert}
+               "bilm": train_bilm, "albert": train_albert, "mt": train_mt}
 
 def worker(proc_id, gpu_ranks, args, model):
     """

@@ -19,6 +19,10 @@ def main():
                         help="Path of the vocabulary file.")
     parser.add_argument("--spm_model_path", default=None, type=str,
                         help="Path of the sentence piece model.")
+    parser.add_argument("--tgt_vocab_path", default=None, type=str,
+                        help="Path of the target vocabulary file.")
+    parser.add_argument("--tgt_spm_model_path", default=None, type=str,
+                        help="Path of the target sentence piece model.")
     parser.add_argument("--dataset_path", type=str, default="dataset.pt",
                         help="Path of the preprocessed dataset.")
 
@@ -32,11 +36,12 @@ def main():
     parser.add_argument("--processes_num", type=int, default=1,
                         help="Split the whole dataset into `processes_num` parts, "
                              "and each part is fed to a single process in training step.")
-    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert"], default="bert",
+    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "mt"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--docs_buffer_size", type=int, default=100000,
                         help="The buffer size of documents in memory, specific to targets that require negative sampling.")
     parser.add_argument("--seq_length", type=int, default=128, help="Sequence length of instances.")
+    parser.add_argument("--tgt_seq_length", type=int, default=128, help="Target sequence length of instances.")
     parser.add_argument("--dup_factor", type=int, default=5,
                         help="Duplicate instances multiple times.")
     parser.add_argument("--short_seq_prob", type=float, default=0.1,
@@ -61,6 +66,8 @@ def main():
 
     # Build tokenizer.
     tokenizer = str2tokenizer[args.tokenizer](args)
+    if args.target == "mt":
+        args.tgt_tokenizer = str2tokenizer[args.tokenizer](args, False)
 
     # Build and save dataset.
     dataset = str2dataset[args.target](args, tokenizer.vocab, tokenizer)
@@ -69,3 +76,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

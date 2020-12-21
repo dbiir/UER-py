@@ -4,6 +4,7 @@ import random
 import pickle
 from multiprocessing import Pool
 from uer.utils.constants import *
+from uer.utils.tokenizers import *
 from uer.utils.misc import count_lines
 from uer.utils.seed import set_seed
 
@@ -798,6 +799,79 @@ class BilmDataLoader(DataLoader):
                 torch.LongTensor(tgt_forward), \
                 torch.LongTensor(tgt_backward), \
                 torch.LongTensor(seg)
+
+
+class MtDataset(Dataset):
+    def __init__(self, args, vocab, tokenizer):
+        super(MtDataset, self).__init__(args, vocab, tokenizer)
+        self.tgt_seq_length = args.tgt_seq_length
+        self.src_vocab, self.src_tokenizer = vocab, tokenizer
+        self.tgt_tokenizer = args.tgt_tokenizer
+        self.tgt_vocab = self.tgt_tokenizer.vocab
+
+    def worker(self, proc_id, start, end):
+        print("Worker %d is building dataset ... " % proc_id)
+        set_seed(self.seed)
+        dataset_writer = open("dataset-tmp-" + str(proc_id) + ".pt", "wb")
+        pos = 0
+        with open(self.corpus_path, mode="r", encoding="utf-8") as f:
+            while pos < start:
+                f.readline()
+                pos += 1
+            while True:
+                line = f.readline()
+                pos += 1
+
+                document_src, document_tgt = line.strip().split("\t")
+                src = self.src_tokenizer.convert_tokens_to_ids(self.src_tokenizer.tokenize(document_src))
+                tgt = self.tgt_tokenizer.convert_tokens_to_ids(self.tgt_tokenizer.tokenize(document_tgt))
+
+                src = [self.src_vocab.get(CLS_TOKEN)] + src + [self.src_vocab.get(SEP_TOKEN)]
+                tgt = [self.tgt_vocab.get(CLS_TOKEN)] + tgt + [self.tgt_vocab.get(SEP_TOKEN)]
+                seg = [1] * len(src)
+
+                src, tgt, seg = src[:self.seq_length], tgt[:self.tgt_seq_length+1], seg[:self.seq_length]
+                while len(src) != self.seq_length:
+                    src.append(PAD_ID)
+                    seg.append(PAD_ID)
+                while len(tgt) != self.tgt_seq_length+1:
+                    tgt.append(PAD_ID)
+                pickle.dump((src, tgt, seg), dataset_writer)
+
+                if pos >= end:
+                    break
+
+            dataset_writer.close()
+
+
+class MtDataLoader(DataLoader):
+    def __iter__(self):
+        while True:
+            while self._empty():
+                self._fill_buf()
+            if self.start + self.batch_size >= self.end:
+                instances = self.buffer[self.start:]
+            else:
+                instances = self.buffer[self.start: self.start + self.batch_size]
+
+            self.start += self.batch_size
+
+            src = []
+            tgt_in = []
+            tgt_out = []
+            seg = []
+
+            for ins in instances:
+                src.append(ins[0])
+                tgt_in.append(ins[1][:-1])
+                tgt_out.append(ins[1][1:])
+                seg.append(ins[2])
+
+            yield torch.LongTensor(src), \
+                torch.LongTensor(tgt_in), \
+                torch.LongTensor(tgt_out), \
+                torch.LongTensor(seg)
+
 
 # class ClsDataset(Dataset):
 #     def worker(self, proc_id, start, end):

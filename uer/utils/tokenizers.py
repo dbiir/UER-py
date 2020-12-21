@@ -9,22 +9,28 @@ import six
 
 class Tokenizer(object):
 
-  def __init__(self, args):
+  def __init__(self, args, is_src=True):
     self.vocab = None
     self.sp_model = None
-    if args.spm_model_path:
+    if is_src == True:
+      spm_model_path = args.spm_model_path
+      vocab_path = args.vocab_path
+    else:
+      spm_model_path = args.tgt_spm_model_path
+      vocab_path = args.tgt_vocab_path
+    if spm_model_path:
       try:
         import sentencepiece as spm
       except ImportError:
         raise ImportError("You need to install SentencePiece to use XLNetTokenizer: https://github.com/google/sentencepiece"
                           "pip install sentencepiece")
       self.sp_model = spm.SentencePieceProcessor()
-      self.sp_model.Load(args.spm_model_path)
+      self.sp_model.Load(spm_model_path)
       self.vocab = {self.sp_model.IdToPiece(i): i for i
                     in range(self.sp_model.GetPieceSize())}
     else:
       self.vocab = Vocab()
-      self.vocab.load(args.vocab_path, is_quiet=True)
+      self.vocab.load(vocab_path, is_quiet=True)
       self.vocab = self.vocab.w2i
     self.inv_vocab = {v: k for k, v in self.vocab.items()}
 
