@@ -23,6 +23,8 @@ class TransformerEncoder(nn.Module):
             self.transformer = nn.ModuleList([
                 TransformerLayer(args) for _ in range(self.layers_num)
             ])
+        if self.layernorm_positioning == "pre":
+            self.layer_norm = LayerNorm(args.hidden_size)
         
     def forward(self, emb, seg):
         """
@@ -59,4 +61,7 @@ class TransformerEncoder(nn.Module):
             else:
                 hidden = self.transformer[i](hidden, mask)
 
-        return hidden
+        if self.layernorm_positioning == "pre":
+            return self.layer_norm(hidden)
+        else:
+            return hidden

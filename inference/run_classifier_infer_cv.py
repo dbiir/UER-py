@@ -16,7 +16,7 @@ sys.path.append(uer_dir)
 
 from uer.utils.vocab import Vocab
 from uer.utils.constants import *
-from uer.utils.tokenizer import * 
+from uer.utils import * 
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_loader import load_model
@@ -48,12 +48,16 @@ def main():
                         help="Sequence length.")
     parser.add_argument("--labels_num", type=int, required=True,
                         help="Number of prediction labels.")
-    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
+    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg"], default="word_pos_seg",
                         help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
-                                              "cnn", "gatedcnn", "attn", "synt", \
-                                              "rcnn", "crnn", "gpt", "bilstm"], \
-                                              default="bert", help="Encoder type.")
+    parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
+                                              "birnn", "bilstm", "bigru", \
+                                              "gatedcnn"], \
+                                              default="transformer", help="Encoder type.")
+    parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
+                        help="Mask type.")
+    parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="pre",
+                        help="Layernorm positioning.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
                         help="Pooling type.")
@@ -82,19 +86,10 @@ def main():
     args = load_hyperparam(args)
 
     # Build tokenizer.
-    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
+    args.tokenizer = str2tokenizer[args.tokenizer](args)
 
     # Build classification model and load parameters.
     args.soft_targets, args.soft_alpha = False, False
-    #model = Classifier(args)
-    #model = load_model(model, args.load_model_path)
-
-    # For simplicity, we use DataParallel wrapper to use multiple GPUs.
-    #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    #model = model.to(device)
-    #if torch.cuda.device_count() > 1:
-    #    print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
-    #    model = torch.nn.DataParallel(model)
 
     dataset = read_dataset(args, args.test_path)
 

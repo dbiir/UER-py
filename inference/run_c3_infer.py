@@ -1,5 +1,5 @@
 """
-  This script provides an exmaple to wrap UER-py for C3 (multiple choice dataset) inference.
+  This script provides an exmaple to wrap UER-py for C3 (a multiple choice dataset) inference.
 """
 import sys
 import os
@@ -15,7 +15,7 @@ sys.path.append(uer_dir)
 
 from uer.utils.vocab import Vocab
 from uer.utils.constants import *
-from uer.utils.tokenizer import *
+from uer.utils import *
 from uer.utils.config import load_hyperparam
 from uer.model_loader import load_model
 from uer.opts import infer_opts
@@ -44,7 +44,7 @@ def main():
     args = load_hyperparam(args)
 
     # Build tokenizer.
-    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
+    args.tokenizer = str2tokenizer[args.tokenizer](args)
 
     # Build classification model and load parameters.
     model = MultipleChoice(args)

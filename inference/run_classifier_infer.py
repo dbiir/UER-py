@@ -15,7 +15,7 @@ sys.path.append(uer_dir)
 
 from uer.utils.vocab import Vocab
 from uer.utils.constants import *
-from uer.utils.tokenizer import * 
+from uer.utils import * 
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_loader import load_model
@@ -94,7 +94,7 @@ def main():
     args = load_hyperparam(args)
 
     # Build tokenizer.
-    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
+    args.tokenizer = str2tokenizer[args.tokenizer](args)
 
     # Build classification model and load parameters.
     args.soft_targets, args.soft_alpha = False, False
