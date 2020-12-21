@@ -13,6 +13,7 @@ class TransformerEncoder(nn.Module):
         self.layers_num = args.layers_num
         self.parameter_sharing = args.parameter_sharing
         self.factorized_embedding_parameterization = args.factorized_embedding_parameterization
+        self.layernorm_positioning = args.layernorm_positioning
 
         if self.factorized_embedding_parameterization:
             self.linear = nn.Linear(args.emb_size, args.hidden_size)
