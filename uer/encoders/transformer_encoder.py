@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from uer.layers.transformer import TransformerLayer
-
+from uer.layers.layer_norm import LayerNorm
 
 class TransformerEncoder(nn.Module):
     """

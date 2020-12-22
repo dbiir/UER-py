@@ -10,16 +10,19 @@ sys.path.append(uer_dir)
 from uer.utils.vocab import Vocab
 from uer.utils.constants import *
 from uer.utils.config import load_hyperparam
-from uer.utils.tokenizer import *
+from uer.utils.tokenizers import *
 from uer.model_builder import build_model
-
+from uer.layers import *
+from uer.encoders import *
+from uer.targets import *
+from uer.utils import *
 
 class SequenceEncoder(torch.nn.Module):
     
-    def __init__(self, model):
+    def __init__(self, args):
         super(SequenceEncoder, self).__init__()
-        self.embedding = model.embedding
-        self.encoder = model.encoder
+        self.embedding = str2embedding[args.embedding](args, len(args.vocab))
+        self.encoder = str2encoder[args.encoder](args)
         # Close dropout.
         self.eval()
 
@@ -49,12 +52,16 @@ if __name__ == '__main__':
     # Model options.
     parser.add_argument("--seq_length", type=int, default=128, help="Sequence length.")
     parser.add_argument("--batch_size", type=int, default=8, help="Batch size.")
-    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
+    parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
+                        help="Mask type.")
+    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg"], default="word_pos_seg",
                         help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
-                                                   "cnn", "gatedcnn", "attn", \
-                                                   "rcnn", "crnn", "gpt", "gpt2"], \
-                                                   default="bert", help="Encoder type.")
+    parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
+                                              "birnn", "bilstm", "bigru", \
+                                              "gatedcnn"], \
+                                              default="transformer", help="Encoder type.")
+    parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
+                        help="Layernorm positioning.") 
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
     parser.add_argument("--factorized_embedding_parameterization", action="store_true",
@@ -79,21 +86,17 @@ if __name__ == '__main__':
     args.vocab = vocab
 
     # Build and load modeli.
-    # A pseudo target is added.
-    args.target = "bert"
-    model = build_model(args)
+    model = SequenceEncoder(args)
     pretrained_model = torch.load(args.pretrained_model_path)
     model.load_state_dict(pretrained_model, strict=False)
-
-    seq_encoder = SequenceEncoder(model)
 
     # For simplicity, we use DataParallel wrapper to use multiple GPUs.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if torch.cuda.device_count() > 1:
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
-        seq_encoder = nn.DataParallel(seq_encoder)
+        model = nn.DataParallel(model)
 
-    seq_encoder = seq_encoder.to(device)
+    model = model.to(device)
     
     # Build tokenizer
     tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
@@ -133,7 +136,7 @@ if __name__ == '__main__':
     for i, (src_batch, seg_batch) in enumerate(batch_loader(args.batch_size, src, seg)):
         src_batch = src_batch.to(device)
         seg_batch = seg_batch.to(device)
-        output = seq_encoder(src_batch, seg_batch)
+        output = model(src_batch, seg_batch)
         feature_vectors.append(output)
 
     feature_vectors = torch.cat(feature_vectors, 0)

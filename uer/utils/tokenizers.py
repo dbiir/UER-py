@@ -54,7 +54,7 @@ class Tokenizer(object):
 class CharTokenizer(Tokenizer):
     
   def __init__(self, args):
-    super().__init__(args)
+    super().__init__(args, is_src)
 
   def tokenize(self, text, use_vocab=True):
     if use_vocab:
@@ -66,7 +66,7 @@ class CharTokenizer(Tokenizer):
 class SpaceTokenizer(Tokenizer):
    
   def __init__(self, args):
-    super().__init__(args)
+    super().__init__(args, is_src)
 
   def tokenize(self, text, use_vocab=True):
     if use_vocab:
@@ -214,7 +214,7 @@ class BertTokenizer(Tokenizer):
   """Runs end-to-end tokenziation."""
 
   def __init__(self, args, do_lower_case=True):
-    super().__init__(args)
+    super().__init__(args, is_src)
     if not args.spm_model_path:
       self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case)
       self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab)
