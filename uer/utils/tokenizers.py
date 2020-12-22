@@ -18,6 +18,7 @@ class Tokenizer(object):
     else:
       spm_model_path = args.tgt_spm_model_path
       vocab_path = args.tgt_vocab_path
+
     if spm_model_path:
       try:
         import sentencepiece as spm
@@ -213,7 +214,7 @@ def whitespace_tokenize(text):
 class BertTokenizer(Tokenizer):
   """Runs end-to-end tokenziation."""
 
-  def __init__(self, args, do_lower_case=True):
+  def __init__(self, args, is_src=True, do_lower_case=True):
     super().__init__(args, is_src)
     if not args.spm_model_path:
       self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case)
@@ -441,3 +442,4 @@ def _is_punctuation(char):
   if cat.startswith("P"):
     return True
   return False
+
