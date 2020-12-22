@@ -29,24 +29,24 @@ for i in range(args.layers):
         print(input_model["transformer.h." + str(i) + ".attn.c_attn.weight"].T[0:768,:].sum().mean())
         
     for j in range(3):
-        output_model["encoder.block." + str(i) + ".self_attn.linear_layers." + str(j) + ".weight"] = input_model["transformer.h." + str(i) + ".attn.c_attn.weight"].T[j*768:(j+1)*768,:]
-        output_model["encoder.block." + str(i) + ".self_attn.linear_layers." + str(j) + ".bias"] = input_model["transformer.h." + str(i) + ".attn.c_attn.bias"][j*768:(j+1)*768]
+        output_model["encoder.transformer." + str(i) + ".self_attn.linear_layers." + str(j) + ".weight"] = input_model["transformer.h." + str(i) + ".attn.c_attn.weight"].T[j*768:(j+1)*768,:]
+        output_model["encoder.transformer." + str(i) + ".self_attn.linear_layers." + str(j) + ".bias"] = input_model["transformer.h." + str(i) + ".attn.c_attn.bias"][j*768:(j+1)*768]
     if i == 0:
-        print(output_model["encoder.block." + str(i) + ".self_attn.linear_layers.0.weight"].sum().mean())
+        print(output_model["encoder.transformer." + str(i) + ".self_attn.linear_layers.0.weight"].sum().mean())
 
-    output_model["encoder.block." + str(i) + ".self_attn.final_linear.weight"] = input_model["transformer.h." + str(i) + ".attn.c_proj.weight"].T
-    output_model["encoder.block." + str(i) + ".self_attn.final_linear.bias"] = input_model["transformer.h." + str(i) + ".attn.c_proj.bias"]
+    output_model["encoder.transformer." + str(i) + ".self_attn.final_linear.weight"] = input_model["transformer.h." + str(i) + ".attn.c_proj.weight"].T
+    output_model["encoder.transformer." + str(i) + ".self_attn.final_linear.bias"] = input_model["transformer.h." + str(i) + ".attn.c_proj.bias"]
 
-    output_model["encoder.block." + str(i) + ".layer_norm_1.gamma"] = input_model["transformer.h." + str(i) + ".ln_1.weight"]
-    output_model["encoder.block." + str(i) + ".layer_norm_1.beta"] = input_model["transformer.h." + str(i) + ".ln_1.bias"]
+    output_model["encoder.transformer." + str(i) + ".layer_norm_1.gamma"] = input_model["transformer.h." + str(i) + ".ln_1.weight"]
+    output_model["encoder.transformer." + str(i) + ".layer_norm_1.beta"] = input_model["transformer.h." + str(i) + ".ln_1.bias"]
 
-    output_model["encoder.block." + str(i) + ".feed_forward.linear_1.weight"] = input_model["transformer.h." + str(i) + ".mlp.c_fc.weight"].T
-    output_model["encoder.block." + str(i) + ".feed_forward.linear_1.bias"] = input_model["transformer.h." + str(i) + ".mlp.c_fc.bias"]
-    output_model["encoder.block." + str(i) + ".feed_forward.linear_2.weight"] = input_model["transformer.h." + str(i) + ".mlp.c_proj.weight"].T
-    output_model["encoder.block." + str(i) + ".feed_forward.linear_2.bias"] = input_model["transformer.h." + str(i) + ".mlp.c_proj.bias"]
+    output_model["encoder.transformer." + str(i) + ".feed_forward.linear_1.weight"] = input_model["transformer.h." + str(i) + ".mlp.c_fc.weight"].T
+    output_model["encoder.transformer." + str(i) + ".feed_forward.linear_1.bias"] = input_model["transformer.h." + str(i) + ".mlp.c_fc.bias"]
+    output_model["encoder.transformer." + str(i) + ".feed_forward.linear_2.weight"] = input_model["transformer.h." + str(i) + ".mlp.c_proj.weight"].T
+    output_model["encoder.transformer." + str(i) + ".feed_forward.linear_2.bias"] = input_model["transformer.h." + str(i) + ".mlp.c_proj.bias"]
 
-    output_model["encoder.block." + str(i) + ".layer_norm_2.gamma"] = input_model["transformer.h." + str(i) + ".ln_2.weight"]
-    output_model["encoder.block." + str(i) + ".layer_norm_2.beta"] = input_model["transformer.h." + str(i) + ".ln_2.bias"]
+    output_model["encoder.transformer." + str(i) + ".layer_norm_2.gamma"] = input_model["transformer.h." + str(i) + ".ln_2.weight"]
+    output_model["encoder.transformer." + str(i) + ".layer_norm_2.beta"] = input_model["transformer.h." + str(i) + ".ln_2.bias"]
 
 
 output_model["encoder.layer_norm.gamma"] = input_model["transformer.ln_f.weight"]
