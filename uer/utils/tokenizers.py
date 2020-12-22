@@ -54,7 +54,7 @@ class Tokenizer(object):
 
 class CharTokenizer(Tokenizer):
     
-  def __init__(self, args):
+  def __init__(self, args, is_src=True):
     super().__init__(args, is_src)
 
   def tokenize(self, text, use_vocab=True):
@@ -66,7 +66,7 @@ class CharTokenizer(Tokenizer):
 
 class SpaceTokenizer(Tokenizer):
    
-  def __init__(self, args):
+  def __init__(self, args, is_src=True):
     super().__init__(args, is_src)
 
   def tokenize(self, text, use_vocab=True):
@@ -235,7 +235,7 @@ class BertTokenizer(Tokenizer):
 class BasicTokenizer(object):
   """Runs basic tokenization (punctuation splitting, lower casing, etc.)."""
 
-  def __init__(self, do_lower_case=True):
+  def __init__(self, is_src=True, do_lower_case=True):
     """Constructs a BasicTokenizer.
     Args:
       do_lower_case: Whether to lower case the input.
@@ -349,7 +349,7 @@ class BasicTokenizer(object):
 class WordpieceTokenizer(object):
   """Runs WordPiece tokenziation."""
 
-  def __init__(self, vocab, unk_token="[UNK]", max_input_chars_per_word=200):
+  def __init__(self, is_src=True, vocab, unk_token="[UNK]", max_input_chars_per_word=200):
     self.vocab = vocab
     self.unk_token = unk_token
     self.max_input_chars_per_word = max_input_chars_per_word
