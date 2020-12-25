@@ -568,8 +568,10 @@ def train_mt(args, gpu_id, rank, loader, model, optimizer, scheduler):
         steps += 1 
 
 
+
 str2trainer = {"bert": train_bert, "lm": train_lm, "mlm": train_mlm,
-               "bilm": train_bilm, "albert": train_albert, "mt": train_mt}
+               "bilm": train_bilm, "albert": train_albert, "mt": train_mt,
+               "t5": train_mt}
 
 def worker(proc_id, gpu_ranks, args, model):
     """

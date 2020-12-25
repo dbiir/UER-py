@@ -57,7 +57,7 @@ def main():
     parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
                         help="Layernorm positioning.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "mt"], default="bert",
+    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "mt", "t5"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--tie_weights", action="store_true",
                         help="Tie the word embedding and softmax weights.")

@@ -439,7 +439,7 @@ class MlmDataset(Dataset):
                                 pickle.dump(instance, dataset_writer)
                             # Clear buffer.
                             docs_buffer = []
-                        if pos >= end - 1:
+                        if pos >= end:
                             if len(docs_buffer) > 0:
                                 all_documents = self.concatenate_docs(docs_buffer)
                                 instances = self.build_instances(all_documents)
@@ -454,7 +454,7 @@ class MlmDataset(Dataset):
                             for instance in instances:
                                 pickle.dump(instance, dataset_writer)
 
-                    if pos >= end - 1:
+                    if pos >= end:
                         break
 
         dataset_writer.close()
@@ -678,26 +678,22 @@ class LmDataset(Dataset):
 
                 document = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line))
 
-                instances_num = len(document) // (self.seq_length-1)
+                document = [self.vocab.get(CLS_TOKEN)] + document + [self.vocab.get(SEP_TOKEN)]
+
+                instances_num = len(document) // (self.seq_length+1)
                 for i in range(instances_num):
-                    src = document[i * (self.seq_length - 1) : (i+1) * (self.seq_length - 1)]
-                    tgt = src + [self.vocab.get(SEP_TOKEN)]
-                    src = [self.vocab.get(CLS_TOKEN)] + src
-                    seg = [1] * len(src)
-                    pickle.dump((src, tgt, seg), dataset_writer)
+                    src = document[i * (self.seq_length+1) : (i+1) * (self.seq_length+1)]
+                    seg_pos = self.seq_length
+                    pickle.dump((src, seg_pos), dataset_writer)
 
-                src = document[instances_num * (self.seq_length-1): ]
+                src = document[instances_num * (self.seq_length+1): ]
                 if len(src) > 0:
-                    tgt = src + [self.vocab.get(SEP_TOKEN)]
-                    src = [self.vocab.get(CLS_TOKEN)] + src
-                    seg = [1] * len(src)
-                    while len(src) != self.seq_length:
+                    seg_pos = len(src)
+                    while len(src) != self.seq_length + 1:
                         src.append(PAD_ID)
-                        tgt.append(PAD_ID)
-                        seg.append(PAD_ID)
-                    pickle.dump((src, tgt, seg), dataset_writer)
+                    pickle.dump((src, seg_pos), dataset_writer)
 
-                if pos >= end - 1:
+                if pos >= end:
                     break
 
         dataset_writer.close()
@@ -720,9 +716,9 @@ class LmDataLoader(DataLoader):
             seg = []
 
             for ins in instances:
-                src.append(ins[0])
-                tgt.append(ins[1])
-                seg.append(ins[2])
+                src.append(ins[0][:-1])
+                tgt.append(ins[0][1:])
+                seg.append([1]*ins[1] + [PAD_ID]*(len(ins[0])-1-ins[1]))
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt), \
@@ -871,6 +867,68 @@ class MtDataLoader(DataLoader):
                 torch.LongTensor(tgt_in), \
                 torch.LongTensor(tgt_out), \
                 torch.LongTensor(seg)
+
+
+class T5Dataset(MlmDataset):
+    '''
+    T5 can reuse the code of MlmDataset.
+    '''
+    pass
+
+
+class T5DataLoader(DataLoader):
+    def __iter__(self):
+        while True:
+            while self._empty():
+                self._fill_buf()
+            if self.start + self.batch_size >= self.end:
+                instances = self.buffer[self.start:]
+            else:
+                instances = self.buffer[self.start: self.start + self.batch_size]
+
+            self.start += self.batch_size
+
+            src = []
+            tgt_in = []
+            tgt_out = []
+            seg = []
+
+            tgt_seq_length = 0
+
+            for abc, ins in enumerate(instances):
+                if len(ins) == 3:
+                    src.append(ins[0])
+                    if len(ins[1]) > tgt_seq_length:
+                        tgt_seq_length = len(ins[1]) + 2
+                    tgt_in.append([self.vocab.get(CLS_TOKEN)])
+                    for mask in ins[1]:
+                        tgt_in[-1].append(mask[1])
+                    tgt_in[-1].append(self.vocab.get(SEP_TOKEN))
+                    tgt_out.append(tgt_in[-1][1:] + [PAD_ID])
+
+                    seg.append([1]*ins[2][0] + [PAD_ID]*(len(ins[0])-ins[2][0]))
+                else:
+                    src_single, tgt_single = mask_seq(ins[0], self.vocab, self.span_masking, self.span_geo_prob, self.span_max_length)
+                    if len(tgt_single) > tgt_seq_length:
+                        tgt_seq_length = len(tgt_single) + 2
+                    src.append(src_single)
+                    tgt_in.append([self.vocab.get(CLS_TOKEN)])
+                    for mask in tgt_single:
+                        tgt_in[-1].append(mask[1])
+                    tgt_in[-1].append(self.vocab.get(SEP_TOKEN))
+                    tgt_out.append(tgt_in[-1][1:] + [PAD_ID])
+                    
+                    seg.append([1]*ins[1][0] + [PAD_ID]*(len(ins[0])-ins[1][0]))
+
+            for i in range(len(tgt_in)):
+                while len(tgt_in[i]) != 32:
+                    tgt_in[i].append(PAD_ID)
+                    tgt_out[i].append(PAD_ID)
+
+            yield torch.LongTensor(src), \
+                torch.LongTensor(tgt_in), \
+                torch.LongTensor(tgt_out), \
+                torch.LongTensor(seg)            
 
 
 # class ClsDataset(Dataset):

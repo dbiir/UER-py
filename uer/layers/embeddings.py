@@ -27,7 +27,7 @@ class WordPosEmbedding(nn.Module):
     def __init__(self, args, vocab_size):
         super(WordPosEmbedding, self).__init__()
         self.dropout = nn.Dropout(args.dropout)
-        self.max_length = 1024
+        self.max_length = 512
         self.word_embedding = nn.Embedding(vocab_size, args.emb_size)
         self.position_embedding = nn.Embedding(self.max_length, args.emb_size)
 
