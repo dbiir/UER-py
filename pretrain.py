@@ -38,6 +38,8 @@ def main():
                         help="Training batch size. The actual batch_size is [batch_size x world_size x accumulation_steps].")
     parser.add_argument("--instances_buffer_size", type=int, default=25600,
                         help="The buffer size of instances in memory.")
+    parser.add_argument("--labels_num", type=int, required=True,
+                        help="Number of prediction labels.")
 
     # Model options.
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout value.")
