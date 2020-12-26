@@ -38,6 +38,8 @@ def main():
                         help="Training batch size. The actual batch_size is [batch_size x world_size x accumulation_steps].")
     parser.add_argument("--instances_buffer_size", type=int, default=25600,
                         help="The buffer size of instances in memory.")
+    parser.add_argument("--labels_num", type=int, required=True,
+                        help="Number of prediction labels.")
 
     # Model options.
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout value.")
@@ -52,12 +54,14 @@ def main():
                                               default="transformer", help="Encoder type.")
     parser.add_argument("--decoder", choices=["transformer"], \
                                               default="transformer", help="Decoder type.")
+    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
+                        help="Pooling type.")
     parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
                         help="Mask type.")
     parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
                         help="Layernorm positioning.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "mt", "t5"], default="bert",
+    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "mt", "t5", "cls"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--tie_weights", action="store_true",
                         help="Tie the word embedding and softmax weights.")
