@@ -1,5 +1,4 @@
 import os
-import pickle
 import sys
 import time
 import math
@@ -45,8 +44,7 @@ def train_and_validate(args):
             tgt_vocab = Vocab()
             tgt_vocab.load(args.tgt_vocab_path)
             args.tgt_vocab = tgt_vocab.w2i
-    if args.target == "cls":
-        args.labels_num = count_labels_num(args.dataset_path)
+
     # Build model.
     model = build_model(args)
 
