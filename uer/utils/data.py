@@ -928,89 +928,89 @@ class T5DataLoader(DataLoader):
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt_in), \
                 torch.LongTensor(tgt_out), \
-                torch.LongTensor(seg)            
+                torch.LongTensor(seg)
 
 
-# class ClsDataset(Dataset):
-#     def worker(self, proc_id, start, end):
-#         print("Worker %d is building dataset ... " % proc_id)
-#         set_seed(self.seed)
-#         f_write = open("dataset-tmp-" + str(proc_id) + ".pt", "wb")
-#         pos = 0
-#         with open(self.corpus_path, mode="r", encoding="utf-8") as f:
-#             while pos < start:
-#                 f.readline()
-#                 pos += 1
-#             while True:
-#                 f.readline()
-#                 pos += 1
+class ClsDataset(Dataset):
+    def worker(self, proc_id, start, end):
+        print("Worker %d is building dataset ... " % proc_id)
+        set_seed(self.seed)
+        f_write = open("dataset-tmp-" + str(proc_id) + ".pt", "wb")
+        pos = 0
+        with open(self.corpus_path, mode="r", encoding="utf-8") as f:
+            while pos < start:
+                line = f.readline()
+                pos += 1
+            while True:
+                line = f.readline()
+                pos += 1
 
-#                 line = line.strip().split('\t')
-#                 if len(line) == 2:
-#                     label = int(line[0])
-#                     text = " ".join(line[1:])
-#                     src = [self.vocab.get(t) for t in self.tokenizer.tokenize(text)]
-#                     src = [CLS_ID] + src
-#                     tgt = label
-#                     seg = [1] * len(src)
-#                     if len(src) >= self.seq_length:
-#                         src = src[:self.seq_length]
-#                         seg = seg[:self.seq_length]
-#                     else:
-#                         while len(src) != self.seq_length:
-#                             src.append(PAD_ID)
-#                             seg.append(PAD_ID)
-#                     pickle.dump((src, tgt, seg), f_write)
-#                 elif len(line) == 3: # For sentence pair input.
-#                     label = int(line[0])
-#                     text_a, text_b = line[1], line[2]
+                line = line.strip().split('\t')
+                if len(line) == 2:
+                    label = int(line[0])
+                    text = " ".join(line[1:])
+                    src = [self.vocab.get(t) for t in self.tokenizer.tokenize(text)]
+                    src = [self.vocab.get(CLS_TOKEN)] + src
+                    tgt = label
+                    seg = [1] * len(src)
+                    if len(src) >= self.seq_length:
+                        src = src[:self.seq_length]
+                        seg = seg[:self.seq_length]
+                    else:
+                        while len(src) != self.seq_length:
+                            src.append(PAD_ID)
+                            seg.append(PAD_ID)
+                    pickle.dump((src, tgt, seg), f_write)
+                elif len(line) == 3:  # For sentence pair input.
+                    label = int(line[0])
+                    text_a, text_b = line[1], line[2]
 
-#                     src_a = [self.vocab.get(t) for t in self.tokenizer.tokenize(text_a)]
-#                     src_a = [CLS_ID] + tokens_a + [SEP_ID]
-#                     src_b = [vocab.get(t) for t in tokenizer.tokenize(text_b)]
-#                     src_b = tokens_b + [SEP_ID]
+                    src_a = [self.vocab.get(t) for t in self.tokenizer.tokenize(text_a)]
+                    src_a = [self.vocab.get(CLS_TOKEN)] + src_a + [self.vocab.get(SEP_TOKEN)]
+                    src_b = [self.vocab.get(t) for t in self.tokenizer.tokenize(text_b)]
+                    src_b = src_b + [self.vocab.get(SEP_TOKEN)]
 
-#                     src = src_a + src_b
-#                     seg = [1] * len(src_a) + [2] * len(src_b)
+                    src = src_a + src_b
+                    seg = [1] * len(src_a) + [2] * len(src_b)
 
-#                     if len(src) >= self.seq_length:
-#                         src = src[:self.seq_length]
-#                         seg = seg[:self.seq_length]
-#                     else:
-#                         while len(src) != self.seq_length:
-#                             src.append(PAD_ID)
-#                             seg.append(PAD_ID)
-#                     pickle.dump((src, tgt, seg), f_write)
-#                 else:
-#                     pass
+                    if len(src) >= self.seq_length:
+                        src = src[:self.seq_length]
+                        seg = seg[:self.seq_length]
+                    else:
+                        while len(src) != self.seq_length:
+                            src.append(PAD_ID)
+                            seg.append(PAD_ID)
+                    pickle.dump((src, tgt, seg), f_write)
+                else:
+                    pass
 
-#                 if pos >= end - 1:
-#                     break
+                if pos >= end - 1:
+                    break
 
-#         f_write.close()
+        f_write.close()
 
 
-# class ClsDataLoader(DataLoader):
-#     def __iter__(self):
-#         while True:
-#             while self._empty():
-#                 self._fill_buf()
-#             if self.start + self.batch_size >= self.end:
-#                 instances = self.buffer[self.start:]
-#             else:
-#                 instances = self.buffer[self.start: self.start + self.batch_size]
+class ClsDataLoader(DataLoader):
+    def __iter__(self):
+        while True:
+            while self._empty():
+                self._fill_buf()
+            if self.start + self.batch_size >= self.end:
+                instances = self.buffer[self.start:]
+            else:
+                instances = self.buffer[self.start: self.start + self.batch_size]
 
-#             self.start += self.batch_size
-        
-#             src = []
-#             tgt = []
-#             seg = []
+            self.start += self.batch_size
 
-#             for ins in instances:
-#                 src.append(ins[0])
-#                 tgt.append(ins[1])
-#                 seg.append(ins[2])
+            src = []
+            tgt = []
+            seg = []
 
-#             yield torch.LongTensor(src), \
-#                 torch.LongTensor(tgt), \
-#                 torch.LongTensor(seg)
+            for ins in instances:
+                src.append(ins[0])
+                tgt.append(ins[1])
+                seg.append(ins[2])
+
+            yield torch.LongTensor(src), \
+                  torch.LongTensor(tgt), \
+                  torch.LongTensor(seg)
