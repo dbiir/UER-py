@@ -36,7 +36,7 @@ def main():
     parser.add_argument("--processes_num", type=int, default=1,
                         help="Split the whole dataset into `processes_num` parts, "
                              "and each part is fed to a single process in training step.")
-    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "mt", "t5"], default="bert",
+    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "mt", "t5", "cls"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--docs_buffer_size", type=int, default=100000,
                         help="The buffer size of documents in memory, specific to targets that require negative sampling.")

@@ -52,12 +52,14 @@ def main():
                                               default="transformer", help="Encoder type.")
     parser.add_argument("--decoder", choices=["transformer"], \
                                               default="transformer", help="Decoder type.")
+    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
+                        help="Pooling type.")
     parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
                         help="Mask type.")
     parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
                         help="Layernorm positioning.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "mt", "t5"], default="bert",
+    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "mt", "t5", "cls"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--tie_weights", action="store_true",
                         help="Tie the word embedding and softmax weights.")
