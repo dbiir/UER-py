@@ -18,18 +18,6 @@ from uer.utils import *
 from uer.utils.vocab import Vocab
 from uer.utils.seed import set_seed
 
-def count_labels_num(path):
-    labels_set = set()
-    file = open(path, "rb")
-    while True:
-        try:
-            _, tgt, _ = pickle.load(file)
-            labels_set.add(tgt)
-        except EOFError:
-            break
-    return len(labels_set)
-
-
 def train_and_validate(args):
     set_seed(args.seed)
 
