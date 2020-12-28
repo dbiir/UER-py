@@ -135,6 +135,7 @@ CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_pa
 ```
 <br>
 预测是否是下一个句子（NSP）是BERT的目标任务之一，但是，NSP任务不适合句子级别的评论，因为我们将句子切分为多个部分。 UER-py可以使用不同的目标，在这里选择使用掩码语言模型（MLM）作为目标任务可能是对书籍评论语料进行预训练更为合适：
+
 ```
 python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
                       --processes_num 8 --target mlm
