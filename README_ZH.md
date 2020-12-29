@@ -11,7 +11,7 @@
 
 <br>
 
-Table of Contents
+目录
 =================
   * [项目特色](#项目特色)
   * [依赖环境](#依赖环境)
@@ -20,26 +20,26 @@ Table of Contents
   * [预训练模型](#预训练模型)
   * [使用说明](#使用说明)
   * [竞赛解决方案](#竞赛解决方案)
-  * [实验](#实验)
+  * [引用](#引用)
 
 
 <br/>
 
 ## 项目特色
 UER-py有如下几方面优势:
-- __可复现性__ UER-py已在许多数据集上进行了测试，与原始预训练模型实现的性能相匹配。
-- __多GPU模式__ UER-py支持CPU、单机单GPU、单机多GPU、多机多GPU训练模式。BERT类模型计算量大。多GPU模式使得UER-py能够在大规模语料上进行预训练。详情见速度评测
-- __模块化__ UER-py使用解耦的设计框架。模型分成Embedding、Encoder、Target三个部分。每个部分提供清晰的接口，便于对模型的模块进行组合优化，提升项目的可扩展性。详情见设计框架
--__效率__ UER-py改进了预处理，预训练和微调阶段，从而大大提高了速度并减少了内存需求。
-- __模型仓库__ 我们会维护并持续发布中文预训练模型。详情见预训练模型
-- __SOTA结果__ UER-py提供了全面的下游任务，包括文本分类、文本对分类、序列标注、阅读理解等
-- __相关功能__ UER-py提供了多项预训练相关的功能和优化，包括特征抽取、近义词检索、预训练模型转换、模型集成、混合精度训练等
+- __可复现__ UER-py已在许多数据集上进行了测试，与原始预训练模型实现的表现相匹配。
+- __多GPU模式__ UER-py支持CPU、单机单GPU、单机多GPU、多机多GPU训练模式。BERT类模型计算量大。多GPU模式使得UER-py能够在大规模语料上进行预训练
+- __模块化__ UER-py使用解耦的模块化设计框架。模型分成Embedding、Encoder、Target三个部分。每个部分提供清晰的接口，便于对模型的模块进行组合优化
+- __高效__ UER-py优化了预处理，预训练和微调阶段的代码，从而大大提高了速度并减少了内存需求
+- __模型仓库__ 我们维护并持续发布中文预训练模型。用户可以根据具体任务的要求，从中选择合适的预训练模型使用。
+- __SOTA结果__ UER-py支持全面的下游任务，包括文本分类、文本对分类、序列标注、阅读理解等
+- __相关功能__ UER-py提供了丰富的预训练相关的功能和优化，包括特征抽取、近义词检索、预训练模型转换、模型集成、混合精度训练等
 
 
 <br/>
 
 ## 依赖环境
-* Python 3.6
+* Python >= 3.6
 * torch >= 1.0
 * six >= 1.12.0
 * argparse
@@ -47,7 +47,7 @@ UER-py有如下几方面优势:
 * 如果使用混合精度，需要安装英伟达的apex
 * 如果涉及到TensorFlow模型的转换，需要安装TensorFlow
 * 如果在tokenizer中使用sentencepiece模型，需要安装sentencepiece
-* 如果要开发堆栈模型，将需要LightGBM和[BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
+* 如果使用模型集成stacking，需要LightGBM和[BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
 
 <br/>
 
@@ -291,10 +291,11 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 
 ## 数据集
 我们收集了一系列[__下游数据集__](https://github.com/dbiir/UER-py/wiki/Datasets)并将其转换为UER可以直接加载的格式。
+
 <br/>
 
 ## 预训练模型
-借助UER-py，我们使用不同的语料库，编码器和目标任务对模型进行了预训练，所有预先训练的模型都可以由UER-py直接加载，将来会发布更多预训练模型，可以在[__modelzoo__](https://github.com/dbiir/UER-py/wiki/Modelzoo)中找到预训练模型和下载链接的详细介绍。
+借助UER-py，我们使用不同的语料库，编码器和目标任务对模型进行了预训练，所有预先训练的模型都可以由UER-py直接加载，将来会发布更多预训练模型，可以在[__预训练模型仓库__](https://github.com/dbiir/UER-py/wiki/Modelzoo)中找到预训练模型和下载链接的详细介绍。
 
 <br/>
 
@@ -334,17 +335,13 @@ UER-py/
 
 ```
 
-更多使用示例在[__instructions__](https://github.com/dbiir/UER-py/wiki/Instructions)中，可以帮助用户快速完成BERT，GPT，ELMO等预训练模型在一系列下游任务上微调的实验。
+更多使用示例在[__使用说明__](https://github.com/dbiir/UER-py/wiki/Instructions)中，可以帮助用户快速完成BERT，GPT，ELMO等预训练模型在一系列下游任务上微调的实验。
 
 <br/>
 
 ## 竞赛解决方案
-UER-py已用于许多NLP竞赛的获奖解决方案中，在本节中，我们提供了一些使用UER-py在NLP比赛中获得SOTA成绩的示例，比如CLUE。更多详细信息参见[__competition solutions__](https://github.com/dbiir/UER-py/wiki/Competition-solutions)。
+UER-py已用于许多NLP竞赛的获奖解决方案中，在本节中，我们提供了一些使用UER-py在NLP比赛中获得SOTA成绩的示例，比如CLUE。更多详细信息参见[__竞赛解决方案__](https://github.com/dbiir/UER-py/wiki/Competition-solutions)。
 
-<br/>
-
-## 实验
-我们进行了各种实验来测试的性能。有关更多实验结果参见[__experiments__](https://github.com/dbiir/UER-py/wiki/Experiments)。
 <br/>
 
 ## 引用
