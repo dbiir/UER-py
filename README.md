@@ -22,7 +22,8 @@ Table of Contents
   * [Modelzoo](#modelzoo)
   * [Instructions](#instructions)
   * [Competition solutions](#competition-solutions)
-  * [Experiments](#experiments)
+  * [Citation](#citation)
+  * [Contact information](#contact-information)
 
 
 <br/>
@@ -350,13 +351,8 @@ UER-py has been used in winning solutions of many NLP competitions. In this sect
 
 <br/>
 
-## Experiments
-We conducted a variety of experiments to test UER's performace. See [__experiments__](https://github.com/dbiir/UER-py/wiki/Experiments) for more experimental results.
-
-<br/>
-
 ## Citation
-#### We have a paper one can cite for [UER-py](https://arxiv.org/pdf/1909.05658.pdf):
+#### If you are using the work (e.g. pre-trained model) in UER-py for academic work, please cite the [system paper](https://arxiv.org/pdf/1909.05658.pdf) published in EMNLP 2019:
 ```
 @article{zhao2019uer,
   title={UER: An Open-Source Toolkit for Pre-training Models},
