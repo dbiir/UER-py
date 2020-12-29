@@ -259,12 +259,12 @@ Besides classification, UER-py also provides scripts for other downstream tasks.
 ```
 python3 run_ner.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                    --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
-                   --output_model_path models/ner_model.bin
+                   --output_model_path models/ner_model.bin \
                    --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 \
                    --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 *--label2id_path* specifies the path of label2id file for named entity recognition.
-The default path of the fine-tuned ner model is *./models/ner_model.bin* . Then we do inference with the ner model:
+Then we do inference with the fine-tuned ner model:
 ```
 python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --vocab_path models/google_zh_vocab.txt \
                                    --test_path datasets/msra_ner/test_nolabel.tsv \
@@ -278,12 +278,12 @@ We could use *run_cmrc.py* for machine reading comprehension:
 ```
 python3 run_cmrc.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                     --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json \
-                    --output_model_path models/cmrc_model.bin
+                    --output_model_path models/cmrc_model.bin \
                     --epochs_num 2 --batch_size 8 --seq_length 512 \
                     --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 We don't specify the *--test_path* because CMRC2018 dataset doesn't provide labels for testset. 
-Then we do inference with the cmrc model:
+Then we do inference with the fine-tuned cmrc model:
 ```
 python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vocab_path models/google_zh_vocab.txt \
                                     --test_path datasets/cmrc2018/test.json  \
