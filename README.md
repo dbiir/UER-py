@@ -10,7 +10,7 @@ Pre-training has become an essential part for NLP tasks and has led to remarkabl
 
 
 <br/>
-Recently we received [Chinese 36-layers RoBERTa](https://share.weiyun.com/J9rj9WRB) and [Chinese 36-layers RoBERTa-WWM](https://share.weiyun.com/UsI0OSeR) models pre-trained with Tencent Cloud TI-ONE (see models/bert_xlarge_config.json for detailed configuration). We were told that the 36-layers RoBERTa achieves improvements on some downstream tasks such as XNLI and CMRC2018 and models with more corpora and training steps will be released in the near future. We look forward to user feedback on this model.
+Recently we received [Chinese 36-layers RoBERTa](https://share.weiyun.com/J9rj9WRB) and [Chinese 36-layers RoBERTa-WWM](https://share.weiyun.com/UsI0OSeR) models pre-trained with Tencent Cloud TI-ONE (see models/bert_xlarge_config.json for detailed configuration). We were told that the 36-layers RoBERTa achieves improvements on some downstream tasks such as XNLI and CMRC2018 and models with more corpora and training steps will be released in the near future. We look forward to user feedback on this model. We recommend to use small learning rates (e.g. 1e-5) for large models.
 <br>
 
 Table of Contents
@@ -112,9 +112,9 @@ python3 run_classifier.py --pretrained_model_path models/book_review_model.bin -
 ``` 
 It turns out that the result of Google's model is 87.5; The result of *book_review_model.bin* is 88.2. It is also noticeable that we don't need to specify the target in fine-tuning stage. Pre-training target is replaced with task-specific target.
 
-The default path of the fine-tuned classifier model is *./models/classifier_model.bin* . Then we do inference with the classifier model. 
+The default path of the fine-tuned classifier model is *models/finetuned_model.bin* . Then we do inference with the fine-tuned model. 
 ```
-python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin --vocab_path models/google_zh_vocab.txt \
                                           --test_path datasets/douban_book_review/test_nolabel.tsv \
                                           --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
                                           --embedding word_pos_seg --encoder transformer --mask fully_visible
@@ -127,6 +127,7 @@ We recommend to use *CUDA_VISIBLE_DEVICES* to specify which GPUs are visible (al
 ```
 CUDA_VISIBLE_DEVICES=0 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_zh_vocab.txt \
                                                  --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
+                                                 --output_model_path models/classifier_model.bin
                                                  --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
 
 CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
@@ -134,6 +135,7 @@ CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_pa
                                                                  --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
                                                                  --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
+Notice that we explicitly specify the fine-tuned model path by *--output_model_path* in fine-tuning stage.
 <br>
 
 BERT consists of next sentence prediction (NSP) target. However, NSP target is not suitable for sentence-level reviews since we have to split a sentence into multiple parts. UER-py facilitates the use of different targets. Using masked language modeling (MLM) as target could be a properer choice for pre-training of reviews:
@@ -161,7 +163,7 @@ python3 run_classifier.py --pretrained_model_path models/reviews_lstm_lm_model.b
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 5  --batch_size 64 --learning_rate 1e-3 --embedding word --encoder lstm --pooling mean
 
-python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin --vocab_path models/google_zh_vocab.txt \
                                           --config_path models/rnn_config.json --test_path datasets/douban_book_review/test_nolabel.tsv \
                                           --prediction_path datasets/douban_book_review/prediction.tsv \
                                           --labels_num 2 --embedding word --encoder lstm --pooling mean
@@ -199,7 +201,7 @@ python3 run_classifier.py --pretrained_model_path models/wikizh_gatedcnn_lm_mode
                           --epochs_num 5  --batch_size 64 --learning_rate 5e-5 \
                           --embedding word --encoder gatedcnn --pooling max
 
-python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin --vocab_path models/google_zh_vocab.txt \
                                           --config_path models/gatedcnn_9_config.json \
                                           --test_path datasets/chnsenticorp/test_nolabel.tsv \
                                           --prediction_path datasets/chnsenticorp/prediction.tsv \
@@ -257,6 +259,7 @@ Besides classification, UER-py also provides scripts for other downstream tasks.
 ```
 python3 run_ner.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                    --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
+                   --output_model_path models/ner_model.bin
                    --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 \
                    --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
@@ -275,6 +278,7 @@ We could use *run_cmrc.py* for machine reading comprehension:
 ```
 python3 run_cmrc.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                     --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json \
+                    --output_model_path models/cmrc_model.bin
                     --epochs_num 2 --batch_size 8 --seq_length 512 \
                     --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
