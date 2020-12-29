@@ -52,9 +52,9 @@ UER-py有如下几方面优势:
 <br/>
 
 ## 快速上手
-我们使用BERT模型和[豆瓣书评分类数据集](https://embedding.github.io/evaluation/)简要说明如何使用UER-py。 我们首先在书评语料上对模型进行预训练，然后在书评分类数据集上对其进行微调。有三个输入文件：书评语料，书评分类数据集和中文词典。这些文件均以UTF-8编码，并被包括在这个项目中。
+我们使用BERT模型和[豆瓣书评分类数据集](https://embedding.github.io/evaluation/)简要说明如何使用UER-py。 我们首先在书评语料上对模型进行预训练，然后在书评分类数据集上对其进行微调。这个过程有三个输入文件：书评语料，书评分类数据集和中文词典。这些文件均为UTF-8编码，并被包括在这个项目中。
 
-BERT的语料格式是一行一个句子，不同文档使用空行分隔，如下所示：
+BERT模型要求的预训练语料格式是一行一个句子，不同文档使用空行分隔，如下所示：
 
 ```
 doc1-sent1
@@ -66,7 +66,7 @@ doc2-sent1
 doc3-sent1
 doc3-sent2
 ```
-书评语料是由书评分类数据集去掉标签得到的。我们将一条评论从中间分开，从而形成一个两句话的文档，具体格式可见*corpora*文件夹中的*book_review_bert.txt*。
+书评语料是由书评分类数据集去掉标签得到的。我们将一条评论从中间分开，从而形成一个两句话的文档，具体可见*corpora*文件夹中的*book_review_bert.txt*。
 
 分类数据集的格式如下：
 ```
@@ -75,18 +75,18 @@ label    text_a
 0        instance2
 1        instance3
 ```
-标签和实例之间用\t分隔，第一行是列名。对于n分类，标签应该是0到n-1之间（包括0和n-1）的整数。
+标签和文本之间用\t分隔，第一行是列名。对于n分类，标签应该是0到n-1之间（包括0和n-1）的整数。
 
 词典文件的格式是一行一个单词，我们使用谷歌提供的包含21128个中文字符的词典文件*models/google_zh_vocab.txt*
 
-我们首先对书评语料进行预处理，并且需要在预处理阶段指定模型的目标任务（*--target*）：
+我们首先对书评语料进行预处理。预处理阶段需要指定模型的目标任务（*--target*）：
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
                       --processes_num 8 --target bert
 ```
 注意我们需要安装 ``six>=1.12.0``。
 
-预处理非常耗时，使用多个进程可以大大加快预处理速度（*--processes_num *）。 原始文本在预处理之后被转换为*pretrain.py*的可以接受的输入，*dataset.pt*。然后下载Google中文预训练模型[*google_zh_model.bin*](https://share.weiyun.com/A1C49VPb)（此文件为UER支持的格式），并将其放在 *model* 文件夹中。接着加载Google中文预训练模型，并在书评语料上对其进行增量预训练。预训练模型由词向量，编码器和目标任务层组成，因此要构建预训练模型，我们应明确指定模型的词向量（*--embedding*），编码器（*--encoder* 和 *--mask *）和目标任务（*--target *）。假设我们有一台带有8个GPU的机器：
+预处理非常耗时，使用多个进程可以大大加快预处理速度（*--processes_num*）。 原始文本在预处理之后被转换为*pretrain.py*的可以接受的输入，*dataset.pt*。然后下载Google中文预训练模型[*google_zh_model.bin*](https://share.weiyun.com/A1C49VPb)（此文件为UER支持的格式），并将其放在 *models* 文件夹中。接着加载Google中文预训练模型，在书评语料上对其进行增量预训练。预训练模型由词向量层，编码层和目标任务层组成。因此要构建预训练模型，我们应明确指定模型的词向量层（*--embedding*），编码器层（*--encoder* 和 *--mask*）和目标任务层（*--target*）的类型。假设我们有一台带有8个GPU的机器：
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
                     --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
@@ -94,8 +94,8 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_voca
 
 mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
-*--mask* 指定掩码类型，BERT使用双向语言模型，句子中的任意一个词可以包含所有词的信息，因此我们使用 *fully_visible* 掩码类型。
-请注意，*pretrain.py*输出的模型回带有记录训练步骤的后缀，这里我们可以删除后缀以方便使用。
+*--mask* 指定注意力网络中使用的遮罩类型。BERT使用双向语言模型，句子中的任意一个词可以看到所有词的信息，因此我们使用 *fully_visible* 遮罩类型。
+请注意，*pretrain.py*输出的模型会带有记录训练步数的后缀，这里我们可以删除后缀以方便使用。
 
 然后，我们在下游分类数据集上微调预训练模型，我们可以用 *google_zh_model.bin*:
 ```
@@ -109,7 +109,7 @@ python3 run_classifier.py --pretrained_model_path models/book_review_model.bin -
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ``` 
-实验结果显示，谷歌BERT模型在书评分类任务上的结果是87.5；*book_review_model.bin* 在其上的结果是88.2。值得注意的是，我们不需要在微调阶段指定目标任务，预训练模型的目标任务已替换为特定下游任务。
+实验结果显示，谷歌BERT模型在书评分类任务上的结果是87.5；*book_review_model.bin* 在其上的结果是88.2。值得注意的是，我们不需要在微调阶段指定目标任务。预训练模型的目标任务已被替换为特定下游任务需要的目标任务。
 
 微调后的分类器模型的默认路径是*./models/classifier_model.bin*, 然后我们利用微调后的分类器模型进行预测。 
 ```
