@@ -104,70 +104,18 @@ def read_dataset(args, path):
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    
+    finetune_opts(parser)
 
-    # Path options.
-    parser.add_argument("--pretrained_model_path", default=None, type=str,
-                        help="Path of the pretrained model.")
-    parser.add_argument("--output_model_path", default="./models/multichoice_model.bin", type=str,
-                        help="Path of the output model.")
-    parser.add_argument("--vocab_path", default=None, type=str,
-                        help="Path of the vocabulary file.")
-    parser.add_argument("--spm_model_path", default=None, type=str,
-                        help="Path of the sentence piece model.")
-    parser.add_argument("--train_path", type=str, required=True,
-                        help="Path of the trainset.")
-    parser.add_argument("--dev_path", type=str, required=True,
-                        help="Path of the devset.")
-    parser.add_argument("--test_path", type=str,
-                        help="Path of the testset.")
-    parser.add_argument("--config_path", default="./models/bert_base_config.json", type=str,
-                        help="Path of the config file.")
-
-    # Model options.
-    parser.add_argument("--batch_size", type=int, default=32,
-                        help="Batch size.")
-    parser.add_argument("--seq_length", type=int, default=512,
-                        help="Sequence length.")
-    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
-                        help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
-                                              "cnn", "gatedcnn", "attn", "synt", \
-                                              "rcnn", "crnn", "gpt", "bilstm"], \
-                                              default="bert", help="Encoder type.")
-    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
-    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
     parser.add_argument("--max_choices_num", default=4, type=int,
                         help="The maximum number of cadicate answer, shorter than this will be padded.")
 
-    # Tokenizer options.
     parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
                         help="Specify the tokenizer."
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."
                              "Space tokenizer segments sentences into words according to space."
                         )
-
-    # Optimizer options.
-    parser.add_argument("--learning_rate", type=float, default=2e-5,
-                        help="Learning rate.")
-    parser.add_argument("--warmup", type=float, default=0.1,
-                        help="Warm up value.")
-    parser.add_argument("--fp16", action='store_true',
-                        help="Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit.")
-    parser.add_argument("--fp16_opt_level", choices=["O0", "O1", "O2", "O3" ], default='O1',
-                        help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
-                             "See details at https://nvidia.github.io/apex/amp.html")
-
-    # Training options.
-    parser.add_argument("--dropout", type=float, default=0.2,
-                        help="Dropout.")
-    parser.add_argument("--epochs_num", type=int, default=8,
-                        help="Number of epochs.")
-    parser.add_argument("--report_steps", type=int, default=100,
-                        help="Specific steps to print prompt.")
-    parser.add_argument("--seed", type=int, default=7,
-                        help="Random seed.")
 
     args = parser.parse_args()
     args.labels_num = args.max_choices_num
