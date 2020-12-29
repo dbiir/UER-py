@@ -17,7 +17,7 @@
   * [依赖环境](#依赖环境)
   * [快速上手](#快速上手)
   * [数据集](#数据集)
-  * [预训练模型](#预训练模型)
+  * [预训练模型仓库](#预训练模型仓库)
   * [使用说明](#使用说明)
   * [竞赛解决方案](#竞赛解决方案)
   * [引用](#引用)
@@ -109,23 +109,24 @@ python3 run_classifier.py --pretrained_model_path models/book_review_model.bin -
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ``` 
-实验结果显示，谷歌BERT模型在书评分类任务上的结果是87.5；*book_review_model.bin* 在其上的结果是88.2。值得注意的是，我们不需要在微调阶段指定目标任务。预训练模型的目标任务已被替换为特定下游任务需要的目标任务。
+实验结果显示，谷歌BERT模型在书评分类任务测试集上的结果为准确率87.5；*book_review_model.bin* 在其上的结果是88.2。值得注意的是，我们不需要在微调阶段指定目标任务。预训练模型的目标任务已被替换为特定下游任务需要的目标任务。
 
-微调后的分类器模型的默认路径是*./models/classifier_model.bin*, 然后我们利用微调后的分类器模型进行预测。 
+微调后的模型的默认路径是*models/finetuned_model.bin*, 然后我们利用微调后的分类器模型进行预测。 
 ```
-python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin --vocab_path models/google_zh_vocab.txt \
                                           --test_path datasets/douban_book_review/test_nolabel.tsv \
                                           --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
                                           --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-*--test_path* 指明需要预测的文件； <br>
-*--prediction_path* 指明预测结果的文件；<br>
-注意到我们需要指定分类任务标签的个数*--labels_num*，这里二分类任务。
+*--test_path* 指定需要预测的文件；<br>
+*--prediction_path* 指定预测结果的文件；<br>
+注意到我们需要指定分类任务标签的个数 *--labels_num* ，这里是二分类任务。
 
 一般下游任务规模不大，通常可以使用一个GPU进行微调和推理，推荐使用CUDA_VISIBLE_DEVICES指定程序可见的GPU（如果不指定，则使用所有的GPU）：
 ```
 CUDA_VISIBLE_DEVICES=0 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_zh_vocab.txt \
                                                  --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
+                                                 --output_model_path models/classifier_model.bin
                                                  --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
 
 CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
@@ -133,8 +134,9 @@ CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_pa
                                                                  --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
                                                                  --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
+注意到这里我们在微调阶段使用 *--output_model_path* 指定微调后的模型的输出路径。
 <br>
-预测是否是下一个句子（NSP）是BERT的目标任务之一，但是，NSP任务不适合句子级别的评论，因为我们将句子切分为多个部分。 UER-py可以使用不同的目标，在这里选择使用掩码语言模型（MLM）作为目标任务可能是对书籍评论语料进行预训练更为合适：
+预测是否是下一个句子（NSP）是BERT的目标任务之一，但是，NSP任务不适合句子级别的评论，因为我们需要将句子切分为多个部分。 UER-py可以让用户自由选择不同的目标任务。这里我们选择使用遮罩语言模型（MLM）作为目标任务。MLM目标任务对书籍评论语料可能是更合适的选择：
 
 ```
 python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
@@ -151,25 +153,25 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier.py --pretrained_model_path model
                                                    --epochs_num 3 --batch_size 64 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 预训练的实际批次大小是 *--batch_size* 乘以 *--world_size*。 <br>
-实验证明[*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV)的结果约为88.5。
+实验证明[*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV)的结果为88.5。
 <br>
 
-BERT由于参数量大，计算比较慢，我们希望可以加速模型运算，同时希望模型能够获得具有竞争力的性能，基于此，我们选择2层LSTM编码器来替代12层Transformer编码器。 我们首先下载用于2层LSTM编码器的[*reviews_lstm_lm_model.bin*](https://share.weiyun.com/57dZhqo)。 然后在下游分类数据集上对其进行微调：
+BERT参数量大，计算较慢。我们希望加速模型运算的同时让模型仍然在下游任务上有好的表现。这里我们选择2层LSTM编码器来替代12层Transformer编码器。 我们首先下载2层LSTM编码器的预训练模型[*reviews_lstm_lm_model.bin*](https://share.weiyun.com/57dZhqo)。 然后在下游分类数据集上对其进行微调：
 ```
 python3 run_classifier.py --pretrained_model_path models/reviews_lstm_lm_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/rnn_config.json \
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 5  --batch_size 64 --learning_rate 1e-3 --embedding word --encoder lstm --pooling mean
 
-python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin --vocab_path models/google_zh_vocab.txt \
                                           --config_path models/rnn_config.json --test_path datasets/douban_book_review/test_nolabel.tsv \
                                           --prediction_path datasets/douban_book_review/prediction.tsv \
                                           --labels_num 2 --embedding word --encoder lstm --pooling mean
 ```
-我们可以在豆瓣书评任务测试集上获得超过85.4的准确性，相比使用相同的LSTM编码器而不进行预训练只能获得约81的准确率，这是一个非常具有竞争力的结果。
+我们可以在书评分类任务测试集上获得超过85.4的准确率。相比之下，我们使用相同的LSTM编码器，但是不加载预训练模型，只能获得约81的准确率。
 <br>
 
-UER-py还提供了许多其他编码器和相应的预训练模型。 <br>
-在Chnsenticorp数据集上对ELMo进行预训练和微调的示例：
+UER-py还支持更多的预训练模型。 <br>
+在Chnsenticorp数据集上使用ELMo进行预训练和微调的示例：
 ```
 python3 preprocess.py --corpus_path corpora/chnsenticorp.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
                       --processes_num 8 --seq_length 192 --target bilm
@@ -198,7 +200,7 @@ python3 run_classifier.py --pretrained_model_path models/wikizh_gatedcnn_lm_mode
                           --epochs_num 5  --batch_size 64 --learning_rate 5e-5 \
                           --embedding word --encoder gatedcnn --pooling max
 
-python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+python3 inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin --vocab_path models/google_zh_vocab.txt \
                                           --config_path models/gatedcnn_9_config.json \
                                           --test_path datasets/chnsenticorp/test_nolabel.tsv \
                                           --prediction_path datasets/chnsenticorp/prediction.tsv \
@@ -218,10 +220,10 @@ CUDA_VISIBLE_DEVICES=0 python3 run_classifier_cv.py --pretrained_model_path mode
                                                     --epochs_num 3 --batch_size 32 --folds_num 5 \
                                                     --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-*google_zh_model.bin* 的结果为79.1/63.8（准确性/F1值）；<br>
+*google_zh_model.bin* 的结果为79.1/63.8（准确率/F1值）；<br>
 *--folds_num* 指定交叉验证的轮数；<br>
-*--output_path* 指定微调模型的路径，*--folds_num* 模型已保存，并且*fold ID*后缀添加到模型名称中；<br>
-*--train_features_path* 指定OOF预测文件的路径；*run_classifier_cv.py*通过训练数据集中其他折页上的模型，在每个折页上的类上生成概率；*train_features.npy* 可用作堆叠功能。*竞赛解决方案*部分中介绍了更多详细信息。<br>
+*--output_path* 指定微调模型的路径，共保存 *--folds_num* 个微调后的模型，并将 *fold ID* 后缀添加到模型名称中；<br>
+*--train_features_path* 指定out-of-fold预测文件的路径；训练集被分成了 *--folds_num* 折。一折样本的预测概率是由其他折上的数据训练的模型预测得到的。*train_features.npy* 可用于stacking集成。*竞赛解决方案*部分中介绍了更多详细信息。<br>
 
 我们可以进一步尝试不同的预训练模型。例如，可以下载[*RoBERTa-wwm-ext-large from HIT*](https://github.com/ymcui/Chinese-BERT-wwm)并将其转换为UER格式：
 ```
@@ -237,8 +239,8 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path mo
                                                       --epochs_num 3 --batch_size 64 --folds_num 5 \
                                                       --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-*RoBERTa-wwm-ext-large* 的结果是80.3/66.8（准确值/F1值）。 <br>
-还使用我们的预训练模型[*Reviews+BertEncoder(large)+MlmTarget*](https://share.weiyun.com/hn7kp9bs)，示例如下（有关更多详细信息，请参见模型仓库）：
+*RoBERTa-wwm-ext-large* 的结果是80.3/66.8（准确率/F1值）。 <br>
+使用我们的预训练模型[*Reviews+BertEncoder(large)+MlmTarget*](https://share.weiyun.com/hn7kp9bs)的示例如下（更多详细信息，请参见模型仓库）：
 ```
 CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path models/reviews_bert_large_mlm_model.bin \
                                                       --vocab_path models/google_zh_vocab.txt \
@@ -248,20 +250,21 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path mo
                                                       --folds_num 5 --epochs_num 3 --batch_size 64 --seed 17 \
                                                       --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-结果为81.3/68.4（准确率/F1值），与其他开源预训练权重相比，这一结果具有相当的竞争力。 <br>
-有时大型模型无法收敛，我们需要通过指定 *--seed* 尝试不同的随机种子。
+结果为81.3/68.4（准确率/F1值），与其他开源预训练权重相比，这一结果很具有竞争力。 <br>
+有时大模型无法收敛，我们需要通过指定 *--seed* 尝试不同的随机种子。
 <br>
 
 除了分类外，UER-py还提供其他下游任务的脚本。我们可以使用*run_ner.py*进行命名实体识别：
 ```
 python3 run_ner.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                    --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
+                   --output_model_path models/ner_model.bin \
                    --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 \
                    --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 *--label2id_path* 指定用于命名实体识别的label2id文件的路径。
 
-微调好的ner模型的默认路径是 *./models/ner_model.bin*，然后我们对ner模型进行推断：
+然后我们对ner模型进行推断：
 ```
 python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --vocab_path models/google_zh_vocab.txt \
                                    --test_path datasets/msra_ner/test_nolabel.tsv \
@@ -275,6 +278,7 @@ python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --voca
 ```
 python3 run_cmrc.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                     --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json \
+                    --output_model_path models/cmrc_model.bin \
                     --epochs_num 2 --batch_size 8 --seq_length 512 \
                     --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
@@ -290,12 +294,12 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 <br/>
 
 ## 数据集
-我们收集了一系列[__下游数据集__](https://github.com/dbiir/UER-py/wiki/Datasets)并将其转换为UER可以直接加载的格式。
+我们收集了一系列[__下游任务数据集__](https://github.com/dbiir/UER-py/wiki/Datasets)并将其转换为UER可以直接加载的格式。
 
 <br/>
 
-## 预训练模型
-借助UER-py，我们使用不同的语料库，编码器和目标任务对模型进行了预训练，所有预先训练的模型都可以由UER-py直接加载，将来会发布更多预训练模型，可以在[__预训练模型仓库__](https://github.com/dbiir/UER-py/wiki/Modelzoo)中找到预训练模型和下载链接的详细介绍。
+## 预训练模型仓库
+借助UER-py，我们使用不同的语料，编码器和目标任务进行了预训练，所有预训练模型都可以由UER-py直接加载。将来我们会发布更多的预训练模型。用户可以在[__预训练模型仓库__](https://github.com/dbiir/UER-py/wiki/Modelzoo)中找到预训练模型和对应描述和下载链接。
 
 <br/>
 
@@ -335,12 +339,12 @@ UER-py/
 
 ```
 
-更多使用示例在[__使用说明__](https://github.com/dbiir/UER-py/wiki/Instructions)中，可以帮助用户快速完成BERT，GPT，ELMO等预训练模型在一系列下游任务上微调的实验。
+更多使用示例在[__使用说明__](https://github.com/dbiir/UER-py/wiki/Instructions)中可以找到。这些示例可以帮助用户快速完成BERT、GPT、ELMO等预训练模型以及使用这些预训练模型在一系列下游任务上微调的实验。
 
 <br/>
 
 ## 竞赛解决方案
-UER-py已用于许多NLP竞赛的获奖解决方案中，在本节中，我们提供了一些使用UER-py在NLP比赛中获得SOTA成绩的示例，比如CLUE。更多详细信息参见[__竞赛解决方案__](https://github.com/dbiir/UER-py/wiki/Competition-solutions)。
+UER-py已用于许多NLP竞赛的获奖解决方案中。在本节中，我们提供了一些使用UER-py在NLP比赛中获得SOTA成绩的示例，例如CLUE。更多详细信息参见[__竞赛解决方案__](https://github.com/dbiir/UER-py/wiki/Competition-solutions)。
 
 <br/>
 
