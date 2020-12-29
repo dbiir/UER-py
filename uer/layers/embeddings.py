@@ -109,6 +109,7 @@ class WordSinusoidalEmbedding(nn.Module):
                 f" limited to {self.pe.size(0)}. See max_len argument."
             )
         emb = emb + self.pe[:emb.size(0)]
+        emb = word_emb + emb
         emb = self.dropout(emb)
         return emb
 
