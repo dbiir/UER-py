@@ -2,7 +2,7 @@ def finetune_opts(parser):
     # Path options.
     parser.add_argument("--pretrained_model_path", default=None, type=str,
                         help="Path of the pretrained model.")
-    parser.add_argument("--output_model_path", default=None, type=str,
+    parser.add_argument("--output_model_path", default="./models/finetuned_model.bin", type=str,
                         help="Path of the output model.")
     parser.add_argument("--vocab_path", default=None, type=str,
                         help="Path of the vocabulary file.")

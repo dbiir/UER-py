@@ -16,13 +16,14 @@ from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
 from run_classifier import build_optimizer, load_or_initialize_parameters, train_model, batch_loader, evaluate
+from uer.opts import finetune_opts
 
 
 class MultipleChoice(nn.Module):
     def __init__(self, args):
         super(MultipleChoice, self).__init__()
-        self.embedding = globals()[args.embedding.capitalize() + "Embedding"](args, len(args.tokenizer.vocab))
-        self.encoder = globals()[args.encoder.capitalize() + "Encoder"](args)
+        self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
+        self.encoder = str2encoder[args.encoder](args)
         self.dropout = nn.Dropout(args.dropout)
         self.output_layer = nn.Linear(args.hidden_size, 1)
 
