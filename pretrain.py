@@ -38,7 +38,7 @@ def main():
                         help="Training batch size. The actual batch_size is [batch_size x world_size x accumulation_steps].")
     parser.add_argument("--instances_buffer_size", type=int, default=25600,
                         help="The buffer size of instances in memory.")
-    parser.add_argument("--labels_num", type=int, required=True,
+    parser.add_argument("--labels_num", type=int, required=False,
                         help="Number of prediction labels.")
 
     # Model options.
@@ -97,6 +97,9 @@ def main():
     parser.add_argument("--backend", choices=["nccl", "gloo"], default="nccl", type=str, help="Distributed backend.")
     
     args = parser.parse_args()
+
+    if args.target == "cls":
+        assert args.labels_num is not None, "Cls target needs the number of prediction labels."
 
     # Load hyper-parameters from config file. 
     if args.config_path:
