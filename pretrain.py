@@ -44,9 +44,9 @@ def main():
     # Model options.
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout value.")
     parser.add_argument("--seed", type=int, default=7,  help="Random seed.")
-    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg"], default="word_pos_seg",
+    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
                         help="Emebdding type.")
-    parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg"], default="word_pos_seg",
+    parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
                         help="Target embedding type.")
     parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
                                               "birnn", "bilstm", "bigru", \
