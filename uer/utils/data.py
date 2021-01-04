@@ -240,6 +240,14 @@ class BertDataset(Dataset):
             while True:
                 line = f.readline()
                 pos += 1
+
+                if pos >= end:
+                    if len(docs_buffer) > 0:
+                        instances = self.build_instances(docs_buffer)
+                        for instance in instances:
+                            pickle.dump(instance, dataset_writer)
+                    break
+
                 if not line.strip():
                     if len(document) >= 1:
                         docs_buffer.append(document)
@@ -257,12 +265,6 @@ class BertDataset(Dataset):
                 if len(sentence) > 0:
                     document.append(sentence)
         
-                if pos >= end:
-                    if len(docs_buffer) > 0:
-                        instances = self.build_instances(docs_buffer)
-                        for instance in instances:
-                            pickle.dump(instance, dataset_writer)
-                    break
         dataset_writer.close()
 
     def build_instances(self, all_documents):
