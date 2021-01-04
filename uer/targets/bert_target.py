@@ -2,7 +2,7 @@ import math
 import torch
 import torch.nn as nn
 from uer.layers.layer_norm import LayerNorm
-from uer.utils.act_fun import gelu
+from uer.utils import *
 
 
 class BertTarget(nn.Module):
@@ -15,6 +15,7 @@ class BertTarget(nn.Module):
         self.vocab_size = vocab_size
         self.hidden_size = args.hidden_size
         self.factorized_embedding_parameterization = args.factorized_embedding_parameterization
+        self.act = str2act[args.hidden_act]
 
         # MLM.
         if self.factorized_embedding_parameterization:
@@ -35,7 +36,7 @@ class BertTarget(nn.Module):
 
     def mlm(self, memory_bank, tgt_mlm):
         # Masked language model (MLM) with full softmax prediction.
-        output_mlm = gelu(self.mlm_linear_1(memory_bank))
+        output_mlm = self.act(self.mlm_linear_1(memory_bank))
         output_mlm = self.layer_norm(output_mlm)
         output_mlm = output_mlm.contiguous().view(-1, self.hidden_size)
         tgt_mlm = tgt_mlm.contiguous().view(-1)

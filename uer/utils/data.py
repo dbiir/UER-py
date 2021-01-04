@@ -257,7 +257,7 @@ class BertDataset(Dataset):
                 if len(sentence) > 0:
                     document.append(sentence)
         
-                if pos >= end - 1:
+                if pos >= end:
                     if len(docs_buffer) > 0:
                         instances = self.build_instances(docs_buffer)
                         for instance in instances:

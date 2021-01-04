@@ -2,7 +2,7 @@ import math
 import torch
 import torch.nn as nn
 from uer.layers.layer_norm import LayerNorm
-from uer.utils.act_fun import gelu
+from uer.utils import *
 
 
 class MlmTarget(nn.Module):
@@ -16,6 +16,7 @@ class MlmTarget(nn.Module):
         self.hidden_size = args.hidden_size
         self.emb_size = args.emb_size
         self.factorized_embedding_parameterization = args.factorized_embedding_parameterization
+        self.act = str2act[args.hidden_act]
         
         if self.factorized_embedding_parameterization:
             self.mlm_linear_1 = nn.Linear(args.hidden_size, args.emb_size)
@@ -32,7 +33,7 @@ class MlmTarget(nn.Module):
 
     def mlm(self, memory_bank, tgt_mlm):
         # Masked language modeling (MLM) with full softmax prediction.
-        output_mlm = gelu(self.mlm_linear_1(memory_bank))
+        output_mlm = self.act(self.mlm_linear_1(memory_bank))
         output_mlm = self.layer_norm(output_mlm)
         if self.factorized_embedding_parameterization:
             output_mlm = output_mlm.contiguous().view(-1, self.emb_size)

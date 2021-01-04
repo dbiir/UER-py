@@ -349,6 +349,7 @@ UER-py已用于许多NLP竞赛的获奖解决方案中。在本节中，我们�
 <br/>
 
 ## 引用
+#### 如果您在您的学术工作中使用我们的工作（比如预训练权重），可以引用我们的[论文](https://arxiv.org/pdf/1909.05658.pdf)：
 ```
 @article{zhao2019uer,
   title={UER: An Open-Source Toolkit for Pre-training Models},
