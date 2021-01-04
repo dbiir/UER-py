@@ -20,6 +20,8 @@ def finetune_opts(parser):
     # Model options.
     parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidal"], default="word_pos_seg",
                         help="Emebdding type.")
+    parser.add_argument("--remove_embedding_layernorm", action="store_true",
+                        help="Remove layernorm on embedding.")
     parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
                                               "birnn", "bilstm", "bigru", \
                                               "gatedcnn"], \
@@ -76,6 +78,8 @@ def infer_opts(parser):
     # Model options.
     parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg"], default="word_pos_seg",
                         help="Emebdding type.")
+    parser.add_argument("--remove_embedding_layernorm", action="store_true",
+                        help="Remove layernorm on embedding.")
     parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
                                               "birnn", "bilstm", "bigru", \
                                               "gatedcnn"], \

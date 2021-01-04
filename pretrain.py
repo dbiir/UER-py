@@ -48,6 +48,8 @@ def main():
                         help="Emebdding type.")
     parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
                         help="Target embedding type.")
+    parser.add_argument("--remove_embedding_layernorm", action="store_true",
+                        help="Remove layernorm on embedding.")
     parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
                                               "birnn", "bilstm", "bigru", \
                                               "gatedcnn"], \
