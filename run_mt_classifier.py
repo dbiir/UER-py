@@ -16,6 +16,7 @@ from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
+from uer.opts import *
 from run_classifier import count_labels_num, batch_loader, build_optimizer, load_or_initialize_parameters, train_model, read_dataset, evaluate
 
 
@@ -96,28 +97,10 @@ def main():
                         help="Path of the config file.")
 
     # Model options.
-    parser.add_argument("--batch_size", type=int, default=32,
-                        help="Batch size.")
-    parser.add_argument("--seq_length", type=int, default=128,
-                        help="Sequence length.")
-    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg"], default="word_pos_seg",
-                        help="Emebdding type.")
-    parser.add_argument("--remove_embedding_layernorm", action="store_true",
-                        help="Remove layernorm on embedding.")
-    parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
-                                              "birnn", "bilstm", "bigru", \
-                                              "gatedcnn"], \
-                                              default="transformer", help="Encoder type.")
-    parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
-                        help="Mask type.")
-    parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="pre",
-                        help="Layernorm positioning.")
-    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
+    model_opts(parser)
+    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",                           
                         help="Pooling type.")
-    parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
-    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
-    
+
     # Tokenizer options.
     parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
                         help="Specify the tokenizer." 
@@ -127,27 +110,12 @@ def main():
                              )
 
     # Optimizer options.
+    optimization_opts(parser)
     parser.add_argument("--soft_targets", action='store_true',
                         help="Train model with logits.")
-    parser.add_argument("--learning_rate", type=float, default=2e-5,
-                        help="Learning rate.")
-    parser.add_argument("--warmup", type=float, default=0.1,
-                        help="Warm up value.")
-    parser.add_argument("--fp16", action='store_true',
-                        help="Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit.")
-    parser.add_argument("--fp16_opt_level", choices=["O0", "O1", "O2", "O3" ], default='O1',
-                        help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
-                             "See details at https://nvidia.github.io/apex/amp.html")
 
     # Training options.
-    parser.add_argument("--dropout", type=float, default=0.5,
-                        help="Dropout.")
-    parser.add_argument("--epochs_num", type=int, default=3,
-                        help="Number of epochs.")
-    parser.add_argument("--report_steps", type=int, default=100,
-                        help="Specific steps to print prompt.")
-    parser.add_argument("--seed", type=int, default=7,
-                        help="Random seed.")
+    training_opts(parser)
     
     args = parser.parse_args()
 
