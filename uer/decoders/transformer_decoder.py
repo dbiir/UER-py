@@ -12,12 +12,10 @@ class TransformerDecoder(nn.Module):
     def __init__(self, args):
         super(TransformerDecoder, self).__init__()
         self.layers_num = args.layers_num
-        # Add
         self.layernorm_positioning = args.layernorm_positioning
         self.transformer_decoder = nn.ModuleList([
             TransformerDecoderLayer(args) for _ in range(self.layers_num)
         ])
-        # Add
         if self.layernorm_positioning == "pre":
             self.layer_norm = LayerNorm(args.hidden_size)
 
@@ -49,7 +47,6 @@ class TransformerDecoder(nn.Module):
         for i in range(self.layers_num):
             hidden = self.transformer_decoder[i](hidden, memory_bank, mask_decoder, mask_encoder)
 
-        # Add
         if self.layernorm_positioning == "pre":
             return self.layer_norm(hidden)
         else:
