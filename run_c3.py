@@ -3,12 +3,11 @@ This script provides an exmaple to wrap UER-py for C3 (a multiple choice dataset
 """
 import argparse
 import json
-import torch
 import random
+import torch
 import torch.nn as nn
 from uer.layers import *
 from uer.encoders import *
-from uer.utils.vocab import Vocab
 from uer.utils.constants import *
 from uer.utils import *
 from uer.utils.optimizers import *
@@ -168,7 +167,7 @@ def main():
         model = torch.nn.DataParallel(model)
     args.model = model
 
-    total_loss, result, best_result = 0., 0., 0.
+    total_loss, result, best_result = 0.0, 0.0, 0.0
 
     print("Start training.")
 
@@ -181,7 +180,7 @@ def main():
 
             if (i + 1) % args.report_steps == 0:
                 print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i+1, total_loss / args.report_steps))
-                total_loss = 0.
+                total_loss = 0.0
 
         result = evaluate(args, read_dataset(args, args.dev_path))
         if result[0] > best_result:

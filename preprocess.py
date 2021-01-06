@@ -1,9 +1,8 @@
 import argparse
-import torch
-from uer.utils.data import *
-from uer.utils import *
 import six
 from packaging import version
+from uer.utils.data import *
+from uer.utils import *
 
 
 assert version.parse(six.__version__) >= version.parse("1.12.0")
@@ -76,4 +75,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

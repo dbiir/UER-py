@@ -1,15 +1,12 @@
 """
 This script provides an exmaple to wrap UER-py for classification (cross validation).
 """
-import torch
 import random
 import argparse
-import collections
 import torch.nn as nn
 import numpy as np
 from uer.layers import *
 from uer.encoders import *
-from uer.utils.vocab import Vocab
 from uer.utils.constants import *
 from uer.utils import *
 from uer.utils.optimizers import *
@@ -34,7 +31,7 @@ def main():
                         help="Path of the sentence piece model.")
     parser.add_argument("--train_path", type=str, required=True,
                         help="Path of the trainset.")
-    parser.add_argument("--config_path", default="./models/bert_base_config.json", type=str,
+    parser.add_argument("--config_path", default="models/bert_base_config.json", type=str,
                         help="Path of the config file.")
     parser.add_argument("--train_features_path", type=str, required=True,
                         help="Path of the train features for stacking.")
@@ -89,8 +86,8 @@ def main():
 
     train_features = []
 
-    total_loss, result = 0., 0.
-    acc, marco_f1 = 0., 0.
+    total_loss, result = 0.0, 0.0
+    acc, marco_f1 = 0.0, 0.0
 
     for fold_id in range(args.folds_num):
         # Build classification model.
@@ -111,7 +108,7 @@ def main():
             model = torch.nn.DataParallel(model)
         args.model = model
 
-        trainset = dataset[0:fold_id*instances_num_per_fold] + dataset[(fold_id+1)*instances_num_per_fold:]
+        trainset = dataset[0 : fold_id * instances_num_per_fold] + dataset[(fold_id + 1) * instances_num_per_fold :]
         random.shuffle(trainset)
         
         train_src = torch.LongTensor([example[0] for example in trainset])
@@ -123,21 +120,21 @@ def main():
         else:
             train_soft_tgt = None
 
-        devset = dataset[fold_id*instances_num_per_fold:(fold_id+1)*instances_num_per_fold]
+        devset = dataset[fold_id * instances_num_per_fold : (fold_id + 1) * instances_num_per_fold]
 
         dev_src = torch.LongTensor([example[0] for example in devset])
         dev_tgt = torch.LongTensor([example[1] for example in devset])
         dev_seg = torch.LongTensor([example[2] for example in devset])
         dev_soft_tgt = None
 
-        for epoch in range(1, args.epochs_num+1):
+        for epoch in range(1, args.epochs_num + 1):
             model.train()
             for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, train_src, train_tgt, train_seg, train_soft_tgt)):    
                 loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch, soft_tgt_batch)
                 total_loss += loss.item()
                 if (i + 1) % args.report_steps == 0:
                     print("Fold id: {}, Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(fold_id, epoch, i+1, total_loss / args.report_steps))
-                    total_loss = 0.
+                    total_loss = 0.0
 
         model.eval()
         for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, dev_src, dev_tgt, dev_seg, dev_soft_tgt)): 
@@ -151,17 +148,17 @@ def main():
 
         output_model_name = ".".join(args.output_model_path.split(".")[:-1])
         output_model_suffix = args.output_model_path.split(".")[-1]
-        save_model(model, output_model_name+"-fold_"+str(fold_id)+"."+output_model_suffix)
+        save_model(model, output_model_name + "-fold_" + str(fold_id) + "." + output_model_suffix)
         result = evaluate(args, devset)
-        acc += result[0]/args.folds_num
+        acc += result[0] / args.folds_num
         f1 = []
         confusion = result[1]
         for i in range(confusion.size()[0]):
-            p = confusion[i,i].item()/confusion[i,:].sum().item()
-            r = confusion[i,i].item()/confusion[:,i].sum().item()
-            f1.append(2*p*r/(p+r))
+            p = confusion[i,i].item() / confusion[i, :].sum().item()
+            r = confusion[i,i].item() / confusion[:, i].sum().item()
+            f1.append(2 * p * r / (p + r))
 
-        marco_f1 += sum(f1)/len(f1)/args.folds_num
+        marco_f1 += sum(f1) / len(f1) / args.folds_num
         # print("Acc. : {:.4f}".format(result[0]))
         # print("Marco F1 : {:.4f}".format(sum(f1)/len(f1)))
         

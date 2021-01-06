@@ -3,12 +3,10 @@ This script provides an example to wrap UER-py for ChID (a multiple choice datas
 """
 import argparse
 import json
-import torch
 import random
-import torch.nn as nn
+import torch
 from uer.layers import *
 from uer.encoders import *
-from uer.utils.vocab import Vocab
 from uer.utils.constants import *
 from uer.utils.tokenizers import *
 from uer.utils.optimizers import *
@@ -27,17 +25,17 @@ def tokenize_chid(text):
         if first_idiom:
             idiom_index = text.find("#idiom")
             output.extend(text[:idiom_index])
-            output.append(text[idiom_index:idiom_index+13])
+            output.append(text[idiom_index : idiom_index + 13])
             pre_idiom_index = idiom_index
             first_idiom = False
         else:
-            if text[idiom_index+1:].find("#idiom") == -1:
-                output.extend(text[pre_idiom_index+13:])
+            if text[idiom_index + 1 :].find("#idiom") == -1:
+                output.extend(text[pre_idiom_index + 13 :])
                 break
             else:
-                idiom_index = idiom_index+1+text[idiom_index+1:].find("#idiom")
-                output.extend(text[pre_idiom_index+13:idiom_index])
-                output.append(text[idiom_index:idiom_index+13])
+                idiom_index = idiom_index + 1 + text[idiom_index + 1 :].find("#idiom")
+                output.extend(text[pre_idiom_index + 13 : idiom_index])
+                output.append(text[idiom_index : idiom_index + 13])
                 pre_idiom_index = idiom_index
 
     return output
@@ -47,15 +45,15 @@ def add_tokens_around(tokens, idiom_index, tokens_num):
     left_tokens_num = tokens_num // 2
     right_tokens_num = tokens_num - left_tokens_num
 
-    if idiom_index >= left_tokens_num and (len(tokens)-1-idiom_index) >= right_tokens_num:
-        left_tokens = tokens[idiom_index-left_tokens_num: idiom_index]
-        right_tokens = tokens[idiom_index+1: idiom_index+1+right_tokens_num]
+    if idiom_index >= left_tokens_num and (len(tokens) - 1 - idiom_index) >= right_tokens_num:
+        left_tokens = tokens[idiom_index - left_tokens_num : idiom_index]
+        right_tokens = tokens[idiom_index + 1 : idiom_index + 1 + right_tokens_num]
     elif idiom_index < left_tokens_num:
         left_tokens = tokens[:idiom_index]
-        right_tokens = tokens[idiom_index+1: idiom_index+1+tokens_num-len(left_tokens)]
-    elif (len(tokens)-1-idiom_index) < right_tokens_num:
-        right_tokens = tokens[idiom_index+1:]
-        left_tokens = tokens[idiom_index-(tokens_num-len(right_tokens)): idiom_index]
+        right_tokens = tokens[idiom_index + 1 : idiom_index + 1 + tokens_num - len(left_tokens)]
+    elif (len(tokens) - 1 - idiom_index) < right_tokens_num:
+        right_tokens = tokens[idiom_index + 1 :]
+        left_tokens = tokens[idiom_index - (tokens_num - len(right_tokens)) : idiom_index]
 
     return left_tokens, right_tokens
 
@@ -69,10 +67,10 @@ def read_dataset(args, data_path, answer_path):
 
     for line in open(data_path, mode="r", encoding="utf-8"):
         example = json.loads(line)
-        options = example['candidates']
-        for context in example['content']:
+        options = example["candidates"]
+        for context in example["content"]:
             chid_tokens = tokenize_chid(context)
-            tags = [token for token in chid_tokens if '#idiom' in token]
+            tags = [token for token in chid_tokens if "#idiom" in token]
             for tag in tags:
                 if answer_path is not None:
                     tgt = answers[tag]
@@ -80,7 +78,7 @@ def read_dataset(args, data_path, answer_path):
                     tgt = -1
                 tokens = []
                 for i, token in enumerate(chid_tokens):
-                    if '#idiom' in token:
+                    if "#idiom" in token:
                         sub_tokens = [str(token)]
                     else:
                         sub_tokens = args.tokenizer.tokenize(token)
@@ -90,17 +88,17 @@ def read_dataset(args, data_path, answer_path):
                 left_tokens, right_tokens = add_tokens_around(tokens, idiom_index, max_tokens_for_doc-1)
 
                 for i in range(len(left_tokens)):
-                    if '#idiom' in left_tokens[i] and left_tokens[i] != tag:
+                    if "#idiom" in left_tokens[i] and left_tokens[i] != tag:
                         left_tokens[i] = "[MASK]"
                 for i in range(len(right_tokens)):
-                    if '#idiom' in right_tokens[i] and right_tokens[i] != tag:
+                    if "#idiom" in right_tokens[i] and right_tokens[i] != tag:
                         right_tokens[i] = "[MASK]"
 
                 dataset.append(([], tgt, [], tag, group_index))
 
                 for option in options:
                     option_tokens = args.tokenizer.tokenize(option)
-                    tokens = ['[CLS]'] + option_tokens + ['[SEP]'] + left_tokens + ['[unused1]'] + right_tokens + ['[SEP]']
+                    tokens = ["[CLS]"] + option_tokens + ["[SEP]"] + left_tokens + ["[unused1]"] + right_tokens + ["[SEP]"]
 
                     src = args.tokenizer.convert_tokens_to_ids(tokens)[:args.seq_length]
                     seg = [0] * len(src)
@@ -136,8 +134,6 @@ def main():
     args = parser.parse_args()
 
     args.labels_num = args.max_choices_num
-    if args.output_model_path == None:
-        args.output_model_path = "./models/chid_model.bin"
 
     # Load the hyperparameters from the config file.
     args = load_hyperparam(args)
@@ -186,7 +182,7 @@ def main():
         model = torch.nn.DataParallel(model)
     args.model = model
 
-    total_loss, result, best_result = 0., 0., 0.
+    total_loss, result, best_result = 0.0, 0.0, 0.0
 
     print("Start training.")
 

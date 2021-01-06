@@ -1,10 +1,9 @@
 """
 This script provides an exmaple to wrap UER-py for classification.
 """
-import torch
 import random
 import argparse
-import collections
+import torch
 import torch.nn as nn
 from uer.layers import *
 from uer.encoders import *
@@ -103,20 +102,20 @@ def build_optimizer(args, model):
 def batch_loader(batch_size, src, tgt, seg, soft_tgt=None):
     instances_num = src.size()[0]
     for i in range(instances_num // batch_size):
-        src_batch = src[i*batch_size: (i+1)*batch_size, :]
-        tgt_batch = tgt[i*batch_size: (i+1)*batch_size]
-        seg_batch = seg[i*batch_size: (i+1)*batch_size, :]
+        src_batch = src[i * batch_size : (i + 1) * batch_size, :]
+        tgt_batch = tgt[i * batch_size : (i + 1) * batch_size]
+        seg_batch = seg[i * batch_size : (i + 1) * batch_size, :]
         if soft_tgt is not None:
-            soft_tgt_batch = soft_tgt[i*batch_size: (i+1)*batch_size, :]
+            soft_tgt_batch = soft_tgt[i * batch_size : (i + 1) * batch_size, :]
             yield src_batch, tgt_batch, seg_batch, soft_tgt_batch
         else:
             yield src_batch, tgt_batch, seg_batch, None
     if instances_num > instances_num // batch_size * batch_size:
-        src_batch = src[instances_num//batch_size*batch_size:, :]
-        tgt_batch = tgt[instances_num//batch_size*batch_size:]
-        seg_batch = seg[instances_num//batch_size*batch_size:, :]
+        src_batch = src[instances_num // batch_size * batch_size :, :]
+        tgt_batch = tgt[instances_num // batch_size * batch_size :]
+        seg_batch = seg[instances_num // batch_size * batch_size :, :]
         if soft_tgt is not None:
-            soft_tgt_batch = soft_tgt[instances_num//batch_size*batch_size:, :]
+            soft_tgt_batch = soft_tgt[instances_num // batch_size * batch_size :, :]
             yield src_batch, tgt_batch, seg_batch, soft_tgt_batch
         else:
             yield src_batch, tgt_batch, seg_batch, None
@@ -146,8 +145,8 @@ def read_dataset(args, path):
                 seg = [1] * len(src_a) + [2] * len(src_b)
 
             if len(src) > args.seq_length:
-                src = src[:args.seq_length]
-                seg = seg[:args.seq_length]
+                src = src[: args.seq_length]
+                seg = seg[: args.seq_length]
             while len(src) < args.seq_length:
                 src.append(0)
                 seg.append(0)
@@ -190,7 +189,6 @@ def evaluate(args, dataset, print_confusion_matrix=False):
     seg = torch.LongTensor([sample[2] for sample in dataset])
 
     batch_size = args.batch_size
-    instances_num = src.size()[0]
 
     correct = 0
     # Confusion matrix.
@@ -203,7 +201,7 @@ def evaluate(args, dataset, print_confusion_matrix=False):
         tgt_batch = tgt_batch.to(args.device)
         seg_batch = seg_batch.to(args.device)
         with torch.no_grad():
-            loss, logits = args.model(src_batch, tgt_batch, seg_batch)
+            _, logits = args.model(src_batch, tgt_batch, seg_batch)
         pred = torch.argmax(nn.Softmax(dim=1)(logits), dim=1)
         gold = tgt_batch
         for j in range(pred.size()[0]):
@@ -215,13 +213,13 @@ def evaluate(args, dataset, print_confusion_matrix=False):
         print(confusion)
         print("Report precision, recall, and f1:")
         for i in range(confusion.size()[0]):
-            p = confusion[i,i].item()/confusion[i,:].sum().item()
-            r = confusion[i,i].item()/confusion[:,i].sum().item()
-            f1 = 2*p*r / (p+r)
+            p = confusion[i,i].item() / confusion[i, :].sum().item()
+            r = confusion[i,i].item() / confusion[:, i].sum().item()
+            f1 = 2 * p * r / (p + r)
             print("Label {}: {:.3f}, {:.3f}, {:.3f}".format(i,p,r,f1))
 
     print("Acc. (Correct/Total): {:.4f} ({}/{}) ".format(correct/len(dataset), correct, len(dataset)))
-    return correct/len(dataset), confusion
+    return correct / len(dataset), confusion
 
 
 def main():
@@ -245,9 +243,6 @@ def main():
                         help="Weight of the soft targets loss.")
     
     args = parser.parse_args()
-
-    if args.output_model_path == None:
-        args.output_model_path = "./models/classifier_model.bin"
 
     # Load the hyperparameters from the config file.
     args = load_hyperparam(args)
@@ -303,7 +298,7 @@ def main():
         model = torch.nn.DataParallel(model)
     args.model = model
 
-    total_loss, result, best_result = 0., 0., 0.
+    total_loss, result, best_result = 0.0, 0.0, 0.0
 
     print("Start training.")
     

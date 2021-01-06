@@ -53,7 +53,7 @@ class NerTagger(nn.Module):
             numerator = -torch.sum(nn.LogSoftmax(dim=-1)(logits) * one_hot, 1)
             
             tgt = tgt.contiguous().view(-1)
-            tgt_mask = (tgt<self.labels_num-1).float().to(torch.device(tgt.device))
+            tgt_mask = (tgt < self.labels_num - 1).float().to(torch.device(tgt.device))
 
             numerator = torch.sum(tgt_mask * numerator)
             denominator = torch.sum(tgt_mask) + 1e-6
@@ -80,9 +80,9 @@ def read_dataset(args, path):
             seg = [1] * len(src)
 
             if len(src) > args.seq_length:
-                src = src[:args.seq_length]
-                tgt = tgt[:args.seq_length]
-                seg = seg[:args.seq_length]
+                src = src[: args.seq_length]
+                tgt = tgt[: args.seq_length]
+                seg = seg[: args.seq_length]
             while len(src) < args.seq_length:
                 src.append(0)
                 tgt.append(args.labels_num-1)
@@ -95,14 +95,14 @@ def read_dataset(args, path):
 def batch_loader(batch_size, src, tgt, seg):
     instances_num = src.size()[0]
     for i in range(instances_num // batch_size):
-        src_batch = src[i*batch_size: (i+1)*batch_size, :]
-        tgt_batch = tgt[i*batch_size: (i+1)*batch_size, :]
-        seg_batch = seg[i*batch_size: (i+1)*batch_size, :]
+        src_batch = src[i * batch_size : (i + 1) * batch_size, :]
+        tgt_batch = tgt[i * batch_size : (i + 1) * batch_size, :]
+        seg_batch = seg[i * batch_size : (i + 1) * batch_size, :]
         yield src_batch, tgt_batch, seg_batch
     if instances_num > instances_num // batch_size * batch_size:
-        src_batch = src[instances_num//batch_size*batch_size:, :]
-        tgt_batch = tgt[instances_num//batch_size*batch_size:, :]
-        seg_batch = seg[instances_num//batch_size*batch_size:, :]
+        src_batch = src[instances_num // batch_size * batch_size :, :]
+        tgt_batch = tgt[instances_num // batch_size * batch_size :, :]
+        seg_batch = seg[instances_num // batch_size * batch_size :, :]
         yield src_batch, tgt_batch, seg_batch
 
 
@@ -210,9 +210,6 @@ def main():
 
     args = parser.parse_args()
 
-    if args.output_model_path == None:
-        args.output_model_path = "./models/ner_model.bin"
-
     # Load the hyperparameters of the config file.
     args = load_hyperparam(args)
 
@@ -271,7 +268,7 @@ def main():
         model = torch.nn.DataParallel(model)
     args.model = model
 
-    total_loss, f1, best_f1 = 0., 0., 0.
+    total_loss, f1, best_f1 = 0.0, 0.0, 0.0
 
     print("Start training.")
 

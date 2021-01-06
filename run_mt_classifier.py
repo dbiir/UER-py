@@ -2,14 +2,12 @@
 This script provides an exmaple to wrap UER-py for multi-task classification.
 """
 import os
-import torch
 import random
 import argparse
-import collections
+import torch
 import torch.nn as nn
 from uer.layers import *
 from uer.encoders import *
-from uer.utils.vocab import Vocab
 from uer.utils.constants import *
 from uer.utils import * 
 from uer.utils.optimizers import *
@@ -70,7 +68,7 @@ def pack_dataset(dataset, dataset_id, batch_size):
         src_batch.append(sample[0])
         tgt_batch.append(sample[1])
         seg_batch.append(sample[2])
-        if (i+1)%batch_size == 0:
+        if (i + 1) % batch_size == 0:
             packed_dataset.append((dataset_id, torch.LongTensor(src_batch), torch.LongTensor(tgt_batch), torch.LongTensor(seg_batch)))
             src_batch, tgt_batch, seg_batch = [], [], []
             continue
@@ -93,7 +91,7 @@ def main():
                         help="Path of the vocabulary file.")
     parser.add_argument("--spm_model_path", default=None, type=str,
                         help="Path of the sentence piece model.")    
-    parser.add_argument("--config_path", default="./models/bert_base_config.json", type=str,
+    parser.add_argument("--config_path", default="models/bert_base_config.json", type=str,
                         help="Path of the config file.")
 
     # Model options.
@@ -111,13 +109,13 @@ def main():
 
     # Optimizer options.
     optimization_opts(parser)
-    parser.add_argument("--soft_targets", action='store_true',
-                        help="Train model with logits.")
 
     # Training options.
     training_opts(parser)
     
     args = parser.parse_args()
+
+    args.soft_targets = False
 
     # Load the hyperparameters from the config file.
     args = load_hyperparam(args)
@@ -174,11 +172,11 @@ def main():
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
 
-    total_loss, result, best_result = 0., 0., 0.
+    total_loss, result, best_result = 0.0, 0.0, 0.0
     
     print("Start training.")
 
-    for epoch in range(1, args.epochs_num+1):
+    for epoch in range(1, args.epochs_num + 1):
         model.train()
         for i, (dataset_id, src_batch, tgt_batch, seg_batch) in enumerate(packed_dataset_all):
             if hasattr(model, "module"):
@@ -189,7 +187,7 @@ def main():
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
                 print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i+1, total_loss / args.report_steps))
-                total_loss = 0.
+                total_loss = 0.0
 
         for dataset_id, path in enumerate(args.dataset_path_list):
             args.labels_num = args.labels_num_list[dataset_id]

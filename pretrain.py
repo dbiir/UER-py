@@ -2,6 +2,7 @@ import argparse
 import torch
 import uer.trainer as trainer
 from uer.utils.config import load_hyperparam
+from uer.opts import *
 
 
 def main():
@@ -40,36 +41,21 @@ def main():
                         help="The buffer size of instances in memory.")
     parser.add_argument("--labels_num", type=int, required=False,
                         help="Number of prediction labels.")
-
-    # Model options.
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout value.")
     parser.add_argument("--seed", type=int, default=7,  help="Random seed.")
-    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
-                        help="Emebdding type.")
+
+    # Model options.
+    model_opts(parser)
     parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
                         help="Target embedding type.")
-    parser.add_argument("--remove_embedding_layernorm", action="store_true",
-                        help="Remove layernorm on embedding.")
-    parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
-                                              "birnn", "bilstm", "bigru", \
-                                              "gatedcnn"], \
-                                              default="transformer", help="Encoder type.")
     parser.add_argument("--decoder", choices=["transformer"], \
                                               default="transformer", help="Decoder type.")
     parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
                         help="Pooling type.")
-    parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
-                        help="Mask type.")
-    parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
-                        help="Layernorm positioning.")
-    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "mt", "t5", "cls"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--tie_weights", action="store_true",
                         help="Tie the word embedding and softmax weights.")
-    parser.add_argument("--factorized_embedding_parameterization", action="store_true",
-                        help="Factorized embedding parameterization.")
-    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
     parser.add_argument("--has_lmtarget_bias", action="store_true",
                         help="Add bias on output_layer for lm target.")
 
@@ -81,15 +67,9 @@ def main():
                         help="Max length for span masking.")
 
     # Optimizer options.
-    parser.add_argument("--learning_rate", type=float, default=2e-5, help="Initial learning rate.")
-    parser.add_argument("--warmup", type=float, default=0.1, help="Warm up value.")
+    optimization_opts(parser) 
     parser.add_argument("--beta1", type=float, default=0.9, help="Beta1 for Adam optimizer.")
     parser.add_argument("--beta2", type=float, default=0.999, help="Beta2 for Adam optimizer.")
-    parser.add_argument("--fp16", action='store_true',
-                        help="Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit")
-    parser.add_argument("--fp16_opt_level", choices=["O0", "O1", "O2", "O3" ], default='O1',
-                        help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
-                             "See details at https://nvidia.github.io/apex/amp.html")
 
     # GPU options.
     parser.add_argument("--world_size", type=int, default=1, help="Total number of processes (GPUs) for training.")
@@ -101,7 +81,7 @@ def main():
     args = parser.parse_args()
 
     if args.target == "cls":
-        assert args.labels_num is not None, "Cls target needs the number of prediction labels."
+        assert args.labels_num is not None, "Cls target needs the denotation of the number of labels."
 
     # Load hyper-parameters from config file. 
     if args.config_path:

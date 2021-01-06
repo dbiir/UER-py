@@ -1,14 +1,11 @@
 """
 This script provides an exmaple to wrap UER-py for document-based question answering.
 """
-import torch
 import random
 import argparse
-import collections
-import torch.nn as nn
+import torch
 from uer.layers import *
 from uer.encoders import *
-from uer.utils.vocab import Vocab
 from uer.utils.constants import *
 from uer.utils import *
 from uer.utils.optimizers import *
@@ -142,9 +139,6 @@ def main():
     
     args = parser.parse_args()
 
-    if args.output_model_path == None:
-        args.output_model_path = "./models/dbqa_model.bin"
-
     # Load the hyperparameters from the config file.
     args = load_hyperparam(args)
 
@@ -195,11 +189,11 @@ def main():
         model = torch.nn.DataParallel(model)
     args.model = model
 
-    total_loss, result, best_result = 0., 0., 0.
+    total_loss, result, best_result = 0.0, 0.0, 0.0
 
     print("Start training.")
     
-    for epoch in range(1, args.epochs_num+1):
+    for epoch in range(1, args.epochs_num + 1):
         model.train()
         for i, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):    
             loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch)

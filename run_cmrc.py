@@ -4,12 +4,11 @@ This script provides an exmaple to wrap UER-py for Chinese machine reading compr
 import re
 import argparse
 import json
-import torch
 import random
+import torch
 import torch.nn as nn
 from uer.layers import *
 from uer.encoders import *
-from uer.utils.vocab import Vocab
 from uer.utils.constants import *
 from uer.utils.tokenizers import * 
 from uer.utils.optimizers import *
@@ -127,16 +126,16 @@ def read_dataset(args, path):
 def batch_loader(batch_size, src, seg, start_position, end_position):
     instances_num = src.size()[0]
     for i in range(instances_num // batch_size):
-        src_batch = src[i*batch_size: (i+1)*batch_size, :]
-        seg_batch = seg[i*batch_size: (i+1)*batch_size, :]
-        start_position_batch = start_position[i*batch_size: (i+1)*batch_size]
-        end_position_batch = end_position[i*batch_size: (i+1)*batch_size]
+        src_batch = src[i * batch_size : (i + 1) * batch_size, :]
+        seg_batch = seg[i * batch_size : (i + 1) * batch_size, :]
+        start_position_batch = start_position[i * batch_size : (i + 1) * batch_size]
+        end_position_batch = end_position[i * batch_size : (i + 1) * batch_size]
         yield src_batch, seg_batch, start_position_batch, end_position_batch
     if instances_num > instances_num // batch_size * batch_size:
-        src_batch = src[instances_num//batch_size*batch_size:, :]
-        seg_batch = seg[instances_num//batch_size*batch_size:, :]
-        start_position_batch = start_position[instances_num//batch_size*batch_size:]
-        end_position_batch = end_position[instances_num//batch_size*batch_size:]
+        src_batch = src[instances_num // batch_size * batch_size :, :]
+        seg_batch = seg[instances_num // batch_size * batch_size :, :]
+        start_position_batch = start_position[instances_num // batch_size * batch_size :]
+        end_position_batch = end_position[instances_num // batch_size * batch_size :]
         yield src_batch, seg_batch, start_position_batch, end_position_batch
 
 
@@ -333,7 +332,7 @@ def evaluate(args, dataset, examples):
     
     f1_score = 100.0 * f1 / total_count
     em_score = 100.0 * em / total_count
-    avg = (f1_score+em_score)*0.5
+    avg = (f1_score + em_score) * 0.5
     print("Avg: {:.4f},F1:{:.4f},EM:{:.4f},Total:{},Skip:{}".format(avg,f1_score,em_score,total_count,skip_count))
     return avg
 
@@ -347,9 +346,6 @@ def main():
                         help="When splitting up a long document into chunks, how much stride to take between chunks.")
 
     args = parser.parse_args()
-
-    if args.output_model_path == None:
-        args.output_model_path = "./models/cmrc_model.bin"
 
     # Load the hyperparameters from the config file.
     args = load_hyperparam(args)
@@ -401,13 +397,13 @@ def main():
         model = torch.nn.DataParallel(model)
     args.model = model
 
-    total_loss = 0.
+    total_loss = 0.0
     result = 0.0
     best_result = 0.0
 
     print("Start training.")
     
-    for epoch in range(1, args.epochs_num+1):
+    for epoch in range(1, args.epochs_num + 1):
         model.train()
         
         for i, (src_batch, seg_batch, start_position_batch, end_position_batch) in enumerate(batch_loader(batch_size, src, seg, start_position, end_position)):
@@ -415,7 +411,7 @@ def main():
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
                 print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i+1, total_loss / args.report_steps))
-                total_loss = 0.
+                total_loss = 0.0
             
         result = evaluate(args, *read_dataset(args, args.dev_path))
         if result > best_result:
