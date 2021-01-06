@@ -87,19 +87,19 @@ class TransformerDecoderLayer(nn.Module):
             output: [batch_size x seq_length x hidden_size]
         """
         if self.layernorm_positioning == "post":
-            inter = self.dropout_1(self.self_attn(hidden, hidden, hidden, mask_decoder))
-            inter_norm = self.layer_norm_1(inter + hidden)
-            mid = self.dropout_2(self.context_attn(encoder_hidden, encoder_hidden, inter_norm, mask_encoder))
-            mid_norm = self.layer_norm_2(mid + inter_norm)
+            query = self.dropout_1(self.self_attn(hidden, hidden, hidden, mask_decoder))
+            query_norm = self.layer_norm_1(query + hidden)
+            mid = self.dropout_2(self.context_attn(encoder_hidden, encoder_hidden, query_norm, mask_encoder))
+            mid_norm = self.layer_norm_2(mid + query_norm)
             output = self.dropout_3(self.feed_forward(mid_norm))
             output = self.layer_norm_3(output + mid_norm)
         else:
             hidden_norm = self.layer_norm_1(hidden)
-            inter = self.dropout_1(self.self_attn(hidden_norm, hidden_norm, hidden_norm, mask_decoder))
-            inter = inter + hidden
-            inter_norm = self.layer_norm_2(inter)
-            mid = self.dropout_2(self.context_attn(encoder_hidden, encoder_hidden, inter_norm, mask_encoder))
-            mid = mid + inter
+            query = self.dropout_1(self.self_attn(hidden_norm, hidden_norm, hidden_norm, mask_decoder))
+            query = query + hidden
+            query_norm = self.layer_norm_2(query)
+            mid = self.dropout_2(self.context_attn(encoder_hidden, encoder_hidden, query_norm, mask_encoder))
+            mid = mid + query
             mid_norm = self.layer_norm_3(mid)
             output = self.dropout_3(self.feed_forward(mid_norm)) + mid
         return output
