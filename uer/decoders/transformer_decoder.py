@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from uer.layers import *
 from uer.layers.transformer import TransformerDecoderLayer
+from uer.layers.layer_norm import LayerNorm
 
 
 class TransformerDecoder(nn.Module):
@@ -11,10 +12,15 @@ class TransformerDecoder(nn.Module):
     def __init__(self, args):
         super(TransformerDecoder, self).__init__()
         self.layers_num = args.layers_num
+        # Add
+        self.layernorm_positioning = args.layernorm_positioning
         self.transformer_decoder = nn.ModuleList([
             TransformerDecoderLayer(args) for _ in range(self.layers_num)
         ])
-        
+        # Add
+        if self.layernorm_positioning == "pre":
+            self.layer_norm = LayerNorm(args.hidden_size)
+
     def forward(self, memory_bank, emb, additional_info):
         """
         Args:
@@ -43,5 +49,9 @@ class TransformerDecoder(nn.Module):
         for i in range(self.layers_num):
             hidden = self.transformer_decoder[i](hidden, memory_bank, mask_decoder, mask_encoder)
 
-        return hidden
+        # Add
+        if self.layernorm_positioning == "pre":
+            return self.layer_norm(hidden)
+        else:
+            return hidden
 
