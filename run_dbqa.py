@@ -24,7 +24,7 @@ def read_dataset(args, path):
                 for i, column_name in enumerate(line.strip().split("\t")):
                     columns[column_name] = i
                 continue
-            line = line.strip().split('\t')
+            line = line.strip().split("\t")
             qid = int(line[columns["qid"]])
             tgt = int(line[columns["label"]])
             text_a, text_b = line[columns["text_a"]], line[columns["text_b"]]
@@ -34,8 +34,8 @@ def read_dataset(args, path):
             seg = [1] * len(src_a) + [2] * len(src_b)
             
             if len(src) > args.seq_length:
-                src = src[:args.seq_length]
-                seg = seg[:args.seq_length]
+                src = src[: args.seq_length]
+                seg = seg[: args.seq_length]
             while len(src) < args.seq_length:
                 src.append(0)
                 seg.append(0)
@@ -54,7 +54,7 @@ def evaluate(args, dataset):
 
     args.model.eval()
 
-    for i, (src_batch, tgt_batch,  seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
+    for i, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
         src_batch = src_batch.to(args.device)
         tgt_batch = tgt_batch.to(args.device)
         seg_batch = seg_batch.to(args.device)
@@ -63,7 +63,7 @@ def evaluate(args, dataset):
         if i == 0:
             logits_all = logits
         if i >= 1:
-            logits_all = torch.cat((logits_all,logits), 0)
+            logits_all = torch.cat((logits_all, logits), 0)
 
     # To calculate MRR, the results are grouped by qid.
     dataset_groupby_qid, correct_answer_orders, scores = [], [], []
@@ -98,7 +98,7 @@ def evaluate(args, dataset):
 
     reciprocal_rank = []
     for qid, correct_answer_orders, scores in dataset_groupby_qid:
-        if len(correct_answer_orders)==1:
+        if len(correct_answer_orders) == 1:
             sorted_scores = sorted(scores, reverse=True)
             for j in range(len(sorted_scores)):
                 if sorted_scores[j] == scores[correct_answer_orders[0]]:
@@ -144,7 +144,7 @@ def main():
 
     set_seed(args.seed)
 
-    # Count the number of labels. 
+    # Count the number of labels.
     args.labels_num = count_labels_num(args.train_path)
 
     # Build tokenizer.
@@ -155,7 +155,7 @@ def main():
 
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
-    
+
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
 
@@ -192,15 +192,15 @@ def main():
     total_loss, result, best_result = 0.0, 0.0, 0.0
 
     print("Start training.")
-    
+
     for epoch in range(1, args.epochs_num + 1):
         model.train()
-        for i, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):    
+        for i, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
             loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch)
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i+1, total_loss / args.report_steps))
-                total_loss = 0.
+                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
+                total_loss = 0.0
 
         result = evaluate(args, read_dataset(args, args.dev_path))
         if result > best_result:

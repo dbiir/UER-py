@@ -9,7 +9,7 @@ import torch.nn as nn
 from uer.layers import *
 from uer.encoders import *
 from uer.utils.constants import *
-from uer.utils import * 
+from uer.utils import *
 from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
@@ -112,7 +112,7 @@ def main():
 
     # Training options.
     training_opts(parser)
-    
+
     args = parser.parse_args()
 
     args.soft_targets = False
@@ -122,14 +122,14 @@ def main():
 
     set_seed(args.seed)
 
-    # Count the number of labels. 
+    # Count the number of labels.
     args.labels_num_list = [count_labels_num(os.path.join(path, "train.tsv")) for path in args.dataset_path_list]
 
     args.datasets_num = len(args.dataset_path_list)
 
     # Build tokenizer.
     args.tokenizer = str2tokenizer[args.tokenizer](args)
-    
+
     # Build multi-task classification model.
     model = MultitaskClassifier(args)
 
@@ -140,16 +140,15 @@ def main():
     model = model.to(args.device)
     args.model = model
 
-
     # Training phase.
     dataset_list = [read_dataset(args, os.path.join(path, "train.tsv")) for path in args.dataset_path_list]
-    packed_dataset_list = [pack_dataset(dataset, i, args.batch_size) for i, dataset in enumerate(dataset_list)] 
-    
+    packed_dataset_list = [pack_dataset(dataset, i, args.batch_size) for i, dataset in enumerate(dataset_list)]
+
     packed_dataset_all = []
     for packed_dataset in packed_dataset_list:
         packed_dataset_all += packed_dataset
 
-    random.shuffle(packed_dataset_all)    
+    random.shuffle(packed_dataset_all)
     instances_num = sum([len(dataset) for dataset in dataset_list])
     batch_size = args.batch_size
 
@@ -159,13 +158,13 @@ def main():
     print("The number of training instances:", instances_num)
 
     optimizer, scheduler = build_optimizer(args, model)
-    
+
     if args.fp16:
         try:
             from apex import amp
         except ImportError:
             raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer,opt_level = args.fp16_opt_level)
+        model, optimizer = amp.initialize(model, optimizer, opt_level = args.fp16_opt_level)
         args.amp = amp
 
     if torch.cuda.device_count() > 1:
@@ -173,7 +172,7 @@ def main():
         model = torch.nn.DataParallel(model)
 
     total_loss, result, best_result = 0.0, 0.0, 0.0
-    
+
     print("Start training.")
 
     for epoch in range(1, args.epochs_num + 1):
@@ -186,7 +185,7 @@ def main():
             loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch, None)
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i+1, total_loss / args.report_steps))
+                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
                 total_loss = 0.0
 
         for dataset_id, path in enumerate(args.dataset_path_list):
@@ -197,7 +196,7 @@ def main():
                 model.change_dataset(dataset_id)
             result = evaluate(args, read_dataset(args, os.path.join(path, "dev.tsv")))
 
-    save_model(model, args.output_model_path) 
+    save_model(model, args.output_model_path)
 
 
 if __name__ == "__main__":

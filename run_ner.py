@@ -51,7 +51,7 @@ class NerTagger(nn.Module):
                       scatter_(1, tgt, 1.0)
 
             numerator = -torch.sum(nn.LogSoftmax(dim=-1)(logits) * one_hot, 1)
-            
+
             tgt = tgt.contiguous().view(-1)
             tgt_mask = (tgt < self.labels_num - 1).float().to(torch.device(tgt.device))
 
@@ -71,7 +71,7 @@ def read_dataset(args, path):
                 for i, column_name in enumerate(line.strip().split("\t")):
                     columns[column_name] = i
                 continue
-            line = line.strip().split('\t')
+            line = line.strip().split("\t")
             labels = line[columns["label"]]
             tgt = [args.l2i[l] for l in labels.split(" ")]
 
@@ -85,7 +85,7 @@ def read_dataset(args, path):
                 seg = seg[: args.seq_length]
             while len(src) < args.seq_length:
                 src.append(0)
-                tgt.append(args.labels_num-1)
+                tgt.append(args.labels_num - 1)
                 seg.append(0)
             dataset.append([src, tgt, seg])
 
@@ -148,7 +148,7 @@ def evaluate(args, dataset):
         loss, logits = args.model(src_batch, tgt_batch, seg_batch)
 
         pred = logits.argmax(dim=-1)
-        gold = tgt_batch.contiguous().view(-1,1)
+        gold = tgt_batch.contiguous().view(-1, 1)
 
         for j in range(gold.size()[0]):
             if gold[j].item() in args.begin_ids:
@@ -163,7 +163,7 @@ def evaluate(args, dataset):
         for j in range(gold.size()[0]):
             if gold[j].item() in args.begin_ids:
                 start = j
-                for k in range(j+1, gold.size()[0]):
+                for k in range(j + 1, gold.size()[0]):
                     if gold[k].item() == args.l2i["[PAD]"] or gold[k].item() == args.l2i["O"] or gold[k].item() in args.begin_ids:
                         end = k - 1
                         break
@@ -174,7 +174,7 @@ def evaluate(args, dataset):
         for j in range(pred.size()[0]):
             if pred[j].item() in args.begin_ids and gold[j].item() != args.l2i["[PAD]"]:
                 start = j
-                for k in range(j+1, pred.size()[0]):
+                for k in range(j + 1, pred.size()[0]):
                     if pred[k].item() == args.l2i["[PAD]"] or pred[k].item() == args.l2i["O"] or pred[k].item() in args.begin_ids:
                         end = k - 1
                         break
@@ -185,17 +185,17 @@ def evaluate(args, dataset):
         for entity in pred_entities_pos:
             if entity not in gold_entities_pos:
                 continue
-            for j in range(entity[0], entity[1]+1):
+            for j in range(entity[0], entity[1] + 1):
                 if gold[j].item() != pred[j].item():
                     break
             else:
                 correct += 1
 
     print("Report precision, recall, and f1:")
-    p = correct/pred_entities_num
-    r = correct/gold_entities_num
-    f1 = 2*p*r/(p+r)
-    print("{:.3f}, {:.3f}, {:.3f}".format(p,r,f1))
+    p = correct / pred_entities_num
+    r = correct / gold_entities_num
+    f1 = 2 * p * r / (p + r)
+    print("{:.3f}, {:.3f}, {:.3f}".format(p, r, f1))
 
     return f1
 
@@ -236,7 +236,7 @@ def main():
 
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
-    
+
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
 
@@ -261,8 +261,8 @@ def main():
             from apex import amp
         except ImportError:
             raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer,opt_level = args.fp16_opt_level)
-    
+        model, optimizer = amp.initialize(model, optimizer, opt_level = args.fp16_opt_level)
+
     if torch.cuda.device_count() > 1:
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
@@ -272,14 +272,14 @@ def main():
 
     print("Start training.")
 
-    for epoch in range(1, args.epochs_num+1):
+    for epoch in range(1, args.epochs_num + 1):
         model.train()
         for i, (src_batch, tgt_batch, seg_batch) in enumerate(batch_loader(batch_size, src, tgt, seg)):
             loss = train(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch)
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i+1, total_loss / args.report_steps))
-                total_loss = 0.
+                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
+                total_loss = 0.0
 
         f1 = evaluate(args, read_dataset(args, args.dev_path))
         if f1 > best_f1:

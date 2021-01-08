@@ -85,7 +85,7 @@ def read_dataset(args, data_path, answer_path):
                     for sub_token in sub_tokens:
                         tokens.append(sub_token)
                 idiom_index = tokens.index(tag)
-                left_tokens, right_tokens = add_tokens_around(tokens, idiom_index, max_tokens_for_doc-1)
+                left_tokens, right_tokens = add_tokens_around(tokens, idiom_index, max_tokens_for_doc - 1)
 
                 for i in range(len(left_tokens)):
                     if "#idiom" in left_tokens[i] and left_tokens[i] != tag:
@@ -100,7 +100,7 @@ def read_dataset(args, data_path, answer_path):
                     option_tokens = args.tokenizer.tokenize(option)
                     tokens = ["[CLS]"] + option_tokens + ["[SEP]"] + left_tokens + ["[unused1]"] + right_tokens + ["[SEP]"]
 
-                    src = args.tokenizer.convert_tokens_to_ids(tokens)[:args.seq_length]
+                    src = args.tokenizer.convert_tokens_to_ids(tokens)[: args.seq_length]
                     seg = [0] * len(src)
 
                     while len(src) < args.seq_length:
@@ -111,11 +111,11 @@ def read_dataset(args, data_path, answer_path):
                     dataset[-1][2].append(seg)
 
                 while len(dataset[-1][0]) < args.max_choices_num:
-                    dataset[-1][0].append([0]*args.seq_length)
-                    dataset[-1][2].append([0]*args.seq_length)
+                    dataset[-1][0].append([0] * args.seq_length)
+                    dataset[-1][2].append([0] * args.seq_length)
         group_index += 1
 
-    return dataset 
+    return dataset
 
 
 def main():
@@ -174,7 +174,7 @@ def main():
             from apex import amp
         except ImportError:
             raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer, opt_level = args.fp16_opt_level)
+        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
         args.amp = amp
 
     if torch.cuda.device_count() > 1:
@@ -186,7 +186,7 @@ def main():
 
     print("Start training.")
 
-    for epoch in range(1, args.epochs_num+1):
+    for epoch in range(1, args.epochs_num + 1):
         model.train()
         for i, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
 
@@ -194,13 +194,14 @@ def main():
             total_loss += loss.item()
 
             if (i + 1) % args.report_steps == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i+1, total_loss / args.report_steps))
-                total_loss = 0.
+                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
+                total_loss = 0.0
 
         result = evaluate(args, read_dataset(args, args.dev_path, args.dev_answer_path))
         if result[0] > best_result:
             best_result = result[0]
             save_model(model, args.output_model_path)
+
 
 if __name__ == "__main__":
     main()

@@ -62,7 +62,7 @@ def read_dataset(args, path):
     examples = []
     for i in range(len(data)):
         for j in range(len(data[i][1])):
-            example = ['\n'.join(data[i][0]).lower(), data[i][1][j]["question"].lower()]
+            example = ["\n".join(data[i][0]).lower(), data[i][1][j]["question"].lower()]
             for k in range(len(data[i][1][j]["choice"])):
                 example += [data[i][1][j]["choice"][k].lower()]
             for k in range(len(data[i][1][j]["choice"]), args.max_choices_num):
@@ -82,7 +82,7 @@ def read_dataset(args, path):
 
         for k in range(args.max_choices_num):
 
-            src_a = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(example[k+2]) + [SEP_TOKEN])
+            src_a = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(example[k + 2]) + [SEP_TOKEN])
             src_b = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(example[1]) + [SEP_TOKEN])
             src_c = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(example[0]) + [SEP_TOKEN])
 
@@ -90,8 +90,8 @@ def read_dataset(args, path):
             seg = [1] * (len(src_a) + len(src_b)) + [2] * len(src_c)
 
             if len(src) > args.seq_length:
-                src = src[:args.seq_length]
-                seg = seg[:args.seq_length]
+                src = src[: args.seq_length]
+                seg = seg[: args.seq_length]
             while len(src) < args.seq_length:
                 src.append(0)
                 seg.append(0)
@@ -104,7 +104,7 @@ def read_dataset(args, path):
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    
+
     finetune_opts(parser)
 
     parser.add_argument("--max_choices_num", default=4, type=int,
@@ -159,7 +159,7 @@ def main():
             from apex import amp
         except ImportError:
             raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer, opt_level = args.fp16_opt_level)
+        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
         args.amp = amp
 
     if torch.cuda.device_count() > 1:
@@ -171,7 +171,7 @@ def main():
 
     print("Start training.")
 
-    for epoch in range(1, args.epochs_num+1):
+    for epoch in range(1, args.epochs_num + 1):
         model.train()
         for i, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
 
@@ -179,7 +179,7 @@ def main():
             total_loss += loss.item()
 
             if (i + 1) % args.report_steps == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i+1, total_loss / args.report_steps))
+                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
                 total_loss = 0.0
 
         result = evaluate(args, read_dataset(args, args.dev_path))

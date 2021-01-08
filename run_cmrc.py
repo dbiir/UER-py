@@ -10,7 +10,7 @@ import torch.nn as nn
 from uer.layers import *
 from uer.encoders import *
 from uer.utils.constants import *
-from uer.utils.tokenizers import * 
+from uer.utils.tokenizers import *
 from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
@@ -41,14 +41,14 @@ class MachineReadingComprehension(nn.Module):
         start_loss = nn.NLLLoss()(nn.LogSoftmax(dim=-1)(start_logits), start_position)
         end_loss = nn.NLLLoss()(nn.LogSoftmax(dim=-1)(end_logits), end_position)
         loss = (start_loss + end_loss) / 2
-        
+
         return loss, start_logits, end_logits
 
 
 def read_examples(path):
-    # Read squad-style examples. 
+    # Read squad-style examples.
     examples = []
-    with open(path, mode='r', encoding='utf-8') as f:
+    with open(path, mode="r", encoding="utf-8") as f:
         for article in json.load(f)["data"]:
             for para in article["paragraphs"]:
                 context = para["context"]
@@ -59,15 +59,15 @@ def read_examples(path):
                     for answer in qa["answers"]:
                         answer_texts.append(answer["text"])
                         start_positions.append(answer["answer_start"])
-                        end_positions.append(answer["answer_start"]+ len(answer["text"]))
-                    examples.append((context,question,question_id,start_positions,end_positions,answer_texts))
+                        end_positions.append(answer["answer_start"] + len(answer["text"]))
+                    examples.append((context, question, question_id, start_positions, end_positions, answer_texts))
     return examples
 
 
 def convert_examples_to_dataset(args, examples):
     # Converts a list of examples into a dataset that can be directly given as input to a model.
     dataset = []
-    print("The number of questions in the dataset:",len(examples))
+    print("The number of questions in the dataset:", len(examples))
     for i in range(len(examples)):
         context = examples[i][0]
         question = examples[i][1]
@@ -91,11 +91,11 @@ def convert_examples_to_dataset(args, examples):
 
         for doc_span_index, doc_span in enumerate(doc_spans):
             start_offset = doc_span[0]
-            span_context = context[start_offset:start_offset+doc_span[1]]
+            span_context = context[start_offset : start_offset + doc_span[1]]
             # Convert absolute position to relative position.
             start_position = start_position_absolute - start_offset + len(question) + 2
             end_position = end_position_absolute - start_offset + len(question) + 2
-            
+
             # If span does not contain the complete answer, we use it for data augmentation.
             if start_position < len(question) + 2:
                 start_position = len(question) + 2
@@ -113,7 +113,7 @@ def convert_examples_to_dataset(args, examples):
                 src.append(0)
                 seg.append(0)
 
-            dataset.append((src,seg,start_position,end_position,answers,question_id,len(question),doc_span_index,start_offset))
+            dataset.append((src, seg, start_position, end_position, answers, question_id, len(question), doc_span_index, start_offset))
     return dataset
 
 
@@ -141,7 +141,7 @@ def batch_loader(batch_size, src, seg, start_position, end_position):
 
 def train(args, model, optimizer, scheduler, src_batch, seg_batch, start_position_batch, end_position_batch):
     model.zero_grad()
-    
+
     src_batch = src_batch.to(args.device)
     seg_batch = seg_batch.to(args.device)
     start_position_batch = start_position_batch.to(args.device)
@@ -164,7 +164,7 @@ def train(args, model, optimizer, scheduler, src_batch, seg_batch, start_positio
 
 
 # Evaluation script from CMRC2018.
-# We modify the tokenizer. 
+# We modify the tokenizer.
 def mixed_segmentation(in_str, rm_punc=False):
     #in_str = str(in_str).decode('utf-8').lower().strip()
     n_str = str(in_str).lower().strip()
@@ -259,12 +259,12 @@ def get_answers(dataset, start_prob_all, end_prob_all):
     for i in range(len(dataset)):
         question_id = dataset[i][5]
         question_length = dataset[i][6]
-        span_index =dataset[i][7]
+        span_index = dataset[i][7]
         start_offset = dataset[i][8]
 
         start_scores, end_scores = start_prob_all[i], end_prob_all[i]
 
-        start_pred = torch.argmax(start_scores[question_length + 2:], dim=0) + question_length + 2
+        start_pred = torch.argmax(start_scores[question_length + 2 :], dim=0) + question_length + 2
         end_pred = start_pred + torch.argmax(end_scores[start_pred:], dim=0)
         score = start_scores[start_pred] + end_scores[end_pred]
 
@@ -273,12 +273,12 @@ def get_answers(dataset, start_prob_all, end_prob_all):
 
         if question_id == previous_question_id:
             if score > current_answer[3]:
-                current_answer = (span_index,start_pred_absolute,end_pred_absolute,score)
+                current_answer = (span_index, start_pred_absolute, end_pred_absolute, score)
         else:
             if i > 0:
                 pred_answers.append(current_answer)
             previous_question_id = question_id
-            current_answer = (span_index,start_pred_absolute,end_pred_absolute,score)
+            current_answer = (span_index, start_pred_absolute, end_pred_absolute, score)
     pred_answers.append(current_answer)
     return pred_answers
 
@@ -289,10 +289,10 @@ def evaluate(args, dataset, examples):
     seg = torch.LongTensor([sample[1] for sample in dataset])
     start_position = torch.LongTensor([sample[2] for sample in dataset])
     end_position = torch.LongTensor([sample[3] for sample in dataset])
-    
+
     batch_size = args.batch_size
     instances_num = src.size()[0]
-    
+
     args.model.eval()
     start_prob_all, end_prob_all = [], []
 
@@ -301,10 +301,10 @@ def evaluate(args, dataset, examples):
         seg_batch = seg_batch.to(args.device)
         start_position_batch = start_position_batch.to(args.device)
         end_position_batch = end_position_batch.to(args.device)
-            
+
         with torch.no_grad():
             loss, start_logits, end_logits = args.model(src_batch, seg_batch, start_position_batch, end_position_batch)
-            
+
         start_prob = nn.Softmax(dim=1)(start_logits)
         end_prob = nn.Softmax(dim=1)(end_logits)
 
@@ -320,20 +320,20 @@ def evaluate(args, dataset, examples):
         answers = examples[i][5]
         start_pred_pos = pred_answers[i][1]
         end_pred_pos = pred_answers[i][2]
-        
+
         if end_pred_pos <= start_pred_pos:
             skip_count += 1
             continue
-            
+
         prediction = examples[i][0][start_pred_pos:end_pred_pos]
-        
+
         f1 += calc_f1_score(answers, prediction)
         em += calc_em_score(answers, prediction)
-    
+
     f1_score = 100.0 * f1 / total_count
     em_score = 100.0 * em / total_count
     avg = (f1_score + em_score) * 0.5
-    print("Avg: {:.4f},F1:{:.4f},EM:{:.4f},Total:{},Skip:{}".format(avg,f1_score,em_score,total_count,skip_count))
+    print("Avg: {:.4f},F1:{:.4f},EM:{:.4f},Total:{},Skip:{}".format(avg, f1_score, em_score, total_count, skip_count))
     return avg
 
 
@@ -351,7 +351,7 @@ def main():
     args = load_hyperparam(args)
 
     set_seed(args.seed)
-      
+
     # Build tokenizer.
     args.tokenizer = CharTokenizer(args)
 
@@ -360,7 +360,7 @@ def main():
 
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
-    
+
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
 
@@ -380,7 +380,7 @@ def main():
     end_position = torch.LongTensor([sample[3] for sample in trainset])
 
     args.train_steps = int(instances_num * args.epochs_num / batch_size) + 1
-   
+
     print("The number of training instances:", instances_num)
 
     optimizer, scheduler = build_optimizer(args, model)
@@ -390,7 +390,7 @@ def main():
             from apex import amp
         except ImportError:
             raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer,opt_level = args.fp16_opt_level)
+        model, optimizer = amp.initialize(model, optimizer,opt_level=args.fp16_opt_level)
 
     if torch.cuda.device_count() > 1:
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
@@ -402,17 +402,17 @@ def main():
     best_result = 0.0
 
     print("Start training.")
-    
+
     for epoch in range(1, args.epochs_num + 1):
         model.train()
-        
+
         for i, (src_batch, seg_batch, start_position_batch, end_position_batch) in enumerate(batch_loader(batch_size, src, seg, start_position, end_position)):
             loss = train(args, model, optimizer, scheduler, src_batch, seg_batch, start_position_batch, end_position_batch)
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
                 print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i+1, total_loss / args.report_steps))
                 total_loss = 0.0
-            
+
         result = evaluate(args, *read_dataset(args, args.dev_path))
         if result > best_result:
             best_result = result

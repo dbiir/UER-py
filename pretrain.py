@@ -42,14 +42,13 @@ def main():
     parser.add_argument("--labels_num", type=int, required=False,
                         help="Number of prediction labels.")
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout value.")
-    parser.add_argument("--seed", type=int, default=7,  help="Random seed.")
+    parser.add_argument("--seed", type=int, default=7, help="Random seed.")
 
     # Model options.
     model_opts(parser)
     parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
                         help="Target embedding type.")
-    parser.add_argument("--decoder", choices=["transformer"], \
-                                              default="transformer", help="Decoder type.")
+    parser.add_argument("--decoder", choices=["transformer"], default="transformer", help="Decoder type.")
     parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
                         help="Pooling type.")
     parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "mt", "t5", "cls"], default="bert",

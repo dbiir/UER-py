@@ -70,7 +70,7 @@ def main():
 
     set_seed(args.seed)
 
-    # Count the number of labels. 
+    # Count the number of labels.
     args.labels_num = count_labels_num(args.train_path)
 
     # Build tokenizer.
@@ -102,7 +102,7 @@ def main():
                 from apex import amp
             except ImportError:
                 raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-            model, optimizer = amp.initialize(model, optimizer, opt_level = args.fp16_opt_level)
+            model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
             args.amp = amp
         if torch.cuda.device_count() > 1:
             model = torch.nn.DataParallel(model)
@@ -110,7 +110,7 @@ def main():
 
         trainset = dataset[0 : fold_id * instances_num_per_fold] + dataset[(fold_id + 1) * instances_num_per_fold :]
         random.shuffle(trainset)
-        
+
         train_src = torch.LongTensor([example[0] for example in trainset])
         train_tgt = torch.LongTensor([example[1] for example in trainset])
         train_seg = torch.LongTensor([example[2] for example in trainset])
@@ -129,22 +129,22 @@ def main():
 
         for epoch in range(1, args.epochs_num + 1):
             model.train()
-            for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, train_src, train_tgt, train_seg, train_soft_tgt)):    
+            for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, train_src, train_tgt, train_seg, train_soft_tgt)):
                 loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch, soft_tgt_batch)
                 total_loss += loss.item()
                 if (i + 1) % args.report_steps == 0:
-                    print("Fold id: {}, Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(fold_id, epoch, i+1, total_loss / args.report_steps))
+                    print("Fold id: {}, Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(fold_id, epoch, i + 1, total_loss / args.report_steps))
                     total_loss = 0.0
 
         model.eval()
         for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, dev_src, dev_tgt, dev_seg, dev_soft_tgt)): 
-             src_batch = src_batch.to(args.device)
-             seg_batch = seg_batch.to(args.device)
-             with torch.no_grad():
-                 _, logits = model(src_batch, None, seg_batch)
-             prob = nn.Softmax(dim=1)(logits)
-             prob = prob.cpu().numpy().tolist()        
-             train_features.extend(prob)
+            src_batch = src_batch.to(args.device)
+            seg_batch = seg_batch.to(args.device)
+            with torch.no_grad():
+                _, logits = model(src_batch, None, seg_batch)
+            prob = nn.Softmax(dim=1)(logits)
+            prob = prob.cpu().numpy().tolist()
+            train_features.extend(prob)
 
         output_model_name = ".".join(args.output_model_path.split(".")[:-1])
         output_model_suffix = args.output_model_path.split(".")[-1]
@@ -154,14 +154,12 @@ def main():
         f1 = []
         confusion = result[1]
         for i in range(confusion.size()[0]):
-            p = confusion[i,i].item() / confusion[i, :].sum().item()
-            r = confusion[i,i].item() / confusion[:, i].sum().item()
+            p = confusion[i, i].item() / confusion[i, :].sum().item()
+            r = confusion[i, i].item() / confusion[:, i].sum().item()
             f1.append(2 * p * r / (p + r))
 
         marco_f1 += sum(f1) / len(f1) / args.folds_num
-        # print("Acc. : {:.4f}".format(result[0]))
-        # print("Marco F1 : {:.4f}".format(sum(f1)/len(f1)))
-        
+
     train_features = np.array(train_features)
     np.save(args.train_features_path, train_features)
     print("Acc. : {:.4f}".format(acc))

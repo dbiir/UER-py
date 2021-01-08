@@ -83,7 +83,7 @@ def load_or_initialize_parameters(args, model):
     else:
         # Initialize with normal distribution.
         for n, p in list(model.named_parameters()):
-            if 'gamma' not in n and 'beta' not in n:
+            if "gamma" not in n and "beta" not in n:
                 p.data.normal_(0, 0.02)
 
 
@@ -95,7 +95,7 @@ def build_optimizer(args, model):
                 {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.0}
     ]
     optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
-    scheduler = WarmupLinearSchedule(optimizer, warmup_steps=args.train_steps*args.warmup, t_total=args.train_steps)
+    scheduler = WarmupLinearSchedule(optimizer, warmup_steps=args.train_steps * args.warmup, t_total=args.train_steps)
     return optimizer, scheduler
 
 
@@ -129,15 +129,15 @@ def read_dataset(args, path):
                 for i, column_name in enumerate(line.strip().split("\t")):
                     columns[column_name] = i
                 continue
-            line = line[:-1].split('\t')
+            line = line[:-1].split("\t")
             tgt = int(line[columns["label"]])
             if args.soft_targets and "logits" in columns.keys():
                 soft_tgt = [float(value) for value in line[columns["logits"]].split(" ")]
-            if "text_b" not in columns: # Sentence classification.
+            if "text_b" not in columns:  # Sentence classification.
                 text_a = line[columns["text_a"]]
                 src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a))
                 seg = [1] * len(src)
-            else: # Sentence-pair classification.
+            else:  # Sentence-pair classification.
                 text_a, text_b = line[columns["text_a"]], line[columns["text_b"]]
                 src_a = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a) + [SEP_TOKEN])
                 src_b = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(text_b) + [SEP_TOKEN])
@@ -179,7 +179,7 @@ def train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_bat
 
     optimizer.step()
     scheduler.step()
-    
+
     return loss
 
 
@@ -196,7 +196,7 @@ def evaluate(args, dataset, print_confusion_matrix=False):
 
     args.model.eval()
 
-    for i, (src_batch, tgt_batch,  seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
+    for i, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
         src_batch = src_batch.to(args.device)
         tgt_batch = tgt_batch.to(args.device)
         seg_batch = seg_batch.to(args.device)
@@ -213,18 +213,18 @@ def evaluate(args, dataset, print_confusion_matrix=False):
         print(confusion)
         print("Report precision, recall, and f1:")
         for i in range(confusion.size()[0]):
-            p = confusion[i,i].item() / confusion[i, :].sum().item()
-            r = confusion[i,i].item() / confusion[:, i].sum().item()
+            p = confusion[i, i].item() / confusion[i, :].sum().item()
+            r = confusion[i, i].item() / confusion[:, i].sum().item()
             f1 = 2 * p * r / (p + r)
-            print("Label {}: {:.3f}, {:.3f}, {:.3f}".format(i,p,r,f1))
+            print("Label {}: {:.3f}, {:.3f}, {:.3f}".format(i, p, r, f1))
 
-    print("Acc. (Correct/Total): {:.4f} ({}/{}) ".format(correct/len(dataset), correct, len(dataset)))
+    print("Acc. (Correct/Total): {:.4f} ({}/{}) ".format(correct / len(dataset), correct, len(dataset)))
     return correct / len(dataset), confusion
 
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    
+
     finetune_opts(parser)
 
     parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
@@ -241,7 +241,7 @@ def main():
                         help="Train model with logits.")
     parser.add_argument("--soft_alpha", type=float, default=0.5,
                         help="Weight of the soft targets loss.")
-    
+
     args = parser.parse_args()
 
     # Load the hyperparameters from the config file.
@@ -249,7 +249,7 @@ def main():
 
     set_seed(args.seed)
 
-    # Count the number of labels. 
+    # Count the number of labels.
     args.labels_num = count_labels_num(args.train_path)
 
     # Build tokenizer.
@@ -260,7 +260,7 @@ def main():
 
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
-    
+
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
 
@@ -284,13 +284,13 @@ def main():
     print("The number of training instances:", instances_num)
 
     optimizer, scheduler = build_optimizer(args, model)
-    
+
     if args.fp16:
         try:
             from apex import amp
         except ImportError:
             raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer, opt_level = args.fp16_opt_level)
+        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
         args.amp = amp
 
     if torch.cuda.device_count() > 1:
@@ -301,15 +301,15 @@ def main():
     total_loss, result, best_result = 0.0, 0.0, 0.0
 
     print("Start training.")
-    
-    for epoch in range(1, args.epochs_num+1):
+
+    for epoch in range(1, args.epochs_num + 1):
         model.train()
-        for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, src, tgt, seg, soft_tgt)):    
+        for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, src, tgt, seg, soft_tgt)):
             loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch, soft_tgt_batch)
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i+1, total_loss / args.report_steps))
-                total_loss = 0.
+                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
+                total_loss = 0.0
 
         result = evaluate(args, read_dataset(args, args.dev_path))
         if result[0] > best_result:

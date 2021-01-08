@@ -294,7 +294,7 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 <br/>
 
 ## 数据集
-我们收集了一系列[__下游任务数据集__](https://github.com/dbiir/UER-py/wiki/Datasets)并将其转换为UER可以直接加载的格式。
+我们收集了一系列[__下游任务数据集__](https://github.com/dbiir/UER-py/wiki/下游任务数据集)并将其转换为UER可以直接加载的格式。
 
 <br/>
 
@@ -339,7 +339,7 @@ UER-py/
 
 ```
 
-更多使用示例在[__使用说明__](https://github.com/dbiir/UER-py/wiki/Instructions)中可以找到。这些示例可以帮助用户快速完成BERT、GPT、ELMO等预训练模型以及使用这些预训练模型在一系列下游任务上微调的实验。
+更多使用示例在[__使用说明__](https://github.com/dbiir/UER-py/wiki/使用说明)中可以找到。这些示例可以帮助用户快速完成BERT、GPT、ELMO等预训练模型以及使用这些预训练模型在一系列下游任务上微调的实验。
 
 <br/>
 
