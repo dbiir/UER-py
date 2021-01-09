@@ -147,4 +147,3 @@ class BigruEncoder(BirnnEncoder):
                            num_layers=args.layers_num,
                            dropout=args.dropout,
                            batch_first=True)
-

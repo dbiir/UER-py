@@ -13,9 +13,9 @@ class TransformerDecoder(nn.Module):
         super(TransformerDecoder, self).__init__()
         self.layers_num = args.layers_num
         self.layernorm_positioning = args.layernorm_positioning
-        self.transformer_decoder = nn.ModuleList([
-            TransformerDecoderLayer(args) for _ in range(self.layers_num)
-        ])
+        self.transformer_decoder = nn.ModuleList(
+            [TransformerDecoderLayer(args) for _ in range(self.layers_num)]
+        )
         if self.layernorm_positioning == "pre":
             self.layer_norm = LayerNorm(args.hidden_size)
 

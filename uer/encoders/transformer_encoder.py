@@ -21,9 +21,9 @@ class TransformerEncoder(nn.Module):
         if self.parameter_sharing:
             self.transformer = TransformerLayer(args)
         else:
-            self.transformer = nn.ModuleList([
-                TransformerLayer(args) for _ in range(self.layers_num)
-            ])
+            self.transformer = nn.ModuleList(
+                [TransformerLayer(args) for _ in range(self.layers_num)]
+            )
         if self.layernorm_positioning == "pre":
             self.layer_norm = LayerNorm(args.hidden_size)
         

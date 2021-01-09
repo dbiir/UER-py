@@ -1,22 +1,23 @@
-# -*- encoding:utf-8 -*-
 import math
 import torch
 import torch.nn as nn
+
 
 class MultiHeadedAttention(nn.Module):
     """
     Each head is a self-attention operation.
     self-attention refers to https://arxiv.org/pdf/1706.03762.pdf
     """
+
     def __init__(self, hidden_size, heads_num, dropout):
         super(MultiHeadedAttention, self).__init__()
         self.hidden_size = hidden_size
         self.heads_num = heads_num
         self.per_head_size = hidden_size // heads_num
 
-        self.linear_layers = nn.ModuleList([
-                nn.Linear(hidden_size, hidden_size) for _ in range(3)
-            ])
+        self.linear_layers = nn.ModuleList(
+                [nn.Linear(hidden_size, hidden_size) for _ in range(3)]
+            )
         
         self.dropout = nn.Dropout(dropout)
         self.final_linear = nn.Linear(hidden_size, hidden_size)
@@ -56,7 +57,7 @@ class MultiHeadedAttention(nn.Module):
                             ]
 
         scores = torch.matmul(query, key.transpose(-2, -1))
-        scores = scores / math.sqrt(float(per_head_size)) 
+        scores = scores / math.sqrt(float(per_head_size))
         scores = scores + mask
         probs = nn.Softmax(dim=-1)(scores)
         probs = self.dropout(probs)
