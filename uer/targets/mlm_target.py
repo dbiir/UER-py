@@ -6,7 +6,7 @@ from uer.utils import *
 
 class MlmTarget(nn.Module):
     """
-    BERT exploits masked language modeling (MLM) 
+    BERT exploits masked language modeling (MLM)
     and next sentence prediction (NSP) for pretraining.
     """
 
