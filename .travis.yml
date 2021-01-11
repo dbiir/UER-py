@@ -1,56 +1,52 @@
-name: Lint & Tests
+language: python
 
-on: [push, pull_request]
+sudo: enabled
 
-jobs:
-  lint-and-tests:
+python:
 
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.6] # build only for 3.6 for now
+    - "3.5"
 
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: preprocess
-      run: |
-        python preprocess.py --corpus_path corpora/literature_mini_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt --processes_num 8 --target bert
+env:
+
+    global:
+
+     - TRAVIS=true
+
+
+
+install:
+
+    - pip install -r requirements.txt
+
+
+
+script:
+
+    python preprocess.py --corpus_path corpora/literature_mini_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt --processes_num 8 --target bert
+
+    python python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_model.bin \
+                --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 \
+    mv models/test_model.bin-10 models/test_model.bin
+
     
-    - name: train
-      run: |
-        python python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_model.bin \
-                    --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 \
-        mv models/test_model.bin-10 models/test_model.bin
+    python run_classifier.py --pretrained_model_path models/test_model.bin --vocab_path models/google_zh_vocab.txt \
+          --train_path datasets/test_data/train.tsv --dev_path datasets/test_data/dev.tsv --test_path datasets/test_data/test.tsv \
+          --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible --output_model_path models/finetuned_model.bin
 
-    - name: classifier
-      run: |
-        python run_classifier.py --pretrained_model_path models/test_model.bin --vocab_path models/google_zh_vocab.txt \
-              --train_path datasets/test_data/train.tsv --dev_path datasets/test_data/dev.tsv --test_path datasets/test_data/test.tsv \
-              --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible --output_model_path models/finetuned_model.bin
-    - name: classifie-infer
-      run: |
-        python inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin --vocab_path models/google_zh_vocab.txt \
-              --test_path datasets/test_data/test_nolabel.tsv \
-              --prediction_path datasets/test_data/prediction.tsv --labels_num 2 \
-              --embedding word_pos_seg --encoder transformer --mask fully_visible 
+    python inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin --vocab_path models/google_zh_vocab.txt \
+          --test_path datasets/test_data/test_nolabel.tsv \
+          --prediction_path datasets/test_data/prediction.tsv --labels_num 2 \
+          --embedding word_pos_seg --encoder transformer --mask fully_visible 
 
-  build-docs:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.6
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.6
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+  # build-docs:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Set up Python 3.6
+  #     uses: actions/setup-python@v2
+  #     with:
+  #       python-version: 3.6
+  #   - name: Install dependencies
+  #     run: |
+  #       python -m pip install --upgrade pip
+  #       pip install -r requirements.txt
