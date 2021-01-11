@@ -24,19 +24,14 @@ script:
 
     python preprocess.py --corpus_path corpora/literature_mini_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt --processes_num 8 --target bert
 
-    python pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_model.bin \
-                --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 \
+    python pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_model.bin --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert --total_steps 10 --save_checkpoint_steps 10 --report_steps 2
+    
     mv models/test_model.bin-10 models/test_model.bin
 
     
-    python run_classifier.py --pretrained_model_path models/test_model.bin --vocab_path models/google_zh_vocab.txt \
-          --train_path datasets/test_data/train.tsv --dev_path datasets/test_data/dev.tsv --test_path datasets/test_data/test.tsv \
-          --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible --output_model_path models/finetuned_model.bin
+    python run_classifier.py --pretrained_model_path models/test_model.bin --vocab_path models/google_zh_vocab.txt --train_path datasets/test_data/train.tsv --dev_path datasets/test_data/dev.tsv --test_path datasets/test_data/test.tsv --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible --output_model_path models/finetuned_model.bin
 
-    python inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin --vocab_path models/google_zh_vocab.txt \
-          --test_path datasets/test_data/test_nolabel.tsv \
-          --prediction_path datasets/test_data/prediction.tsv --labels_num 2 \
-          --embedding word_pos_seg --encoder transformer --mask fully_visible 
+    python inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin --vocab_path models/google_zh_vocab.txt --test_path datasets/test_data/test_nolabel.tsv --prediction_path datasets/test_data/prediction.tsv --labels_num 2 --embedding word_pos_seg --encoder transformer --mask fully_visible 
 
   # build-docs:
   #   runs-on: ubuntu-latest
