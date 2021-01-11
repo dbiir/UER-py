@@ -1,7 +1,7 @@
 import os
-import torch
 import random
 import pickle
+import torch
 from multiprocessing import Pool
 from uer.utils.constants import *
 from uer.utils.tokenizers import *
@@ -22,7 +22,7 @@ def mask_seq(src, vocab, span_masking, span_geo_prob, span_max_length):
     for index_set in tokens_index:
         if len(tgt_mlm) >= num_to_predict:
             break
-        
+
         if span_masking:
             i = index_set[0]
             span_len = index_set[1]
@@ -56,7 +56,7 @@ def mask_seq(src, vocab, span_masking, span_geo_prob, span_max_length):
                     if rdi not in [vocab.get(CLS_TOKEN), vocab.get(SEP_TOKEN), vocab.get(MASK_TOKEN), PAD_ID]:
                         break
                 src[i] = rdi
-    
+
     tgt_mlm = sorted(tgt_mlm, key=lambda x: x[0])
     return src, tgt_mlm
 
@@ -76,7 +76,7 @@ def create_index(src, vocab, span_masking, span_geo_prob, span_max_length):
             span_end_position = i + span_len
             if span_end_position > len(src):
                 span_len = len(src) - i
-            tokens_index.append([i,span_len])
+            tokens_index.append([i, span_len])
     return tokens_index
 
 
