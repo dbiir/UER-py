@@ -10,7 +10,7 @@ from uer.utils.seed import set_seed
 
 
 def mask_seq(src, vocab, span_masking, span_geo_prob, span_max_length):
-    for i in range(len(src)-1,-1,-1):
+    for i in range(len(src) - 1, -1, -1):
         if src[i] != PAD_ID:
             break
     src_no_pad = src[:i + 1]
@@ -30,8 +30,8 @@ def mask_seq(src, vocab, span_masking, span_geo_prob, span_max_length):
                 continue
             
             for j in range(span_len):
-                token = src[i+j]
-                tgt_mlm.append((i+j, token))
+                token = src[i + j]
+                tgt_mlm.append((i + j, token))
             prob = random.random()
             if prob < 0.8:
                 for j in range(span_len):
@@ -39,7 +39,7 @@ def mask_seq(src, vocab, span_masking, span_geo_prob, span_max_length):
             elif prob < 0.9:
                 for j in range(span_len):
                     while True:
-                        rdi = random.randint(1, len(vocab)-1)
+                        rdi = random.randint(1, len(vocab) - 1)
                         if rdi not in [vocab.get(CLS_TOKEN), vocab.get(SEP_TOKEN), vocab.get(MASK_TOKEN), PAD_ID]:
                             break
                     src[i+j] = rdi
@@ -52,7 +52,7 @@ def mask_seq(src, vocab, span_masking, span_geo_prob, span_max_length):
                 src[i] = vocab.get(MASK_TOKEN)
             elif prob < 0.9:
                 while True:
-                    rdi = random.randint(1, len(vocab)-1)
+                    rdi = random.randint(1, len(vocab) - 1)
                     if rdi not in [vocab.get(CLS_TOKEN), vocab.get(SEP_TOKEN), vocab.get(MASK_TOKEN), PAD_ID]:
                         break
                 src[i] = rdi
@@ -90,12 +90,12 @@ def get_span_len(max_span_len, p):
             geo_prob *= p
             geo_prob_cum.append(geo_prob_cum[-1] + geo_prob)
         else:
-            geo_prob *= (1-p)
+            geo_prob *= (1 - p)
             geo_prob_cum.append(geo_prob_cum[-1] + geo_prob)
 
     prob = geo_prob_cum[-1] * random.random()
-    for i in range(len(geo_prob_cum)-1):
-        if prob >= geo_prob_cum[i] and prob < geo_prob_cum[i+1]:
+    for i in range(len(geo_prob_cum) - 1):
+        if prob >= geo_prob_cum[i] and prob < geo_prob_cum[i + 1]:
             current_span_len = i + 1
     return current_span_len
 
@@ -104,7 +104,7 @@ def merge_dataset(dataset_path, workers_num):
     # Merge datasets.
     dataset_writer = open(dataset_path, "wb")
     for i in range(workers_num):
-        tmp_dataset_reader = open("dataset-tmp-"+str(i)+".pt", "rb")
+        tmp_dataset_reader = open("dataset-tmp-" + str(i) + ".pt", "rb")
         while True:
             tmp_data = tmp_dataset_reader.read(2^20)
             if tmp_data:
@@ -112,7 +112,7 @@ def merge_dataset(dataset_path, workers_num):
             else:
                 break
         tmp_dataset_reader.close()
-        os.remove("dataset-tmp-"+str(i)+".pt")
+        os.remove("dataset-tmp-" + str(i) + ".pt")
     dataset_writer.close()
 
 
@@ -160,7 +160,7 @@ class Dataset(object):
             pool = Pool(workers_num)
             for i in range(workers_num):
                 start = i * lines_num // workers_num
-                end = (i+1) * lines_num // workers_num
+                end = (i + 1) * lines_num // workers_num
                 pool.apply_async(func=self.worker, args=[i, start, end])
             pool.close()
             pool.join()
@@ -328,20 +328,12 @@ class BertDataset(Dataset):
                     truncate_seq_pair(tokens_a, tokens_b, max_num_tokens)
 
                     src = []
-
                     src.append(self.vocab.get(CLS_TOKEN))
-                    for token in tokens_a:
-                        src.append(token)
-
+                    src.extend(tokens_a)
                     src.append(self.vocab.get(SEP_TOKEN))
-
                     seg_pos = [len(src)]
-
-                    for token in tokens_b:
-                        src.append(token)
-
+                    src.extend(tokens_b)
                     src.append(self.vocab.get(SEP_TOKEN))
-
                     seg_pos.append(len(src))
 
                     while len(src) != self.seq_length:
@@ -383,20 +375,20 @@ class BertDataLoader(DataLoader):
                 if len(ins) == 4:
                     src.append(ins[0])
                     masked_words_num += len(ins[1])
-                    tgt_mlm.append([0]*len(ins[0]))
+                    tgt_mlm.append([0] * len(ins[0]))
                     for mask in ins[1]:
                         tgt_mlm[-1][mask[0]] = mask[1]
                     is_next.append(ins[2])
-                    seg.append([1]*ins[3][0] + [2]*(ins[3][1]-ins[3][0]) + [PAD_ID]*(len(ins[0])-ins[3][1]))
+                    seg.append([1] * ins[3][0] + [2] * (ins[3][1] - ins[3][0]) + [PAD_ID] * (len(ins[0]) - ins[3][1]))
                 else:
                     src_single, tgt_mlm_single = mask_seq(ins[0], self.vocab, self.span_masking, self.span_geo_prob, self.span_max_length)
                     masked_words_num += len(tgt_mlm_single)
                     src.append(src_single)
-                    tgt_mlm.append([0]*len(ins[0]))
+                    tgt_mlm.append([0] * len(ins[0]))
                     for mask in tgt_mlm_single:
                         tgt_mlm[-1][mask[0]] = mask[1]
                     is_next.append(ins[1])
-                    seg.append([1]*ins[2][0] + [2]*(ins[2][1]-ins[2][0]) + [PAD_ID]*(len(ins[0])-ins[2][1]))
+                    seg.append([1] * ins[2][0] + [2] * (ins[2][1] - ins[2][0]) + [PAD_ID] * (len(ins[0]) - ins[2][1]))
 
             if masked_words_num == 0:
                 continue
@@ -471,7 +463,7 @@ class MlmDataset(Dataset):
         instances = []
         instances_num = len(all_documents) // self.seq_length
         for i in range(instances_num):
-            src = all_documents[i * self.seq_length : (i+1) * self.seq_length]
+            src = all_documents[i * self.seq_length : (i + 1) * self.seq_length]
             seg_pos = [len(src)]
 
             if not self.dynamic_masking:
@@ -520,18 +512,18 @@ class MlmDataLoader(DataLoader):
                 if len(ins) == 3:
                     src.append(ins[0])
                     masked_words_num += len(ins[1])
-                    tgt.append([0]*len(ins[0]))
+                    tgt.append([0] * len(ins[0]))
                     for mask in ins[1]:
                         tgt[-1][mask[0]] = mask[1]
-                    seg.append([1]*ins[2][0] + [PAD_ID]*(len(ins[0])-ins[2][0]))
+                    seg.append([1] * ins[2][0] + [PAD_ID] * (len(ins[0]) - ins[2][0]))
                 else:
                     src_single, tgt_single = mask_seq(ins[0], self.vocab, self.span_masking, self.span_geo_prob, self.span_max_length)
                     masked_words_num += len(tgt_single)
                     src.append(src_single)
-                    tgt.append([0]*len(ins[0]))
+                    tgt.append([0] * len(ins[0]))
                     for mask in tgt_single:
                         tgt[-1][mask[0]] = mask[1]
-                    seg.append([1]*ins[1][0] + [PAD_ID]*(len(ins[0])-ins[1][0]))
+                    seg.append([1] * ins[1][0] + [PAD_ID] * (len(ins[0]) - ins[1][0]))
             
             if masked_words_num == 0:
                 continue       
@@ -625,22 +617,14 @@ class AlbertDataset(Dataset):
                     truncate_seq_pair(tokens_a, tokens_b, max_num_tokens)
 
                     src = []
-
                     src.append(self.vocab.get(CLS_TOKEN))
-                    for token in tokens_a:
-                        src.append(token)
-
+                    src.extend(tokens_a)
                     src.append(self.vocab.get(SEP_TOKEN))
-
                     seg_pos = [len(src)]
-
-                    for token in tokens_b:
-                        src.append(token)
-            
+                    src.extend(tokens_b)
                     src.append(self.vocab.get(SEP_TOKEN))
-
                     seg_pos.append(len(src))
-                    
+
                     while len(src) != self.seq_length:
                         src.append(PAD_ID)
 
@@ -679,16 +663,15 @@ class LmDataset(Dataset):
                 pos += 1
 
                 document = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line))
-
                 document = [self.vocab.get(CLS_TOKEN)] + document + [self.vocab.get(SEP_TOKEN)]
 
-                instances_num = len(document) // (self.seq_length+1)
+                instances_num = len(document) // (self.seq_length + 1)
                 for i in range(instances_num):
-                    src = document[i * (self.seq_length+1) : (i+1) * (self.seq_length+1)]
+                    src = document[i * (self.seq_length + 1) : (i + 1) * (self.seq_length + 1)]
                     seg_pos = self.seq_length
                     pickle.dump((src, seg_pos), dataset_writer)
 
-                src = document[instances_num * (self.seq_length+1): ]
+                src = document[instances_num * (self.seq_length + 1): ]
                 if len(src) > 0:
                     seg_pos = len(src)
                     while len(src) != self.seq_length + 1:
@@ -720,7 +703,7 @@ class LmDataLoader(DataLoader):
             for ins in instances:
                 src.append(ins[0][:-1])
                 tgt.append(ins[0][1:])
-                seg.append([1]*ins[1] + [PAD_ID]*(len(ins[0])-1-ins[1]))
+                seg.append([1] * ins[1] + [PAD_ID] * (len(ins[0]) - 1 - ins[1]))
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt), \
@@ -745,7 +728,7 @@ class BilmDataset(Dataset):
 
                 instances_num = len(document) // self.seq_length
                 for i in range(instances_num):
-                    src = document[i * self.seq_length : (i+1) * self.seq_length]
+                    src = document[i * self.seq_length : (i + 1) * self.seq_length]
                     tgt_forward = src[1:] + [self.vocab.get(SEP_TOKEN)]
                     tgt_backward = [self.vocab.get(CLS_TOKEN)] + src[:-1]
                     seg = [1] * len(src)
@@ -828,11 +811,11 @@ class MtDataset(Dataset):
                 tgt = [self.tgt_vocab.get(CLS_TOKEN)] + tgt + [self.tgt_vocab.get(SEP_TOKEN)]
                 seg = [1] * len(src)
 
-                src, tgt, seg = src[:self.seq_length], tgt[:self.tgt_seq_length+1], seg[:self.seq_length]
+                src, tgt, seg = src[:self.seq_length], tgt[:self.tgt_seq_length + 1], seg[:self.seq_length]
                 while len(src) != self.seq_length:
                     src.append(PAD_ID)
                     seg.append(PAD_ID)
-                while len(tgt) != self.tgt_seq_length+1:
+                while len(tgt) != self.tgt_seq_length + 1:
                     tgt.append(PAD_ID)
                 pickle.dump((src, tgt, seg), dataset_writer)
 
@@ -908,7 +891,7 @@ class T5DataLoader(DataLoader):
                     tgt_in[-1].append(self.vocab.get(SEP_TOKEN))
                     tgt_out.append(tgt_in[-1][1:] + [PAD_ID])
 
-                    seg.append([1]*ins[2][0] + [PAD_ID]*(len(ins[0])-ins[2][0]))
+                    seg.append([1] * ins[2][0] + [PAD_ID] * (len(ins[0]) - ins[2][0]))
                 else:
                     src_single, tgt_single = mask_seq(ins[0], self.vocab, self.span_masking, self.span_geo_prob, self.span_max_length)
                     if len(tgt_single) > tgt_seq_length:
@@ -920,7 +903,7 @@ class T5DataLoader(DataLoader):
                     tgt_in[-1].append(self.vocab.get(SEP_TOKEN))
                     tgt_out.append(tgt_in[-1][1:] + [PAD_ID])
                     
-                    seg.append([1]*ins[1][0] + [PAD_ID]*(len(ins[0])-ins[1][0]))
+                    seg.append([1] * ins[1][0] + [PAD_ID] * (len(ins[0]) - ins[1][0]))
 
             for i in range(len(tgt_in)):
                 while len(tgt_in[i]) != 32:
