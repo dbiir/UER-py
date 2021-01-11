@@ -24,7 +24,7 @@ script:
 
     python preprocess.py --corpus_path corpora/literature_mini_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt --processes_num 8 --target bert
 
-    python python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_model.bin \
+    python pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_model.bin \
                 --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 \
     mv models/test_model.bin-10 models/test_model.bin
 
