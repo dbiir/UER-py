@@ -3,17 +3,13 @@
 """
 import sys
 import os
-import torch
-import json
-import random
 import argparse
-import collections
+import torch
 import torch.nn as nn
 
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
-from uer.utils.vocab import Vocab
 from uer.utils.constants import *
 from uer.utils import *
 from uer.utils.config import load_hyperparam
@@ -71,16 +67,16 @@ def main():
     model.eval()
 
     with open(args.test_path) as f:
-        data= json.load(f)
+        data = json.load(f)
 
     question_ids = []
     for i in range(len(data)):
         questions = data[i][1]
         for question in questions:
-            question_ids.append(question['id'])
+            question_ids.append(question["id"])
 
     index = 0
-    with open(args.prediction_path,'w') as f:
+    with open(args.prediction_path, "w") as f:
         for i, (src_batch, _, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
 
             src_batch = src_batch.to(device)
@@ -93,11 +89,11 @@ def main():
                 pred = pred.cpu().numpy().tolist()
                 for j in range(len(pred)):
                     output = {}
-                    output['id'] = question_ids[index]
+                    output["id"] = question_ids[index]
                     index += 1
-                    output['label'] = int(pred[j])
+                    output["label"] = int(pred[j])
                     f.write(json.dumps(output))
-                    f.write('\n')
+                    f.write("\n")
 
 
 if __name__ == "__main__":
