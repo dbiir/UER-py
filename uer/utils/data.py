@@ -337,7 +337,7 @@ class BertDataset(Dataset):
                     seg_pos.append(len(src))
 
                     while len(src) != self.seq_length:
-                            src.append(PAD_ID)
+                        src.append(PAD_ID)
 
                     if not self.dynamic_masking:
                         src, tgt_mlm = mask_seq(src, self.vocab, self.span_masking, self.span_geo_prob, self.span_max_length)
