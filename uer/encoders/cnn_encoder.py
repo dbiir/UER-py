@@ -43,7 +43,7 @@ class GatedcnnEncoder(nn.Module):
         batch_size, seq_length, _ = emb.size()
 
         padding = torch.zeros([batch_size, self.kernel_size-1, self.emb_size]).to(emb.device)
-        emb = torch.cat([padding, emb], dim=1).unsqueeze(1) # batch_size, 1, seq_length+width-1, emb_size
+        emb = torch.cat([padding, emb], dim=1).unsqueeze(1)  # batch_size, 1, seq_length+width-1, emb_size
 
         hidden = self.conv_1(emb)
         hidden += self.conv_b1.repeat(1, 1, seq_length, 1)
@@ -66,7 +66,7 @@ class GatedcnnEncoder(nn.Module):
                 res_input = hidden
             hidden = torch.cat([padding, hidden], dim=2)
 
-        hidden = hidden[:, :, self.kernel_size - 1:,:]
+        hidden = hidden[:, :, self.kernel_size - 1:, :]
         output = hidden.transpose(1, 2).contiguous().view(batch_size, seq_length, self.hidden_size)
 
         return output
