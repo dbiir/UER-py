@@ -294,7 +294,7 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 <br/>
 
 ## 数据集
-我们收集了一系列[__下游任务数据集__](https://github.com/dbiir/UER-py/blob/master/docs/dataset_zh.md)并将其转换为UER可以直接加载的格式。
+我们收集了一系列[__下游任务数据集__](https://github.com/dbiir/UER-py/blob/master/docs/datasets_zh.md)并将其转换为UER可以直接加载的格式。
 
 <br/>
 

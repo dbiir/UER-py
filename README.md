@@ -295,7 +295,7 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 <br/>
 
 ## Datasets
-We collected a range of [__downstream datasets__](https://github.com/dbiir/UER-py/blob/master/docs/dataset.md) and converted them into format that UER can load directly.
+We collected a range of [__downstream datasets__](https://github.com/dbiir/UER-py/blob/master/docs/datasets.md) and converted them into format that UER can load directly.
 
 <br/>
 
