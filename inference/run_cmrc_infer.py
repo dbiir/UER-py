@@ -3,9 +3,7 @@
 """
 import sys
 import os
-import random
 import argparse
-import json
 import torch
 import torch.nn as nn
 
@@ -15,7 +13,6 @@ sys.path.append(uer_dir)
 from uer.utils.config import load_hyperparam
 from uer.utils.constants import *
 from uer.utils.tokenizers import * 
-from uer.utils.vocab import Vocab
 from uer.model_loader import load_model
 from uer.opts import infer_opts
 from run_cmrc import *

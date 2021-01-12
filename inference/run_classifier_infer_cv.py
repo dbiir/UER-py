@@ -3,11 +3,8 @@
 """
 import sys
 import os
-import torch
-import json
-import random
 import argparse
-import collections
+import torch
 import torch.nn as nn
 import numpy as np
 
@@ -20,6 +17,7 @@ from uer.utils import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_loader import load_model
+from uer.opts import model_opts
 from run_classifier import Classifier
 from inference.run_classifier_infer import *
 
@@ -42,35 +40,22 @@ def main():
                         help="Path of the config file.")
 
     # Model options.
-    parser.add_argument("--batch_size", type=int, default=128,
+    model_opts(parser)
+    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
+                        help="Pooling type.")
+    parser.add_argument("--batch_size", type=int, default=64,
                         help="Batch size.")
     parser.add_argument("--seq_length", type=int, default=128,
                         help="Sequence length.")
     parser.add_argument("--labels_num", type=int, required=True,
                         help="Number of prediction labels.")
-    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg"], default="word_pos_seg",
-                        help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
-                                              "birnn", "bilstm", "bigru", \
-                                              "gatedcnn"], \
-                                              default="transformer", help="Encoder type.")
-    parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
-                        help="Mask type.")
-    parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="pre",
-                        help="Layernorm positioning.")
-    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
-                        help="Pooling type.")
-    parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
-    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
 
     # Tokenizer options.
     parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
                         help="Specify the tokenizer." 
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."
-                             "Space tokenizer segments sentences into words according to space."
-                             )
+                             "Space tokenizer segments sentences into words according to space.")
 
     # Output options.
     parser.add_argument("--output_logits", action="store_true", help="Write logits to output file.")
@@ -79,7 +64,7 @@ def main():
     # Cross validation options.
     parser.add_argument("--folds_num", type=int, default=5,
                         help="The number of folds for cross validation.")
-    
+
     args = parser.parse_args()
 
     # Load the hyperparameters from the config file.
@@ -122,7 +107,7 @@ def main():
             seg_batch = seg_batch.to(device)
             with torch.no_grad():
                 _, logits = model(src_batch, None, seg_batch)
-            
+
             prob = nn.Softmax(dim=1)(logits)
             prob = prob.cpu().numpy().tolist()
             test_features[fold_id].extend(prob)
@@ -130,7 +115,7 @@ def main():
     test_features = np.array(test_features)
     test_features = np.mean(test_features, axis=0)
     print(test_features.shape)
-    np.save(args.test_features_path, test_features)            
+    np.save(args.test_features_path, test_features)
 
 
 if __name__ == "__main__":

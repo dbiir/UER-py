@@ -4,8 +4,6 @@
 import sys
 import os
 import torch
-import json
-import random
 import argparse
 import collections
 import torch.nn as nn
@@ -13,9 +11,8 @@ import torch.nn as nn
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
-from uer.utils.vocab import Vocab
 from uer.utils.constants import *
-from uer.utils import * 
+from uer.utils import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_loader import load_model
@@ -26,12 +23,12 @@ from run_classifier import Classifier
 def batch_loader(batch_size, src, seg):
     instances_num = src.size()[0]
     for i in range(instances_num // batch_size):
-        src_batch = src[i*batch_size: (i+1)*batch_size, :]
-        seg_batch = seg[i*batch_size: (i+1)*batch_size, :]
+        src_batch = src[i * batch_size : (i + 1) * batch_size, :]
+        seg_batch = seg[i * batch_size : (i + 1) * batch_size, :]
         yield src_batch, seg_batch
     if instances_num > instances_num // batch_size * batch_size:
-        src_batch = src[instances_num//batch_size*batch_size:, :]
-        seg_batch = seg[instances_num//batch_size*batch_size:, :]
+        src_batch = src[instances_num // batch_size * batch_size :, :]
+        seg_batch = seg[instances_num // batch_size * batch_size :, :]
         yield src_batch, seg_batch
 
 
@@ -44,12 +41,12 @@ def read_dataset(args, path):
                 for i, column_name in enumerate(line):
                     columns[column_name] = i
                 continue
-            line = line.strip().split('\t')
-            if "text_b" not in columns: # Sentence classification.
+            line = line.strip().split("\t")
+            if "text_b" not in columns:  # Sentence classification.
                 text_a = line[columns["text_a"]]
                 src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a))
                 seg = [1] * len(src)
-            else: # Sentence pair classification.
+            else:  # Sentence pair classification.
                 text_a, text_b = line[columns["text_a"]], line[columns["text_b"]]
                 src_a = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a) + [SEP_TOKEN])
                 src_b = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(text_b) + [SEP_TOKEN])
@@ -57,8 +54,8 @@ def read_dataset(args, path):
                 seg = [1] * len(src_a) + [2] * len(src_b)
             
             if len(src) > args.seq_length:
-                src = src[:args.seq_length]
-                seg = seg[:args.seq_length]
+                src = src[: args.seq_length]
+                seg = seg[: args.seq_length]
             while len(src) < args.seq_length:
                 src.append(0)
                 seg.append(0)
