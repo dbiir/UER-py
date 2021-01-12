@@ -10,9 +10,9 @@ class RnnEncoder(nn.Module):
         self.bidirectional = args.bidirectional
         if self.bidirectional:
             assert args.hidden_size % 2 == 0
-            self.hidden_size= args.hidden_size // 2
+            self.hidden_size = args.hidden_size // 2
         else:
-            self.hidden_size= args.hidden_size
+            self.hidden_size = args.hidden_size
         self.layers_num = args.layers_num
 
         self.rnn = nn.RNN(input_size=args.emb_size,
@@ -74,7 +74,7 @@ class BirnnEncoder(nn.Module):
         super(BirnnEncoder, self).__init__()
 
         assert args.hidden_size % 2 == 0
-        self.hidden_size= args.hidden_size // 2
+        self.hidden_size = args.hidden_size // 2
         self.layers_num = args.layers_num
 
         self.rnn_forward = nn.RNN(input_size=args.emb_size,
