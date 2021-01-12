@@ -42,27 +42,9 @@ def main():
                         help="Path of the config file.")
 
     # Model options.
-    parser.add_argument("--batch_size", type=int, default=128,
-                        help="Batch size.")
-    parser.add_argument("--seq_length", type=int, default=128,
-                        help="Sequence length.")
-    parser.add_argument("--labels_num", type=int, required=True,
-                        help="Number of prediction labels.")
-    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg"], default="word_pos_seg",
-                        help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
-                                              "birnn", "bilstm", "bigru", \
-                                              "gatedcnn"], \
-                                              default="transformer", help="Encoder type.")
-    parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
-                        help="Mask type.")
-    parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="pre",
-                        help="Layernorm positioning.")
-    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
+    model_opts(parser)
     parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
                         help="Pooling type.")
-    parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
-    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
 
     # Tokenizer options.
     parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
