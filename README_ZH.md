@@ -9,7 +9,6 @@
 预训练已经成为自然语言处理任务的重要组成部分，为大量自然语言处理任务带来了显著提升。 UER-py（Universal Encoder Representations）是一个用于对通用语料进行预训练并对下游任务进行微调的工具包。UER-py遵循模块化的设计原则。通过模块的组合，用户能迅速精准复现已有的预训练模型（例如BERT，GPT，ELMO），并利用已有的接口进一步开发更多的预训练模型。通过UER-py，我们建立了一个模型仓库，其中包含基于不同语料，编码器和目标任务的预训练模型。用户可以根据具体任务的要求，从中选择合适的预训练模型使用。
 
 
-
 <br>
 
 目录
@@ -300,7 +299,7 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 <br/>
 
 ## 预训练模型仓库
-借助UER-py，我们使用不同的语料，编码器和目标任务进行了预训练，所有预训练模型都可以由UER-py直接加载。将来我们会发布更多的预训练模型。用户可以在[__预训练模型仓库__](https://github.com/dbiir/UER-py/wiki/Modelzoo)中找到预训练模型和对应描述和下载链接。
+借助UER-py，我们使用不同的语料，编码器和目标任务进行了预训练，所有预训练模型都可以由UER-py直接加载。将来我们会发布更多的预训练模型。用户可以在[__预训练模型仓库__](https://github.com/dbiir/UER-py/wiki/模型仓库)中找到预训练模型和对应描述和下载链接。
 
 <br/>
 
@@ -345,7 +344,7 @@ UER-py/
 <br/>
 
 ## 竞赛解决方案
-UER-py已用于许多NLP竞赛的获奖解决方案中。在本节中，我们提供了一些使用UER-py在NLP比赛中获得SOTA成绩的示例，例如CLUE。更多详细信息参见[__竞赛解决方案__](https://github.com/dbiir/UER-py/wiki/Competition-solutions)。
+UER-py已用于许多NLP竞赛的获奖解决方案中。在本节中，我们提供了一些使用UER-py在NLP比赛中获得SOTA成绩的示例，例如CLUE。更多详细信息参见[__竞赛解决方案__](https://github.com/dbiir/UER-py/wiki/竞赛解决方案)。
 
 <br/>
 
