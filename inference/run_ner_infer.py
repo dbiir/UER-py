@@ -48,12 +48,12 @@ def read_dataset(args, path):
 def batch_loader(batch_size, src, seg):
     instances_num = src.size()[0]
     for i in range(instances_num // batch_size):
-        src_batch = src[i*batch_size: (i+1)*batch_size, :]
-        seg_batch = seg[i*batch_size: (i+1)*batch_size, :]
+        src_batch = src[i * batch_size : (i + 1) * batch_size, :]
+        seg_batch = seg[i * batch_size : (i + 1) * batch_size, :]
         yield src_batch, seg_batch
     if instances_num > instances_num // batch_size * batch_size:
-        src_batch = src[instances_num//batch_size*batch_size:, :]
-        seg_batch = seg[instances_num//batch_size*batch_size:, :]
+        src_batch = src[instances_num // batch_size * batch_size :, :]
+        seg_batch = seg[instances_num // batch_size * batch_size :, :]
         yield src_batch, seg_batch
 
 
@@ -119,13 +119,13 @@ def main():
             # Storing sequence length of instances in a batch.
             seq_length_batch = []
             for seg in seg_batch.cpu().numpy().tolist():
-                for j in range(len(seg)-1, -1, -1):
+                for j in range(len(seg) - 1, -1, -1):
                     if seg[j] != 0:
                         break
                 seq_length_batch.append(j+1)
             pred = pred.cpu().numpy().tolist()
             for j in range(0, len(pred), args.seq_length):
-                for label_id in pred[j: j+seq_length_batch[j//args.seq_length]]:
+                for label_id in pred[j: j + seq_length_batch[j // args.seq_length]]:
                     f.write(i2l[label_id] + " ")
                 f.write("\n")
         
