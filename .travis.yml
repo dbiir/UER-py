@@ -40,14 +40,13 @@ script:
     
     mv models/test_albert_model.bin-10 models/test_albert_model.bin
 
-    # #gpt2
-    # python preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset_lm.pt --processes_num 8 --target lm --seq_length 64
+    python preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset_lm.pt --processes_num 8 --target lm --seq_length 64
 
-    # python pretrain.py --dataset_path dataset_lm.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_gpt_model.bin --embedding word_pos --encoder transformer --mask causal --target lm --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --config_path models/bert_tiny_config.json --batch_size 2 --layernorm_positioning pre 
+    python pretrain.py --dataset_path dataset_lm.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_gpt_model.bin --embedding word_pos --encoder transformer --mask causal --target lm --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --config_path models/bert_tiny_config.json --batch_size 2 --layernorm_positioning pre 
     
-    # mv models/test_gpt_model.bin-10 models/test_gpt_model.bin
+    mv models/test_gpt_model.bin-10 models/test_gpt_model.bin
 
-    # #spanbert
+    #spanbert
     # python preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset_spanbert.pt --processes_num 8 --target bert --seq_length 64 --span_masking
 
     # python pretrain.py --dataset_path dataset_spanbert.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_spanbert_model.bin --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --config_path models/bert_tiny_config.json --batch_size 2
