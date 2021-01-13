@@ -24,23 +24,23 @@ script:
     # bert
     python preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset_bert.pt --processes_num 8 --target bert --seq_length 64
 
-    python pretrain.py --dataset_path dataset_bert.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_bert_model.bin --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --config_path models/bert_tiny_config.json --batch_size 2
+    # python pretrain.py --dataset_path dataset_bert.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_bert_model.bin --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --config_path models/bert_tiny_config.json --batch_size 2
     
-    mv models/test_bert_model.bin-10 models/test_bert_model.bin
+    # mv models/test_bert_model.bin-10 models/test_bert_model.bin
     
-    # roberta
-    python preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset_roberta.pt --processes_num 8 --target mlm --seq_length 64 --dynamic_masking --full_sentence
+    # # roberta
+    # python preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset_roberta.pt --processes_num 8 --target mlm --seq_length 64 --dynamic_masking --full_sentence
 
-    python pretrain.py --dataset_path dataset_roberta.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_roberta_model.bin --embedding word_pos_seg --encoder transformer --mask fully_visible --target mlm --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --config_path models/bert_tiny_config.json --batch_size 2
+    # python pretrain.py --dataset_path dataset_roberta.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_roberta_model.bin --embedding word_pos_seg --encoder transformer --mask fully_visible --target mlm --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --config_path models/bert_tiny_config.json --batch_size 2
     
-    mv models/test_roberta_model.bin-10 models/test_roberta_model.bin
+    # mv models/test_roberta_model.bin-10 models/test_roberta_model.bin
 
-    #albert
-    python preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset_albert.pt --processes_num 8 --target albert --seq_length 64
+    # #albert
+    # python preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset_albert.pt --processes_num 8 --target albert --seq_length 64
 
-    python pretrain.py --dataset_path dataset_albert.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_albert_model.bin --embedding word_pos_seg --encoder transformer --mask fully_visible --target albert --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --config_path models/bert_base_config.json --batch_size 2 --factorized_embedding_parameterization --parameter_sharing
+    # python pretrain.py --dataset_path dataset_albert.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_albert_model.bin --embedding word_pos_seg --encoder transformer --mask fully_visible --target albert --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --config_path models/bert_base_config.json --batch_size 2 --factorized_embedding_parameterization --parameter_sharing
     
-    mv models/test_albert_model.bin-10 models/test_albert_model.bin
+    # mv models/test_albert_model.bin-10 models/test_albert_model.bin
 
     # #gpt2
     # python preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset_lm.pt --processes_num 8 --target lm --seq_length 64
