@@ -49,3 +49,59 @@
               "answers": [
                 {
                   "text": "FAKE_ANSWER_1", 
+                  "answer_start": -1
+                }, 
+                {
+                  "text": "FAKE_ANSWER_2", 
+                  "answer_start": -1
+                }, 
+                {
+                  "text": "FAKE_ANSWER_3", 
+                  "answer_start": -1
+                }
+              ]
+            }, 
+            {
+              "question": "罗亚尔港号的船名来自于哪个州？", 
+              "id": "TEST_0_QUERY_3", 
+              "answers": [
+                {
+                  "text": "FAKE_ANSWER_1", 
+                  "answer_start": -1
+                }, 
+                {
+                  "text": "FAKE_ANSWER_2", 
+                  "answer_start": -1
+                }, 
+                {
+                  "text": "FAKE_ANSWER_3", 
+                  "answer_start": -1
+                }
+              ]
+            }, 
+            {
+              "question": "2009年2月5日，罗亚尔港号巡洋舰在什么地方搁浅了？", 
+              "id": "TEST_0_QUERY_4", 
+              "answers": [
+                {
+                  "text": "FAKE_ANSWER_1", 
+                  "answer_start": -1
+                }, 
+                {
+                  "text": "FAKE_ANSWER_2", 
+                  "answer_start": -1
+                }, 
+                {
+                  "text": "FAKE_ANSWER_3", 
+                  "answer_start": -1
+                }
+              ]
+            }
+          ]
+        }
+      ], 
+      "id": "TEST_0", 
+      "title": "皇家港号导弹巡洋舰"
+    }
+  ]
+}
