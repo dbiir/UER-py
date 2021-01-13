@@ -803,6 +803,10 @@ class MtDataset(Dataset):
                 line = f.readline()
                 pos += 1
 
+                if len(line.strip().split("\t")) != 2:
+                    if pos >= end:
+                        break
+                    continue
                 document_src, document_tgt = line.strip().split("\t")
                 src = self.src_tokenizer.convert_tokens_to_ids(self.src_tokenizer.tokenize(document_src))
                 tgt = self.tgt_tokenizer.convert_tokens_to_ids(self.tgt_tokenizer.tokenize(document_tgt))
