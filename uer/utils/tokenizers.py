@@ -9,22 +9,29 @@ import six
 
 class Tokenizer(object):
 
-    def __init__(self, args):
+    def __init__(self, args, is_src=True):
         self.vocab = None
         self.sp_model = None
-        if args.spm_model_path:
+        if is_src == True:
+            spm_model_path = args.spm_model_path
+            vocab_path = args.vocab_path
+        else:
+            spm_model_path = args.tgt_spm_model_path
+            vocab_path = args.tgt_vocab_path
+
+        if spm_model_path:
             try:
                 import sentencepiece as spm
             except ImportError:
                 raise ImportError("You need to install SentencePiece to use XLNetTokenizer: https://github.com/google/sentencepiece"
                                                     "pip install sentencepiece")
             self.sp_model = spm.SentencePieceProcessor()
-            self.sp_model.Load(args.spm_model_path)
+            self.sp_model.Load(spm_model_path)
             self.vocab = {self.sp_model.IdToPiece(i): i for i
                                         in range(self.sp_model.GetPieceSize())}
         else:
             self.vocab = Vocab()
-            self.vocab.load(args.vocab_path, is_quiet=True)
+            self.vocab.load(vocab_path, is_quiet=True)
             self.vocab = self.vocab.w2i
         self.inv_vocab = {v: k for k, v in self.vocab.items()}
 
@@ -47,20 +54,26 @@ class Tokenizer(object):
 
 class CharTokenizer(Tokenizer):
         
-    def __init__(self, args):
-        super().__init__(args)
+    def __init__(self, args, is_src=True):
+        super().__init__(args, is_src)
 
-    def tokenize(self, text):
-        return [token if token in self.vocab else "[UNK]" for token in list(text.strip())]
+    def tokenize(self, text, use_vocab=True):
+        if use_vocab:
+            return [token if token in self.vocab else "[UNK]" for token in list(text.strip())]
+        else:
+            return [token for token in list(text.strip())]
 
 
 class SpaceTokenizer(Tokenizer):
      
-    def __init__(self, args):
-        super().__init__(args)
+    def __init__(self, args, is_src=True):
+        super().__init__(args, is_src)
 
-    def tokenize(self, text):
-        return [token if token in self.vocab else "[UNK]" for token in text.strip().split(" ")]
+    def tokenize(self, text, use_vocab=True):
+        if use_vocab:
+            return [token if token in self.vocab else "[UNK]" for token in text.strip().split(" ")]
+        else:
+            return [token for token in text.strip().split(" ")]
 
 
 SPIECE_UNDERLINE = u"▁".encode("utf-8")
@@ -201,8 +214,8 @@ def whitespace_tokenize(text):
 class BertTokenizer(Tokenizer):
     """Runs end-to-end tokenziation."""
 
-    def __init__(self, args, do_lower_case=True):
-        super().__init__(args)
+    def __init__(self, args, is_src=True, do_lower_case=True):
+        super().__init__(args, is_src)
         if not args.spm_model_path:
             self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case)
             self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab)
