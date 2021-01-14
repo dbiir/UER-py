@@ -703,7 +703,10 @@ class LmDataLoader(DataLoader):
             for ins in instances:
                 src.append(ins[0][:-1])
                 tgt.append(ins[0][1:])
-                seg.append([1] * ins[1] + [PAD_ID] * (len(ins[0]) - 1 - ins[1]))
+                if ins[1] == len(ins[0]):
+                    seg.append([1] * (ins[1] - 1))
+                else:
+                    seg.append([1] * ins[1] + [PAD_ID] * (len(ins[0]) - 1 - ins[1]))
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt), \
