@@ -12,16 +12,11 @@ env:
 
      - TRAVIS=true
 
-
-
 install:
 
     - pip install -r requirements.txt
 
-
-
 script:
-    # bert
     python preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset_bert.pt --processes_num 8 --target bert --seq_length 64
 
     python pretrain.py --dataset_path dataset_bert.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/test_bert_model.bin --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --config_path models/bert_tiny_config.json --batch_size 2
