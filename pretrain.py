@@ -57,6 +57,8 @@ def main():
                         help="Tie the word embedding and softmax weights.")
     parser.add_argument("--has_lmtarget_bias", action="store_true",
                         help="Add bias on output_layer for lm target.")
+    parser.add_argument("--rpe", action="store_true",
+                        help="Use relative position embedding.")
 
     # Masking options.
     parser.add_argument("--span_masking", action="store_true", help="Span masking.")

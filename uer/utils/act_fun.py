@@ -11,3 +11,6 @@ def gelu_fast(x):
 
 def relu(x):
     return F.relu(x)
+
+def linear(x):
+    return x

@@ -22,14 +22,14 @@ class MultiHeadedAttention(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.final_linear = nn.Linear(hidden_size, hidden_size)
 
-    def forward(self, key, value, query, mask):
+    def forward(self, key, value, query, mask, position_bias=None):
         """
         Args:
             key: [batch_size x seq_length x hidden_size]
             value: [batch_size x seq_length x hidden_size]
             query: [batch_size x seq_length x hidden_size]
             mask: [batch_size x 1 x seq_length x seq_length]
-
+            position_bias: [batch_size x 1 x seq_length x seq_length]
         Returns:
             output: [batch_size x seq_length x hidden_size]
         """
@@ -57,6 +57,8 @@ class MultiHeadedAttention(nn.Module):
                             ]
 
         scores = torch.matmul(query, key.transpose(-2, -1))
+        if self.position_bias is not None:
+            scores = scores + position_bias
         scores = scores / math.sqrt(float(per_head_size))
         scores = scores + mask
         probs = nn.Softmax(dim=-1)(scores)
