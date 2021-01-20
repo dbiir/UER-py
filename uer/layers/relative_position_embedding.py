@@ -1,5 +1,6 @@
 import math
 import torch
+import torch.nn as nn
 
 class RelativePositionEmbedding(nn.Module):
     """ Relative Position Embedding
