@@ -36,7 +36,8 @@ class MultiHeadedAttention(nn.Module):
         Returns:
             output: [batch_size x seq_length x hidden_size]
         """
-        batch_size, seq_length, hidden_size = query.size()
+        batch_size, seq_length, _ = query.size()
+        inner_hidden_size =  self.heads_num * self.per_head_size
         heads_num = self.heads_num
         per_head_size = self.per_head_size
 
@@ -50,7 +51,7 @@ class MultiHeadedAttention(nn.Module):
             return x. \
                    transpose(1, 2). \
                    contiguous(). \
-                   view(batch_size, seq_length, hidden_size)
+                   view(batch_size, seq_length, inner_hidden_size)
 
 
         query, key, value = [l(x). \
