@@ -57,7 +57,7 @@ class MultiHeadedAttention(nn.Module):
                             ]
 
         scores = torch.matmul(query, key.transpose(-2, -1))
-        if self.position_bias is not None:
+        if position_bias is not None:
             scores = scores + position_bias
         scores = scores / math.sqrt(float(per_head_size))
         scores = scores + mask
