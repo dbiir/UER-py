@@ -15,7 +15,7 @@ class TransformerLayer(nn.Module):
 
         self.layernorm_positioning = args.layernorm_positioning
 
-        if hasattr(arg, "attention_head_size"):
+        if hasattr(args, "attention_head_size"):
             attention_head_size = args.attention_head_size
         else:
             attention_head_size = args.hidden_size // args.heads_num
