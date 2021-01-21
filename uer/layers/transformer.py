@@ -15,9 +15,15 @@ class TransformerLayer(nn.Module):
 
         self.layernorm_positioning = args.layernorm_positioning
 
+        if hasattr(arg, "attention_head_size"):
+            attention_head_size = args.attention_head_size
+        else:
+            attention_head_size = args.hidden_size // args.heads_num
+
+
         # Multi-headed self-attention.
         self.self_attn = MultiHeadedAttention(
-            args.hidden_size, args.heads_num, args.dropout
+            args.hidden_size, args.heads_num, attention_head_size, args.dropout
         )
         self.dropout_1 = nn.Dropout(args.dropout)
         self.layer_norm_1 = LayerNorm(args.hidden_size)
@@ -65,16 +71,21 @@ class TransformerDecoderLayer(nn.Module):
 
         self.layernorm_positioning = args.layernorm_positioning
 
+        if hasattr(args, "attention_head_size"):
+            attention_head_size = args.attention_head_size
+        else:
+            attention_head_size = args.hidden_size // args.heads_num
+
         # Multi-headed self-attention.
         self.self_attn = MultiHeadedAttention(
-            args.hidden_size, args.heads_num, args.dropout
+            args.hidden_size, args.heads_num, attention_head_size, args.dropout
         )
         self.dropout_1 = nn.Dropout(args.dropout)
         self.layer_norm_1 = LayerNorm(args.hidden_size)
 
         # Multi-headed context-attention.
         self.context_attn = MultiHeadedAttention(
-            args.hidden_size, args.heads_num, args.dropout
+            args.hidden_size, args.heads_num, attention_head_size, args.dropout
         )
         self.dropout_2 = nn.Dropout(args.dropout)
         self.layer_norm_2 = LayerNorm(args.hidden_size)
