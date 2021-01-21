@@ -11,19 +11,18 @@ class MultiHeadedAttention(nn.Module):
 
     def __init__(self, hidden_size, heads_num, attention_head_size, dropout):
         super(MultiHeadedAttention, self).__init__()
-        self.hidden_size = hidden_size
         self.heads_num = heads_num
 
         self.per_head_size = attention_head_size
 
-        inner_hidden_size = heads_num * attention_head_size
+        self.inner_hidden_size = heads_num * attention_head_size
 
         self.linear_layers = nn.ModuleList(
-                [nn.Linear(hidden_size, inner_hidden_size) for _ in range(3)]
+                [nn.Linear(hidden_size, self.inner_hidden_size) for _ in range(3)]
             )
         
         self.dropout = nn.Dropout(dropout)
-        self.final_linear = nn.Linear(inner_hidden_size, hidden_size)
+        self.final_linear = nn.Linear(self.inner_hidden_size, hidden_size)
 
     def forward(self, key, value, query, mask, position_bias=None):
         """
@@ -37,7 +36,6 @@ class MultiHeadedAttention(nn.Module):
             output: [batch_size x seq_length x hidden_size]
         """
         batch_size, seq_length, _ = query.size()
-        inner_hidden_size =  self.heads_num * self.per_head_size
         heads_num = self.heads_num
         per_head_size = self.per_head_size
 
@@ -51,7 +49,7 @@ class MultiHeadedAttention(nn.Module):
             return x. \
                    transpose(1, 2). \
                    contiguous(). \
-                   view(batch_size, seq_length, inner_hidden_size)
+                   view(batch_size, seq_length, self.inner_hidden_size)
 
 
         query, key, value = [l(x). \
