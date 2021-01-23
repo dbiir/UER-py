@@ -31,4 +31,3 @@ if version.parse(torch.__version__) < version.parse("1.7"):
     silu = _silu_python
 else:
     silu = F.silu
-
