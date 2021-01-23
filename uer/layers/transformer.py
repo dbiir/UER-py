@@ -20,25 +20,25 @@ class TransformerLayer(nn.Module):
         else:
             attention_head_size = args.hidden_size // args.heads_num
 
-        use_bias = bool(1 - args.remove_bias)
+        has_bias = bool(1 - args.remove_bias)
 
         # Multi-headed self-attention.
         self.self_attn = MultiHeadedAttention(
             args.hidden_size, args.heads_num, attention_head_size, args.dropout
         )
         self.dropout_1 = nn.Dropout(args.dropout)
-        self.layer_norm_1 = LayerNorm(args.hidden_size, use_bias=use_bias)
+        self.layer_norm_1 = LayerNorm(args.hidden_size, has_bias=has_bias)
         # Feed forward layer.
         if args.feed_forward == "gated":
             self.feed_forward = GatedFeedForward(
-                args.hidden_size, args.feedforward_size, args.hidden_act, use_bias
+                args.hidden_size, args.feedforward_size, args.hidden_act, has_bias
             )
         else:
             self.feed_forward = PositionwiseFeedForward(
-                args.hidden_size, args.feedforward_size, args.hidden_act, use_bias
+                args.hidden_size, args.feedforward_size, args.hidden_act, has_bias
             )
         self.dropout_2 = nn.Dropout(args.dropout)
-        self.layer_norm_2 = LayerNorm(args.hidden_size, use_bias=use_bias)
+        self.layer_norm_2 = LayerNorm(args.hidden_size, has_bias=has_bias)
 
         self.relative_pos_emb = None
         if args.relative_position_embedding:
@@ -82,33 +82,33 @@ class TransformerDecoderLayer(nn.Module):
         else:
             attention_head_size = args.hidden_size // args.heads_num
 
-        use_bias = bool(1 - args.remove_bias)
+        has_bias = bool(1 - args.remove_bias)
 
         # Multi-headed self-attention.
         self.self_attn = MultiHeadedAttention(
             args.hidden_size, args.heads_num, attention_head_size, args.dropout
         )
         self.dropout_1 = nn.Dropout(args.dropout)
-        self.layer_norm_1 = LayerNorm(args.hidden_size, use_bias=use_bias)
+        self.layer_norm_1 = LayerNorm(args.hidden_size, has_bias=has_bias)
 
         # Multi-headed context-attention.
         self.context_attn = MultiHeadedAttention(
             args.hidden_size, args.heads_num, attention_head_size, args.dropout
         )
         self.dropout_2 = nn.Dropout(args.dropout)
-        self.layer_norm_2 = LayerNorm(args.hidden_size, use_bias=use_bias)
+        self.layer_norm_2 = LayerNorm(args.hidden_size, has_bias=has_bias)
 
         # Feed forward layer.
         if args.feed_forward == "gated":
             self.feed_forward = GatedFeedForward(
-                args.hidden_size, args.feedforward_size, args.hidden_act, use_bias
+                args.hidden_size, args.feedforward_size, args.hidden_act, has_bias
             )
         else:
             self.feed_forward = PositionwiseFeedForward(
-                args.hidden_size, args.feedforward_size, args.hidden_act, use_bias
+                args.hidden_size, args.feedforward_size, args.hidden_act, has_bias
             )
         self.dropout_3 = nn.Dropout(args.dropout)
-        self.layer_norm_3 = LayerNorm(args.hidden_size, use_bias=use_bias)
+        self.layer_norm_3 = LayerNorm(args.hidden_size, has_bias=has_bias)
 
         self.relative_pos_emb = None
         if args.relative_position_embedding:
