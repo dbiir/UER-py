@@ -116,19 +116,19 @@ class WordSinusoidalposEmbedding(nn.Module):
         self.register_buffer("pe", pe)
 
         self.word_embedding = nn.Embedding(vocab_size, args.emb_size)
-        
+
         self.dropout = nn.Dropout(args.dropout)
 
     def forward(self, src, _):
         """Embed inputs.
         Args:
             emb (FloatTensor): Sequence of word vectors
-                ``(seq_len, batch_size, self.dim)``
+                ``(batch_size, seq_len, self.dim)``
             step (int or NoneType): If stepwise (``seq_len = 1``), use
                 the encoding for this position.
         """
         word_emb = self.word_embedding(src)
         emb = word_emb * math.sqrt(word_emb.size(-1))
-        emb = emb + self.pe[: emb.size(0)]
+        emb = emb + self.pe[: emb.size(1)].transpose(0, 1)
         emb = self.dropout(emb)
         return emb
