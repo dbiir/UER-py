@@ -18,7 +18,8 @@ class RelativePositionEmbedding(nn.Module):
     def forward(self, encoder_hidden, decoder_hidden):
         """
         Args:
-            emb: [batch_size x seq_length x emb_size]
+            encoder_hidden: [batch_size x seq_length x emb_size]
+            decoder_hidden: [batch_size x seq_length x emb_size]
         Returns:
             position_bias: [batch_size x 1 x seq_length x seq_length]
         """
@@ -52,6 +53,3 @@ class RelativePositionEmbedding(nn.Module):
         position_bias += torch.where(is_small, n.float(), val_if_large)
 
         return position_bias.expand(encoder_hidden.size()[0], 1, encoder_hidden.size()[1], decoder_hidden.size()[1]).cuda()
-
-
-
