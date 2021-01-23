@@ -13,6 +13,9 @@ def gelu_fast(x):
 def relu(x):
     return F.relu(x)
 
+def linear(x):
+    return x
+
 def _silu_python(x):
     """
     See Gaussian Error Linear Units (Hendrycks et al., https://arxiv.org/abs/1606.08415) where the SiLU (Sigmoid Linear
@@ -23,8 +26,9 @@ def _silu_python(x):
     """
     return x * torch.sigmoid(x)
 
-
+  
 if version.parse(torch.__version__) < version.parse("1.7"):
     silu = _silu_python
 else:
     silu = F.silu
+
