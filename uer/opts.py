@@ -15,7 +15,7 @@ def model_opts(parser):
                         help="Layernorm positioning.")
     parser.add_argument("--feed_forward", choices=["dense", "gated"], default="dense",
                         help="Feed forward type, specific to transformer model.")
-    parser.add_argument("--remove_bias", action="store_true",
+    parser.add_argument("--remove_transformer_bias", action="store_true",
                         help="Remove bias in feed forward and layer norm layers.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
