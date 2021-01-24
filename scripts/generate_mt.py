@@ -131,7 +131,7 @@ if __name__ == '__main__':
                                               default="transformer", help="Decoder type.")
     parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
                         help="Layernorm positioning.")
-    parser.add_argument("--target", choices=["lm", "mt"], default="mt",
+    parser.add_argument("--target", choices=["lm", "seq2seq"], default="seq2seq",
                         help="The training target of the pretraining model.")
 
     # Subword options.
@@ -170,7 +170,7 @@ if __name__ == '__main__':
     vocab.load(args.vocab_path)
     args.vocab = vocab
 
-    if args.target == "mt":
+    if args.target == "seq2seq":
         tgt_vocab = Vocab()
         tgt_vocab.load(args.tgt_vocab_path)
         args.tgt_vocab = tgt_vocab

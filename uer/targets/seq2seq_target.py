@@ -3,12 +3,12 @@ from uer.layers import *
 from uer.targets import *
 
 
-class MtTarget(LmTarget):
+class Seq2seqTarget(LmTarget):
     """
     """
 
     def __init__(self, args, vocab_size):
-        super(MtTarget, self).__init__(args, len(args.tgt_vocab))
+        super(Seq2seqTarget, self).__init__(args, len(args.tgt_vocab))
 
         self.embedding = str2embedding[args.tgt_embedding](args, len(args.tgt_vocab))
 

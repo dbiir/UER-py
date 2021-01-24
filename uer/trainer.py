@@ -26,7 +26,7 @@ def train_and_validate(args):
         sp_model.Load(args.spm_model_path)
         args.vocab = {sp_model.IdToPiece(i): i for i
                       in range(sp_model.GetPieceSize())}
-        if args.target == "mt":
+        if args.target == "seq2seq":
             tgt_sp_model = spm.SentencePieceProcessor()
             tgt_sp_model.Load(args.tgt_spm_model_path)
             args.tgt_vocab = {tgt_sp_model.IdToPiece(i): i for i
@@ -35,7 +35,7 @@ def train_and_validate(args):
         vocab = Vocab()
         vocab.load(args.vocab_path)
         args.vocab = vocab.w2i
-        if args.target == "mt":
+        if args.target == "seq2seq":
             tgt_vocab = Vocab()
             tgt_vocab.load(args.tgt_vocab_path)
             args.tgt_vocab = tgt_vocab.w2i
@@ -302,9 +302,9 @@ class ClsTrainer(Trainer):
         self.total_instances = 0.0
 
 
-class MtTrainer(Trainer):
+class Seq2seqTrainer(Trainer):
     def __init__(self, args):
-        super(MtTrainer, self).__init__(args)
+        super(Seq2seqTrainer, self).__init__(args)
         self.total_correct = 0.0
         self.total_denominator = 0.0
 
@@ -340,13 +340,13 @@ class MtTrainer(Trainer):
         self.total_denominator = 0.0
 
 
-class T5Trainer(MtTrainer):
+class T5Trainer(Seq2seqTrainer):
     pass
 
 
 str2trainer = {"bert": BertTrainer, "mlm": MlmTrainer, "lm": LmTrainer,
                "albert": AlbertTrainer, "bilm": BilmTrainer, "cls": ClsTrainer,
-               "mt": MtTrainer, "t5": T5Trainer}
+               "seq2seq": Seq2seqTrainer, "t5": T5Trainer}
 
 def worker(proc_id, gpu_ranks, args, model):
     """
