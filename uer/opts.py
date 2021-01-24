@@ -9,7 +9,7 @@ def model_opts(parser):
                                               "birnn", "bilstm", "bigru",
                                               "gatedcnn"],
                                               default="transformer", help="Encoder type.")
-    parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
+    parser.add_argument("--mask", choices=["fully_visible", "causal", "causal_with_prefix"], default="fully_visible",
                         help="Mask type.")
     parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
                         help="Layernorm positioning.")
