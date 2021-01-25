@@ -30,6 +30,7 @@ class MlmTarget(nn.Module):
         self.softmax = nn.LogSoftmax(dim=-1)
 
         self.criterion = nn.NLLLoss()
+        #self.criterion = nn.CrossEntropyLoss()
 
     def mlm(self, memory_bank, tgt_mlm):
         # Masked language modeling (MLM) with full softmax prediction.
@@ -44,18 +45,12 @@ class MlmTarget(nn.Module):
         tgt_mlm = tgt_mlm[tgt_mlm > 0]
         output_mlm = self.mlm_linear_2(output_mlm)
         output_mlm = self.softmax(output_mlm)
-
-        one_hot = torch.zeros(output_mlm.size(0), self.vocab_size). \
-            to(torch.device(output_mlm.device)). \
-            scatter_(1, tgt_mlm.contiguous().view(-1, 1), 1.0)
-        numerator = -torch.sum(output_mlm * one_hot, 1)
         denominator = torch.tensor(output_mlm.size(0) + 1e-6)
-        loss_mlm = torch.sum(numerator) / denominator
         if output_mlm.size(0) == 0:
             correct_mlm = torch.tensor(0.0)
         else:
             correct_mlm = torch.sum((output_mlm.argmax(dim=-1).eq(tgt_mlm)).float())
-
+        loss_mlm = self.criterion(output_mlm, tgt_mlm)
         return loss_mlm, correct_mlm, denominator
 
     def forward(self, memory_bank, tgt):

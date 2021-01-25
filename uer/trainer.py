@@ -344,6 +344,10 @@ class T5Trainer(Seq2seqTrainer):
     pass
 
 
+class PrefixlmTrainer(MlmTrainer):
+    pass
+
+
 str2trainer = {"bert": BertTrainer, "mlm": MlmTrainer, "lm": LmTrainer,
                "albert": AlbertTrainer, "bilm": BilmTrainer, "cls": ClsTrainer,
                "seq2seq": Seq2seqTrainer, "t5": T5Trainer}

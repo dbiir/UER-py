@@ -1006,3 +1006,77 @@ class ClsDataLoader(DataLoader):
             yield torch.LongTensor(src), \
                   torch.LongTensor(tgt), \
                   torch.LongTensor(seg)
+
+
+class PrefixlmDataset(Dataset):
+    
+    def worker(self, proc_id, start, end):
+        print("Worker %d is building dataset ... " % proc_id)
+        set_seed(self.seed)
+        dataset_writer = open("dataset-tmp-" + str(proc_id) + ".pt", "wb")
+        pos = 0
+        with open(self.corpus_path, mode="r", encoding="utf-8") as f:
+            while pos < start:
+                f.readline()
+                pos += 1
+            while True:
+                line = f.readline()
+                pos += 1
+
+                if len(line.strip().split("\t")) != 2:
+                    if pos >= end:
+                        break
+                    continue
+                document_src, document_tgt = line.strip().split("\t")
+                src = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(document_src))
+                tgt = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(document_tgt))
+                src = [self.vocab.get(CLS_TOKEN)] + src + [self.vocab.get(SEP_TOKEN)]
+                tgt = tgt + [self.vocab.get(SEP_TOKEN)]
+                seg_pos = [len(src)]
+
+                if seg_pos[0] >= self.seq_length:
+                    continue
+
+                src = src + tgt
+                tgt = [0] * seg_pos[0] + tgt[1:] + [PAD_ID]
+                seg_pos.append(len(src))
+                src, tgt = src[:self.seq_length], tgt[:self.seq_length]
+                while len(src) != self.seq_length:
+                    src.append(PAD_ID)
+                    tgt.append(PAD_ID)
+                if  seg_pos[1] > self.seq_length:
+                    seg_pos[1] = self.seq_length
+
+                pickle.dump((src, tgt, seg_pos), dataset_writer)
+
+                if pos >= end:
+                    break
+
+            dataset_writer.close()
+
+
+class PrefixlmDataLoader(DataLoader):
+    def __iter__(self):
+        while True:
+            while self._empty():
+                self._fill_buf()
+            if self.start + self.batch_size >= self.end:
+                instances = self.buffer[self.start:]
+            else:
+                instances = self.buffer[self.start: self.start + self.batch_size]
+
+            self.start += self.batch_size
+
+            src = []
+            tgt = []
+            seg = []
+
+            for ins in instances:
+                src.append(ins[0])
+                tgt.append(ins[1])
+                seg.append([1] * ins[2][0] + [2] * (ins[2][1] - ins[2][0]) + [PAD_ID] * (len(ins[0]) - ins[2][1]))
+
+            yield torch.LongTensor(src), \
+                torch.LongTensor(tgt), \
+                torch.LongTensor(seg)
+
