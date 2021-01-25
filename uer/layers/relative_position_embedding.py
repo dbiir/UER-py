@@ -54,7 +54,5 @@ class RelativePositionEmbedding(nn.Module):
 
         position_bias =  position_bias.expand(encoder_hidden.size()[0], 1, encoder_hidden.size()[1], decoder_hidden.size()[1])
 
-        if torch.cuda.is_available():
-            return position_bias.cuda()
-        else:
-            return position_bias
+        return position_bias.to(torch.device(encoder_hidden.device))
+
