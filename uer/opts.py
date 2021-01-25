@@ -5,6 +5,8 @@ def model_opts(parser):
                         help="Use relative position embedding.")
     parser.add_argument("--remove_embedding_layernorm", action="store_true",
                         help="Remove layernorm on embedding.")
+    parser.add_argument("--remove_embedding_layernorm_bias", action="store_true",
+                        help="Remove layernorm bias on embedding.")
     parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru",
                                               "birnn", "bilstm", "bigru",
                                               "gatedcnn"],
@@ -15,8 +17,8 @@ def model_opts(parser):
                         help="Layernorm positioning.")
     parser.add_argument("--feed_forward", choices=["dense", "gated"], default="dense",
                         help="Feed forward type, specific to transformer model.")
-    parser.add_argument("--remove_bias", action="store_true",
-                        help="Remove bias in feed forward and layer norm layers.")
+    parser.add_argument("--remove_transformer_bias", action="store_true",
+                        help="Remove bias on transformer layers.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
