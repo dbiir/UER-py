@@ -52,4 +52,9 @@ class RelativePositionEmbedding(nn.Module):
                                    )
         position_bias += torch.where(is_small, n.float(), val_if_large)
 
-        return position_bias.expand(encoder_hidden.size()[0], 1, encoder_hidden.size()[1], decoder_hidden.size()[1]).cuda()
+        position_bias =  position_bias.expand(encoder_hidden.size()[0], 1, encoder_hidden.size()[1], decoder_hidden.size()[1])
+
+        if torch.cuda.is_available():
+            return position_bias.cuda()
+        else:
+            return position_bias

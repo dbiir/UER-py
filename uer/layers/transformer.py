@@ -20,11 +20,11 @@ class TransformerLayer(nn.Module):
         else:
             attention_head_size = args.hidden_size // args.heads_num
 
-        has_bias = bool(1 - args.remove_bias)
+        has_bias = bool(1 - args.remove_transformer_bias)
 
         # Multi-headed self-attention.
         self.self_attn = MultiHeadedAttention(
-            args.hidden_size, args.heads_num, attention_head_size, args.dropout
+            args.hidden_size, args.heads_num, attention_head_size, args.dropout, has_bias=has_bias
         )
         self.dropout_1 = nn.Dropout(args.dropout)
         self.layer_norm_1 = LayerNorm(args.hidden_size, has_bias=has_bias)
@@ -82,18 +82,18 @@ class TransformerDecoderLayer(nn.Module):
         else:
             attention_head_size = args.hidden_size // args.heads_num
 
-        has_bias = bool(1 - args.remove_bias)
+        has_bias = bool(1 - args.remove_transformer_bias)
 
         # Multi-headed self-attention.
         self.self_attn = MultiHeadedAttention(
-            args.hidden_size, args.heads_num, attention_head_size, args.dropout
+            args.hidden_size, args.heads_num, attention_head_size, args.dropout, has_bias=has_bias
         )
         self.dropout_1 = nn.Dropout(args.dropout)
         self.layer_norm_1 = LayerNorm(args.hidden_size, has_bias=has_bias)
 
         # Multi-headed context-attention.
         self.context_attn = MultiHeadedAttention(
-            args.hidden_size, args.heads_num, attention_head_size, args.dropout
+            args.hidden_size, args.heads_num, attention_head_size, args.dropout, has_bias=has_bias
         )
         self.dropout_2 = nn.Dropout(args.dropout)
         self.layer_norm_2 = LayerNorm(args.hidden_size, has_bias=has_bias)

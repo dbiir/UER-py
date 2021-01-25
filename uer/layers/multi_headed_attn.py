@@ -9,7 +9,7 @@ class MultiHeadedAttention(nn.Module):
     self-attention refers to https://arxiv.org/pdf/1706.03762.pdf
     """
 
-    def __init__(self, hidden_size, heads_num, attention_head_size, dropout):
+    def __init__(self, hidden_size, heads_num, attention_head_size, dropout, has_bias=True):
         super(MultiHeadedAttention, self).__init__()
         self.heads_num = heads_num
 
@@ -18,11 +18,11 @@ class MultiHeadedAttention(nn.Module):
         self.inner_hidden_size = heads_num * attention_head_size
 
         self.linear_layers = nn.ModuleList(
-                [nn.Linear(hidden_size, self.inner_hidden_size) for _ in range(3)]
+                [nn.Linear(hidden_size, self.inner_hidden_size, bias=has_bias) for _ in range(3)]
             )
         
         self.dropout = nn.Dropout(dropout)
-        self.final_linear = nn.Linear(self.inner_hidden_size, hidden_size)
+        self.final_linear = nn.Linear(self.inner_hidden_size, hidden_size, bias=has_bias)
 
     def forward(self, key, value, query, mask, position_bias=None):
         """
