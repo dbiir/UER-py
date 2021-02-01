@@ -3,6 +3,7 @@ import os
 import torch
 import argparse
 import torch.nn as nn
+import numpy as np
 
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
@@ -23,13 +24,74 @@ class SequenceEncoder(torch.nn.Module):
         super(SequenceEncoder, self).__init__()
         self.embedding = str2embedding[args.embedding](args, len(args.vocab))
         self.encoder = str2encoder[args.encoder](args)
+        self.pooling = args.pooling
         # Close dropout.
         self.eval()
 
     def forward(self, src, seg):
         emb = self.embedding(src, seg)
         output = self.encoder(emb, seg)
+
+        if self.pooling == "mean":
+            output = torch.mean(output, dim=1)
+        elif self.pooling == "max":
+            output = torch.max(output, dim=1)[0]
+        elif self.pooling == "last":
+            output = output[:, -1, :]
+        elif self.pooling == "first":
+            output = output[:, 0, :]
+        else:
+            output = output
+
         return output        
+
+class WhiteningHandle(torch.nn.Module):
+    """
+    Whitening operation.
+    @ref: https://github.com/bojone/BERT-whitening/blob/main/demo.py
+    """
+
+    def __init__(self, args, vecs):
+        super(WhiteningHandle, self).__init__()
+        self.kernel, self.bias = self._compute_kernel_bias(vecs)
+
+    def forward(self, vecs, n_components=None, normal=True, pt=True):
+        vecs = self._format_vecs_to_np(vecs)
+        vecs = self._transform(vecs, n_components)
+        vecs = self._normalize(vecs) if normal else vecs
+        vecs = torch.tensor(vecs) if pt else vecs
+        return vecs
+
+    def _compute_kernel_bias(self, vecs):
+        vecs = self._format_vecs_to_np(vecs)
+        mu = vecs.mean(axis=0, keepdims=True)
+        cov = np.cov(vecs.T)
+        u, s, vh = np.linalg.svd(cov)
+        W = np.dot(u, np.diag(1 / np.sqrt(s)))
+        return W, -mu
+
+    def _transform(self, vecs, n_components):
+        w = self.kernel[:, :n_components] \
+                if isinstance(n_components, int) else self.kernel
+        return (vecs + self.bias).dot(w)
+
+    def _normalize(self, vecs):
+        return vecs / (vecs**2).sum(axis=1, keepdims=True)**0.5
+
+    def _format_vecs_to_np(self, vecs):
+        vecs_np = []
+        for vec in vecs:
+            if isinstance(vec, list):
+                vec = np.array(vec)
+            elif torch.is_tensor(vec):
+                vec = vec.detach().numpy()
+            elif isinstance(vec, np.ndarray):
+                vec = vec
+            else:
+                raise Exception('Unknown vec type.')
+            vecs_np.append(vec)
+        vecs_np = np.array(vecs_np)
+        return vecs_np
 
 
 if __name__ == '__main__':
@@ -60,6 +122,9 @@ if __name__ == '__main__':
                                               "birnn", "bilstm", "bigru", \
                                               "gatedcnn"], \
                                               default="transformer", help="Encoder type.")
+    parser.add_argument("--pooling", choices=["first", "last", "max", "mean"], \
+                                              default=None, help="Pooling Type.")
+    parser.add_argument("--whitening_size", type=int, default=None, help="Output vector size after whitening.")
     parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
                         help="Layernorm positioning.") 
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
@@ -68,6 +133,16 @@ if __name__ == '__main__':
                         help="Factorized embedding parameterization.")
     parser.add_argument("--tie_weights", action="store_true",
                         help="Tie the word embedding and softmax weights.")
+    parser.add_argument("--remove_embedding_layernorm", action="store_true",
+                        help="Remove layernorm on embedding.")
+    parser.add_argument("--remove_embedding_layernorm_bias", action="store_true",
+                        help="Remove layernorm bias on embedding.")
+    parser.add_argument("--remove_transformer_bias", action="store_true",
+                        help="Remove bias on transformer layers.")
+    parser.add_argument("--feed_forward", choices=["dense", "gated"], default="dense",
+                        help="Feed forward type, specific to transformer model.")
+    parser.add_argument("--relative_position_embedding", action="store_true",
+                        help="Use relative position embedding.")
 
     # Tokenizer options.
     parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
@@ -138,7 +213,15 @@ if __name__ == '__main__':
         seg_batch = seg_batch.to(device)
         output = model(src_batch, seg_batch)
         feature_vectors.append(output)
-
     feature_vectors = torch.cat(feature_vectors, 0)
+
+    # whitening
+    if args.pooling is not None and args.whitening_size is not None:
+        print("Conduct whitening({}).".format(args.whitening_size))
+        whitening = WhiteningHandle(args, feature_vectors)
+        feature_vectors = whitening(feature_vectors, args.whitening_size, pt=True)
+
     torch.save(feature_vectors,args.output_path)
-    print("The number of sentences: {}".format(feature_vectors.size(0)))
+    print("The size of features vectors: {}".format(feature_vectors.size()))
+    print("The number of sentences: {}".format(len(feature_vectors)))
+    
