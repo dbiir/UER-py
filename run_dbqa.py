@@ -1,26 +1,18 @@
 """
 This script provides an exmaple to wrap UER-py for document-based question answering.
 """
-import torch
 import random
 import argparse
-import collections
-import torch.nn as nn
-from uer.utils.vocab import Vocab
+import torch
+from uer.layers import *
+from uer.encoders import *
 from uer.utils.constants import *
-from uer.utils.tokenizer import *
-from uer.layers.embeddings import *
-from uer.encoders.bert_encoder import *
-from uer.encoders.rnn_encoder import *
-from uer.encoders.birnn_encoder import *
-from uer.encoders.cnn_encoder import *
-from uer.encoders.attn_encoder import *
-from uer.encoders.gpt_encoder import *
-from uer.encoders.mixed_encoder import *
+from uer.utils import *
 from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
+from uer.opts import finetune_opts
 from run_classifier import Classifier, count_labels_num, build_optimizer, batch_loader, train_model, load_or_initialize_parameters
 
 
@@ -32,7 +24,7 @@ def read_dataset(args, path):
                 for i, column_name in enumerate(line.strip().split("\t")):
                     columns[column_name] = i
                 continue
-            line = line.strip().split('\t')
+            line = line.strip().split("\t")
             qid = int(line[columns["qid"]])
             tgt = int(line[columns["label"]])
             text_a, text_b = line[columns["text_a"]], line[columns["text_b"]]
@@ -42,8 +34,8 @@ def read_dataset(args, path):
             seg = [1] * len(src_a) + [2] * len(src_b)
             
             if len(src) > args.seq_length:
-                src = src[:args.seq_length]
-                seg = seg[:args.seq_length]
+                src = src[: args.seq_length]
+                seg = seg[: args.seq_length]
             while len(src) < args.seq_length:
                 src.append(0)
                 seg.append(0)
@@ -62,7 +54,7 @@ def evaluate(args, dataset):
 
     args.model.eval()
 
-    for i, (src_batch, tgt_batch,  seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
+    for i, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
         src_batch = src_batch.to(args.device)
         tgt_batch = tgt_batch.to(args.device)
         seg_batch = seg_batch.to(args.device)
@@ -71,7 +63,7 @@ def evaluate(args, dataset):
         if i == 0:
             logits_all = logits
         if i >= 1:
-            logits_all = torch.cat((logits_all,logits), 0)
+            logits_all = torch.cat((logits_all, logits), 0)
 
     # To calculate MRR, the results are grouped by qid.
     dataset_groupby_qid, correct_answer_orders, scores = [], [], []
@@ -106,7 +98,7 @@ def evaluate(args, dataset):
 
     reciprocal_rank = []
     for qid, correct_answer_orders, scores in dataset_groupby_qid:
-        if len(correct_answer_orders)==1:
+        if len(correct_answer_orders) == 1:
             sorted_scores = sorted(scores, reverse=True)
             for j in range(len(sorted_scores)):
                 if sorted_scores[j] == scores[correct_answer_orders[0]]:
@@ -128,73 +120,22 @@ def evaluate(args, dataset):
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    # Path options.
-    parser.add_argument("--pretrained_model_path", default=None, type=str,
-                        help="Path of the pretrained model.")
-    parser.add_argument("--output_model_path", default="./models/dbqa_model.bin", type=str,
-                        help="Path of the output model.")
-    parser.add_argument("--vocab_path", default=None, type=str,
-                        help="Path of the vocabulary file.")
-    parser.add_argument("--spm_model_path", default=None, type=str,
-                        help="Path of the sentence piece model.")
-    parser.add_argument("--train_path", type=str, required=True,
-                        help="Path of the trainset.")
-    parser.add_argument("--dev_path", type=str, required=True,
-                        help="Path of the devset.") 
-    parser.add_argument("--test_path", type=str,
-                        help="Path of the testset.")
-    parser.add_argument("--config_path", default="./models/bert_base_config.json", type=str,
-                        help="Path of the config file.")
+    finetune_opts(parser)
 
-    # Model options.
-    parser.add_argument("--batch_size", type=int, default=32,
-                        help="Batch size.")
-    parser.add_argument("--seq_length", type=int, default=128,
-                        help="Sequence length.")
-    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
-                        help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
-                                              "cnn", "gatedcnn", "attn", "synt", \
-                                              "rcnn", "crnn", "gpt", "bilstm"], \
-                                              default="bert", help="Encoder type.")
-    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
                         help="Pooling type.")
-    parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
-    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
-    
-    # Tokenizer options.
+
     parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
-                        help="Specify the tokenizer." 
+                        help="Specify the tokenizer."
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."
                              "Space tokenizer segments sentences into words according to space."
                              )
 
-    # Optimizer options.
     parser.add_argument("--soft_targets", action='store_true',
                         help="Train model with logits.")
     parser.add_argument("--soft_alpha", type=float, default=0.5,
                         help="Weight of the soft targets loss.")
-    parser.add_argument("--learning_rate", type=float, default=2e-5,
-                        help="Learning rate.")
-    parser.add_argument("--warmup", type=float, default=0.1,
-                        help="Warm up value.")
-    parser.add_argument("--fp16", action='store_true',
-                        help="Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit")
-    parser.add_argument("--fp16_opt_level", choices=["O0", "O1", "O2", "O3" ], default='O1',
-                        help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
-                             "See details at https://nvidia.github.io/apex/amp.html")
-
-    # Training options.
-    parser.add_argument("--dropout", type=float, default=0.5,
-                        help="Dropout.")
-    parser.add_argument("--epochs_num", type=int, default=3,
-                        help="Number of epochs.")
-    parser.add_argument("--report_steps", type=int, default=100,
-                        help="Specific steps to print prompt.")
-    parser.add_argument("--seed", type=int, default=7,
-                        help="Random seed.")
     
     args = parser.parse_args()
 
@@ -203,18 +144,18 @@ def main():
 
     set_seed(args.seed)
 
-    # Count the number of labels. 
+    # Count the number of labels.
     args.labels_num = count_labels_num(args.train_path)
 
     # Build tokenizer.
-    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
+    args.tokenizer = str2tokenizer[args.tokenizer](args)
 
     # Build classification model.
     model = Classifier(args)
 
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
-    
+
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
 
@@ -248,18 +189,18 @@ def main():
         model = torch.nn.DataParallel(model)
     args.model = model
 
-    total_loss, result, best_result = 0., 0., 0.
+    total_loss, result, best_result = 0.0, 0.0, 0.0
 
     print("Start training.")
-    
-    for epoch in range(1, args.epochs_num+1):
+
+    for epoch in range(1, args.epochs_num + 1):
         model.train()
-        for i, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):    
+        for i, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
             loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch)
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i+1, total_loss / args.report_steps))
-                total_loss = 0.
+                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
+                total_loss = 0.0
 
         result = evaluate(args, read_dataset(args, args.dev_path))
         if result > best_result:

@@ -30,10 +30,13 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    vocab_path = args.vocab_path
+    args.vocab_path, args.spm_model_path = "./models/reserved_vocab.txt", None
+
     # Build tokenizer.
     tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
 
     # Build and save vocabulary.
     vocab = Vocab()
-    vocab.build(args.corpus, tokenizer, args.workers_num, args.min_count)
-    vocab.save(args.vocab_path)
+    vocab.build(args.corpus_path, tokenizer, args.workers_num, args.min_count)
+    vocab.save(vocab_path)

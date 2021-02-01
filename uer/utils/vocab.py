@@ -52,7 +52,7 @@ class Vocab(object):
                 line = f.readline()
                 pos += 1
 
-                tokens = tokenizer.tokenize(line)
+                tokens = tokenizer.tokenize(line, use_vocab=False)
                 for t in tokens:
                     if t not in w2i:
                         w2i[t], w2c[t] = len(i2w), 1
