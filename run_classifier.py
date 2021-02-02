@@ -94,8 +94,9 @@ def build_optimizer(args, model):
                 {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01},
                 {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.0}
     ]
-    optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
-    scheduler = WarmupLinearSchedule(optimizer, warmup_steps=args.train_steps * args.warmup, t_total=args.train_steps)
+    optimizer = str2optimizer[args.optimizer](optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
+    scheduler = str2schedule[args.schedule](optimizer, warmup_steps=args.train_steps * args.warmup,
+                                            t_total=args.train_steps)
     return optimizer, scheduler
 
 
