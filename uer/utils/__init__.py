@@ -16,10 +16,12 @@ str2dataloader = {"bert": BertDataLoader, "lm": LmDataLoader, "mlm": MlmDataLoad
 
 str2act = {"gelu": gelu, "gelu_fast": gelu_fast, "relu": relu, "silu": silu, "linear": linear}
 
-str2optimizer = {"adamw": AdamW, "lamb": Lamb, "adabelief": AdaBelief}
+str2optimizer = {"adamw": AdamW, "adafactor": Adafactor}
 
-str2schedule = {"warmupconstant": WarmupConstantSchedule, "warmuplinear": WarmupLinearSchedule,
-                "warmupcosine": WarmupCosineSchedule, "warmupcosinerestart": WarmupCosineWithHardRestartsSchedule}
+str2scheduler = {"linear": get_linear_schedule_with_warmup, "cosine": get_cosine_schedule_with_warmup,
+                "cosine_with_restarts": get_cosine_with_hard_restarts_schedule_with_warmup,
+                "polynomial": get_polynomial_decay_schedule_with_warmup,
+                "constant": constant_with_warmup, "constant_with_warmup": get_constant_schedule_with_warmup}
 
 __all__ = ["CharTokenizer", "SpaceTokenizer", "BertTokenizer", "str2tokenizer",
            "BertDataset", "LmDataset", "MlmDataset", "BilmDataset",
@@ -29,6 +31,8 @@ __all__ = ["CharTokenizer", "SpaceTokenizer", "BertTokenizer", "str2tokenizer",
            "AlbertDataLoader", "Seq2seqDataLoader", "T5DataLoader", "ClsDataLoader",
            "PrefixlmDataLoader", "str2dataloader",
            "gelu", "gelu_fast", "relu", "silu", "linear", "str2act",
-           "AdamW", "Lamb", "AdaBelief", "str2optimizer",
-           "WarmupConstantSchedule", "WarmupLinearSchedule", "WarmupCosineSchedule",
-           "WarmupCosineWithHardRestartsSchedule", "str2schedule"]
+           "AdamW", "Adafactor", "str2optimizer",
+           "get_linear_schedule_with_warmup", "get_cosine_schedule_with_warmup",
+           "get_cosine_with_hard_restarts_schedule_with_warmup",
+           "get_polynomial_decay_schedule_with_warmup",
+           "constant_with_warmup", "get_constant_schedule_with_warmup", "str2scheduler"]
