@@ -387,8 +387,17 @@ def worker(proc_id, gpu_ranks, args, model):
         {"params": [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], "weight_decay_rate": 0.01},
         {"params": [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], "weight_decay_rate": 0.0}
     ]
-    optimizer = str2optimizer[args.optimizer](optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
-    scheduler = str2scheduler[args.scheduler](optimizer, args.train_steps*args.warmup, args.train_steps)
+    if args.optimizer in ["adamw"]:
+        optimizer = str2optimizer[args.optimizer](optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
+    else:
+        optimizer = str2optimizer[args.optimizer](optimizer_grouped_parameters, lr=args.learning_rate,
+                                                  scale_parameter=False, relative_step=False)
+    if args.scheduler in ["constant"]:
+        scheduler = str2scheduler[args.scheduler](optimizer)
+    elif args.scheduler in ["constant_with_warmup"]:
+        scheduler = str2scheduler[args.scheduler](optimizer, args.train_steps*args.warmup)
+    else:
+        scheduler = str2scheduler[args.scheduler](optimizer, args.train_steps*args.warmup, args.train_steps)
 
     if args.fp16:
         try:
