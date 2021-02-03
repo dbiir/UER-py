@@ -31,10 +31,11 @@ class RelativePositionEmbedding(nn.Module):
         context_position = torch.arange(query_length, dtype=torch.long)[:, None]
         memory_position = torch.arange(key_length, dtype=torch.long)[None, :]
         relative_position = memory_position - context_position  # shape (query_length, key_length)
-        relative_position_bucket = self._relative_position_bucket(
+        relative_position_bucket = self.relative_position_bucket(
             relative_position,  # shape (query_length, key_length)
             bidirectional=self.bidirectional,
             num_buckets=self.num_buckets,
+            max_distance=self.max_distance
         )
         relative_position_bucket = relative_position_bucket.to(self.relative_attention_bias.weight.device)
         values = self.relative_attention_bias(relative_position_bucket)  # shape (query_length, key_length, num_heads)
@@ -42,7 +43,7 @@ class RelativePositionEmbedding(nn.Module):
         return values
 
 
-    def _relative_position_bucket(relative_position, bidirectional=True, num_buckets=32, max_distance=128):
+    def relative_position_bucket(self, relative_position, bidirectional, num_buckets, max_distance):
         """
         Adapted from Mesh Tensorflow:
         https://github.com/tensorflow/mesh/blob/0cb87fe07da627bf0b7e60475d59f95ed6b5be3d/mesh_tensorflow/transformer/transformer_layers.py#L593
