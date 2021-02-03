@@ -6,11 +6,9 @@ import re
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("--input_model_path", type=str, default="pytorch_model.bin",
                         help=".")
-parser.add_argument("--input_vocab_path", type=str, default="vocab.txt",
-                        help=".")
 parser.add_argument("--output_model_path", type=str, default="gpt_model.bin",
                         help=".")
-parser.add_argument("--layers", type=int, default=12)
+parser.add_argument("--layers_num", type=int, default=12)
 
 args = parser.parse_args()
 path = args.input_model_path
@@ -23,7 +21,7 @@ output_model = collections.OrderedDict()
 output_model["transformer.wte.weight"] = input_model["embedding.word_embedding.weight"]
 output_model["transformer.wpe.weight"] = input_model["embedding.position_embedding.weight"]
 
-for i in range(args.layers):
+for i in range(args.layers_num):
     output_model["transformer.h." + str(i) + ".attn.bias"] = torch.tril(torch.ones(1024, 1024)).view(1, 1, 1024, 1024)
     weight = []
     bias = []

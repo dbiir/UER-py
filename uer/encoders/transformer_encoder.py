@@ -48,11 +48,28 @@ class TransformerEncoder(nn.Module):
                 unsqueeze(1)
             mask = mask.float()
             mask = (1.0 - mask) * -10000.0
-        else:
+        elif self.mask == "causal":
             mask = torch.ones(seq_length, seq_length, device=emb.device)
             mask = torch.tril(mask)
             mask = (1.0 - mask) * -10000
             mask = mask.repeat(batch_size, 1, 1, 1)
+        else:
+            mask_a = (seg == 1). \
+                unsqueeze(1). \
+                repeat(1, seq_length, 1). \
+                unsqueeze(1).float()
+
+            mask_b = (seg > 0). \
+                unsqueeze(1). \
+                repeat(1, seq_length, 1). \
+                unsqueeze(1).float()
+
+            mask_tril = torch.ones(seq_length, seq_length, device=emb.device)
+            mask_tril = torch.tril(mask_tril)
+            mask_tril = mask_tril.repeat(batch_size, 1, 1, 1)
+
+            mask = (mask_a + mask_b + mask_tril >= 2).float()
+            mask = (1.0 - mask) * -10000.0
 
         hidden = emb
 

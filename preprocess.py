@@ -32,10 +32,12 @@ def main():
                              "Char tokenizer segments sentences into characters."
                              "Space tokenizer segments sentences into words according to space."
                              )
+    parser.add_argument("--tgt_tokenizer", choices=["bert", "char", "space"], default="bert",
+                        help="Specify the tokenizer.")
     parser.add_argument("--processes_num", type=int, default=1,
                         help="Split the whole dataset into `processes_num` parts, "
                              "and each part is fed to a single process in training step.")
-    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "seq2seq", "t5", "cls"], default="bert",
+    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "seq2seq", "t5", "cls", "prefixlm"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--docs_buffer_size", type=int, default=100000,
                         help="The buffer size of documents in memory, specific to targets that require negative sampling.")
@@ -65,8 +67,8 @@ def main():
 
     # Build tokenizer.
     tokenizer = str2tokenizer[args.tokenizer](args)
-    if args.target == "mt":
-        args.tgt_tokenizer = str2tokenizer[args.tokenizer](args, False)
+    if args.target == "seq2seq":
+        args.tgt_tokenizer = str2tokenizer[args.tgt_tokenizer](args, False)
 
     # Build and save dataset.
     dataset = str2dataset[args.target](args, tokenizer.vocab, tokenizer)
