@@ -31,7 +31,7 @@ class MultiHeadedAttention(nn.Module):
             value: [batch_size x seq_length x hidden_size]
             query: [batch_size x seq_length x hidden_size]
             mask: [batch_size x 1 x seq_length x seq_length]
-            position_bias: [batch_size x 1 x seq_length x seq_length]
+            position_bias: [1 x heads_num x seq_length x seq_length]
         Returns:
             output: [batch_size x seq_length x hidden_size]
         """

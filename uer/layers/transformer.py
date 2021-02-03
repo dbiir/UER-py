@@ -42,7 +42,7 @@ class TransformerLayer(nn.Module):
 
         self.relative_pos_emb = None
         if args.relative_position_embedding:
-            self.relative_pos_emb = RelativePositionEmbedding(bidirectional=False)
+            self.relative_pos_emb = RelativePositionEmbedding(bidirectional=False, heads_num=args.heads_num)
 
 
     def forward(self, hidden, mask):
@@ -112,7 +112,7 @@ class TransformerDecoderLayer(nn.Module):
 
         self.relative_pos_emb = None
         if args.relative_position_embedding:
-            self.relative_pos_emb = RelativePositionEmbedding(bidirectional=False)
+            self.relative_pos_emb = RelativePositionEmbedding(bidirectional=False, heads_num=args.heads_num)
 
 
     def forward(self, hidden, encoder_hidden, mask_decoder, mask_encoder):
