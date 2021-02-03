@@ -40,22 +40,18 @@ class TransformerLayer(nn.Module):
         self.dropout_2 = nn.Dropout(args.dropout)
         self.layer_norm_2 = LayerNorm(args.hidden_size, has_bias=has_bias)
 
-        self.relative_pos_emb = None
-        if args.relative_position_embedding:
-            self.relative_pos_emb = RelativePositionEmbedding(bidirectional=False, heads_num=args.heads_num)
 
 
-    def forward(self, hidden, mask):
+    def forward(self, hidden, mask, position_bias = None):
         """
         Args:
             hidden: [batch_size x seq_length x emb_size]
             mask: [batch_size x 1 x seq_length x seq_length]
+            position_bias: [1 x heads_num x seq_length x seq_length]
         Returns:
             output: [batch_size x seq_length x hidden_size]
         """
-        position_bias = None
-        if self.relative_pos_emb:
-            position_bias = self.relative_pos_emb(hidden, hidden)
+
 
         if self.layernorm_positioning == "post":
             inter = self.dropout_1(self.self_attn(hidden, hidden, hidden, mask, position_bias))
@@ -110,27 +106,19 @@ class TransformerDecoderLayer(nn.Module):
         self.dropout_3 = nn.Dropout(args.dropout)
         self.layer_norm_3 = LayerNorm(args.hidden_size, has_bias=has_bias)
 
-        self.relative_pos_emb = None
-        if args.relative_position_embedding:
-            self.relative_pos_emb = RelativePositionEmbedding(bidirectional=False, heads_num=args.heads_num)
 
-
-    def forward(self, hidden, encoder_hidden, mask_decoder, mask_encoder):
+    def forward(self, hidden, encoder_hidden, mask_decoder, mask_encoder, self_position_bias = None, context_position_bias = None):
         """
         Args:
             emb: [batch_size x seq_length x emb_size]
             hidden: [batch_size x seq_length x emb_size]
             mask_encoder: [batch_size x 1 x seq_length x seq_length]
             mask_decoder: [batch_size x 1 x seq_length x seq_length]
+            self_position_bias: [1 x heads_num x seq_length x seq_length]
+            context_position_bias: [1 x heads_num x seq_length x seq_length]
         Returns:
             output: [batch_size x seq_length x hidden_size]
         """
-        self_position_bias = None
-        context_position_bias = None
-        if self.relative_pos_emb:
-            self_position_bias = self.relative_pos_emb(hidden, hidden)
-            context_position_bias = self.relative_pos_emb(hidden, encoder_hidden)
-
 
         if self.layernorm_positioning == "post":
             query = self.dropout_1(self.self_attn(hidden, hidden, hidden, mask_decoder, self_position_bias))
