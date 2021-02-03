@@ -18,6 +18,7 @@ class RelativePositionEmbedding(nn.Module):
 
     def forward(self, encoder_hidden, decoder_hidden):
         """
+        Compute binned relative position bias
         Args:
             encoder_hidden: [batch_size x seq_length x emb_size]
             decoder_hidden: [batch_size x seq_length x emb_size]
@@ -27,7 +28,6 @@ class RelativePositionEmbedding(nn.Module):
         query_length =  encoder_hidden.size()[1]
         key_length = decoder_hidden.size()[1]
 
-        """ Compute binned relative position bias """
         context_position = torch.arange(query_length, dtype=torch.long)[:, None]
         memory_position = torch.arange(key_length, dtype=torch.long)[None, :]
         relative_position = memory_position - context_position  # shape (query_length, key_length)
