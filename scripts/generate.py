@@ -84,7 +84,9 @@ if __name__ == '__main__':
     parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
                         help="Mask type.")
     parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
-                        help="Layernorm positioning.") 
+                        help="Layernorm positioning.")
+    parser.add_argument("--remove_embedding_layernorm", action="store_true",
+                        help="Remove layernorm on embedding.")
     
     # Subword options.
     parser.add_argument("--subword_type", choices=["none", "char"], default="none",
