@@ -3,6 +3,7 @@ import torch.nn as nn
 from uer.layers import *
 from uer.layers.transformer import TransformerDecoderLayer
 from uer.layers.layer_norm import LayerNorm
+from uer.layers.relative_position_embedding import RelativePositionEmbedding
 
 
 class TransformerDecoder(nn.Module):
@@ -13,11 +14,15 @@ class TransformerDecoder(nn.Module):
         super(TransformerDecoder, self).__init__()
         self.layers_num = args.layers_num
         self.layernorm_positioning = args.layernorm_positioning
+        self.relative_position_embedding = args.relative_position_embedding
         self.transformer_decoder = nn.ModuleList(
             [TransformerDecoderLayer(args) for _ in range(self.layers_num)]
         )
         if self.layernorm_positioning == "pre":
             self.layer_norm = LayerNorm(args.hidden_size)
+
+        if self.relative_position_embedding:
+            self.relative_pos_emb = RelativePositionEmbedding(bidirectional=False, heads_num=args.heads_num)
 
     def forward(self, memory_bank, emb, additional_info):
         """
@@ -45,7 +50,14 @@ class TransformerDecoder(nn.Module):
         hidden = emb
 
         for i in range(self.layers_num):
-            hidden = self.transformer_decoder[i](hidden, memory_bank, mask_decoder, mask_encoder)
+            if self.relative_position_embedding:
+                self_position_bias = self.relative_pos_emb(hidden, hidden)
+                context_position_bias = self.relative_pos_emb(hidden, memory_bank)
+            else:
+                self_position_bias = None
+                context_position_bias = None
+
+            hidden = self.transformer_decoder[i](hidden, memory_bank, mask_decoder, mask_encoder,self_position_bias, context_position_bias)
 
         if self.layernorm_positioning == "pre":
             return self.layer_norm(hidden)

@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from uer.layers.transformer import TransformerLayer
 from uer.layers.layer_norm import LayerNorm
+from uer.layers.relative_position_embedding import RelativePositionEmbedding
 
 class TransformerEncoder(nn.Module):
     """
@@ -14,6 +15,7 @@ class TransformerEncoder(nn.Module):
         self.parameter_sharing = args.parameter_sharing
         self.factorized_embedding_parameterization = args.factorized_embedding_parameterization
         self.layernorm_positioning = args.layernorm_positioning
+        self.relative_position_embedding = args.relative_position_embedding
 
         if self.factorized_embedding_parameterization:
             self.linear = nn.Linear(args.emb_size, args.hidden_size)
@@ -26,6 +28,9 @@ class TransformerEncoder(nn.Module):
             )
         if self.layernorm_positioning == "pre":
             self.layer_norm = LayerNorm(args.hidden_size)
+
+        if self.relative_position_embedding:
+            self.relative_pos_emb = RelativePositionEmbedding(bidirectional=True, heads_num=args.heads_num)
         
     def forward(self, emb, seg):
         """
@@ -74,10 +79,15 @@ class TransformerEncoder(nn.Module):
         hidden = emb
 
         for i in range(self.layers_num):
-            if self.parameter_sharing:
-                hidden = self.transformer(hidden, mask)
+            if self.relative_position_embedding:
+                position_bias = self.relative_pos_emb(hidden, hidden)
             else:
-                hidden = self.transformer[i](hidden, mask)
+                position_bias = None
+
+            if self.parameter_sharing:
+                hidden = self.transformer(hidden, mask, position_bias=position_bias)
+            else:
+                hidden = self.transformer[i](hidden, mask, position_bias=position_bias)
 
         if self.layernorm_positioning == "pre":
             return self.layer_norm(hidden)
