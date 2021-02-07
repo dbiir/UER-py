@@ -78,12 +78,12 @@ class TransformerEncoder(nn.Module):
 
         hidden = emb
 
-        for i in range(self.layers_num):
-            if self.relative_position_embedding:
-                position_bias = self.relative_pos_emb(hidden, hidden)
-            else:
-                position_bias = None
+        if self.relative_position_embedding:
+            position_bias = self.relative_pos_emb(hidden, hidden)
+        else:
+            position_bias = None
 
+        for i in range(self.layers_num):
             if self.parameter_sharing:
                 hidden = self.transformer(hidden, mask, position_bias=position_bias)
             else:

@@ -35,7 +35,7 @@ class WordPosEmbedding(nn.Module):
         super(WordPosEmbedding, self).__init__()
         self.remove_embedding_layernorm = args.remove_embedding_layernorm
         self.dropout = nn.Dropout(args.dropout)
-        self.max_length = 512
+        self.max_length = args.max_seq_length
         self.word_embedding = nn.Embedding(vocab_size, args.emb_size)
         self.position_embedding = nn.Embedding(self.max_length, args.emb_size)
         has_bias = bool(1 - args.remove_embedding_layernorm_bias)
@@ -66,7 +66,7 @@ class WordPosSegEmbedding(nn.Module):
         super(WordPosSegEmbedding, self).__init__()
         self.remove_embedding_layernorm = args.remove_embedding_layernorm
         self.dropout = nn.Dropout(args.dropout)
-        self.max_length = 512
+        self.max_length = args.max_seq_length
         self.word_embedding = nn.Embedding(vocab_size, args.emb_size)
         self.position_embedding = nn.Embedding(self.max_length, args.emb_size)
         self.segment_embedding = nn.Embedding(3, args.emb_size)

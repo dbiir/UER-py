@@ -49,15 +49,15 @@ class TransformerDecoder(nn.Module):
 
         hidden = emb
 
-        for i in range(self.layers_num):
-            if self.relative_position_embedding:
-                self_position_bias = self.relative_pos_emb(hidden, hidden)
-                context_position_bias = self.relative_pos_emb(hidden, memory_bank)
-            else:
-                self_position_bias = None
-                context_position_bias = None
+        if self.relative_position_embedding:
+            self_position_bias = self.relative_pos_emb(hidden, hidden)
+            context_position_bias = self.relative_pos_emb(hidden, memory_bank)
+        else:
+            self_position_bias = None
+            context_position_bias = None
 
-            hidden = self.transformer_decoder[i](hidden, memory_bank, mask_decoder, mask_encoder,self_position_bias, context_position_bias)
+        for i in range(self.layers_num):
+            hidden = self.transformer_decoder[i](hidden, memory_bank, mask_decoder, mask_encoder, self_position_bias, context_position_bias)
 
         if self.layernorm_positioning == "pre":
             return self.layer_norm(hidden)
