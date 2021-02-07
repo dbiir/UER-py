@@ -104,7 +104,7 @@ class WordSinusoidalposEmbedding(nn.Module):
         if args.emb_size % 2 != 0:
             raise ValueError("Cannot use sin/cos positional encoding with "
                              "odd dim (got dim={:d})".format(args.emb_size))
-        self.max_length = 512
+        self.max_length = args.max_seq_length
         pe = torch.zeros(self.max_length, args.emb_size)
         position = torch.arange(0, self.max_length).unsqueeze(1)
         div_term = torch.exp(
