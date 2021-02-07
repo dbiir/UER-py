@@ -35,9 +35,9 @@ class WordPosEmbedding(nn.Module):
         super(WordPosEmbedding, self).__init__()
         self.remove_embedding_layernorm = args.remove_embedding_layernorm
         self.dropout = nn.Dropout(args.dropout)
-        self.max_length = args.max_seq_length
+        self.max_seq_length = args.max_seq_length
         self.word_embedding = nn.Embedding(vocab_size, args.emb_size)
-        self.position_embedding = nn.Embedding(self.max_length, args.emb_size)
+        self.position_embedding = nn.Embedding(self.max_seq_length, args.emb_size)
         has_bias = bool(1 - args.remove_embedding_layernorm_bias)
         if not self.remove_embedding_layernorm:
             self.layer_norm = LayerNorm(args.emb_size, has_bias=has_bias)
@@ -66,9 +66,9 @@ class WordPosSegEmbedding(nn.Module):
         super(WordPosSegEmbedding, self).__init__()
         self.remove_embedding_layernorm = args.remove_embedding_layernorm
         self.dropout = nn.Dropout(args.dropout)
-        self.max_length = args.max_seq_length
+        self.max_seq_length = args.max_seq_length
         self.word_embedding = nn.Embedding(vocab_size, args.emb_size)
-        self.position_embedding = nn.Embedding(self.max_length, args.emb_size)
+        self.position_embedding = nn.Embedding(self.max_seq_length, args.emb_size)
         self.segment_embedding = nn.Embedding(3, args.emb_size)
         has_bias = bool(1 - args.remove_embedding_layernorm_bias)
         if not self.remove_embedding_layernorm:
@@ -104,9 +104,9 @@ class WordSinusoidalposEmbedding(nn.Module):
         if args.emb_size % 2 != 0:
             raise ValueError("Cannot use sin/cos positional encoding with "
                              "odd dim (got dim={:d})".format(args.emb_size))
-        self.max_length = args.max_seq_length
-        pe = torch.zeros(self.max_length, args.emb_size)
-        position = torch.arange(0, self.max_length).unsqueeze(1)
+        self.max_seq_length = args.max_seq_length
+        pe = torch.zeros(self.max_seq_length, args.emb_size)
+        position = torch.arange(0, self.max_seq_length).unsqueeze(1)
         div_term = torch.exp(
             (
                 torch.arange(0, args.emb_size, 2, dtype=torch.float)
