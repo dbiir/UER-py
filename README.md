@@ -6,7 +6,7 @@
 
 <img src="logo.jpg" width="390" hegiht="390" align=left />
 
-Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py (Universal Encoder Representations) is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of pre-training models (e.g. BERT, GPT, ELMO), and provides interfaces for users to further extend upon. With UER-py, we build a model zoo which contains pre-trained models based on different corpora, encoders, and targets. 
+Pre-training has become an essential part for NLP tasks and has led to remarkable improvements. UER-py (Universal Encoder Representations) is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of pre-training models, and provides interfaces for users to further extend upon. With UER-py, we build a model zoo which contains pre-trained models based on different corpora, encoders, and targets. 
 
 
 <br/>
@@ -30,7 +30,7 @@ Table of Contents
 
 ## Features
 UER-py has the following features:
-- __Reproducibility.__ UER-py has been tested on many datasets and should match the performances of the original pre-training model implementations.
+- __Reproducibility.__ UER-py has been tested on many datasets and should match the performances of the original pre-training model implementations such as BERT, GPT, ELMo, and T5.
 - __Multi-GPU.__ UER-py supports CPU mode, single GPU mode, and distributed training mode. 
 - __Model modularity.__ UER-py is divided into multiple components: embedding, encoder, target, and downstream task fine-tuning. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules with as few restrictions as possible.
 - __Efficiency.__ UER-py refines its pre-processing, pre-training, and fine-tuning stages, which largely improves speed and needs less memory.
@@ -342,7 +342,7 @@ UER-py/
 
 The code is well-organized. Users can use and extend upon it with little efforts.
 
-More examples of using UER can be found in [__instructions__](https://github.com/dbiir/UER-py/wiki/Instructions), which help users quickly implement pre-training models such as BERT, GPT, ELMO and fine-tune pre-trained models on a range of downstream tasks. 
+More examples of using UER can be found in [__instructions__](https://github.com/dbiir/UER-py/wiki/Instructions), which help users quickly implement pre-training models such as BERT, GPT, ELMo, T5 and fine-tune pre-trained models on a range of downstream tasks.
 
 <br/>
 
