@@ -127,6 +127,7 @@ if __name__ == '__main__':
     if torch.cuda.device_count() > 1:                                                                                                   
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))                                               
         model = torch.nn.DataParallel(model)
+    model.eval()
 
     dataset = read_dataset(args, args.test_path)
 

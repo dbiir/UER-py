@@ -1,32 +1,64 @@
+"""
+  This script provides an example to wrap UER-py for feature extraction.
+"""
 import sys
 import os
 import torch
-import argparse
 import torch.nn as nn
+import argparse
 import numpy as np
 
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
-from uer.utils.vocab import Vocab
-from uer.utils.constants import *
-from uer.utils.config import load_hyperparam
-from uer.utils.tokenizers import *
-from uer.model_builder import build_model
 from uer.layers import *
 from uer.encoders import *
 from uer.targets import *
+from uer.utils.constants import *
 from uer.utils import *
+from uer.utils.config import load_hyperparam
+from uer.model_loader import load_model
+from uer.opts import infer_opts
 
-class SequenceEncoder(torch.nn.Module):
-    
+
+def batch_loader(batch_size, src, seg):                                                                                             
+    instances_num = src.size(0)                                                                                                     
+    for i in range(instances_num // batch_size):                                                                                    
+        src_batch = src[i * batch_size : (i + 1) * batch_size]                                                                            
+        seg_batch = seg[i * batch_size : (i + 1) * batch_size]                                                                            
+        yield src_batch, seg_batch                                                                                                  
+    if instances_num > instances_num // batch_size * batch_size:                                                                    
+        src_batch = src[instances_num // batch_size * batch_size:]                                                                      
+        seg_batch = seg[instances_num // batch_size * batch_size:]                                                                      
+        yield src_batch, seg_batch
+
+
+def read_dataset(args, path):
+    dataset = []
+    with open(path, mode="r", encoding="utf-8") as f:
+        for line in f:
+            src = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(line))
+            if len(src) == 0:
+                continue
+            src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN]) + src
+            seg = [1] * len(src)
+
+            if len(src) > args.seq_length:
+                src = src[:args.seq_length]
+                seg = seg[:args.seq_length]
+            while len(src) < args.seq_length:
+                src.append(PAD_ID)
+                seg.append(PAD_ID)
+            dataset.append((src, seg))
+    return dataset
+
+
+class FeatureExtractor(torch.nn.Module):    
     def __init__(self, args):
-        super(SequenceEncoder, self).__init__()
-        self.embedding = str2embedding[args.embedding](args, len(args.vocab))
+        super(FeatureExtractor, self).__init__()
+        self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
         self.encoder = str2encoder[args.encoder](args)
         self.pooling = args.pooling
-        # Close dropout.
-        self.eval()
 
     def forward(self, src, seg):
         emb = self.embedding(src, seg)
@@ -38,19 +70,17 @@ class SequenceEncoder(torch.nn.Module):
             output = torch.max(output, dim=1)[0]
         elif self.pooling == "last":
             output = output[:, -1, :]
-        elif self.pooling == "first":
-            output = output[:, 0, :]
         else:
-            output = output
+            output = output[:, 0, :]
 
         return output        
+
 
 class WhiteningHandle(torch.nn.Module):
     """
     Whitening operation.
     @ref: https://github.com/bojone/BERT-whitening/blob/main/demo.py
     """
-
     def __init__(self, args, vecs):
         super(WhiteningHandle, self).__init__()
         self.kernel, self.bias = self._compute_kernel_bias(vecs)
@@ -97,54 +127,12 @@ class WhiteningHandle(torch.nn.Module):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    # Path options.
-    parser.add_argument("--input_path", type=str, required=True,
-                        help="Path of the input file.")
-    parser.add_argument("--pretrained_model_path", type=str, required=True,
-                        help="Path of the pretrained model.")
-    parser.add_argument("--vocab_path", type=str, required=True,
-                        help="Path of the vocabulary file.")
-    parser.add_argument("--spm_model_path", default=None, type=str,
-                        help="Path of the sentence piece model.")
-    parser.add_argument("--output_path", required=True,
-                        help="Path of the output file.")
-    parser.add_argument("--config_path", default="models/bert_base_config.json",
-                        help="Path of the config file.")
+    infer_opts(parser)
 
-    # Model options.
-    parser.add_argument("--seq_length", type=int, default=128, help="Sequence length.")
-    parser.add_argument("--batch_size", type=int, default=8, help="Batch size.")
-    parser.add_argument("--mask", choices=["fully_visible", "causal"], default="fully_visible",
-                        help="Mask type.")
-    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg"], default="word_pos_seg",
-                        help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", \
-                                              "birnn", "bilstm", "bigru", \
-                                              "gatedcnn"], \
-                                              default="transformer", help="Encoder type.")
     parser.add_argument("--pooling", choices=["first", "last", "max", "mean"], \
-                                              default=None, help="Pooling Type.")
+                                              default="first", help="Pooling Type.")
     parser.add_argument("--whitening_size", type=int, default=None, help="Output vector size after whitening.")
-    parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
-                        help="Layernorm positioning.") 
-    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
-    parser.add_argument("--factorized_embedding_parameterization", action="store_true",
-                        help="Factorized embedding parameterization.")
-    parser.add_argument("--tie_weights", action="store_true",
-                        help="Tie the word embedding and softmax weights.")
-    parser.add_argument("--remove_embedding_layernorm", action="store_true",
-                        help="Remove layernorm on embedding.")
-    parser.add_argument("--remove_embedding_layernorm_bias", action="store_true",
-                        help="Remove layernorm bias on embedding.")
-    parser.add_argument("--remove_transformer_bias", action="store_true",
-                        help="Remove bias on transformer layers.")
-    parser.add_argument("--feed_forward", choices=["dense", "gated"], default="dense",
-                        help="Feed forward type, specific to transformer model.")
-    parser.add_argument("--relative_position_embedding", action="store_true",
-                        help="Use relative position embedding.")
 
-    # Tokenizer options.
     parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
                         help="Specify the tokenizer." 
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
@@ -155,73 +143,37 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args = load_hyperparam(args)
 
-    # Load vocabulary.
-    vocab = Vocab()
-    vocab.load(args.vocab_path)
-    args.vocab = vocab
+    args.tokenizer = str2tokenizer[args.tokenizer](args)
 
-    # Build and load modeli.
-    model = SequenceEncoder(args)
-    pretrained_model = torch.load(args.pretrained_model_path)
-    model.load_state_dict(pretrained_model, strict=False)
+    # Build feature extractor model.
+    model = FeatureExtractor(args)
+    model = load_model(model, args.load_model_path)
 
     # For simplicity, we use DataParallel wrapper to use multiple GPUs.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
     if torch.cuda.device_count() > 1:
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = nn.DataParallel(model)
+    model.eval()
 
-    model = model.to(device)
-    
-    # Build tokenizer
-    tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
+    dataset = read_dataset(args, args.test_path)
 
-    dataset = []
-    with open(args.input_path, mode="r", encoding="utf-8") as f:
-        for line in f:
-            tokens = [vocab.get(t) for t in tokenizer.tokenize(line)]
-            if len(tokens) == 0:
-                continue
-            tokens = [args.vocab.get(CLS_TOKEN)] + tokens
-            seg = [1] * len(tokens)
-
-            if len(tokens) > args.seq_length:
-                tokens = tokens[:args.seq_length]
-                seg = seg[:args.seq_length]
-            while len(tokens) < args.seq_length:
-                tokens.append(PAD_ID)
-                seg.append(PAD_ID)
-            dataset.append((tokens, seg))
-           
-    src = torch.LongTensor([e[0] for e in dataset])
-    seg = torch.LongTensor([e[1] for e in dataset])
-
-    def batch_loader(batch_size, src, seg):
-        instances_num = src.size(0)
-        for i in range(instances_num // batch_size):
-            src_batch = src[i*batch_size : (i+1)*batch_size]
-            seg_batch = seg[i*batch_size : (i+1)*batch_size]
-            yield src_batch, seg_batch
-        if instances_num > instances_num // batch_size * batch_size:
-            src_batch = src[instances_num//batch_size*batch_size:]
-            seg_batch = seg[instances_num//batch_size*batch_size:]
-            yield src_batch, seg_batch
+    src = torch.LongTensor([sample[0] for sample in dataset])
+    seg = torch.LongTensor([sample[1] for sample in dataset])
 
     feature_vectors = []
     for i, (src_batch, seg_batch) in enumerate(batch_loader(args.batch_size, src, seg)):
         src_batch = src_batch.to(device)
         seg_batch = seg_batch.to(device)
         output = model(src_batch, seg_batch)
-        feature_vectors.append(output)
+        feature_vectors.append(output.cpu())
     feature_vectors = torch.cat(feature_vectors, 0)
 
-    # whitening
-    if args.pooling is not None and args.whitening_size is not None:
-        print("Conduct whitening({}).".format(args.whitening_size))
+    # Vector whitening.
+    if args.whitening_size is not None:
         whitening = WhiteningHandle(args, feature_vectors)
         feature_vectors = whitening(feature_vectors, args.whitening_size, pt=True)
 
-    torch.save(feature_vectors,args.output_path)
-    print("The size of features vectors: {}".format(feature_vectors.size()))
-    print("The number of sentences: {}".format(len(feature_vectors)))
-    
+    print("The size of feature vectors (sentences_num * vector size): {}".format(feature_vectors.shape))
+    torch.save(feature_vectors, args.prediction_path)

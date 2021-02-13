@@ -75,7 +75,7 @@ def finetune_opts(parser):
                         help="Path of the devset.")
     parser.add_argument("--test_path", default=None, type=str,
                         help="Path of the testset.")
-    parser.add_argument("--config_path", default="./models/bert_base_config.json", type=str,
+    parser.add_argument("--config_path", default="models/bert/base_config.json", type=str,
                         help="Path of the config file.")
 
     # Model options.
