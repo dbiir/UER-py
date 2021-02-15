@@ -170,7 +170,7 @@ if __name__ == '__main__':
         feature_vectors.append(output.cpu())
     feature_vectors = torch.cat(feature_vectors, 0)
 
-    # Vevtor whitening.
+    # Vector whitening.
     if args.whitening_size is not None:
         whitening = WhiteningHandle(args, feature_vectors)
         feature_vectors = whitening(feature_vectors, args.whitening_size, pt=True)
