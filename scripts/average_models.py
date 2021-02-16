@@ -1,4 +1,3 @@
-# -*- encoding:utf-8 -*-
 import sys
 import os
 import torch
@@ -10,7 +9,7 @@ sys.path.append(uer_dir)
 from uer.model_saver import save_model
 
 
-def average_models(model_list_path):
+def average(model_list_path):
     for i, model_path in enumerate(model_list_path):
         model = torch.load(model_path)
         if i == 0:
@@ -30,5 +29,5 @@ if __name__ == '__main__':
                         help="Path of the output model.")
     args = parser.parse_args()
 
-    avg_model = average_models(args.model_list_path)
+    avg_model = average(args.model_list_path)
     torch.save(avg_model, args.output_model_path)
