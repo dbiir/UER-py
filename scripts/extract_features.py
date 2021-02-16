@@ -177,4 +177,3 @@ if __name__ == '__main__':
 
     print("The size of feature vectors (sentences_num * vector size): {}".format(feature_vectors.shape))
     torch.save(feature_vectors, args.prediction_path)
-    

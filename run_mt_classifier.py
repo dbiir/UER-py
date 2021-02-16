@@ -91,7 +91,7 @@ def main():
                         help="Path of the vocabulary file.")
     parser.add_argument("--spm_model_path", default=None, type=str,
                         help="Path of the sentence piece model.")    
-    parser.add_argument("--config_path", default="models/bert_base_config.json", type=str,
+    parser.add_argument("--config_path", default="models/bert/base_config.json", type=str,
                         help="Path of the config file.")
 
     # Model options.

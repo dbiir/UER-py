@@ -54,4 +54,3 @@ if __name__ == '__main__':
             for i in sorted_id[1: args.topn+1]:
                 print(vocab.i2w[i].strip()+ "\t" + str(sims[i].item()))
             print()
-

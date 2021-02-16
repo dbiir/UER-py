@@ -95,7 +95,7 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_voca
 
 mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
-*--mask* specifies the attention mask types. BERT uses bidirectional LM. The word token can attend to all tokens and therefore we use *fully_visible* mask type.
+*--mask* specifies the attention mask types. BERT uses bidirectional LM. The word token can attend to all tokens and therefore we use *fully_visible* mask type. By default, *models/bert/base_config.json* is used as configuration file, which specifies the model hyper-parameters. 
 Notice that the model trained by *pretrain.py* is attacted with the suffix which records the training step. We could remove the suffix for ease of use.
 
 
@@ -215,7 +215,7 @@ UER-py supports cross validation for classification. The example of using cross 
 ```
 CUDA_VISIBLE_DEVICES=0 python3 run_classifier_cv.py --pretrained_model_path models/google_zh_model.bin \
                                                     --vocab_path models/google_zh_vocab.txt \
-                                                    --config_path models/bert_base_config.json \
+                                                    --config_path models/bert/base_config.json \
                                                     --output_model_path models/classifier_model.bin \
                                                     --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
                                                     --train_path datasets/smp2020-ewect/virus/train.tsv \
@@ -235,7 +235,7 @@ python3 scripts/convert_bert_from_huggingface_to_uer.py --input_model_path model
 
 CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path models/chinese_roberta_wwm_large_ext_pytorch/pytorch_model_uer.bin \
                                                       --vocab_path models/google_zh_vocab.txt \
-                                                      --config_path models/bert_large_config.json \
+                                                      --config_path models/bert/large_config.json \
                                                       --train_path datasets/smp2020-ewect/virus/train.tsv \
                                                       --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
                                                       --epochs_num 3 --batch_size 64 --folds_num 5 \
@@ -246,7 +246,7 @@ The example of using our pre-trained model [*Reviews+BertEncoder(large)+MlmTarge
 ```
 CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path models/reviews_bert_large_mlm_model.bin \
                                                       --vocab_path models/google_zh_vocab.txt \
-                                                      --config_path models/bert_large_config.json \
+                                                      --config_path models/bert/large_config.json \
                                                       --train_path datasets/smp2020-ewect/virus/train.tsv \
                                                       --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
                                                       --folds_num 5 --epochs_num 3 --batch_size 64 --seed 17 \

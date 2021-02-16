@@ -24,8 +24,7 @@ class MachineReadingComprehension(nn.Module):
         super(MachineReadingComprehension, self).__init__()
         self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
         self.encoder = str2encoder[args.encoder](args)
-        self.output_layer_1 = nn.Linear(args.hidden_size, args.hidden_size)
-        self.output_layer_2 = nn.Linear(args.hidden_size, 2)
+        self.output_layer = nn.Linear(args.hidden_size, 2)
 
     def forward(self, src, seg, start_position, end_position):
         # Embedding.
@@ -33,8 +32,7 @@ class MachineReadingComprehension(nn.Module):
         # Encoder.
         output = self.encoder(emb, seg)
         # Target.
-        output = torch.tanh(self.output_layer_1(output))
-        logits = self.output_layer_2(output)
+        logits = self.output_layer(output)
 
         start_logits, end_logits = logits.split(1, dim=-1)
         start_logits, end_logits = start_logits.squeeze(-1), end_logits.squeeze(-1)

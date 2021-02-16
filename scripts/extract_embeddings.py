@@ -55,4 +55,3 @@ if __name__ == '__main__':
                 line = line + " " + str(word_embedding[j])
             line += "\n"
             f.write(line)
-

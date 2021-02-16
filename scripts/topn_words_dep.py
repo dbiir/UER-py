@@ -133,4 +133,3 @@ if __name__ == '__main__':
             sorted_ids = torch.argsort(sims, descending=True)
             for j in sorted_ids[1: args.topn + 1]:
                 print(cand_vocab.i2w[j].strip() + "\t" + str(sims[j].item()))
-

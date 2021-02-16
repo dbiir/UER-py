@@ -94,7 +94,7 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_voca
 
 mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
-*--mask* 指定注意力网络中使用的遮罩类型。BERT使用双向语言模型，句子中的任意一个词可以看到所有词的信息，因此我们使用 *fully_visible* 遮罩类型。
+*--mask* 指定注意力网络中使用的遮罩类型。BERT使用双向语言模型，句子中的任意一个词可以看到所有词的信息，因此我们使用 *fully_visible* 遮罩类型。默认情况下，配置文件为 *models/bert/base_config.json* 。配置文件指定了模型的超参数。
 请注意，*pretrain.py*输出的模型会带有记录训练步数的后缀，这里我们可以删除后缀以方便使用。
 
 然后，我们在下游分类数据集上微调预训练模型，我们可以用 *google_zh_model.bin*:
@@ -213,7 +213,7 @@ UER-py支持分类任务的交叉验证，在竞赛数据集[SMP2020-EWECT](http
 ```
 CUDA_VISIBLE_DEVICES=0 python3 run_classifier_cv.py --pretrained_model_path models/google_zh_model.bin \
                                                     --vocab_path models/google_zh_vocab.txt \
-                                                    --config_path models/bert_base_config.json \
+                                                    --config_path models/bert/base_config.json \
                                                     --output_model_path models/classifier_model.bin \
                                                     --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
                                                     --train_path datasets/smp2020-ewect/virus/train.tsv \
@@ -233,7 +233,7 @@ python3 scripts/convert_bert_from_huggingface_to_uer.py --input_model_path model
 
 CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path models/chinese_roberta_wwm_large_ext_pytorch/pytorch_model_uer.bin \
                                                       --vocab_path models/google_zh_vocab.txt \
-                                                      --config_path models/bert_large_config.json \
+                                                      --config_path models/bert/large_config.json \
                                                       --train_path datasets/smp2020-ewect/virus/train.tsv \
                                                       --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
                                                       --epochs_num 3 --batch_size 64 --folds_num 5 \
@@ -244,7 +244,7 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path mo
 ```
 CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path models/reviews_bert_large_mlm_model.bin \
                                                       --vocab_path models/google_zh_vocab.txt \
-                                                      --config_path models/bert_large_config.json \
+                                                      --config_path models/bert/large_config.json \
                                                       --train_path datasets/smp2020-ewect/virus/train.tsv \
                                                       --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
                                                       --folds_num 5 --epochs_num 3 --batch_size 64 --seed 17 \

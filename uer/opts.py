@@ -100,7 +100,7 @@ def infer_opts(parser):
                         help="Path of the testset.")
     parser.add_argument("--prediction_path", type=str, required=True,
                         help="Path of the prediction file.")
-    parser.add_argument("--config_path", default="./models/bert_base_config.json", type=str,
+    parser.add_argument("--config_path", default="models/bert/base_config.json", type=str,
                         help="Path of the config file.")
 
     # Model options.
