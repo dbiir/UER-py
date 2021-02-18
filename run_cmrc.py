@@ -57,7 +57,7 @@ def read_examples(path):
                     for answer in qa["answers"]:
                         answer_texts.append(answer["text"])
                         start_positions.append(answer["answer_start"])
-                        end_positions.append(answer["answer_start"] + len(answer["text"]))
+                        end_positions.append(answer["answer_start"] + len(answer["text"]) - 1)
                     examples.append((context, question, question_id, start_positions, end_positions, answer_texts))
     return examples
 
@@ -97,9 +97,9 @@ def convert_examples_to_dataset(args, examples):
             # If span does not contain the complete answer, we use it for data augmentation.
             if start_position < len(question) + 2:
                 start_position = len(question) + 2
-            if end_position > doc_span[1] + len(question) + 2:
-                end_position = doc_span[1] + len(question) + 2
-            if start_position > doc_span[1] + len(question) + 2 or end_position < len(question) + 2:
+            if end_position > doc_span[1] + len(question) + 1:
+                end_position = doc_span[1] + len(question) + 1
+            if start_position > doc_span[1] + len(question) + 1 or end_position < len(question) + 2:
                 start_position, end_position = 0, 0
 
             src_a = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(question) + [SEP_TOKEN])
@@ -323,7 +323,7 @@ def evaluate(args, dataset, examples):
             skip_count += 1
             continue
 
-        prediction = examples[i][0][start_pred_pos:end_pred_pos]
+        prediction = examples[i][0][start_pred_pos: end_pred_pos + 1]
 
         f1 += calc_f1_score(answers, prediction)
         em += calc_em_score(answers, prediction)

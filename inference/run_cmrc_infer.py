@@ -86,7 +86,7 @@ def main():
             start_pred_pos = pred_answers[i][1]
             end_pred_pos = pred_answers[i][2]
 
-            prediction = examples[i][0][start_pred_pos:end_pred_pos]
+            prediction = examples[i][0][start_pred_pos: end_pred_pos + 1]
             output[question_id] = prediction
 
         f.write(json.dumps(output, indent=4, ensure_ascii=False) + "\n")
