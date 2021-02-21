@@ -21,7 +21,7 @@ class Model(nn.Module):
             self.target.output_layer.weight = self.embedding.word_embedding.weight
 
         if args.target == 't5' and args.share_embedding:
-            self.target.embedding.weight = self.embedding.word_embedding.weight
+            self.target.embedding.word_embedding.weight = self.embedding.word_embedding.weight
 
     def forward(self, src, tgt, seg):
         emb = self.embedding(src, seg)
