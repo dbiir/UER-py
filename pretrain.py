@@ -55,6 +55,8 @@ def main():
                         help="The training target of the pretraining model.")
     parser.add_argument("--tie_weights", action="store_true",
                         help="Tie the word embedding and softmax weights.")
+    parser.add_argument("--share_embedding", action="store_true",
+                        help="Share the word embedding with decoder.")
     parser.add_argument("--has_lmtarget_bias", action="store_true",
                         help="Add bias on output_layer for lm target.")
 

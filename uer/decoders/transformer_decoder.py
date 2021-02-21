@@ -18,8 +18,11 @@ class TransformerDecoder(nn.Module):
         self.transformer_decoder = nn.ModuleList(
             [TransformerDecoderLayer(args) for _ in range(self.layers_num)]
         )
+
+        has_bias = bool(1 - args.remove_transformer_bias)
+
         if self.layernorm_positioning == "pre":
-            self.layer_norm = LayerNorm(args.hidden_size)
+            self.layer_norm = LayerNorm(args.hidden_size, has_bias=has_bias)
 
         if self.relative_position_embedding:
             self.relative_pos_emb = RelativePositionEmbedding(bidirectional=False, heads_num=args.heads_num)

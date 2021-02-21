@@ -20,6 +20,9 @@ class Model(nn.Module):
         elif args.target == 'lm' and args.tie_weights:
             self.target.output_layer.weight = self.embedding.word_embedding.weight
 
+        if args.target == 't5' and args.share_embedding:
+            self.target.embedding.weight = self.embedding.word_embedding.weight
+
     def forward(self, src, tgt, seg):
         emb = self.embedding(src, seg)
         output = self.encoder(emb, seg)
