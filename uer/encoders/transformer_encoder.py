@@ -17,7 +17,7 @@ class TransformerEncoder(nn.Module):
         self.layernorm_positioning = args.layernorm_positioning
         self.relative_position_embedding = args.relative_position_embedding
 
-        self.has_bias = bool(1 - args.remove_transformer_bias)
+        has_bias = bool(1 - args.remove_transformer_bias)
 
         if self.factorized_embedding_parameterization:
             self.linear = nn.Linear(args.emb_size, args.hidden_size)
