@@ -5,8 +5,6 @@ def model_opts(parser):
                         help="Max sequence length for word embedding.")
     parser.add_argument("--relative_position_embedding", action="store_true",
                         help="Use relative position embedding.")
-    parser.add_argument("--share_relative_position_embedding", action="store_true",
-                        help="Share self-attention and context-attention position embedding in decoder.")
     parser.add_argument("--relative_attention_buckets_num", type=int, default=32,
                         help="Buckets num of relative position embedding.")
     parser.add_argument("--remove_embedding_layernorm", action="store_true",
@@ -19,8 +17,6 @@ def model_opts(parser):
                         default="transformer", help="Encoder type.")
     parser.add_argument("--mask", choices=["fully_visible", "causal", "causal_with_prefix"], default="fully_visible",
                         help="Mask type.")
-    parser.add_argument("--share_embedding", action="store_true",
-                        help="Share the word embedding with decoder.")
     parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
                         help="Layernorm positioning.")
     parser.add_argument("--feed_forward", choices=["dense", "gated"], default="dense",

@@ -7,4 +7,5 @@
   "layers_num": 12,
   "dropout": 0.1,
   "share_embedding": true,
+  "share_relative_position_embedding": false
 }
