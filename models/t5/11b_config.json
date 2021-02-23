@@ -1,0 +1,12 @@
+{
+  "emb_size": 1024,
+  "feedforward_size": 65536,
+  "hidden_size": 1024,
+  "hidden_act": "gelu_fast",
+  "attention_head_size": 128,
+  "heads_num": 128,
+  "layers_num": 24,
+  "dropout": 0.1,
+  "share_embedding": true,
+  "share_relative_position_embedding": false
+}
