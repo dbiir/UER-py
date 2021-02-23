@@ -5,5 +5,6 @@
   "hidden_act": "gelu_fast",
   "heads_num": 16,
   "layers_num": 24,
-  "dropout": 0.1
+  "dropout": 0.1,
+  "share_embedding": true
 }
