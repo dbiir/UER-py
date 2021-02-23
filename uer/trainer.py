@@ -413,7 +413,7 @@ def worker(proc_id, gpu_ranks, args, model):
                                 init_method=args.master_ip,
                                 world_size=args.world_size,
                                 rank=rank)
-        model = DistributedDataParallel(model, device_ids=[gpu_id])
+        model = DistributedDataParallel(model, device_ids=[gpu_id], find_unused_parameters=True)
         print("Worker %d is training ... " % rank)
     else:
         print("Worker is training ...")

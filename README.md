@@ -42,7 +42,7 @@ UER-py has the following features:
 
 ## Requirements
 * Python 3.6
-* torch >= 1.0
+* torch >= 1.1
 * six >= 1.12.0
 * argparse
 * packaging
