@@ -27,12 +27,12 @@ class TransformerDecoder(nn.Module):
 
         if self.relative_position_embedding:
             self.self_pos_emb = RelativePositionEmbedding(bidirectional=False, heads_num=args.heads_num,
-                                                          num_buckets=args.relative_attention_num_buckets)
+                                                          num_buckets=args.relative_attention_buckets_num)
             if self.share_relative_position_embedding:
                 self.context_pos_emb = self.self_pos_emb
             else:
                 self.context_pos_emb = RelativePositionEmbedding(bidirectional=False, heads_num=args.heads_num,
-                                                                 num_buckets=args.relative_attention_num_buckets)
+                                                                 num_buckets=args.relative_attention_buckets_num)
 
 
     def forward(self, memory_bank, emb, additional_info):
