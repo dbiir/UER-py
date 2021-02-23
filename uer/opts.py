@@ -5,6 +5,10 @@ def model_opts(parser):
                         help="Max sequence length for word embedding.")
     parser.add_argument("--relative_position_embedding", action="store_true",
                         help="Use relative position embedding.")
+    parser.add_argument("--share_relative_position_embedding", action="store_true",
+                        help="Share self-attention and context-attention position embedding in decoder.")
+    parser.add_argument("--relative_attention_num_buckets", type=int, default=32,
+                        help="Buckets num of relative position embedding.")
     parser.add_argument("--remove_embedding_layernorm", action="store_true",
                         help="Remove layernorm on embedding.")
     parser.add_argument("--remove_embedding_layernorm_bias", action="store_true",

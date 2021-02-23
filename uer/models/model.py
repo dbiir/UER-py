@@ -17,7 +17,7 @@ class Model(nn.Module):
         
         if args.target in ['bert', 'mlm'] and args.tie_weights:
             self.target.mlm_linear_2.weight = self.embedding.word_embedding.weight
-        elif args.target == 'lm' and args.tie_weights:
+        elif args.target in ['lm','t5'] and args.tie_weights:
             self.target.output_layer.weight = self.embedding.word_embedding.weight
 
         if args.target == 't5' and args.share_embedding:

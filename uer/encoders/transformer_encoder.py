@@ -32,7 +32,8 @@ class TransformerEncoder(nn.Module):
             self.layer_norm = LayerNorm(args.hidden_size, has_bias=has_bias)
 
         if self.relative_position_embedding:
-            self.relative_pos_emb = RelativePositionEmbedding(bidirectional=True, heads_num=args.heads_num)
+            self.relative_pos_emb = RelativePositionEmbedding(bidirectional=True, heads_num=args.heads_num,
+                                                              num_buckets=args.relative_attention_num_buckets)
 
 
     def forward(self, emb, seg):

@@ -15,6 +15,7 @@ class TransformerDecoder(nn.Module):
         self.layers_num = args.layers_num
         self.layernorm_positioning = args.layernorm_positioning
         self.relative_position_embedding = args.relative_position_embedding
+        self.share_relative_position_embedding = args.share_relative_position_embedding
         self.transformer_decoder = nn.ModuleList(
             [TransformerDecoderLayer(args) for _ in range(self.layers_num)]
         )
@@ -25,7 +26,14 @@ class TransformerDecoder(nn.Module):
             self.layer_norm = LayerNorm(args.hidden_size, has_bias=has_bias)
 
         if self.relative_position_embedding:
-            self.relative_pos_emb = RelativePositionEmbedding(bidirectional=False, heads_num=args.heads_num)
+            self.self_pos_emb = RelativePositionEmbedding(bidirectional=False, heads_num=args.heads_num,
+                                                          num_buckets=args.relative_attention_num_buckets)
+            if self.share_relative_position_embedding:
+                self.context_pos_emb = self.self_pos_emb
+            else:
+                self.context_pos_emb = RelativePositionEmbedding(bidirectional=False, heads_num=args.heads_num,
+                                                                 num_buckets=args.relative_attention_num_buckets)
+
 
     def forward(self, memory_bank, emb, additional_info):
         """
@@ -53,8 +61,8 @@ class TransformerDecoder(nn.Module):
         hidden = emb
 
         if self.relative_position_embedding:
-            self_position_bias = self.relative_pos_emb(hidden, hidden)
-            context_position_bias = self.relative_pos_emb(hidden, memory_bank)
+            self_position_bias = self.self_pos_emb(hidden, hidden)
+            context_position_bias = self.context_pos_emb(hidden, memory_bank)
         else:
             self_position_bias = None
             context_position_bias = None
