@@ -60,7 +60,7 @@ class TransformerLayer(nn.Module):
             output = self.layer_norm_2(output + inter)
         else:
             inter = self.layer_norm_1(hidden)
-            inter = self.dropout_1(self.self_attn(inter, inter, inter, mask))
+            inter = self.dropout_1(self.self_attn(inter, inter, inter, mask, position_bias))
             hidden = hidden + inter
             output = self.layer_norm_2(hidden)
             output = self.dropout_2(self.feed_forward(output)) + hidden
@@ -110,8 +110,8 @@ class TransformerDecoderLayer(nn.Module):
     def forward(self, hidden, encoder_hidden, mask_decoder, mask_encoder, self_position_bias = None, context_position_bias = None):
         """
         Args:
-            emb: [batch_size x seq_length x emb_size]
             hidden: [batch_size x seq_length x emb_size]
+            encoder_hidden: [batch_size x seq_length x emb_size]
             mask_encoder: [batch_size x 1 x seq_length x seq_length]
             mask_decoder: [batch_size x 1 x seq_length x seq_length]
             self_position_bias: [1 x heads_num x seq_length x seq_length]
@@ -123,16 +123,16 @@ class TransformerDecoderLayer(nn.Module):
         if self.layernorm_positioning == "post":
             query = self.dropout_1(self.self_attn(hidden, hidden, hidden, mask_decoder, self_position_bias))
             query_norm = self.layer_norm_1(query + hidden)
-            mid = self.dropout_2(self.context_attn(encoder_hidden, encoder_hidden, query_norm, mask_encoder,context_position_bias))
+            mid = self.dropout_2(self.context_attn(encoder_hidden, encoder_hidden, query_norm, mask_encoder, context_position_bias))
             mid_norm = self.layer_norm_2(mid + query_norm)
             output = self.dropout_3(self.feed_forward(mid_norm))
             output = self.layer_norm_3(output + mid_norm)
         else:
             hidden_norm = self.layer_norm_1(hidden)
-            query = self.dropout_1(self.self_attn(hidden_norm, hidden_norm, hidden_norm, mask_decoder))
+            query = self.dropout_1(self.self_attn(hidden_norm, hidden_norm, hidden_norm, mask_decoder, self_position_bias))
             query = query + hidden
             query_norm = self.layer_norm_2(query)
-            mid = self.dropout_2(self.context_attn(encoder_hidden, encoder_hidden, query_norm, mask_encoder))
+            mid = self.dropout_2(self.context_attn(encoder_hidden, encoder_hidden, query_norm, mask_encoder, context_position_bias))
             mid = mid + query
             mid_norm = self.layer_norm_3(mid)
             output = self.dropout_3(self.feed_forward(mid_norm)) + mid
