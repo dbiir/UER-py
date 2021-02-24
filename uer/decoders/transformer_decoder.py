@@ -62,7 +62,7 @@ class TransformerDecoder(nn.Module):
 
         if self.relative_position_embedding:
             self_position_bias = self.self_pos_emb(hidden, hidden)
-            context_position_bias = self.context_pos_emb(hidden, memory_bank)
+            context_position_bias = self.context_pos_emb(memory_bank, hidden)
         else:
             self_position_bias = None
             context_position_bias = None
