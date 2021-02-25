@@ -920,14 +920,11 @@ class T5DataLoader(DataLoader):
                         mask_num += 1
                     else:
                         src_with_sentinel.append(token_id)
-                print(src_single)
+
                 while len(src_with_sentinel) != len(src_single):
                     src_with_sentinel.append(PAD_ID)
                 src.append(src_with_sentinel)
-                tgt_in_single.append(SENTINEL_ID)
                 tgt_in.append(tgt_in_single)
-                print(src_with_sentinel)
-                print(tgt_in_single)
                 tgt_out.append(tgt_in[-1][1:] + [PAD_ID])
 
 
