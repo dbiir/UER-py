@@ -905,7 +905,7 @@ class T5DataLoader(DataLoader):
                     else:
                         mask_single.append((src_index, token))
 
-                tgt_in = []
+                tgt_in_single = []
                 mask_num = 0
                 src_with_sentinel = []
                 for token_id in src_single:
@@ -914,18 +914,19 @@ class T5DataLoader(DataLoader):
                             pass
                         else:
                             src_with_sentinel.append(SENTINEL_ID)
-                            tgt_in.append(SENTINEL_ID)
+                            tgt_in_single.append(SENTINEL_ID)
                             SENTINEL_ID += 1
-                        tgt_in.append(mask_single[mask_num][1])
+                        tgt_in_single.append(mask_single[mask_num][1])
                         mask_num += 1
                     else:
                         src_with_sentinel.append(token_id)
-                tgt_in.append(SENTINEL_ID)
+                src.append(src_with_sentinel)
+                tgt_in_single.append(SENTINEL_ID)
+                tgt_in.append(tgt_in_single)
+                print(src_with_sentinel)
+                print(tgt_in_single)
                 tgt_out.append(tgt_in[-1][1:] + [PAD_ID])
 
-            print(src_single)
-            print(src_with_sentinel)
-            print(tgt_in)
 
             for i in range(len(tgt_in)):
                 while len(tgt_in[i]) != 32:
