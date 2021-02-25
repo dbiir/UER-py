@@ -885,8 +885,6 @@ class T5DataLoader(DataLoader):
             tgt_out = []
             seg = []
 
-            tgt_seq_length = 0
-
             for abc, ins in enumerate(instances):
                 if len(ins) == 3:
                     src_single = ins[0]
@@ -898,6 +896,15 @@ class T5DataLoader(DataLoader):
 
                 MASK_ID = self.vocab.get(MASK_TOKEN)
                 SENTINEL_ID = self.vocab.get("[sentinel0]")
+
+
+                mask_single = []
+                for src_index, token in tgt_single:
+                    if src_single[src_index] != MASK_ID:
+                        src_single[src_index] = token
+                    else:
+                        mask_single.append((src_index, token))
+
                 tgt_in = []
                 mask_num = 0
                 src_with_sentinel = []
@@ -909,12 +916,16 @@ class T5DataLoader(DataLoader):
                             src_with_sentinel.append(SENTINEL_ID)
                             tgt_in.append(SENTINEL_ID)
                             SENTINEL_ID += 1
-                        tgt_in.append(tgt_single[mask_num][1])
+                        tgt_in.append(mask_single[mask_num][1])
                         mask_num += 1
                     else:
                         src_with_sentinel.append(token_id)
                 tgt_in.append(SENTINEL_ID)
                 tgt_out.append(tgt_in[-1][1:] + [PAD_ID])
+
+            print(src_single)
+            print(src_with_sentinel)
+            print(tgt_in)
 
             for i in range(len(tgt_in)):
                 while len(tgt_in[i]) != 32:
