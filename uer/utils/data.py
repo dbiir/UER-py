@@ -885,7 +885,9 @@ class T5DataLoader(DataLoader):
             tgt_out = []
             seg = []
 
-            for abc, ins in enumerate(instances):
+            tgt_seq_length = 0
+
+            for _, ins in enumerate(instances):
                 if len(ins) == 3:
                     src_single = ins[0]
                     tgt_single = ins[1]
@@ -900,7 +902,6 @@ class T5DataLoader(DataLoader):
                 for src_index, token in tgt_single:
                     if src_single[src_index] != MASK_ID:
                         src_single[src_index] = MASK_ID
-
 
                 tgt_in_single = []
                 mask_index = 0
@@ -923,12 +924,17 @@ class T5DataLoader(DataLoader):
                 while len(src_with_sentinel) < len(src_single):
                     src_with_sentinel.append(PAD_ID)
 
-                while len(tgt_in_single) < len(src_with_sentinel) * 0.5:
-                    tgt_in_single.append(PAD_ID)
+                if len(tgt_in_single) > tgt_seq_length:
+                    tgt_seq_length = len(tgt_single) + 2
 
                 src.append(src_with_sentinel)
                 tgt_in.append(tgt_in_single)
                 tgt_out.append(tgt_in[-1][1:] + [PAD_ID])
+
+            for i in range(len(tgt_in)):
+                while len(tgt_in[i]) != tgt_seq_length:
+                    tgt_in[i].append(PAD_ID)
+                    tgt_out[i].append(PAD_ID)
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt_in), \
