@@ -889,28 +889,32 @@ class T5DataLoader(DataLoader):
 
             for abc, ins in enumerate(instances):
                 if len(ins) == 3:
-                    src.append(ins[0])
-                    if len(ins[1]) > tgt_seq_length:
-                        tgt_seq_length = len(ins[1]) + 2
-                    tgt_in.append([self.vocab.get(CLS_TOKEN)])
-                    for mask in ins[1]:
-                        tgt_in[-1].append(mask[1])
-                    tgt_in[-1].append(self.vocab.get(SEP_TOKEN))
-                    tgt_out.append(tgt_in[-1][1:] + [PAD_ID])
-
+                    src_single = ins[0]
+                    tgt_single = ins[1]
                     seg.append([1] * ins[2][0] + [PAD_ID] * (len(ins[0]) - ins[2][0]))
                 else:
                     src_single, tgt_single = mask_seq(ins[0], self.vocab, self.span_masking, self.span_geo_prob, self.span_max_length)
-                    if len(tgt_single) > tgt_seq_length:
-                        tgt_seq_length = len(tgt_single) + 2
-                    src.append(src_single)
-                    tgt_in.append([self.vocab.get(CLS_TOKEN)])
-                    for mask in tgt_single:
-                        tgt_in[-1].append(mask[1])
-                    tgt_in[-1].append(self.vocab.get(SEP_TOKEN))
-                    tgt_out.append(tgt_in[-1][1:] + [PAD_ID])
-                    
                     seg.append([1] * ins[1][0] + [PAD_ID] * (len(ins[0]) - ins[1][0]))
+
+                MASK_ID = self.vocab.get(MASK_TOKEN)
+                SENTINEL_ID = self.vocab.get("[sentinel_0]")
+                tgt_in = []
+                mask_num = 0
+                src_with_sentinel = []
+                for token_id in src_single:
+                    if token_id == MASK_ID:
+                        if src_with_sentinel[-1] == (SENTINEL_ID - 1):
+                            pass
+                        else:
+                            src_with_sentinel.append(SENTINEL_ID)
+                            tgt_in.append(SENTINEL_ID)
+                            SENTINEL_ID += 1
+                        tgt_in.append(tgt_single[mask_num][1])
+                        mask_num += 1
+                    else:
+                        src_with_sentinel.append(token_id)
+                tgt_in.append(SENTINEL_ID)
+                tgt_out.append(tgt_in[-1][1:] + [PAD_ID])
 
             for i in range(len(tgt_in)):
                 while len(tgt_in[i]) != 32:
