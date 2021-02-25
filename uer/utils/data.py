@@ -925,7 +925,7 @@ class T5DataLoader(DataLoader):
                     src_with_sentinel.append(PAD_ID)
 
                 if len(tgt_in_single) > tgt_seq_length:
-                    tgt_seq_length = len(tgt_single) + 2
+                    tgt_seq_length = len(tgt_in_single) + 2
 
                 src.append(src_with_sentinel)
                 tgt_in.append(tgt_in_single)
