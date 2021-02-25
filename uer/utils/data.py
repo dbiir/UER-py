@@ -897,16 +897,13 @@ class T5DataLoader(DataLoader):
                 MASK_ID = self.vocab.get(MASK_TOKEN)
                 SENTINEL_ID = self.vocab.get("[extra_id_0]")
 
-
-                mask_single = []
                 for src_index, token in tgt_single:
                     if src_single[src_index] != MASK_ID:
-                        src_single[src_index] = token
-                    else:
-                        mask_single.append((src_index, token))
+                        src_single[src_index] = MASK_ID
 
-                tgt_in_single = [self.vocab.get(CLS_TOKEN)]
-                mask_num = 0
+
+                tgt_in_single = []
+                mask_index = 0
                 src_with_sentinel = []
                 for token_id in src_single:
                     if token_id == MASK_ID:
@@ -916,10 +913,11 @@ class T5DataLoader(DataLoader):
                             src_with_sentinel.append(SENTINEL_ID)
                             tgt_in_single.append(SENTINEL_ID)
                             SENTINEL_ID += 1
-                        tgt_in_single.append(mask_single[mask_num][1])
-                        mask_num += 1
+                        tgt_in_single.append(tgt_single[mask_index][1])
+                        mask_index += 1
                     else:
                         src_with_sentinel.append(token_id)
+                tgt_in_single.append(SENTINEL_ID)
                 tgt_in_single.append(self.vocab.get(SEP_TOKEN))
 
                 while len(src_with_sentinel) < len(src_single):
