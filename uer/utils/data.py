@@ -929,6 +929,9 @@ class T5DataLoader(DataLoader):
 
 
             for i in range(len(tgt_in)):
+                if len(tgt_in[i]) != len(tgt_out[i]):
+                    tgt_in[i].append(PAD_ID)
+
                 while len(tgt_in[i]) != 32:
                     tgt_in[i].append(PAD_ID)
                     tgt_out[i].append(PAD_ID)
