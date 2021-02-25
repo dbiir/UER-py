@@ -922,17 +922,15 @@ class T5DataLoader(DataLoader):
                         src_with_sentinel.append(token_id)
                 tgt_in_single.append(self.vocab.get(SEP_TOKEN))
 
-                while len(src_with_sentinel) != len(src_single):
+                while len(src_with_sentinel) < len(src_single):
                     src_with_sentinel.append(PAD_ID)
+
+                while len(tgt_in_single) < len(src_with_sentinel) * 0.5:
+                    tgt_in_single.append(PAD_ID)
+
                 src.append(src_with_sentinel)
                 tgt_in.append(tgt_in_single)
                 tgt_out.append(tgt_in[-1][1:] + [PAD_ID])
-
-
-            for i in range(len(tgt_in)):
-                while len(tgt_in[i]) != 32:
-                    tgt_in[i].append(PAD_ID)
-                    tgt_out[i].append(PAD_ID)
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt_in), \
