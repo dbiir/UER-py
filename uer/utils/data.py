@@ -903,7 +903,7 @@ class T5DataLoader(DataLoader):
                     if src_single[src_index] != MASK_ID:
                         src_single[src_index] = MASK_ID
 
-                tgt_in_single = []
+                tgt_in_single = [self.vocab.get(CLS_TOKEN)]
                 mask_index = 0
                 src_with_sentinel = []
                 for token_id in src_single:
