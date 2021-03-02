@@ -897,9 +897,9 @@ class T5DataLoader(DataLoader):
                     seg.append([1] * ins[1][0] + [PAD_ID] * (len(ins[0]) - ins[1][0]))
 
                 MASK_ID = self.vocab.get(MASK_TOKEN)
-                SENTINEL_ID = self.vocab.get("[extra_id_0]")
+                SENTINEL_ID = self.vocab.get(SENTINEL_TOKEN)
 
-                for src_index, token in tgt_single:
+                for src_index, _ in tgt_single:
                     if src_single[src_index] != MASK_ID:
                         src_single[src_index] = MASK_ID
 
@@ -925,7 +925,7 @@ class T5DataLoader(DataLoader):
                     src_with_sentinel.append(PAD_ID)
 
                 if len(tgt_in_single) > tgt_seq_length:
-                    tgt_seq_length = len(tgt_in_single) + 2
+                    tgt_seq_length = len(tgt_in_single)
 
                 src.append(src_with_sentinel)
                 tgt_in.append(tgt_in_single)
