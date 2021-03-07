@@ -9,12 +9,12 @@ class MultiHeadedAttention(nn.Module):
     self-attention refers to https://arxiv.org/pdf/1706.03762.pdf
     """
 
-    def __init__(self, hidden_size, heads_num, attention_head_size, dropout, has_bias=True):
+    def __init__(self, hidden_size, heads_num, attention_head_size, dropout, has_bias=True, with_scale = True):
         super(MultiHeadedAttention, self).__init__()
         self.heads_num = heads_num
 
         self.per_head_size = attention_head_size
-
+        self.with_scale = with_scale
         self.inner_hidden_size = heads_num * attention_head_size
 
         self.linear_layers = nn.ModuleList(
@@ -61,7 +61,8 @@ class MultiHeadedAttention(nn.Module):
         scores = torch.matmul(query, key.transpose(-2, -1))
         if position_bias is not None:
             scores = scores + position_bias
-        scores = scores / math.sqrt(float(per_head_size))
+        if self.with_scale:
+            scores = scores / math.sqrt(float(per_head_size))
         scores = scores + mask
         probs = nn.Softmax(dim=-1)(scores)
         probs = self.dropout(probs)

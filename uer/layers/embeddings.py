@@ -13,9 +13,8 @@ class WordEmbedding(nn.Module):
         self.remove_embedding_layernorm = args.remove_embedding_layernorm
         self.dropout = nn.Dropout(args.dropout)
         self.word_embedding = nn.Embedding(vocab_size, args.emb_size)
-        has_bias = bool(1 - args.remove_embedding_layernorm_bias)
         if not self.remove_embedding_layernorm:
-            self.layer_norm = LayerNorm(args.emb_size, has_bias=has_bias)
+            self.layer_norm = LayerNorm(args.emb_size)
 
     def forward(self, src, _):
         emb = self.word_embedding(src)
@@ -38,9 +37,8 @@ class WordPosEmbedding(nn.Module):
         self.max_seq_length = args.max_seq_length
         self.word_embedding = nn.Embedding(vocab_size, args.emb_size)
         self.position_embedding = nn.Embedding(self.max_seq_length, args.emb_size)
-        has_bias = bool(1 - args.remove_embedding_layernorm_bias)
         if not self.remove_embedding_layernorm:
-            self.layer_norm = LayerNorm(args.emb_size, has_bias=has_bias)
+            self.layer_norm = LayerNorm(args.emb_size)
 
     def forward(self, src, _):
         word_emb = self.word_embedding(src)
@@ -70,9 +68,8 @@ class WordPosSegEmbedding(nn.Module):
         self.word_embedding = nn.Embedding(vocab_size, args.emb_size)
         self.position_embedding = nn.Embedding(self.max_seq_length, args.emb_size)
         self.segment_embedding = nn.Embedding(3, args.emb_size)
-        has_bias = bool(1 - args.remove_embedding_layernorm_bias)
         if not self.remove_embedding_layernorm:
-            self.layer_norm = LayerNorm(args.emb_size, has_bias=has_bias)
+            self.layer_norm = LayerNorm(args.emb_size)
 
     def forward(self, src, seg):
         word_emb = self.word_embedding(src)
