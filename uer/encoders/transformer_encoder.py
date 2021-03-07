@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from uer.layers.transformer import TransformerLayer
-from uer.layers.layer_norm import LayerNorm
+from uer.layers.layer_norm import LayerNorm, T5LayerNorm
 from uer.layers.relative_position_embedding import RelativePositionEmbedding
 
 class TransformerEncoder(nn.Module):
@@ -29,7 +29,10 @@ class TransformerEncoder(nn.Module):
                 [TransformerLayer(args) for _ in range(self.layers_num)]
             )
         if self.layernorm_positioning == "pre":
-            self.layer_norm = LayerNorm(args.hidden_size)
+            if args.layernorm == "t5":
+                self.layer_norm = T5LayerNorm(args.hidden_size)
+            else:
+                self.layer_norm = LayerNorm(args.hidden_size)
 
         if self.relative_position_embedding:
             self.relative_pos_emb = RelativePositionEmbedding(bidirectional=True, heads_num=args.heads_num,

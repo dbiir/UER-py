@@ -85,7 +85,7 @@ class TransformerDecoderLayer(nn.Module):
             attention_head_size = args.hidden_size // args.heads_num
 
         has_bias = bool(1 - args.remove_transformer_bias)
-        with_scale = bool(1 - args.remove_multihead_attention_scale)
+        with_scale = bool(1 - args.remove_attention_scale)
 
         # Multi-headed self-attention.
         self.self_attn = MultiHeadedAttention(
