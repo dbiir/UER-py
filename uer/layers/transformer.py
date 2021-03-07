@@ -122,7 +122,7 @@ class TransformerDecoderLayer(nn.Module):
 
 
 
-def forward(self, hidden, encoder_hidden, mask_decoder, mask_encoder, self_position_bias = None, context_position_bias = None):
+    def forward(self, hidden, encoder_hidden, mask_decoder, mask_encoder, self_position_bias = None, context_position_bias = None):
         """
         Args:
             hidden: [batch_size x seq_length x emb_size]
