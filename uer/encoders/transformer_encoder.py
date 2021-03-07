@@ -29,7 +29,7 @@ class TransformerEncoder(nn.Module):
                 [TransformerLayer(args) for _ in range(self.layers_num)]
             )
         if self.layernorm_positioning == "pre":
-            self.layer_norm = LayerNorm(args.hidden_size, has_bias=has_bias)
+            self.layer_norm = LayerNorm(args.hidden_size)
 
         if self.relative_position_embedding:
             self.relative_pos_emb = RelativePositionEmbedding(bidirectional=True, heads_num=args.heads_num,
