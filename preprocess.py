@@ -1,9 +1,8 @@
 import argparse
-import torch
-from uer.utils.data import *
-from uer.utils.tokenizer import *
 import six
 from packaging import version
+from uer.utils.data import *
+from uer.utils import *
 
 
 assert version.parse(six.__version__) >= version.parse("1.12.0")
@@ -19,6 +18,10 @@ def main():
                         help="Path of the vocabulary file.")
     parser.add_argument("--spm_model_path", default=None, type=str,
                         help="Path of the sentence piece model.")
+    parser.add_argument("--tgt_vocab_path", default=None, type=str,
+                        help="Path of the target vocabulary file.")
+    parser.add_argument("--tgt_spm_model_path", default=None, type=str,
+                        help="Path of the target sentence piece model.")
     parser.add_argument("--dataset_path", type=str, default="dataset.pt",
                         help="Path of the preprocessed dataset.")
 
@@ -29,14 +32,17 @@ def main():
                              "Char tokenizer segments sentences into characters."
                              "Space tokenizer segments sentences into words according to space."
                              )
+    parser.add_argument("--tgt_tokenizer", choices=["bert", "char", "space"], default="bert",
+                        help="Specify the tokenizer.")
     parser.add_argument("--processes_num", type=int, default=1,
                         help="Split the whole dataset into `processes_num` parts, "
                              "and each part is fed to a single process in training step.")
-    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "bilm", "albert"], default="bert",
+    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "seq2seq", "t5", "cls", "prefixlm"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--docs_buffer_size", type=int, default=100000,
                         help="The buffer size of documents in memory, specific to targets that require negative sampling.")
     parser.add_argument("--seq_length", type=int, default=128, help="Sequence length of instances.")
+    parser.add_argument("--tgt_seq_length", type=int, default=128, help="Target sequence length of instances.")
     parser.add_argument("--dup_factor", type=int, default=5,
                         help="Duplicate instances multiple times.")
     parser.add_argument("--short_seq_prob", type=float, default=0.1,
@@ -60,10 +66,12 @@ def main():
         args.dup_factor = 1
 
     # Build tokenizer.
-    tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
+    tokenizer = str2tokenizer[args.tokenizer](args)
+    if args.target == "seq2seq":
+        args.tgt_tokenizer = str2tokenizer[args.tgt_tokenizer](args, False)
 
     # Build and save dataset.
-    dataset = globals()[args.target.capitalize() + "Dataset"](args, tokenizer.vocab, tokenizer)
+    dataset = str2dataset[args.target](args, tokenizer.vocab, tokenizer)
     dataset.build_and_save(args.processes_num)
 
 

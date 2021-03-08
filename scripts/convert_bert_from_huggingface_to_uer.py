@@ -4,10 +4,12 @@ import collections
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("--input_model_path", type=str, default="pytorch_model.bin",
-                        help=".")
+                    help=".")
 parser.add_argument("--output_model_path", type=str, default="google_model.bin",
-                        help=".")
+                    help=".")
 parser.add_argument("--layers_num", type=int, default=12, help=".")
+parser.add_argument("--target", choices=["bert", "mlm"], default="bert",
+                    help="The training target of the pretraining model.")
 
 args = parser.parse_args()
 path = args.input_model_path
@@ -40,16 +42,16 @@ for i in range(args.layers_num):
     output_model["encoder.transformer." + str(i) + ".layer_norm_2.gamma"] = input_model["bert.encoder.layer." + str(i) + ".output.LayerNorm.weight"]
     output_model["encoder.transformer." + str(i) + ".layer_norm_2.beta"] = input_model["bert.encoder.layer." + str(i) + ".output.LayerNorm.bias"]
 
-output_model["target.nsp_linear_1.weight"] = input_model["bert.pooler.dense.weight"]
-output_model["target.nsp_linear_1.bias"] = input_model["bert.pooler.dense.bias"]
-output_model["target.nsp_linear_2.weight"] = input_model["cls.seq_relationship.weight"]
-output_model["target.nsp_linear_2.bias"] = input_model["cls.seq_relationship.bias"]
+if args.target == "bert":
+    output_model["target.nsp_linear_1.weight"] = input_model["bert.pooler.dense.weight"]
+    output_model["target.nsp_linear_1.bias"] = input_model["bert.pooler.dense.bias"]
+    output_model["target.nsp_linear_2.weight"] = input_model["cls.seq_relationship.weight"]
+    output_model["target.nsp_linear_2.bias"] = input_model["cls.seq_relationship.bias"]
 output_model["target.mlm_linear_1.weight"] = input_model["cls.predictions.transform.dense.weight"]
 output_model["target.mlm_linear_1.bias"] = input_model["cls.predictions.transform.dense.bias"]
 output_model["target.layer_norm.gamma"] = input_model["cls.predictions.transform.LayerNorm.weight"]
 output_model["target.layer_norm.beta"] = input_model["cls.predictions.transform.LayerNorm.bias"]
 output_model["target.mlm_linear_2.weight"] = input_model["cls.predictions.decoder.weight"]
 output_model["target.mlm_linear_2.bias"] = input_model["cls.predictions.bias"]
-
 
 torch.save(output_model, args.output_model_path)

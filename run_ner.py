@@ -6,29 +6,24 @@ import argparse
 import json
 import torch
 import torch.nn as nn
-from uer.layers.embeddings import *
-from uer.encoders.bert_encoder import *
-from uer.encoders.rnn_encoder import *
-from uer.encoders.birnn_encoder import *
-from uer.encoders.cnn_encoder import *
-from uer.encoders.attn_encoder import *
-from uer.encoders.gpt_encoder import *
-from uer.encoders.mixed_encoder import *
+from uer.layers import *
+from uer.encoders import *
 from uer.utils.config import load_hyperparam
 from uer.utils.optimizers import *
 from uer.utils.constants import *
 from uer.utils.vocab import Vocab
 from uer.utils.seed import set_seed
-from uer.utils.tokenizer import *
+from uer.utils.tokenizers import *
 from uer.model_saver import save_model
+from uer.opts import finetune_opts
 from run_classifier import build_optimizer, load_or_initialize_parameters
 
 
 class NerTagger(nn.Module):
     def __init__(self, args):
         super(NerTagger, self).__init__()
-        self.embedding = globals()[args.embedding.capitalize() + "Embedding"](args, len(args.tokenizer.vocab))
-        self.encoder = globals()[args.encoder.capitalize() + "Encoder"](args)
+        self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
+        self.encoder = str2encoder[args.encoder](args)
         self.labels_num = args.labels_num
         self.output_layer = nn.Linear(args.hidden_size, self.labels_num)
 
@@ -56,9 +51,9 @@ class NerTagger(nn.Module):
                       scatter_(1, tgt, 1.0)
 
             numerator = -torch.sum(nn.LogSoftmax(dim=-1)(logits) * one_hot, 1)
-            
+
             tgt = tgt.contiguous().view(-1)
-            tgt_mask = (tgt<self.labels_num-1).float().to(torch.device(tgt.device))
+            tgt_mask = (tgt < self.labels_num - 1).float().to(torch.device(tgt.device))
 
             numerator = torch.sum(tgt_mask * numerator)
             denominator = torch.sum(tgt_mask) + 1e-6
@@ -76,7 +71,7 @@ def read_dataset(args, path):
                 for i, column_name in enumerate(line.strip().split("\t")):
                     columns[column_name] = i
                 continue
-            line = line.strip().split('\t')
+            line = line.strip().split("\t")
             labels = line[columns["label"]]
             tgt = [args.l2i[l] for l in labels.split(" ")]
 
@@ -85,12 +80,12 @@ def read_dataset(args, path):
             seg = [1] * len(src)
 
             if len(src) > args.seq_length:
-                src = src[:args.seq_length]
-                tgt = tgt[:args.seq_length]
-                seg = seg[:args.seq_length]
+                src = src[: args.seq_length]
+                tgt = tgt[: args.seq_length]
+                seg = seg[: args.seq_length]
             while len(src) < args.seq_length:
                 src.append(0)
-                tgt.append(args.labels_num-1)
+                tgt.append(args.labels_num - 1)
                 seg.append(0)
             dataset.append([src, tgt, seg])
 
@@ -100,14 +95,14 @@ def read_dataset(args, path):
 def batch_loader(batch_size, src, tgt, seg):
     instances_num = src.size()[0]
     for i in range(instances_num // batch_size):
-        src_batch = src[i*batch_size: (i+1)*batch_size, :]
-        tgt_batch = tgt[i*batch_size: (i+1)*batch_size, :]
-        seg_batch = seg[i*batch_size: (i+1)*batch_size, :]
+        src_batch = src[i * batch_size : (i + 1) * batch_size, :]
+        tgt_batch = tgt[i * batch_size : (i + 1) * batch_size, :]
+        seg_batch = seg[i * batch_size : (i + 1) * batch_size, :]
         yield src_batch, tgt_batch, seg_batch
     if instances_num > instances_num // batch_size * batch_size:
-        src_batch = src[instances_num//batch_size*batch_size:, :]
-        tgt_batch = tgt[instances_num//batch_size*batch_size:, :]
-        seg_batch = seg[instances_num//batch_size*batch_size:, :]
+        src_batch = src[instances_num // batch_size * batch_size :, :]
+        tgt_batch = tgt[instances_num // batch_size * batch_size :, :]
+        seg_batch = seg[instances_num // batch_size * batch_size :, :]
         yield src_batch, tgt_batch, seg_batch
 
 
@@ -153,7 +148,7 @@ def evaluate(args, dataset):
         loss, logits = args.model(src_batch, tgt_batch, seg_batch)
 
         pred = logits.argmax(dim=-1)
-        gold = tgt_batch.contiguous().view(-1,1)
+        gold = tgt_batch.contiguous().view(-1, 1)
 
         for j in range(gold.size()[0]):
             if gold[j].item() in args.begin_ids:
@@ -168,7 +163,7 @@ def evaluate(args, dataset):
         for j in range(gold.size()[0]):
             if gold[j].item() in args.begin_ids:
                 start = j
-                for k in range(j+1, gold.size()[0]):
+                for k in range(j + 1, gold.size()[0]):
                     if gold[k].item() == args.l2i["[PAD]"] or gold[k].item() == args.l2i["O"] or gold[k].item() in args.begin_ids:
                         end = k - 1
                         break
@@ -179,7 +174,7 @@ def evaluate(args, dataset):
         for j in range(pred.size()[0]):
             if pred[j].item() in args.begin_ids and gold[j].item() != args.l2i["[PAD]"]:
                 start = j
-                for k in range(j+1, pred.size()[0]):
+                for k in range(j + 1, pred.size()[0]):
                     if pred[k].item() == args.l2i["[PAD]"] or pred[k].item() == args.l2i["O"] or pred[k].item() in args.begin_ids:
                         end = k - 1
                         break
@@ -190,17 +185,17 @@ def evaluate(args, dataset):
         for entity in pred_entities_pos:
             if entity not in gold_entities_pos:
                 continue
-            for j in range(entity[0], entity[1]+1):
+            for j in range(entity[0], entity[1] + 1):
                 if gold[j].item() != pred[j].item():
                     break
             else:
                 correct += 1
 
     print("Report precision, recall, and f1:")
-    p = correct/pred_entities_num
-    r = correct/gold_entities_num
-    f1 = 2*p*r/(p+r)
-    print("{:.3f}, {:.3f}, {:.3f}".format(p,r,f1))
+    p = correct / pred_entities_num
+    r = correct / gold_entities_num
+    f1 = 2 * p * r / (p + r)
+    print("{:.3f}, {:.3f}, {:.3f}".format(p, r, f1))
 
     return f1
 
@@ -208,62 +203,11 @@ def evaluate(args, dataset):
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    # Path options.
-    parser.add_argument("--pretrained_model_path", default=None, type=str,
-                        help="Path of the pretrained model.")
-    parser.add_argument("--output_model_path", default="./models/ner_model.bin", type=str,
-                        help="Path of the output model.")
-    parser.add_argument("--vocab_path", default=None, type=str,
-                        help="Path of the vocabulary file.")
-    parser.add_argument("--spm_model_path", default=None, type=str,
-                        help="Path of the sentence piece model.")
-    parser.add_argument("--train_path", type=str, required=True,
-                        help="Path of the trainset.")
-    parser.add_argument("--dev_path", type=str, required=True,
-                        help="Path of the devset.")
-    parser.add_argument("--test_path", type=str,
-                        help="Path of the testset.")
-    parser.add_argument("--config_path", default="./models/bert_base_config.json", type=str,
-                        help="Path of the config file.")
+    finetune_opts(parser)
+
     parser.add_argument("--label2id_path", type=str, required=True,
                         help="Path of the label2id file.")
 
-    # Model options.
-    parser.add_argument("--batch_size", type=int, default=32,
-                        help="Batch_size.")
-    parser.add_argument("--seq_length", default=128, type=int,
-                        help="Sequence length.")
-    parser.add_argument("--embedding", choices=["bert", "word"], default="bert",
-                        help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
-                                              "cnn", "gatedcnn", "attn", "synt", \
-                                              "rcnn", "crnn", "gpt", "bilstm"], \
-                                              default="bert", help="Encoder type.")
-    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
-    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
-    
-    # Optimizer options.
-    parser.add_argument("--learning_rate", type=float, default=2e-5,
-                        help="Learning rate.")
-    parser.add_argument("--warmup", type=float, default=0.1,
-                        help="Warm up value.")
-    parser.add_argument("--fp16", action='store_true',
-                        help="Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit")
-    parser.add_argument("--fp16_opt_level", choices=["O0", "O1", "O2", "O3" ], default='O1',
-                        help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
-                             "See details at https://nvidia.github.io/apex/amp.html")
-
-    # Training options.
-    parser.add_argument("--dropout", type=float, default=0.1,
-                        help="Dropout.")
-    parser.add_argument("--epochs_num", type=int, default=3,
-                        help="Number of epochs.")
-    parser.add_argument("--report_steps", type=int, default=100,
-                        help="Specific steps to print prompt.")
-    parser.add_argument("--seed", type=int, default=7,
-                        help="Random seed.")
-    
     args = parser.parse_args()
 
     # Load the hyperparameters of the config file.
@@ -292,7 +236,7 @@ def main():
 
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
-    
+
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
 
@@ -317,25 +261,25 @@ def main():
             from apex import amp
         except ImportError:
             raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer,opt_level = args.fp16_opt_level)
-    
+        model, optimizer = amp.initialize(model, optimizer, opt_level = args.fp16_opt_level)
+
     if torch.cuda.device_count() > 1:
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
     args.model = model
 
-    total_loss, f1, best_f1 = 0., 0., 0.
+    total_loss, f1, best_f1 = 0.0, 0.0, 0.0
 
     print("Start training.")
 
-    for epoch in range(1, args.epochs_num+1):
+    for epoch in range(1, args.epochs_num + 1):
         model.train()
         for i, (src_batch, tgt_batch, seg_batch) in enumerate(batch_loader(batch_size, src, tgt, seg)):
             loss = train(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch)
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i+1, total_loss / args.report_steps))
-                total_loss = 0.
+                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
+                total_loss = 0.0
 
         f1 = evaluate(args, read_dataset(args, args.dev_path))
         if f1 > best_f1:
