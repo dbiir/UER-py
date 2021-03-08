@@ -16,6 +16,8 @@ from uer.utils import *
 from uer.utils.config import load_hyperparam
 from uer.model_loader import load_model
 from uer.opts import infer_opts
+from scripts.generate_lm import top_k_top_p_filtering
+
 
 class GenerateSeq2seq(torch.nn.Module):
     def __init__(self, args):
@@ -31,28 +33,6 @@ class GenerateSeq2seq(torch.nn.Module):
         hidden = self.target.decoder(memory_bank, emb, (src,))
         output = self.target.output_layer(hidden)
         return output
-
-
-def top_k_top_p_filtering(logits, top_k, top_p):
-    top_k = min(top_k, logits.size(-1))  # Safety check
-    if top_k > 0:
-        # Remove all tokens with a probability less than the last token of the top-k
-        indices_to_remove = logits < torch.topk(logits, top_k)[0][..., -1, None]
-        logits[indices_to_remove] = -float("Inf")
-
-    if top_p > 0.0:
-        sorted_logits, sorted_indices = torch.sort(logits, descending=True)
-        cumulative_probs = torch.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
-
-        # Remove tokens with cumulative probability above the threshold
-        sorted_indices_to_remove = cumulative_probs > top_p
-        # Shift the indices to the right to keep also the first token above the threshold
-        sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
-        sorted_indices_to_remove[..., 0] = 0
-
-        indices_to_remove = sorted_indices[sorted_indices_to_remove]
-        logits[indices_to_remove] = -float("Inf")
-    return logits
 
 
 if __name__ == '__main__':
