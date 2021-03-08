@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     infer_opts(parser)
 
-    parser.add_argument("--target", choices=["seq2seq","t5"], default="t5",
+    parser.add_argument("--target", choices=["seq2seq", "t5"], default="t5",
                         help="The training target of the pretraining model.")
     parser.add_argument("--share_relative_position_embedding", action="store_true",
                         help="Add bias on output_layer for lm target.")
@@ -92,7 +92,7 @@ if __name__ == '__main__':
 
     with open(args.test_path, mode="r", encoding="utf-8") as f:
         line = f.readline().strip()
-        src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN]+args.tokenizer.tokenize(line)+[SEP_TOKEN])
+        src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(line) + [SEP_TOKEN])
         seg = [1] * len(src)
         tgt = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN])
         beginning_length = len(src)
