@@ -63,7 +63,6 @@ class FeatureExtractor(torch.nn.Module):
     def forward(self, src, seg):
         emb = self.embedding(src, seg)
         output = self.encoder(emb, seg)
-
         seg = torch.unsqueeze(seg, dim=-1)
         output = output * seg
 
