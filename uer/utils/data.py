@@ -346,8 +346,7 @@ class BertDataset(Dataset):
                         src.append(PAD_ID)
 
                     if not self.dynamic_masking:
-                        src, tgt_mlm = mask_seq(src, self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob,
-                                                self.span_max_length)
+                        src, tgt_mlm = mask_seq(src, self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob, self.span_max_length)
                         instance = (src, tgt_mlm, is_random_next, seg_pos)
                     else:
                         instance = (src, is_random_next, seg_pos)
@@ -388,8 +387,7 @@ class BertDataLoader(DataLoader):
                     is_next.append(ins[2])
                     seg.append([1] * ins[3][0] + [2] * (ins[3][1] - ins[3][0]) + [PAD_ID] * (len(ins[0]) - ins[3][1]))
                 else:
-                    src_single, tgt_mlm_single = mask_seq(ins[0], self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob,
-                                                          self.span_max_length)
+                    src_single, tgt_mlm_single = mask_seq(ins[0], self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob, self.span_max_length)
                     masked_words_num += len(tgt_mlm_single)
                     src.append(src_single)
                     tgt_mlm.append([0] * len(ins[0]))
@@ -402,9 +400,9 @@ class BertDataLoader(DataLoader):
                 continue
 
             yield torch.LongTensor(src), \
-                  torch.LongTensor(tgt_mlm), \
-                  torch.LongTensor(is_next), \
-                  torch.LongTensor(seg)
+                torch.LongTensor(tgt_mlm), \
+                torch.LongTensor(is_next), \
+                torch.LongTensor(seg)
 
 
 class MlmDataset(Dataset):
@@ -427,8 +425,7 @@ class MlmDataset(Dataset):
                     line = f.readline()
                     pos += 1
 
-                    document = [self.vocab.get(CLS_TOKEN)] + self.tokenizer.convert_tokens_to_ids(
-                        self.tokenizer.tokenize(line)) + [self.vocab.get(SEP_TOKEN)]
+                    document = [self.vocab.get(CLS_TOKEN)] + self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line)) + [self.vocab.get(SEP_TOKEN)]
 
                     if self.full_sentences:
                         if len(document) > 0:
@@ -526,8 +523,7 @@ class MlmDataLoader(DataLoader):
                         tgt[-1][mask[0]] = mask[1]
                     seg.append([1] * ins[2][0] + [PAD_ID] * (len(ins[0]) - ins[2][0]))
                 else:
-                    src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob,
-                                                      self.span_max_length)
+                    src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob, self.span_max_length)
                     masked_words_num += len(tgt_single)
                     src.append(src_single)
                     tgt.append([0] * len(ins[0]))
@@ -539,8 +535,8 @@ class MlmDataLoader(DataLoader):
                 continue
 
             yield torch.LongTensor(src), \
-                  torch.LongTensor(tgt), \
-                  torch.LongTensor(seg)
+                torch.LongTensor(tgt), \
+                torch.LongTensor(seg)
 
 
 class AlbertDataset(Dataset):
@@ -640,8 +636,7 @@ class AlbertDataset(Dataset):
                         src.append(PAD_ID)
 
                     if not self.dynamic_masking:
-                        src, tgt_mlm = mask_seq(src, self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob,
-                                                self.span_max_length)
+                        src, tgt_mlm = mask_seq(src, self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob,self.span_max_length)
                         instance = (src, tgt_mlm, is_wrong_order, seg_pos)
                     else:
                         instance = (src, is_wrong_order, seg_pos)
@@ -721,8 +716,8 @@ class LmDataLoader(DataLoader):
                     seg.append([1] * ins[1] + [PAD_ID] * (len(ins[0]) - 1 - ins[1]))
 
             yield torch.LongTensor(src), \
-                  torch.LongTensor(tgt), \
-                  torch.LongTensor(seg)
+                torch.LongTensor(tgt), \
+                torch.LongTensor(seg)
 
 
 class BilmDataset(Dataset):
@@ -792,9 +787,9 @@ class BilmDataLoader(DataLoader):
                 seg.append(ins[3])
 
             yield torch.LongTensor(src), \
-                  torch.LongTensor(tgt_forward), \
-                  torch.LongTensor(tgt_backward), \
-                  torch.LongTensor(seg)
+                torch.LongTensor(tgt_forward), \
+                torch.LongTensor(tgt_backward), \
+                torch.LongTensor(seg)
 
 
 class Seq2seqDataset(Dataset):
@@ -868,9 +863,9 @@ class Seq2seqDataLoader(DataLoader):
                 seg.append(ins[2])
 
             yield torch.LongTensor(src), \
-                  torch.LongTensor(tgt_in), \
-                  torch.LongTensor(tgt_out), \
-                  torch.LongTensor(seg)
+                torch.LongTensor(tgt_in), \
+                torch.LongTensor(tgt_out), \
+                torch.LongTensor(seg)
 
 
 class T5Dataset(MlmDataset):
@@ -905,8 +900,7 @@ class T5DataLoader(DataLoader):
                     tgt_single = ins[1]
                     seg.append([1] * ins[2][0] + [PAD_ID] * (len(ins[0]) - ins[2][0]))
                 else:
-                    src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob,
-                                                      self.span_max_length)
+                    src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob, self.span_max_length)
                     seg.append([1] * ins[1][0] + [PAD_ID] * (len(ins[0]) - ins[1][0]))
 
                 MASK_ID = self.vocab.get(MASK_TOKEN)
@@ -950,9 +944,9 @@ class T5DataLoader(DataLoader):
                     tgt_out[i].append(PAD_ID)
 
             yield torch.LongTensor(src), \
-                  torch.LongTensor(tgt_in), \
-                  torch.LongTensor(tgt_out), \
-                  torch.LongTensor(seg)
+                torch.LongTensor(tgt_in), \
+                torch.LongTensor(tgt_out), \
+                torch.LongTensor(seg)
 
 
 class ClsDataset(Dataset):
@@ -1036,8 +1030,8 @@ class ClsDataLoader(DataLoader):
                 seg.append(ins[2])
 
             yield torch.LongTensor(src), \
-                  torch.LongTensor(tgt), \
-                  torch.LongTensor(seg)
+                torch.LongTensor(tgt), \
+                torch.LongTensor(seg)
 
 
 class PrefixlmDataset(Dataset):
@@ -1109,6 +1103,5 @@ class PrefixlmDataLoader(DataLoader):
                 seg.append([1] * ins[2][0] + [2] * (ins[2][1] - ins[2][0]) + [PAD_ID] * (len(ins[0]) - ins[2][1]))
 
             yield torch.LongTensor(src), \
-                  torch.LongTensor(tgt), \
-                  torch.LongTensor(seg)
-
+                torch.LongTensor(tgt), \
+                torch.LongTensor(seg)
