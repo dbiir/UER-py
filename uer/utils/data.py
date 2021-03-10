@@ -9,14 +9,14 @@ from uer.utils.misc import count_lines
 from uer.utils.seed import set_seed
 
 
-def mask_seq(src, tokenizer, wwm, span_masking, span_geo_prob, span_max_length):
+def mask_seq(src, tokenizer, whole_word_masking, span_masking, span_geo_prob, span_max_length):
     vocab = tokenizer.vocab
     for i in range(len(src) - 1, -1, -1):
         if src[i] != PAD_ID:
             break
     src_no_pad = src[:i + 1]
 
-    tokens_index = create_index(src_no_pad, tokenizer, span_masking, span_geo_prob, span_max_length)
+    tokens_index = create_index(src_no_pad, tokenizer, whole_word_masking, span_masking, span_geo_prob, span_max_length)
     random.shuffle(tokens_index)
     num_to_predict = max(1, int(round(len(src_no_pad) * 0.15)))
     tgt_mlm = []
@@ -62,7 +62,7 @@ def mask_seq(src, tokenizer, wwm, span_masking, span_geo_prob, span_max_length):
     return src, tgt_mlm
 
 
-def create_index(src, tokenizer, span_masking, span_geo_prob, span_max_length):
+def create_index(src, tokenizer, whole_word_masking, span_masking, span_geo_prob, span_max_length):
     tokens_index = []
     span_end_position = -1
     vocab = tokenizer.vocab
@@ -142,7 +142,7 @@ class Dataset(object):
         self.seq_length = args.seq_length
         self.seed = args.seed
         self.dynamic_masking = args.dynamic_masking
-        self.wwm = args.wwm
+        self.whole_word_masking = args.whole_word_masking
         self.span_masking = args.span_masking
         self.span_geo_prob = args.span_geo_prob
         self.span_max_length = args.span_max_length
@@ -189,7 +189,7 @@ class DataLoader(object):
         self.end = 0
         self.buffer = []
         self.vocab = args.vocab
-        self.wwm = args.wwm
+        self.whole_word_masking = args.whole_word_masking
         self.span_masking = args.span_masking
         self.span_geo_prob = args.span_geo_prob
         self.span_max_length = args.span_max_length
@@ -346,7 +346,7 @@ class BertDataset(Dataset):
                         src.append(PAD_ID)
 
                     if not self.dynamic_masking:
-                        src, tgt_mlm = mask_seq(src, self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob, self.span_max_length)
+                        src, tgt_mlm = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
                         instance = (src, tgt_mlm, is_random_next, seg_pos)
                     else:
                         instance = (src, is_random_next, seg_pos)
@@ -387,7 +387,7 @@ class BertDataLoader(DataLoader):
                     is_next.append(ins[2])
                     seg.append([1] * ins[3][0] + [2] * (ins[3][1] - ins[3][0]) + [PAD_ID] * (len(ins[0]) - ins[3][1]))
                 else:
-                    src_single, tgt_mlm_single = mask_seq(ins[0], self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob, self.span_max_length)
+                    src_single, tgt_mlm_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
                     masked_words_num += len(tgt_mlm_single)
                     src.append(src_single)
                     tgt_mlm.append([0] * len(ins[0]))
@@ -473,7 +473,7 @@ class MlmDataset(Dataset):
             seg_pos = [len(src)]
 
             if not self.dynamic_masking:
-                src, tgt = mask_seq(src, self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob, self.span_max_length)
+                src, tgt = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
                 instance = (src, tgt, seg_pos)
             else:
                 instance = (src, seg_pos)
@@ -487,7 +487,7 @@ class MlmDataset(Dataset):
             src.append(PAD_ID)
 
         if not self.dynamic_masking:
-            src, tgt = mask_seq(src, self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob, self.span_max_length)
+            src, tgt = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
             instance = (src, tgt, seg_pos)
         else:
             instance = (src, seg_pos)
@@ -523,7 +523,7 @@ class MlmDataLoader(DataLoader):
                         tgt[-1][mask[0]] = mask[1]
                     seg.append([1] * ins[2][0] + [PAD_ID] * (len(ins[0]) - ins[2][0]))
                 else:
-                    src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob, self.span_max_length)
+                    src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
                     masked_words_num += len(tgt_single)
                     src.append(src_single)
                     tgt.append([0] * len(ins[0]))
@@ -636,7 +636,7 @@ class AlbertDataset(Dataset):
                         src.append(PAD_ID)
 
                     if not self.dynamic_masking:
-                        src, tgt_mlm = mask_seq(src, self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob,self.span_max_length)
+                        src, tgt_mlm = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob,self.span_max_length)
                         instance = (src, tgt_mlm, is_wrong_order, seg_pos)
                     else:
                         instance = (src, is_wrong_order, seg_pos)
@@ -900,7 +900,7 @@ class T5DataLoader(DataLoader):
                     tgt_single = ins[1]
                     seg.append([1] * ins[2][0] + [PAD_ID] * (len(ins[0]) - ins[2][0]))
                 else:
-                    src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.wwm, self.span_masking, self.span_geo_prob, self.span_max_length)
+                    src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
                     seg.append([1] * ins[1][0] + [PAD_ID] * (len(ins[0]) - ins[1][0]))
 
                 MASK_ID = self.vocab.get(MASK_TOKEN)

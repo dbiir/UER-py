@@ -67,7 +67,7 @@ def main():
                         help="Add bias on output_layer for lm target.")
 
     # Masking options.
-    parser.add_argument("--wwm", action="store_true", help="Whole word masking.")
+    parser.add_argument("--whole_word_masking", action="store_true", help="Whole word masking.")
     parser.add_argument("--span_masking", action="store_true", help="Span masking.")
     parser.add_argument("--span_geo_prob", type=float, default=0.2,
                         help="Hyperparameter of geometric distribution for span masking.")
