@@ -54,12 +54,12 @@ def main():
 
     # Model options.
     model_opts(parser)
-    parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"],default="word_pos_seg",
+    parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
                         help="Target embedding type.")
     parser.add_argument("--decoder", choices=["transformer"], default="transformer", help="Decoder type.")
     parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
                         help="Pooling type.")
-    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "seq2seq", "t5", "cls", "prefixlm"],default="bert",
+    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "seq2seq", "t5", "cls", "prefixlm"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--tie_weights", action="store_true",
                         help="Tie the word embedding and softmax weights.")
@@ -81,7 +81,7 @@ def main():
     parser.add_argument("--world_size", type=int, default=1, help="Total number of processes (GPUs) for training.")
     parser.add_argument("--gpu_ranks", default=[], nargs='+', type=int, help="List of ranks of each process."
                         " Each process has a unique integer rank whose value is in the interval [0, world_size), and runs in a single GPU.")
-    parser.add_argument("--master_ip", default="tcp://localhost:12345", type=str,help="IP-Port of master for training.")
+    parser.add_argument("--master_ip", default="tcp://localhost:12345", type=str, help="IP-Port of master for training.")
     parser.add_argument("--backend", choices=["nccl", "gloo"], default="nccl", type=str, help="Distributed backend.")
 
     args = parser.parse_args()
