@@ -108,7 +108,7 @@ def merge_dataset(dataset_path, workers_num):
     for i in range(workers_num):
         tmp_dataset_reader = open("dataset-tmp-" + str(i) + ".pt", "rb")
         while True:
-            tmp_data = tmp_dataset_reader.read(2 ^ 20)
+            tmp_data = tmp_dataset_reader.read(2^20)
             if tmp_data:
                 dataset_writer.write(tmp_data)
             else:
@@ -636,7 +636,7 @@ class AlbertDataset(Dataset):
                         src.append(PAD_ID)
 
                     if not self.dynamic_masking:
-                        src, tgt_mlm = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob,self.span_max_length)
+                        src, tgt_mlm = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
                         instance = (src, tgt_mlm, is_wrong_order, seg_pos)
                     else:
                         instance = (src, is_wrong_order, seg_pos)
