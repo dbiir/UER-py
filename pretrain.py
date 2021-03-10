@@ -2,6 +2,7 @@ import argparse
 import torch
 import uer.trainer as trainer
 from uer.utils.config import load_hyperparam
+from uer.opts import *
 
 
 def main():
@@ -14,11 +15,15 @@ def main():
                         help="Path of the vocabulary file.")
     parser.add_argument("--spm_model_path", default=None, type=str,
                         help="Path of the sentence piece model.")
+    parser.add_argument("--tgt_vocab_path", default=None, type=str,
+                        help="Path of the target vocabulary file.")
+    parser.add_argument("--tgt_spm_model_path", default=None, type=str,
+                        help="Path of the target sentence piece model.")
     parser.add_argument("--pretrained_model_path", type=str, default=None,
                         help="Path of the pretrained model.")
     parser.add_argument("--output_model_path", type=str, required=True,
                         help="Path of the output model.")
-    parser.add_argument("--config_path", type=str, default="models/bert_base_config.json",
+    parser.add_argument("--config_path", type=str, default="models/bert/base_config.json",
                         help="Config file of model hyper-parameters.")
 
     # Training and saving options. 
@@ -34,26 +39,24 @@ def main():
                         help="Training batch size. The actual batch_size is [batch_size x world_size x accumulation_steps].")
     parser.add_argument("--instances_buffer_size", type=int, default=25600,
                         help="The buffer size of instances in memory.")
+    parser.add_argument("--labels_num", type=int, required=False,
+                        help="Number of prediction labels.")
+    parser.add_argument("--dropout", type=float, default=0.1, help="Dropout value.")
+    parser.add_argument("--seed", type=int, default=7, help="Random seed.")
 
     # Model options.
-    parser.add_argument("--dropout", type=float, default=0.1, help="Dropout value.")
-    parser.add_argument("--seed", type=int, default=7,  help="Random seed.")
-    parser.add_argument("--embedding", choices=["bert", "word", "gpt"], default="bert",
-                        help="Emebdding type.")
-    parser.add_argument("--encoder", choices=["bert", "lstm", "gru", \
-                                                   "cnn", "gatedcnn", "attn", "synt", \
-                                                   "rcnn", "crnn", "gpt", "gpt2", "bilstm"], \
-                                                   default="bert", help="Encoder type.")
-    parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--target", choices=["bert", "lm", "cls", "mlm", "bilm", "albert"], default="bert",
+    model_opts(parser)
+    parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
+                        help="Target embedding type.")
+    parser.add_argument("--decoder", choices=["transformer"], default="transformer", help="Decoder type.")
+    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
+                        help="Pooling type.")
+    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "seq2seq", "t5", "cls", "prefixlm"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--tie_weights", action="store_true",
                         help="Tie the word embedding and softmax weights.")
-    parser.add_argument("--factorized_embedding_parameterization", action="store_true",
-                        help="Factorized embedding parameterization.")
     parser.add_argument("--has_lmtarget_bias", action="store_true",
                         help="Add bias on output_layer for lm target.")
-    parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
 
     # Masking options.
     parser.add_argument("--span_masking", action="store_true", help="Span masking.")
@@ -63,15 +66,7 @@ def main():
                         help="Max length for span masking.")
 
     # Optimizer options.
-    parser.add_argument("--learning_rate", type=float, default=2e-5, help="Initial learning rate.")
-    parser.add_argument("--warmup", type=float, default=0.1, help="Warm up value.")
-    parser.add_argument("--beta1", type=float, default=0.9, help="Beta1 for Adam optimizer.")
-    parser.add_argument("--beta2", type=float, default=0.999, help="Beta2 for Adam optimizer.")
-    parser.add_argument("--fp16", action='store_true',
-                        help="Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit")
-    parser.add_argument("--fp16_opt_level", choices=["O0", "O1", "O2", "O3" ], default='O1',
-                        help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
-                             "See details at https://nvidia.github.io/apex/amp.html")
+    optimization_opts(parser) 
 
     # GPU options.
     parser.add_argument("--world_size", type=int, default=1, help="Total number of processes (GPUs) for training.")
@@ -82,12 +77,15 @@ def main():
     
     args = parser.parse_args()
 
+    if args.target == "cls":
+        assert args.labels_num is not None, "Cls target needs the denotation of the number of labels."
+
     # Load hyper-parameters from config file. 
     if args.config_path:
         load_hyperparam(args)
 
     ranks_num = len(args.gpu_ranks)
-
+    
     if args.world_size > 1:
         # Multiprocessing distributed mode.
         assert torch.cuda.is_available(), "No available GPUs." 

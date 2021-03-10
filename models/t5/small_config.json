@@ -1,0 +1,14 @@
+{
+  "emb_size": 512,
+  "feedforward_size": 2048,
+  "hidden_size": 512,
+  "hidden_act": "relu",
+  "heads_num": 8,
+  "layers_num": 6,
+  "dropout": 0.1,
+  "share_embedding": true,
+  "share_relative_position_embedding": false,
+  "remove_attention_scale": true,
+  "layernorm": "t5",
+  "remove_transformer_bias": true
+}
