@@ -53,6 +53,7 @@ def main():
 
     # Masking options.
     parser.add_argument("--dynamic_masking", action="store_true", help="Dynamic masking.")
+    parser.add_argument("--wwm", action="store_true", help="Whole word masking.")
     parser.add_argument("--span_masking", action="store_true", help="Span masking.")
     parser.add_argument("--span_geo_prob", type=float, default=0.2,
                         help="Hyperparameter of geometric distribution for span masking.")
@@ -66,13 +67,13 @@ def main():
         args.dup_factor = 1
 
     # Build tokenizer.
-    args.tokenizer = str2tokenizer[args.tokenizer](args)
+    tokenizer = str2tokenizer[args.tokenizer](args)
     if args.target == "seq2seq":
         args.tgt_tokenizer = str2tokenizer[args.tgt_tokenizer](args, False)
 
     # Build and save dataset.
-    dataset = str2dataset[args.target](args)
-    dataset.build_and_save(args)
+    dataset = str2dataset[args.target](args, tokenizer.vocab, tokenizer)
+    dataset.build_and_save(args.processes_num)
 
 
 if __name__ == "__main__":

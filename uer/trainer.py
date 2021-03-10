@@ -35,8 +35,9 @@ def train_and_validate(args):
         args.tokenizer = str2tokenizer[args.tokenizer](args)
         args.vocab = args.tokenizer.vocab
         if args.target == "seq2seq":
-            args.tgt_tokenizer = str2tokenizer[args.tgt_tokenizer](args, False)
-            args.tgt_vocab = args.tgt_tokenizer.vocab
+            tgt_vocab = Vocab()
+            tgt_vocab.load(args.tgt_vocab_path)
+            args.tgt_vocab = tgt_vocab.w2i
 
     # Build model.
     model = build_model(args)
