@@ -74,7 +74,16 @@ def main():
                         " Each process has a unique integer rank whose value is in the interval [0, world_size), and runs in a single GPU.")
     parser.add_argument("--master_ip", default="tcp://localhost:12345", type=str, help="IP-Port of master for training.")
     parser.add_argument("--backend", choices=["nccl", "gloo"], default="nccl", type=str, help="Distributed backend.")
-    
+
+    parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
+                        help="Specify the tokenizer." 
+                             "Original Google BERT uses bert tokenizer on Chinese corpus."
+                             "Char tokenizer segments sentences into characters."
+                             "Space tokenizer segments sentences into words according to space."
+                             )
+    parser.add_argument("--tgt_tokenizer", choices=["bert", "char", "space"], default="bert",
+                        help="Specify the tokenizer.")
+
     args = parser.parse_args()
 
     if args.target == "cls":

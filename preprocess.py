@@ -66,13 +66,13 @@ def main():
         args.dup_factor = 1
 
     # Build tokenizer.
-    tokenizer = str2tokenizer[args.tokenizer](args)
+    args.tokenizer = str2tokenizer[args.tokenizer](args)
     if args.target == "seq2seq":
         args.tgt_tokenizer = str2tokenizer[args.tgt_tokenizer](args, False)
 
     # Build and save dataset.
-    dataset = str2dataset[args.target](args, tokenizer.vocab, tokenizer)
-    dataset.build_and_save(args.processes_num)
+    dataset = str2dataset[args.target](args)
+    dataset.build_and_save(args)
 
 
 if __name__ == "__main__":

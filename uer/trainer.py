@@ -32,13 +32,11 @@ def train_and_validate(args):
             args.tgt_vocab = {tgt_sp_model.IdToPiece(i): i for i
                               in range(tgt_sp_model.GetPieceSize())}
     else:
-        vocab = Vocab()
-        vocab.load(args.vocab_path)
-        args.vocab = vocab.w2i
+        args.tokenizer = str2tokenizer[args.tokenizer](args)
+        args.vocab = args.tokenizer.vocab
         if args.target == "seq2seq":
-            tgt_vocab = Vocab()
-            tgt_vocab.load(args.tgt_vocab_path)
-            args.tgt_vocab = tgt_vocab.w2i
+            args.tgt_tokenizer = str2tokenizer[args.tgt_tokenizer](args, False)
+            args.tgt_vocab = args.tgt_tokenizer.vocab
 
     # Build model.
     model = build_model(args)
