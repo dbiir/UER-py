@@ -20,6 +20,9 @@ def mask_seq(src, tokenizer, whole_word_masking, span_masking, span_geo_prob, sp
     tokens_index, src_no_pad = create_index(src_no_pad, tokenizer, whole_word_masking, span_masking, span_geo_prob, span_max_length)
     if len(src_no_pad) < len(src):
         src = src_no_pad + (len(src) - len(src_no_pad)) * [PAD_ID]
+    else:
+        src = src_no_pad
+
     random.shuffle(tokens_index)
     num_to_predict = max(1, int(round(len(src_no_pad) * 0.15)))
     tgt_mlm = []
