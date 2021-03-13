@@ -153,7 +153,14 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier.py --pretrained_model_path model
                                                    --epochs_num 3 --batch_size 64 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 预训练的实际批次大小是 *--batch_size* 乘以 *--world_size*。 <br>
-实验证明[*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV)的结果为88.5。
+实验证明[*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV)的结果为88.5。 <br>
+不同的预训练目标需要不同格式的语料。MLM目标对应的语料格式如下：
+```
+doc1
+doc2
+doc3
+``` 
+注意到当预训练目标被改为MLM后，我们使用的预训练语料为 *corpora/book_review.txt* 而不是 *corpora/book_review_bert.txt*。
 <br>
 
 BERT参数量大，计算较慢。我们希望加速模型运算的同时让模型仍然在下游任务上有好的表现。这里我们选择2层LSTM编码器来替代12层Transformer编码器。 我们首先下载2层LSTM编码器的预训练模型[*reviews_lstm_lm_model.bin*](https://share.weiyun.com/57dZhqo)。 然后在下游分类数据集上对其进行微调：

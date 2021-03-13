@@ -155,7 +155,14 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier.py --pretrained_model_path model
                                                    --epochs_num 3 --batch_size 64 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 The actual batch size of pre-training is *--batch_size* times *--world_size* . <br>
-It turns out that the result of [*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV) is around 88.5.
+It turns out that the result of [*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV) is around 88.5. <br>
+Different targets require different corpus formats. The format of the corpus for MLM target is as follows：
+```
+doc1
+doc2
+doc3
+``` 
+Notice that *corpora/book_review.txt* (instead of *corpora/book_review_bert.txt*) is used when the target is switched to MLM. 
 <br>
 
 BERT is slow. It could be great if we can speed up the model and still achieve competitive performance. To achieve this goal, we select a 2-layers LSTM encoder to substitute 12-layers Transformer encoder. We firstly download [*reviews_lstm_lm_model.bin*](https://share.weiyun.com/57dZhqo) for 2-layers LSTM encoder. Then we fine-tune it on downstream classification dataset:

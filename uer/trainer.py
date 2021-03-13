@@ -26,6 +26,7 @@ def train_and_validate(args):
         sp_model.Load(args.spm_model_path)
         args.vocab = {sp_model.IdToPiece(i): i for i
                       in range(sp_model.GetPieceSize())}
+        args.tokenizer = str2tokenizer[args.tokenizer](args)
         if args.target == "seq2seq":
             tgt_sp_model = spm.SentencePieceProcessor()
             tgt_sp_model.Load(args.tgt_spm_model_path)
