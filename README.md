@@ -124,19 +124,28 @@ python3 inference/run_classifier_infer.py --load_model_path models/finetuned_mod
 *--prediction_path* specifies the path of the file with prediction results. <br>
 We need to explicitly specify the number of labels by *--labels_num*. Douban book review is a two-way classification dataset.
 
-We recommend to use *CUDA_VISIBLE_DEVICES* to specify which GPUs are visible (all GPUs are used in default) :
+We recommend to use *CUDA_VISIBLE_DEVICES* to specify which GPUs are visible (all GPUs are used in default). Suppose GPU 0 and GPU 2 are available:
 ```
-CUDA_VISIBLE_DEVICES=0 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_zh_vocab.txt \
-                                                 --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
-                                                 --output_model_path models/classifier_model.bin \
-                                                 --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
+python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
+                      --processes_num 8 --target bert
 
-CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
-                                                                 --test_path datasets/douban_book_review/test_nolabel.tsv \
-                                                                 --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
-                                                                 --embedding word_pos_seg --encoder transformer --mask fully_visible
+CUDA_VISIBLE_DEVICES=0,2 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
+                                             --output_model_path models/book_review_model.bin  --world_size 2 --gpu_ranks 0 1 \
+                                             --total_steps 5000 --save_checkpoint_steps 1000 --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert
+
+mv models/book_review_model.bin-5000 models/book_review_model.bin
+
+CUDA_VISIBLE_DEVICES=0,2 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_zh_vocab.txt \
+                                                   --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
+                                                   --output_model_path models/classifier_model.bin \
+                                                   --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
+
+CUDA_VISIBLE_DEVICES=0,2 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+                                                                   --test_path datasets/douban_book_review/test_nolabel.tsv \
+                                                                   --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
+                                                                   --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-Notice that we explicitly specify the fine-tuned model path by *--output_model_path* in fine-tuning stage.
+Notice that we explicitly specify the fine-tuned model path by *--output_model_path* in fine-tuning stage. The actual batch size of pre-training is *--batch_size* times *--world_size* .
 <br>
 
 BERT consists of next sentence prediction (NSP) target. However, NSP target is not suitable for sentence-level reviews since we have to split a sentence into multiple parts. UER-py facilitates the use of different targets. Using masked language modeling (MLM) as target could be a properer choice for pre-training of reviews:
@@ -154,7 +163,6 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier.py --pretrained_model_path model
                                                    --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                                                    --epochs_num 3 --batch_size 64 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-The actual batch size of pre-training is *--batch_size* times *--world_size* . <br>
 It turns out that the result of [*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV) is around 88.5. <br>
 Different targets require different corpus formats. The format of the corpus for MLM target is as follows (one document per line):
 ```
@@ -307,7 +315,7 @@ We collected a range of :arrow_right: [__downstream datasets__](https://github.c
 <br/>
 
 ## Modelzoo
-With the help of UER, we pre-trained models with different corpora, encoders, and targets. All pre-trained models can be loaded by UER directly. More pre-trained models will be released in the future. Detailed introduction of pre-trained models and download links can be found in :arrow_right: [__modelzoo__](https://github.com/dbiir/UER-py/wiki/Modelzoo) :arrow_left:.
+With the help of UER, we pre-trained models with different corpora, encoders, and targets. All pre-trained models can be loaded by UER directly. More pre-trained models will be released in the future. Detailed introduction of pre-trained models and download links can be found in :arrow_right: [__modelzoo__](https://github.com/dbiir/UER-py/wiki/Modelzoo) :arrow_left: .
 
 <br/>
 
@@ -349,7 +357,7 @@ UER-py/
 
 The code is well-organized. Users can use and extend upon it with little efforts.
 
-More examples of using UER can be found in :arrow_right: [__instructions__](https://github.com/dbiir/UER-py/wiki/Instructions) :arrow_left:, which help users quickly implement pre-training models such as BERT, GPT, ELMo, T5 and fine-tune pre-trained models on a range of downstream tasks.
+More examples of using UER can be found in :arrow_right: [__instructions__](https://github.com/dbiir/UER-py/wiki/Instructions) :arrow_left: , which help users quickly implement pre-training models such as BERT, GPT, ELMo, T5 and fine-tune pre-trained models on a range of downstream tasks.
 
 <br/>
 

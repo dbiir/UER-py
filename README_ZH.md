@@ -122,19 +122,28 @@ python3 inference/run_classifier_infer.py --load_model_path models/finetuned_mod
 *--prediction_path* 指定预测结果的文件；<br>
 注意到我们需要指定分类任务标签的个数 *--labels_num* ，这里是二分类任务。
 
-一般下游任务规模不大，通常可以使用一个GPU进行微调和推理，推荐使用CUDA_VISIBLE_DEVICES指定程序可见的GPU（如果不指定，则使用所有的GPU）：
+推荐使用CUDA_VISIBLE_DEVICES指定程序可见的GPU（如果不指定，则使用所有的GPU）。假设我们需要使用0号GPU和2号GPU：
 ```
-CUDA_VISIBLE_DEVICES=0 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_zh_vocab.txt \
-                                                 --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
-                                                 --output_model_path models/classifier_model.bin \
-                                                 --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
+python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
+                      --processes_num 8 --target bert
 
-CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
-                                                                 --test_path datasets/douban_book_review/test_nolabel.tsv \
-                                                                 --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
-                                                                 --embedding word_pos_seg --encoder transformer --mask fully_visible
+CUDA_VISIBLE_DEVICES=0,2 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
+                                             --output_model_path models/book_review_model.bin  --world_size 2 --gpu_ranks 0 1 \
+                                             --total_steps 5000 --save_checkpoint_steps 1000 --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert
+
+mv models/book_review_model.bin-5000 models/book_review_model.bin
+
+CUDA_VISIBLE_DEVICES=0,2 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_zh_vocab.txt \
+                                                   --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
+                                                   --output_model_path models/classifier_model.bin \
+                                                   --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
+
+CUDA_VISIBLE_DEVICES=0,2 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
+                                                                   --test_path datasets/douban_book_review/test_nolabel.tsv \
+                                                                   --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
+                                                                   --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-注意到这里我们在微调阶段使用 *--output_model_path* 指定微调后的模型的输出路径。
+注意到这里我们在微调阶段使用 *--output_model_path* 指定微调后的模型的输出路径。预训练的实际批次大小是 *--batch_size* 乘以 *--world_size*。
 <br>
 预测是否是下一个句子（NSP）是BERT的目标任务之一，但是，NSP任务不适合句子级别的评论，因为我们需要将句子切分为多个部分。 UER-py可以让用户自由选择不同的目标任务。这里我们选择使用遮罩语言模型（MLM）作为目标任务。MLM目标任务对书籍评论语料可能是更合适的选择：
 
@@ -152,7 +161,6 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier.py --pretrained_model_path model
                                                    --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                                                    --epochs_num 3 --batch_size 64 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-预训练的实际批次大小是 *--batch_size* 乘以 *--world_size*。 <br>
 实验表明 [*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV) 的结果为88.5。 <br>
 不同的预训练目标需要不同格式的语料。MLM目标对应的语料格式为一行一个文档：
 ```
@@ -301,12 +309,12 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 <br/>
 
 ## 数据集
-我们收集了一系列:arrow_right:[__下游任务数据集__](https://github.com/dbiir/UER-py/wiki/下游任务数据集):arrow_left:并将其转换为UER可以直接加载的格式。
+我们收集了一系列 :arrow_right: [__下游任务数据集__](https://github.com/dbiir/UER-py/wiki/下游任务数据集) :arrow_left: 并将其转换为UER可以直接加载的格式。
 
 <br/>
 
 ## 预训练模型仓库
-借助UER-py，我们使用不同的语料，编码器和目标任务进行了预训练，所有预训练模型都可以由UER-py直接加载。将来我们会发布更多的预训练模型。用户可以在:arrow_right:[__预训练模型仓库__](https://github.com/dbiir/UER-py/wiki/模型仓库):arrow_left:中找到预训练模型和对应描述和下载链接。
+借助UER-py，我们使用不同的语料，编码器和目标任务进行了预训练，所有预训练模型都可以由UER-py直接加载。将来我们会发布更多的预训练模型。用户可以在 :arrow_right: [__预训练模型仓库__](https://github.com/dbiir/UER-py/wiki/模型仓库) :arrow_left: 中找到预训练模型和对应描述和下载链接。
 
 <br/>
 
@@ -346,12 +354,12 @@ UER-py/
 
 ```
 
-更多使用示例在:arrow_right:[__使用说明__](https://github.com/dbiir/UER-py/wiki/使用说明):arrow_left:中可以找到。这些示例可以帮助用户快速完成BERT、GPT、ELMO等预训练模型以及使用这些预训练模型在一系列下游任务上微调的实验。
+更多使用示例在 :arrow_right: [__使用说明__](https://github.com/dbiir/UER-py/wiki/使用说明) :arrow_left: 中可以找到。这些示例可以帮助用户快速完成BERT、GPT、ELMO等预训练模型以及使用这些预训练模型在一系列下游任务上微调的实验。
 
 <br/>
 
 ## 竞赛解决方案
-UER-py已用于许多NLP竞赛的获奖解决方案中。在本节中，我们提供了一些使用UER-py在NLP比赛中获得SOTA成绩的示例，例如CLUE。更多详细信息参见:arrow_right:[__竞赛解决方案__](https://github.com/dbiir/UER-py/wiki/竞赛解决方案):arrow_left:。
+UER-py已用于许多NLP竞赛的获奖解决方案中。在本节中，我们提供了一些使用UER-py在NLP比赛中获得SOTA成绩的示例，例如CLUE。更多详细信息参见 :arrow_right: [__竞赛解决方案__](https://github.com/dbiir/UER-py/wiki/竞赛解决方案) :arrow_left: 。
 
 <br/>
 
