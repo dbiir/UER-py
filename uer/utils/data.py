@@ -969,6 +969,8 @@ class T5DataLoader(DataLoader):
                         else:
                             src_with_sentinel.append(SENTINEL_ID)
                             tgt_in_single.append(SENTINEL_ID)
+                            if SENTINEL_ID < len(self.vocab) - 1:
+                                SENTINEL_ID += 1
                             SENTINEL_ID += 1
                         tgt_in_single.append(tgt_single[mask_index][1])
                         mask_index += 1

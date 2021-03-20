@@ -302,12 +302,12 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 <br/>
 
 ## Datasets
-We collected a range of [__downstream datasets__](https://github.com/dbiir/UER-py/wiki/Datasets) and converted them into format that UER can load directly.
+We collected a range of :arrow_right: [__downstream datasets__](https://github.com/dbiir/UER-py/wiki/Datasets) :arrow_left: and converted them into format that UER can load directly.
 
 <br/>
 
 ## Modelzoo
-With the help of UER, we pre-trained models with different corpora, encoders, and targets. All pre-trained models can be loaded by UER directly. More pre-trained models will be released in the future. Detailed introduction of pre-trained models and download links can be found in [__modelzoo__](https://github.com/dbiir/UER-py/wiki/Modelzoo).
+With the help of UER, we pre-trained models with different corpora, encoders, and targets. All pre-trained models can be loaded by UER directly. More pre-trained models will be released in the future. Detailed introduction of pre-trained models and download links can be found in :arrow_right: [__modelzoo__](https://github.com/dbiir/UER-py/wiki/Modelzoo) :arrow_left:.
 
 <br/>
 
@@ -349,12 +349,12 @@ UER-py/
 
 The code is well-organized. Users can use and extend upon it with little efforts.
 
-More examples of using UER can be found in [__instructions__](https://github.com/dbiir/UER-py/wiki/Instructions), which help users quickly implement pre-training models such as BERT, GPT, ELMo, T5 and fine-tune pre-trained models on a range of downstream tasks.
+More examples of using UER can be found in :arrow_right: [__instructions__](https://github.com/dbiir/UER-py/wiki/Instructions) :arrow_left:, which help users quickly implement pre-training models such as BERT, GPT, ELMo, T5 and fine-tune pre-trained models on a range of downstream tasks.
 
 <br/>
 
 ## Competition solutions
-UER-py has been used in winning solutions of many NLP competitions. In this section, we provide some examples of using UER-py to achieve SOTA results on NLP competitions, such as CLUE. See [__competition solutions__](https://github.com/dbiir/UER-py/wiki/Competition-solutions) for more detailed information.
+UER-py has been used in winning solutions of many NLP competitions. In this section, we provide some examples of using UER-py to achieve SOTA results on NLP competitions, such as CLUE. See :arrow_right: [__competition solutions__](https://github.com/dbiir/UER-py/wiki/Competition-solutions) :arrow_left: for more detailed information.
 
 <br/>
 

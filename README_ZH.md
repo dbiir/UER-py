@@ -301,12 +301,12 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 <br/>
 
 ## 数据集
-我们收集了一系列[__下游任务数据集__](https://github.com/dbiir/UER-py/wiki/下游任务数据集)并将其转换为UER可以直接加载的格式。
+我们收集了一系列:arrow_right:[__下游任务数据集__](https://github.com/dbiir/UER-py/wiki/下游任务数据集):arrow_left:并将其转换为UER可以直接加载的格式。
 
 <br/>
 
 ## 预训练模型仓库
-借助UER-py，我们使用不同的语料，编码器和目标任务进行了预训练，所有预训练模型都可以由UER-py直接加载。将来我们会发布更多的预训练模型。用户可以在[__预训练模型仓库__](https://github.com/dbiir/UER-py/wiki/模型仓库)中找到预训练模型和对应描述和下载链接。
+借助UER-py，我们使用不同的语料，编码器和目标任务进行了预训练，所有预训练模型都可以由UER-py直接加载。将来我们会发布更多的预训练模型。用户可以在:arrow_right:[__预训练模型仓库__](https://github.com/dbiir/UER-py/wiki/模型仓库):arrow_left:中找到预训练模型和对应描述和下载链接。
 
 <br/>
 
@@ -346,12 +346,12 @@ UER-py/
 
 ```
 
-更多使用示例在[__使用说明__](https://github.com/dbiir/UER-py/wiki/使用说明)中可以找到。这些示例可以帮助用户快速完成BERT、GPT、ELMO等预训练模型以及使用这些预训练模型在一系列下游任务上微调的实验。
+更多使用示例在:arrow_right:[__使用说明__](https://github.com/dbiir/UER-py/wiki/使用说明):arrow_left:中可以找到。这些示例可以帮助用户快速完成BERT、GPT、ELMO等预训练模型以及使用这些预训练模型在一系列下游任务上微调的实验。
 
 <br/>
 
 ## 竞赛解决方案
-UER-py已用于许多NLP竞赛的获奖解决方案中。在本节中，我们提供了一些使用UER-py在NLP比赛中获得SOTA成绩的示例，例如CLUE。更多详细信息参见[__竞赛解决方案__](https://github.com/dbiir/UER-py/wiki/竞赛解决方案)。
+UER-py已用于许多NLP竞赛的获奖解决方案中。在本节中，我们提供了一些使用UER-py在NLP比赛中获得SOTA成绩的示例，例如CLUE。更多详细信息参见:arrow_right:[__竞赛解决方案__](https://github.com/dbiir/UER-py/wiki/竞赛解决方案):arrow_left:。
 
 <br/>
 
