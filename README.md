@@ -128,7 +128,7 @@ We recommend to use *CUDA_VISIBLE_DEVICES* to specify which GPUs are visible (al
 ```
 CUDA_VISIBLE_DEVICES=0 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_zh_vocab.txt \
                                                  --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
-                                                 --output_model_path models/classifier_model.bin
+                                                 --output_model_path models/classifier_model.bin \
                                                  --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
 
 CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
@@ -156,7 +156,7 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier.py --pretrained_model_path model
 ```
 The actual batch size of pre-training is *--batch_size* times *--world_size* . <br>
 It turns out that the result of [*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV) is around 88.5. <br>
-Different targets require different corpus formats. The format of the corpus for MLM target is as follows：
+Different targets require different corpus formats. The format of the corpus for MLM target is as follows (one document per line):
 ```
 doc1
 doc2
@@ -377,4 +377,4 @@ For communication related to this project, please contact Zhe Zhao (helloworld@r
 
 This work is instructed by my enterprise mentors __Qi Ju__, __Xuefeng Yang__, __Haotang Deng__ and school mentors __Tao Liu__, __Xiaoyong Du__.
 
-I also got a lot of help from my Tencent colleagues Hui Chen, Jinbin Zhang, Zhiruo Wang, Weijie Liu, Peng Zhou, Haixiao Liu, and Weijian Wu. 
+We also got a lot of help from my Tencent colleagues Hui Chen, Jinbin Zhang, Zhiruo Wang, Weijie Liu, Peng Zhou, Haixiao Liu, and Weijian Wu. 

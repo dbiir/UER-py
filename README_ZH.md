@@ -126,7 +126,7 @@ python3 inference/run_classifier_infer.py --load_model_path models/finetuned_mod
 ```
 CUDA_VISIBLE_DEVICES=0 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_zh_vocab.txt \
                                                  --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
-                                                 --output_model_path models/classifier_model.bin
+                                                 --output_model_path models/classifier_model.bin \
                                                  --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
 
 CUDA_VISIBLE_DEVICES=0 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
@@ -153,8 +153,8 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier.py --pretrained_model_path model
                                                    --epochs_num 3 --batch_size 64 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 预训练的实际批次大小是 *--batch_size* 乘以 *--world_size*。 <br>
-实验证明[*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV)的结果为88.5。 <br>
-不同的预训练目标需要不同格式的语料。MLM目标对应的语料格式如下：
+实验表明 [*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV) 的结果为88.5。 <br>
+不同的预训练目标需要不同格式的语料。MLM目标对应的语料格式为一行一个文档：
 ```
 doc1
 doc2
