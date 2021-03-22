@@ -8,7 +8,6 @@
   "layers_num": 8,
   "dropout": 0.0,
   "share_embedding": true,
-  "share_relative_position_embedding": true,
   "remove_attention_scale": true,
   "layernorm": "t5",
   "remove_transformer_bias": true

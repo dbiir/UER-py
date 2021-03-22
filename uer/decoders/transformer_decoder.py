@@ -15,7 +15,6 @@ class TransformerDecoder(nn.Module):
         self.layers_num = args.layers_num
         self.layernorm_positioning = args.layernorm_positioning
         self.relative_position_embedding = args.relative_position_embedding
-        self.share_relative_position_embedding = args.share_relative_position_embedding
         self.transformer_decoder = nn.ModuleList(
             [TransformerDecoderLayer(args) for _ in range(self.layers_num)]
         )
@@ -31,11 +30,6 @@ class TransformerDecoder(nn.Module):
         if self.relative_position_embedding:
             self.self_pos_emb = RelativePositionEmbedding(bidirectional=False, heads_num=args.heads_num,
                                                           num_buckets=args.relative_attention_buckets_num)
-            if self.share_relative_position_embedding:
-                self.context_pos_emb = self.self_pos_emb
-            else:
-                self.context_pos_emb = RelativePositionEmbedding(bidirectional=False, heads_num=args.heads_num,
-                                                                 num_buckets=args.relative_attention_buckets_num)
 
 
     def forward(self, memory_bank, emb, additional_info):
@@ -50,9 +44,9 @@ class TransformerDecoder(nn.Module):
         batch_size, tgt_seq_length, _ = emb.size()
 
         mask_encoder = (additional_info[0] > 0). \
-                unsqueeze(1). \
-                repeat(1, tgt_seq_length, 1). \
-                unsqueeze(1)
+            unsqueeze(1). \
+            repeat(1, tgt_seq_length, 1). \
+            unsqueeze(1)
         mask_encoder = mask_encoder.float()
         mask_encoder = (1.0 - mask_encoder) * -10000.0
 
@@ -65,16 +59,13 @@ class TransformerDecoder(nn.Module):
 
         if self.relative_position_embedding:
             self_position_bias = self.self_pos_emb(hidden, hidden)
-            context_position_bias = self.context_pos_emb(hidden, memory_bank)
         else:
             self_position_bias = None
-            context_position_bias = None
 
         for i in range(self.layers_num):
-            hidden = self.transformer_decoder[i](hidden, memory_bank, mask_decoder, mask_encoder, self_position_bias, context_position_bias)
+            hidden = self.transformer_decoder[i](hidden, memory_bank, mask_decoder, mask_encoder, self_position_bias, None)
 
         if self.layernorm_positioning == "pre":
             return self.layer_norm(hidden)
         else:
             return hidden
-

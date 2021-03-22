@@ -7,7 +7,6 @@
   "layers_num": 12,
   "dropout": 0.1,
   "share_embedding": true,
-  "share_relative_position_embedding": false,
   "remove_attention_scale": true,
   "layernorm": "t5",
   "remove_transformer_bias": true
