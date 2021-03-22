@@ -63,6 +63,8 @@ class FeatureExtractor(torch.nn.Module):
     def forward(self, src, seg):
         emb = self.embedding(src, seg)
         output = self.encoder(emb, seg)
+        seg = torch.unsqueeze(seg, dim=-1)
+        output = output * seg
 
         if self.pooling == "mean":
             output = torch.mean(output, dim=1)
@@ -167,7 +169,7 @@ if __name__ == '__main__':
         src_batch = src_batch.to(device)
         seg_batch = seg_batch.to(device)
         output = model(src_batch, seg_batch)
-        feature_vectors.append(output.cpu())
+        feature_vectors.append(output.cpu().detach())
     feature_vectors = torch.cat(feature_vectors, 0)
 
     # Vector whitening.

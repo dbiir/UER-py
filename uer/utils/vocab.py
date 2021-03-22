@@ -19,7 +19,7 @@ class Vocab(object):
     def load(self, vocab_path, is_quiet=False):
         with open(vocab_path, mode="r", encoding="utf-8") as reader:
             for index, line in enumerate(reader):
-                w = line.strip().split()[0] if line.strip() else " "
+                w = line.strip("\n").split()[0] if line.strip() else line.strip("\n")
                 self.w2i[w] = index
                 self.i2w.append(w)
         if not is_quiet:
