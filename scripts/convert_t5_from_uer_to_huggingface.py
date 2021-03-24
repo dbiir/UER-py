@@ -22,12 +22,9 @@ output_model["shared.weight"] = input_model["embedding.word_embedding.weight"]
 
 output_model["encoder.block.0.layer.0.SelfAttention.relative_attention_bias.weight"] = input_model["encoder.relative_pos_emb.relative_attention_bias.weight"]
 output_model["decoder.block.0.layer.0.SelfAttention.relative_attention_bias.weight"] = input_model["target.decoder.self_pos_emb.relative_attention_bias.weight"]
+output_model["encoder.embed_tokens.weight"] = input_model["embedding.word_embedding.weight"]
+output_model["decoder.embed_tokens.weight"] = input_model["embedding.word_embedding.weight"]
 output_model["lm_head.weight"] = input_model["target.output_layer.weight"]
-if args.type == "t5":
-    output_model["decoder.block.0.layer.1.EncDecAttention.relative_attention_bias.weight"] = input_model["target.decoder.context_pos_emb.relative_attention_bias.weight"]
-else:
-    output_model["encoder.embed_tokens.weight"] = input_model["embedding.word_embedding.weight"]
-    output_model["decoder.embed_tokens.weight"] = input_model["embedding.word_embedding.weight"]
 
 for i in range(args.layers_num):
     output_model["encoder.block." + str(i) + ".layer.0.SelfAttention.q.weight"] = input_model["encoder.transformer." + str(i) + ".self_attn.linear_layers.0.weight"]
