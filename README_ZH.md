@@ -40,7 +40,7 @@ UER-py有如下几方面优势:
 
 ## 依赖环境
 * Python >= 3.6
-* torch >= 1.0
+* torch >= 1.1
 * six >= 1.12.0
 * argparse
 * packaging
@@ -52,7 +52,7 @@ UER-py有如下几方面优势:
 <br/>
 
 ## 快速上手
-我们使用BERT模型和[豆瓣书评分类数据集](https://embedding.github.io/evaluation/)简要说明如何使用UER-py。 我们首先在书评语料上对模型进行预训练，然后在书评分类数据集上对其进行微调。这个过程有三个输入文件：书评语料，书评分类数据集和中文词典。这些文件均为UTF-8编码，并被包括在这个项目中。
+这里我们通过几个常见的例子来简要说明如何使用UER-py，更多的细节请参考[使用说明](https://github.com/dbiir/UER-py/blob/master/README_ZH.md#使用说明)。我们首先使用BERT模型[豆瓣书评分类数据集](https://embedding.github.io/evaluation/)。我们在书评语料上对模型进行预训练，然后在书评分类数据集上对其进行微调。这个过程有三个输入文件：书评语料，书评分类数据集和中文词典。这些文件均为UTF-8编码，并被包括在这个项目中。
 
 BERT模型要求的预训练语料格式是一行一个句子，不同文档使用空行分隔，如下所示：
 
@@ -109,9 +109,9 @@ python3 run_classifier.py --pretrained_model_path models/book_review_model.bin -
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                           --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ``` 
-实验结果显示，谷歌BERT模型在书评分类任务测试集上的结果为准确率87.5；*book_review_model.bin* 在其上的结果是88.2。值得注意的是，我们不需要在微调阶段指定目标任务。预训练模型的目标任务已被替换为特定下游任务需要的目标任务。
+实验结果显示，谷歌BERT模型在书评分类任务测试集上的准确率为87.5；*book_review_model.bin* 在其上的准确率为88.2。值得注意的是，我们不需要在微调阶段指定目标任务。预训练模型的目标任务已被替换为特定下游任务需要的目标任务。
 
-微调后的模型的默认路径是*models/finetuned_model.bin*, 然后我们利用微调后的分类器模型进行预测。 
+微调后的模型的默认路径是*models/finetuned_model.bin*, 然后我们利用微调后的分类器模型进行预测：
 ```
 python3 inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin --vocab_path models/google_zh_vocab.txt \
                                           --test_path datasets/douban_book_review/test_nolabel.tsv \
@@ -143,9 +143,10 @@ CUDA_VISIBLE_DEVICES=0,2 python3 inference/run_classifier_infer.py --load_model_
                                                                    --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
                                                                    --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-注意到这里我们在微调阶段使用 *--output_model_path* 指定微调后的模型的输出路径。预训练的实际批次大小是 *--batch_size* 乘以 *--world_size*。
+注意到我们在微调阶段使用 *--output_model_path* 指定微调后的模型的输出路径。预训练的实际batch size大小是 *--batch_size* 乘以 *--world_size*；分类的实际的batch size大小是 *--batch_size* 。
 <br>
-预测是否是下一个句子（NSP）是BERT的目标任务之一，但是，NSP任务不适合句子级别的评论，因为我们需要将句子切分为多个部分。 UER-py可以让用户自由选择不同的目标任务。这里我们选择使用遮罩语言模型（MLM）作为目标任务。MLM目标任务对书籍评论语料可能是更合适的选择：
+
+预测是否是下一个句子（NSP）是BERT的目标任务之一，但是，NSP任务不适合句子级别的评论，因为我们需要将句子切分为多个部分去构造文档。 UER-py可以让用户自由选择不同的目标任务。这里我们选择使用遮罩语言模型（MLM）作为目标任务。MLM目标任务对书籍评论语料可能是更合适的选择：
 
 ```
 python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
@@ -161,7 +162,7 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier.py --pretrained_model_path model
                                                    --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                                                    --epochs_num 3 --batch_size 64 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-实验表明 [*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV) 的结果为88.5。 <br>
+实验结果显示 [*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV) 的准确率为88.5。 <br>
 不同的预训练目标需要不同格式的语料。MLM目标对应的语料格式为一行一个文档：
 ```
 doc1
@@ -182,7 +183,7 @@ python3 inference/run_classifier_infer.py --load_model_path models/finetuned_mod
                                           --prediction_path datasets/douban_book_review/prediction.tsv \
                                           --labels_num 2 --embedding word --encoder lstm --pooling mean
 ```
-我们可以在书评分类任务测试集上获得超过85.4的准确率。相比之下，我们使用相同的LSTM编码器，但是不加载预训练模型，只能获得约81的准确率。
+我们可以在书评分类任务测试集上得到85.4的准确率。相比之下，我们使用相同的LSTM编码器，但是不加载预训练模型，只能得到约81的准确率。
 <br>
 
 UER-py还支持更多的预训练模型。 <br>
@@ -238,7 +239,7 @@ CUDA_VISIBLE_DEVICES=0 python3 run_classifier_cv.py --pretrained_model_path mode
 *google_zh_model.bin* 的结果为79.1/63.8（准确率/F1值）；<br>
 *--folds_num* 指定交叉验证的轮数；<br>
 *--output_path* 指定微调模型的路径，共保存 *--folds_num* 个微调后的模型，并将 *fold ID* 后缀添加到模型名称中；<br>
-*--train_features_path* 指定out-of-fold预测文件的路径；训练集被分成了 *--folds_num* 折。一折样本的预测概率是由其他折上的数据训练的模型预测得到的。*train_features.npy* 可用于stacking集成。*竞赛解决方案*部分中介绍了更多详细信息。<br>
+*--train_features_path* 指定out-of-fold预测文件的路径；训练集被分成了 *--folds_num* 折。一折样本的预测概率是由其他折上的数据训练的模型预测得到的。*train_features.npy* 可用于stacking集成。[*竞赛解决方案*](https://github.com/dbiir/UER-py/blob/master/README_ZH.md#竞赛解决方案)部分中介绍了更多详细信息。<br>
 
 我们可以进一步尝试不同的预训练模型。例如，可以下载[*RoBERTa-wwm-ext-large from HIT*](https://github.com/ymcui/Chinese-BERT-wwm)并将其转换为UER格式：
 ```
