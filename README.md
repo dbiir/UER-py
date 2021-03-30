@@ -267,7 +267,7 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path mo
                                                       --folds_num 5 --epochs_num 3 --batch_size 64 --seed 17 \
                                                       --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-The results are 81.3/68.4 (Accuracy/Marco F1), which has very competitive advantage compared with other open-source pre-trained weights. <br>
+The results are 81.3/68.4 (Accuracy/Marco F1), which is very competitive compared with other open-source pre-trained weights. The corpus used by the above pre-trained weight is highly similar with SMP2020-EWECT, a Weibo review dataset. <br>
 Sometimes large model does not converge. We need to try different random seeds by specifying *--seed*. 
 <br>
 
@@ -352,6 +352,7 @@ UER-py/
     |--run_c3.py
     |--run_chid.py
     |--README.md
+    |--README_ZH.md
 
 ```
 

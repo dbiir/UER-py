@@ -52,7 +52,7 @@ UER-py有如下几方面优势:
 <br/>
 
 ## 快速上手
-这里我们通过几个常见的例子来简要说明如何使用UER-py，更多的细节请参考[使用说明](https://github.com/dbiir/UER-py/blob/master/README_ZH.md#使用说明)。我们首先使用BERT模型[豆瓣书评分类数据集](https://embedding.github.io/evaluation/)。我们在书评语料上对模型进行预训练，然后在书评分类数据集上对其进行微调。这个过程有三个输入文件：书评语料，书评分类数据集和中文词典。这些文件均为UTF-8编码，并被包括在这个项目中。
+这里我们通过几个常见的例子来简要说明如何使用UER-py，更多的细节请参考[使用说明](https://github.com/dbiir/UER-py/blob/master/README_ZH.md#使用说明)。我们首先使用BERT模型和[豆瓣书评分类数据集](https://embedding.github.io/evaluation/)。我们在书评语料上对模型进行预训练，然后在书评分类数据集上对其进行微调。这个过程有三个输入文件：书评语料，书评分类数据集和中文词典。这些文件均为UTF-8编码，并被包括在这个项目中。
 
 BERT模型要求的预训练语料格式是一行一个句子，不同文档使用空行分隔，如下所示：
 
@@ -239,7 +239,7 @@ CUDA_VISIBLE_DEVICES=0 python3 run_classifier_cv.py --pretrained_model_path mode
 *google_zh_model.bin* 的结果为79.1/63.8（准确率/F1值）；<br>
 *--folds_num* 指定交叉验证的轮数；<br>
 *--output_path* 指定微调模型的路径，共保存 *--folds_num* 个微调后的模型，并将 *fold ID* 后缀添加到模型名称中；<br>
-*--train_features_path* 指定out-of-fold预测文件的路径；训练集被分成了 *--folds_num* 折。一折样本的预测概率是由其他折上的数据训练的模型预测得到的。*train_features.npy* 可用于stacking集成。[*竞赛解决方案*](https://github.com/dbiir/UER-py/blob/master/README_ZH.md#竞赛解决方案)部分中介绍了更多详细信息。<br>
+*--train_features_path* 指定out-of-fold预测文件的路径；训练集被分成了 *--folds_num* 折。一折样本的预测概率是由其他折上的数据训练的模型预测得到的。*train_features.npy* 可用于stacking集成。[竞赛解决方案](https://github.com/dbiir/UER-py/blob/master/README_ZH.md#竞赛解决方案)部分给出了更多详细信息。<br>
 
 我们可以进一步尝试不同的预训练模型。例如，可以下载[*RoBERTa-wwm-ext-large from HIT*](https://github.com/ymcui/Chinese-BERT-wwm)并将其转换为UER格式：
 ```
@@ -255,7 +255,7 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path mo
                                                       --epochs_num 3 --batch_size 64 --folds_num 5 \
                                                       --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-*RoBERTa-wwm-ext-large* 的结果是80.3/66.8（准确率/F1值）。 <br>
+*RoBERTa-wwm-ext-large* 的结果为80.3/66.8（准确率/F1值）。 <br>
 使用我们的预训练模型[*Reviews+BertEncoder(large)+MlmTarget*](https://share.weiyun.com/hn7kp9bs)的示例如下（更多详细信息，请参见模型仓库）：
 ```
 CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path models/reviews_bert_large_mlm_model.bin \
@@ -266,7 +266,7 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path mo
                                                       --folds_num 5 --epochs_num 3 --batch_size 64 --seed 17 \
                                                       --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-结果为81.3/68.4（准确率/F1值），与其他开源预训练权重相比，这一结果很具有竞争力。 <br>
+结果为81.3/68.4（准确率/F1值），与其他开源预训练权重相比，这一结果很具有竞争力。这个预训练权重使用的语料和SMP2020-EWECT（微博评论数据集）高度相似。 <br>
 有时大模型无法收敛，我们需要通过指定 *--seed* 尝试不同的随机种子。
 <br>
 
@@ -280,7 +280,7 @@ python3 run_ner.py --pretrained_model_path models/google_zh_model.bin --vocab_pa
 ```
 *--label2id_path* 指定用于命名实体识别的label2id文件的路径。
 
-然后我们对ner模型进行推断：
+然后我们使用ner模型进行推理：
 ```
 python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --vocab_path models/google_zh_vocab.txt \
                                    --test_path datasets/msra_ner/test_nolabel.tsv \
@@ -290,7 +290,7 @@ python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --voca
 ```
 <br>
 
-我们可以使用 *run_cmrc.py* 来进行机器阅读理解：
+我们可以使用 *run_cmrc.py* 进行机器阅读理解：
 ```
 python3 run_cmrc.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                     --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json \
@@ -299,7 +299,7 @@ python3 run_cmrc.py --pretrained_model_path models/google_zh_model.bin --vocab_p
                     --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 我们不指定 *-test_path*，因为CMRC2018数据集不提供测试集的标签。
-然后，我们使用cmrc模型进行推断：
+然后，我们使用cmrc模型进行推理：
 ```
 python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vocab_path models/google_zh_vocab.txt \
                                     --test_path datasets/cmrc2018/test.json  \
@@ -315,7 +315,7 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 <br/>
 
 ## 预训练模型仓库
-借助UER-py，我们使用不同的语料，编码器和目标任务进行了预训练，所有预训练模型都可以由UER-py直接加载。将来我们会发布更多的预训练模型。用户可以在 :arrow_right: [__预训练模型仓库__](https://github.com/dbiir/UER-py/wiki/模型仓库) :arrow_left: 中找到预训练模型和对应描述和下载链接。
+借助UER-py，我们使用不同的语料，编码器和目标任务进行预训练，所有预训练模型都可以由UER-py直接加载。将来我们会发布更多的预训练模型。用户可以在 :arrow_right: [__预训练模型仓库__](https://github.com/dbiir/UER-py/wiki/模型仓库) :arrow_left: 中找到各种性质的预训练模型以及它们对应的描述和下载链接。
 
 <br/>
 
@@ -352,15 +352,16 @@ UER-py/
     |--run_c3.py
     |--run_chid.py
     |--README.md
+    |--README_ZH.md
 
 ```
 
-更多使用示例在 :arrow_right: [__使用说明__](https://github.com/dbiir/UER-py/wiki/使用说明) :arrow_left: 中可以找到。这些示例可以帮助用户快速完成BERT、GPT、ELMO等预训练模型以及使用这些预训练模型在一系列下游任务上微调的实验。
+更多使用示例在 :arrow_right: [__使用说明__](https://github.com/dbiir/UER-py/wiki/使用说明) :arrow_left: 中可以找到。这些示例可以帮助用户快速实现BERT、GPT、ELMo、T5等预训练模型以及使用这些预训练模型在一系列下游任务上进行微调。
 
 <br/>
 
 ## 竞赛解决方案
-UER-py已用于许多NLP竞赛的获奖解决方案中。在本节中，我们提供了一些使用UER-py在NLP比赛中获得SOTA成绩的示例，例如CLUE。更多详细信息参见 :arrow_right: [__竞赛解决方案__](https://github.com/dbiir/UER-py/wiki/竞赛解决方案) :arrow_left: 。
+UER-py已用于许多NLP竞赛的获奖解决方案中。在本节中，我们提供了一些使用UER-py在NLP竞赛中获得SOTA成绩的示例，例如CLUE。更多详细信息参见 :arrow_right: [__竞赛解决方案__](https://github.com/dbiir/UER-py/wiki/竞赛解决方案) :arrow_left: 。
 
 <br/>
 
