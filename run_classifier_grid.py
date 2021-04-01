@@ -40,41 +40,37 @@ def main():
     # Load the hyperparameters from the config file.
     args = load_hyperparam(args)
 
-    #set_seed(args.seed)
+    set_seed(args.seed)
 
     # Count the number of labels.
     args.labels_num = count_labels_num(args.train_path)
 
     # Build tokenizer.
-    args.tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
+    args.tokenizer = str2tokenizer[args.tokenizer](args)
 
     best_acc = 0
-    result = {}
+    config = {}
 
-    for batch_size, learning_rate, epochs_num in product(args.batch_size_grid, args.learning_rate_grid, args.epochs_num_grid):
+    #Build dataset
+    trainset = read_dataset(args, args.train_path)
+    random.shuffle(trainset)
+    instances_num = len(trainset)
+
+    src = torch.LongTensor([example[0] for example in trainset])
+    tgt = torch.LongTensor([example[1] for example in trainset])
+    seg = torch.LongTensor([example[2] for example in trainset])
+    if args.soft_targets:
+        soft_tgt = torch.FloatTensor([example[3] for example in trainset])
+    else:
+        soft_tgt = None
+
+    for batch_size, learning_rate, epochs_num in product(args.batch_size_list, args.learning_rate_list, args.epochs_num_list):
 
         args.learning_rate = learning_rate
         args.batch_size = batch_size
         args.epochs_num = epochs_num
 
-        # build dataset
-
-        trainset = read_dataset(args, args.train_path)
-
-        random.shuffle(trainset)
-        instances_num = len(trainset)
-        batch_size = args.batch_size
-
-        src = torch.LongTensor([example[0] for example in trainset])
-        tgt = torch.LongTensor([example[1] for example in trainset])
-        seg = torch.LongTensor([example[2] for example in trainset])
-        if args.soft_targets:
-            soft_tgt = torch.FloatTensor([example[3] for example in trainset])
-        else:
-            soft_tgt = None
-
         args.train_steps = int(instances_num * args.epochs_num / batch_size) + 1
-
 
         # Build classification model.
         model = Classifier(args)
@@ -94,7 +90,6 @@ def main():
             model = torch.nn.DataParallel(model)
         args.model = model
 
-
         # Training phase.
 
         total_loss, _, _ = 0., 0., 0.
@@ -102,19 +97,16 @@ def main():
         for _ in range(1, args.epochs_num+1):
             model.train()
             for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, src, tgt, seg, soft_tgt)):
-                loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch, soft_tgt_batch)
-                total_loss += loss.item()
-                if (i + 1) % args.report_steps == 0:
-                    total_loss = 0.
+                _ = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch, soft_tgt_batch)
 
         acc, _ = evaluate(args, read_dataset(args, args.dev_path))
 
         if acc > best_acc:
             best_acc = acc
-            result = {'learning_rate':learning_rate, 'batch_size':batch_size, 'epochs_num':epochs_num}
-        print('on', result, '\n')
+            config = {"learning_rate": learning_rate, "batch_size": batch_size, "epochs_num": epochs_num}
+        print('On configuration: {}.\n'.format(config))
 
-    print('Best Acc. is:', best_acc, '. On ', result, 'config.')
+    print("Best Acc. is: {:.4f}, on configuration {}.".format(best_acc, config))
 
 if __name__ == "__main__":
     main()
