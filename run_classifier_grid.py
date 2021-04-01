@@ -28,12 +28,12 @@ def main():
     parser.add_argument("--soft_alpha", type=float, default=0.5,
                         help="Weight of the soft targets loss.")
 
-    parser.add_argument("--batch_size_grid", default=[32], nargs='+', type=int,
-                        help="Batch size.")
-    parser.add_argument("--learning_rate_grid", type=float, default=[2e-5], nargs='+',
-                        help="Learning rate.")
-    parser.add_argument("--epochs_num_grid", type=int, default=[3], nargs='+',
-                        help="Number of epochs.")
+    parser.add_argument("--batch_size_list", default=[32, 64], nargs='+', type=int,
+                        help="A list of batch size for grid search.")
+    parser.add_argument("--learning_rate_list", type=float, default=[3e-5, 1e-4, 3e-4], nargs='+',
+                        help="A list of learning rate for grid search.")
+    parser.add_argument("--epochs_num_list", type=int, default=[3, 5, 8], nargs='+',
+                        help="A list of number of epochs for grid search.")
 
     args = parser.parse_args()
 
@@ -111,7 +111,7 @@ def main():
 
         if acc > best_acc:
             best_acc = acc
-            result = {'learning_rate':learning_rate,'batch_size':batch_size, 'epochs_num':epochs_num}
+            result = {'learning_rate':learning_rate, 'batch_size':batch_size, 'epochs_num':epochs_num}
         print('on', result, '\n')
 
     print('Best Acc. is:', best_acc, '. On ', result, 'config.')
