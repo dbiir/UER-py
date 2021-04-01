@@ -29,7 +29,7 @@ def main():
                         help="Weight of the soft targets loss.")
 
     parser.add_argument("--batch_size_list", default=[32, 64], nargs='+', type=int,
-                        help="A list of batch size for grid search.")
+                        help="A list of batch sizes for grid search.")
     parser.add_argument("--learning_rate_list", type=float, default=[3e-5, 1e-4, 3e-4], nargs='+',
                         help="A list of learning rate for grid search.")
     parser.add_argument("--epochs_num_list", type=int, default=[3, 5, 8], nargs='+',
