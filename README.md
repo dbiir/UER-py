@@ -1,4 +1,4 @@
-[**English**](https://github.com/dbiir/UER-py) | [**中文**](https://github.com/dbiir/UER-py/wiki/%E4%B8%AD%E6%96%87%E6%96%87%E6%A1%A3)
+[**Documents**](https://github.com/dbiir/UER-py/wiki) | [**中文文档**](https://github.com/dbiir/UER-py/wiki/%E4%B8%AD%E6%96%87%E6%96%87%E6%A1%A3)
 
 [![Build Status](https://travis-ci.org/dbiir/UER-py.svg?branch=master)](https://travis-ci.org/dbiir/UER-py)
 [![codebeat badge](https://codebeat.co/badges/f75fab90-6d00-44b4-bb42-d19067400243)](https://codebeat.co/projects/github-com-dbiir-uer-py-master)
