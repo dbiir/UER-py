@@ -23,7 +23,7 @@ output_model["bert.embeddings.token_type_embeddings.weight"] = input_model["embe
 output_model["bert.embeddings.LayerNorm.weight"] = input_model["embedding.layer_norm.gamma"]
 output_model["bert.embeddings.LayerNorm.bias"] = input_model["embedding.layer_norm.beta"]
 
-convert_bert_transformer_encoder_from_uer_to_huggingface(args.layers_num, output_model, input_model)
+convert_bert_transformer_encoder_from_uer_to_huggingface(input_model, output_model, args.layers_num)
 
 output_model["qa_outputs.weight"] = input_model["output_layer.weight"]
 output_model["qa_outputs.bias"] = input_model["output_layer.bias"]

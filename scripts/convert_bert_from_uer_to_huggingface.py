@@ -3,7 +3,7 @@ import argparse
 import collections
 
 
-def convert_bert_transformer_encoder_from_uer_to_huggingface(layers_num, output_model, input_model):
+def convert_bert_transformer_encoder_from_uer_to_huggingface(input_model, output_model, layers_num):
     for i in range(layers_num):
         output_model["bert.encoder.layer." + str(i) + ".attention.self.query.weight"] = input_model["encoder.transformer." + str(i) + ".self_attn.linear_layers.0.weight"]
         output_model["bert.encoder.layer." + str(i) + ".attention.self.query.bias"] = input_model["encoder.transformer." + str(i) + ".self_attn.linear_layers.0.bias"]

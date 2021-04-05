@@ -23,7 +23,7 @@ output_model["embedding.segment_embedding.weight"] = torch.cat((torch.Tensor([[0
 output_model["embedding.layer_norm.gamma"] = input_model["bert.embeddings.LayerNorm.weight"]
 output_model["embedding.layer_norm.beta"] = input_model["bert.embeddings.LayerNorm.bias"]
 
-convert_bert_transformer_encoder_from_huggingface_to_uer(args.layers_num, output_model, input_model)
+convert_bert_transformer_encoder_from_huggingface_to_uer(input_model, output_model, args.layers_num)
 
 output_model["output_layer_1.weight"] = input_model["bert.pooler.dense.weight"]
 output_model["output_layer_1.bias"] = input_model["bert.pooler.dense.bias"]
