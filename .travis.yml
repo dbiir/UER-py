@@ -59,7 +59,7 @@ script:
 
     python run_classifier.py --pretrained_model_path models/albert_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/albert/base_config.json --output_model_path models/classifier_model.bin --train_path datasets/test_data/chnsenticorp_test/train.tsv --dev_path datasets/test_data/chnsenticorp_test/dev.tsv --learning_rate 4e-5 --epochs_num 3 --batch_size 2 --embedding word_pos_seg --encoder transformer --mask fully_visible --factorized_embedding_parameterization --parameter_sharing
 
-    python run_mt_classifier.py --pretrained_model_path models/bert_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --dataset_path_list datasets/test_data/douban_test/ datasets/test_data/chnsenticorp_test/ --epochs_num 1 --batch_size 2 --embedding word_pos_seg --encoder transformer --mask fully_visible
+    python run_classifier_mt.py --pretrained_model_path models/bert_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --dataset_path_list datasets/test_data/douban_test/ datasets/test_data/chnsenticorp_test/ --epochs_num 1 --batch_size 2 --embedding word_pos_seg --encoder transformer --mask fully_visible
     
     python run_ner.py --pretrained_model_path models/bert_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --output_model_path models/ner_model.bin --train_path datasets/test_data/msra_ner_test/train.tsv --dev_path datasets/test_data/msra_ner_test/dev.tsv --label2id_path datasets/msra_ner/label2id.json --epochs_num 2 --batch_size 2 --embedding word_pos_seg --encoder transformer --mask fully_visible
 

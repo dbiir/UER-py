@@ -345,7 +345,7 @@ UER-py/
     |--pretrain.py
     |--run_classifier.py
     |--run_classifier_cv.py
-    |--run_mt_classifier.py
+    |--run_classifier_mt.py
     |--run_cmrc.py
     |--run_ner.py
     |--run_dbqa.py
