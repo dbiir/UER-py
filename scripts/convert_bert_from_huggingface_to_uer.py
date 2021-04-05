@@ -1,6 +1,8 @@
 import torch
 import argparse
 import collections
+
+
 def convert_bert_transformer_encoder_from_huggingface_to_uer(layers_num, output_model, input_model):
     for i in range(layers_num):
         output_model["encoder.transformer." + str(i) + ".self_attn.linear_layers.0.weight"] = input_model["bert.encoder.layer." + str(i) + ".attention.self.query.weight"]
@@ -19,6 +21,7 @@ def convert_bert_transformer_encoder_from_huggingface_to_uer(layers_num, output_
         output_model["encoder.transformer." + str(i) + ".feed_forward.linear_2.bias"] = input_model["bert.encoder.layer." + str(i) + ".output.dense.bias"]
         output_model["encoder.transformer." + str(i) + ".layer_norm_2.gamma"] = input_model["bert.encoder.layer." + str(i) + ".output.LayerNorm.weight"]
         output_model["encoder.transformer." + str(i) + ".layer_norm_2.beta"] = input_model["bert.encoder.layer." + str(i) + ".output.LayerNorm.bias"]
+
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
