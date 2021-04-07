@@ -45,7 +45,7 @@ def main():
     output_model["embedding.layer_norm.gamma"] = input_model["bert.embeddings.LayerNorm.weight"]
     output_model["embedding.layer_norm.beta"] = input_model["bert.embeddings.LayerNorm.bias"]
 
-    convert_bert_transformer_encoder_from_huggingface_to_uer(args.layers_num, output_model, input_model)
+    convert_bert_transformer_encoder_from_huggingface_to_uer(input_model, output_model, args.layers_num)
 
     if args.target == "bert":
         output_model["target.nsp_linear_1.weight"] = input_model["bert.pooler.dense.weight"]
