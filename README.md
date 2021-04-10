@@ -34,7 +34,7 @@ UER-py has the following features:
 - __Efficiency__ UER-py refines its pre-processing, pre-training, and fine-tuning stages, which largely improves speed and needs less memory.
 - __Model zoo__ With the help of UER-py, we pre-trained models with different corpora, encoders, and targets. Proper selection of pre-trained models is important to the downstream task performances.
 - __SOTA results__ UER-py supports comprehensive downstream tasks (e.g. classification and machine reading comprehension) and provides winning solutions of many NLP competitions.
-- __Abundant function__ UER-py provides abundant function related with pre-training, such as feature extractor, model format conversion, model ensemble.
+- __Abundant function__ UER-py provides abundant function related with pre-training, such as feature extractor and model format conversion.
 
 
 <br/>
