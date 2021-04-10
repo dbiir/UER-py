@@ -6,7 +6,7 @@
 
 <img src="logo.jpg" width="390" hegiht="390" align=left />
 
-预训练已经成为自然语言处理任务的重要组成部分，为大量自然语言处理任务带来了显著提升。 UER-py（Universal Encoder Representations）是一个用于对通用语料进行预训练并对下游任务进行微调的工具包。UER-py遵循模块化的设计原则。通过模块的组合，用户能迅速精准复现已有的预训练模型，并利用已有的接口进一步开发更多的预训练模型。通过UER-py，我们建立了一个模型仓库，其中包含基于不同语料，编码器和目标任务的预训练模型。用户可以根据具体任务的要求，从中选择合适的预训练模型使用。
+预训练已经成为自然语言处理任务的重要组成部分，为大量自然语言处理任务带来了显著提升。 UER-py（Universal Encoder Representations）是一个用于对通用语料进行预训练并对下游任务进行微调的工具包。UER-py遵循模块化的设计原则。通过模块的组合，用户能迅速精准的复现已有的预训练模型，并利用已有的接口进一步开发更多的预训练模型。通过UER-py，我们建立了一个模型仓库，其中包含基于不同语料，编码器和目标任务的预训练模型。用户可以根据具体任务的要求，从中选择合适的预训练模型使用。
 
 
 <br>
@@ -46,8 +46,9 @@ UER-py有如下几方面优势:
 * packaging
 * 如果使用混合精度，需要安装英伟达的apex
 * 如果涉及到TensorFlow模型的转换，需要安装TensorFlow
-* 如果在tokenizer中使用sentencepiece模型，需要安装sentencepiece
+* 如果在tokenizer中使用sentencepiece模型，需要安装[SentencePiece](https://github.com/google/sentencepiece)
 * 如果使用模型集成stacking，需要LightGBM和[BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
+* 如果使用全词遮罩（whole word masking）预训练，需要分词工具，例如[jieba](https://github.com/fxsjy/jieba)
 
 <br/>
 
@@ -90,7 +91,7 @@ python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path mo
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
                     --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
-                    --total_steps 5000 --save_checkpoint_steps 1000 --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert
+                    --total_steps 5000 --save_checkpoint_steps 1000 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert
 
 mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
@@ -129,7 +130,7 @@ python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path mo
 
 CUDA_VISIBLE_DEVICES=0,2 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
                                              --output_model_path models/book_review_model.bin  --world_size 2 --gpu_ranks 0 1 \
-                                             --total_steps 5000 --save_checkpoint_steps 1000 --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert
+                                             --total_steps 5000 --save_checkpoint_steps 1000 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert
 
 mv models/book_review_model.bin-5000 models/book_review_model.bin
 
@@ -154,13 +155,13 @@ python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/
 
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
                     --output_model_path models/book_review_mlm_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
-                    --total_steps 5000 --save_checkpoint_steps 2500 --batch_size 64 --embedding word_pos_seg --encoder transformer --mask fully_visible --target mlm
+                    --total_steps 5000 --save_checkpoint_steps 2500 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible --target mlm
 
 mv models/book_review_mlm_model.bin-5000 models/book_review_mlm_model.bin
 
 CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier.py --pretrained_model_path models/book_review_mlm_model.bin --vocab_path models/google_zh_vocab.txt \
                                                    --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
-                                                   --epochs_num 3 --batch_size 64 --embedding word_pos_seg --encoder transformer --mask fully_visible
+                                                   --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
 实验结果显示 [*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV) 的准确率为88.5。 <br>
 不同的预训练目标需要不同格式的语料。MLM目标对应的语料格式为一行一个文档：
@@ -172,7 +173,7 @@ doc3
 注意到当预训练目标被改为MLM后，我们使用的预训练语料为 *corpora/book_review.txt* 而不是 *corpora/book_review_bert.txt*。
 <br>
 
-BERT参数量大，计算较慢。我们希望加速模型运算的同时让模型仍然在下游任务上有好的表现。这里我们选择2层LSTM编码器来替代12层Transformer编码器。 我们首先下载2层LSTM编码器的预训练模型[*reviews_lstm_lm_model.bin*](https://share.weiyun.com/57dZhqo)。 然后在下游分类数据集上对其进行微调：
+BERT参数量大，计算较慢。我们希望加速模型的同时让模型仍然在下游任务上有好的表现。这里我们选择2层LSTM编码器来替代12层Transformer编码器。 我们首先下载2层LSTM编码器的预训练模型[*reviews_lstm_lm_model.bin*](https://share.weiyun.com/57dZhqo)。 然后在下游分类数据集上对其进行微调：
 ```
 python3 run_classifier.py --pretrained_model_path models/reviews_lstm_lm_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/rnn_config.json \
                           --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
@@ -266,11 +267,11 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path mo
                                                       --folds_num 5 --epochs_num 3 --batch_size 64 --seed 17 \
                                                       --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-结果为81.3/68.4（准确率/F1值），与其他开源预训练权重相比，这一结果很具有竞争力。这个预训练权重使用的语料和SMP2020-EWECT（微博评论数据集）高度相似。 <br>
+结果为81.3/68.4（准确率/F1值），与其他开源预训练模型相比，这一结果很具有竞争力。这个预训练模型使用的语料和SMP2020-EWECT（微博评论数据集）高度相似。 <br>
 有时大模型无法收敛，我们需要通过指定 *--seed* 尝试不同的随机种子。
 <br>
 
-除了分类外，UER-py还提供其他下游任务的脚本。我们可以使用*run_ner.py*进行命名实体识别：
+除了分类外，UER-py还提供其他下游任务的脚本。比如，我们可以使用*run_ner.py*进行命名实体识别：
 ```
 python3 run_ner.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                    --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
@@ -315,7 +316,7 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 <br/>
 
 ## 预训练模型仓库
-借助UER-py，我们使用不同的语料，编码器和目标任务进行预训练，所有预训练模型都可以由UER-py直接加载。将来我们会发布更多的预训练模型。用户可以在 :arrow_right: [__预训练模型仓库__](https://github.com/dbiir/UER-py/wiki/预训练模型仓库) :arrow_left: 中找到各种性质的预训练模型以及它们对应的描述和下载链接。
+借助UER-py，我们使用不同的语料，编码器和目标任务进行预训练。用户可以在 :arrow_right: [__预训练模型仓库__](https://github.com/dbiir/UER-py/wiki/预训练模型仓库) :arrow_left: 中找到各种性质的预训练模型以及它们对应的描述和下载链接。所有预训练模型都可以由UER-py直接加载。将来我们会发布更多的预训练模型。
 
 <br/>
 
@@ -366,7 +367,7 @@ UER-py已用于许多NLP竞赛的获奖解决方案中。在本节中，我们�
 <br/>
 
 ## 引用
-#### 如果您在您的学术工作中使用我们的工作（比如预训练权重），可以引用我们的[论文](https://arxiv.org/pdf/1909.05658.pdf)：
+#### 如果您在您的学术工作中使用我们的工作（比如预训练模型权重），可以引用我们的[论文](https://arxiv.org/pdf/1909.05658.pdf)：
 ```
 @article{zhao2019uer,
   title={UER: An Open-Source Toolkit for Pre-training Models},
