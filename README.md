@@ -325,27 +325,28 @@ UER-py is organized as follows：
 ```
 UER-py/
     |--uer/
-    |    |--encoders/: contains encoders such as RNN, CNN, BERT
-    |    |--targets/: contains targets such as language modeling, masked language modeling
-    |    |--layers/: contains frequently-used NN layers, such as embedding layer, normalization layer
-    |    |--models/: contains model.py, which combines embedding, encoder, and target modules
-    |    |--utils/: contains frequently-used utilities
+    |    |--encoders/ # contains encoders such as RNN, CNN, Transformer
+    |    |--targets/ # contains targets such as language modeling, masked language modeling
+    |    |--layers/ # contains frequently-used NN layers, such as embedding layer, normalization layer
+    |    |--models/ # contains model.py, which combines embedding, encoder, and target modules
+    |    |--utils/ # contains frequently-used utilities
     |    |--model_builder.py
     |    |--model_loader.py
     |    |--model_saver.py
     |    |--trainer.py
     |
-    |--corpora/: contains corpora for pre-training
-    |--datasets/: contains downstream tasks
-    |--models/: contains pre-trained models, vocabularies, and configuration files
-    |--scripts/: contains useful scripts for pre-training models
-    |--inference/：contains inference scripts for downstream tasks
+    |--corpora/ # contains corpora for pre-training
+    |--datasets/ # contains downstream tasks
+    |--models/ # contains pre-trained models, vocabularies, and configuration files
+    |--scripts/ # contains useful scripts for pre-training models
+    |--inference/ # contains inference scripts for downstream tasks
     |
     |--preprocess.py
     |--pretrain.py
     |--run_classifier.py
-    |--run_classifier_cv.py
-    |--run_classifier_mt.py
+    |--run_classifier_cv.py # classification with cross validation
+    |--run_classifier_grid.py # classification with grid search
+    |--run_classifier_mt.py # multi-task classification
     |--run_cmrc.py
     |--run_ner.py
     |--run_dbqa.py

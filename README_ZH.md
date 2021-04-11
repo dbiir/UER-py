@@ -271,7 +271,7 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path mo
 有时大模型无法收敛，我们需要通过指定 *--seed* 尝试不同的随机种子。
 <br>
 
-除了分类外，UER-py还提供其他下游任务的脚本。比如，我们可以使用*run_ner.py*进行命名实体识别：
+除了分类外，UER-py还提供其他下游任务的脚本。例如，我们可以使用*run_ner.py*进行命名实体识别：
 ```
 python3 run_ner.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
                    --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
@@ -326,27 +326,28 @@ UER-py使用解耦的设计框架，方便用户使用和扩展，项目组织�
 ```
 UER-py/
     |--uer/
-    |    |--encoders/: contains encoders such as RNN, CNN, BERT
-    |    |--targets/: contains targets such as language modeling, masked language modeling
-    |    |--layers/: contains frequently-used NN layers, such as embedding layer, normalization layer
-    |    |--models/: contains model.py, which combines embedding, encoder, and target modules
-    |    |--utils/: contains frequently-used utilities
+    |    |--encoders/ # 包括编码器模块，例如RNN, CNN, Transformer
+    |    |--targets/ # 包括目标任务模块，例如语言模型, 遮罩语言模型
+    |    |--layers/ # 包括常用的神经网络层
+    |    |--models/ # 包括 model.py，用于组合词向量（embedding）、编码器（encoder）、目标任务（target）模块
+    |    |--utils/ # 包括常用的功能模块
     |    |--model_builder.py
     |    |--model_loader.py
     |    |--model_saver.py
     |    |--trainer.py
     |
-    |--corpora/: contains corpora for pre-training
-    |--datasets/: contains downstream tasks
-    |--models/: contains pre-trained models, vocabularies, and configuration files
-    |--scripts/: contains useful scripts for pre-training models
-    |--inference/：contains inference scripts for downstream tasks
+    |--corpora/ # 预训练语料存放文件夹
+    |--datasets/ # 下游人物数据集存放文件夹
+    |--models/ # 模型、词典、配置文件存放文件夹
+    |--scripts/ # 实用脚本存放文件夹
+    |--inference/ # 前向推理脚本存放文件夹
     |
     |--preprocess.py
     |--pretrain.py
     |--run_classifier.py
-    |--run_classifier_cv.py
-    |--run_classifier_mt.py
+    |--run_classifier_cv.py # 支持交叉验证的分类脚本
+    |--run_classifier_grid.py # 支持网格搜索的分类脚本
+    |--run_classifier_mt.py # 支持多任务的分类脚本
     |--run_cmrc.py
     |--run_ner.py
     |--run_dbqa.py

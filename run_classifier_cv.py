@@ -1,5 +1,5 @@
 """
-This script provides an exmaple to wrap UER-py for classification (cross validation).
+This script provides an exmaple to wrap UER-py for classification with cross validation.
 """
 import random
 import argparse

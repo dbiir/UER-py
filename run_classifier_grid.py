@@ -1,5 +1,5 @@
 """
-This script provides an exmaple to wrap UER-py for classification grid search.
+This script provides an exmaple to wrap UER-py for classification with grid search.
 """
 import torch
 import random
