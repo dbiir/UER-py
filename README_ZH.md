@@ -163,7 +163,6 @@ CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier.py --pretrained_model_path model
                                                    --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
                                                    --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-实验结果显示 [*book_review_mlm_model.bin*](https://share.weiyun.com/V0XidqrV) 的准确率为88.5。 <br>
 不同的预训练目标需要不同格式的语料。MLM目标对应的语料格式为一行一个文档：
 ```
 doc1
