@@ -298,7 +298,7 @@ python3 run_cmrc.py --pretrained_model_path models/google_zh_model.bin --vocab_p
                     --epochs_num 2 --batch_size 8 --seq_length 512 \
                     --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-我们不指定 *-test_path*，因为CMRC2018数据集不提供测试集的标签。
+我们不指定 *--test_path*，因为CMRC2018数据集不提供测试集的标签。
 然后，我们使用cmrc模型进行推理：
 ```
 python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vocab_path models/google_zh_vocab.txt \
@@ -320,7 +320,6 @@ python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vo
 <br/>
 
 ## 使用说明
-### 整体框架
 UER-py使用解耦的设计框架，方便用户使用和扩展，项目组织如下：
 ```
 UER-py/

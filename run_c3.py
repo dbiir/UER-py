@@ -14,8 +14,8 @@ from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
-from run_classifier import build_optimizer, load_or_initialize_parameters, train_model, batch_loader, evaluate
 from uer.opts import finetune_opts
+from run_classifier import build_optimizer, load_or_initialize_parameters, train_model, batch_loader, evaluate
 
 
 class MultipleChoice(nn.Module):
