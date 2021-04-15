@@ -335,7 +335,7 @@ UER-py/
     |    |--trainer.py
     |
     |--corpora/ # 预训练语料存放文件夹
-    |--datasets/ # 下游人物数据集存放文件夹
+    |--datasets/ # 下游任务数据集存放文件夹
     |--models/ # 模型、词典、配置文件存放文件夹
     |--scripts/ # 实用脚本存放文件夹
     |--inference/ # 前向推理脚本存放文件夹
