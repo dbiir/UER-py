@@ -1,0 +1,9 @@
+{
+  "emb_size": 512,
+  "feedforward_size": 2048,
+  "hidden_size": 512,
+  "hidden_act": "relu",
+  "heads_num": 8,
+  "layers_num": 6,
+  "dropout": 0.1
+}

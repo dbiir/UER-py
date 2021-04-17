@@ -10,7 +10,7 @@ import argparse
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
-from uer.utils.tokenizer import *
+from uer.utils.tokenizers import *
 from uer.utils.vocab import Vocab
 
 
