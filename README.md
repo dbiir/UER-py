@@ -54,7 +54,7 @@ UER-py has the following features:
 <br/>
 
 ## Quickstart
-This section uses several commonly-used examples to demonstrate how to use UER-py. More details are discussed in [Instructions](https://github.com/dbiir/UER-py#instructions). We firstly use BERT model on [Douban book review classification dataset](https://embedding.github.io/evaluation/). We pre-train model on book review corpus and then fine-tune it on classification dataset. There are three input files: book review corpus, book review classification dataset, and vocabulary. All files are encoded in UTF-8 and included in this project.
+This section uses several commonly-used examples to demonstrate how to use UER-py. More details are discussed in Instructions. We firstly use BERT model on [Douban book review classification dataset](https://embedding.github.io/evaluation/). We pre-train model on book review corpus and then fine-tune it on classification dataset. There are three input files: book review corpus, book review classification dataset, and vocabulary. All files are encoded in UTF-8 and included in this project.
 
 The format of the corpus for BERT is as follows (one sentence per line and documents are delimited by empty lines)：
 ```
@@ -172,139 +172,7 @@ doc3
 Notice that *corpora/book_review.txt* (instead of *corpora/book_review_bert.txt*) is used when the target is switched to MLM. 
 <br>
 
-BERT is slow. It could be great if we can speed up the model and still achieve competitive performance. To achieve this goal, we select a 2-layers LSTM encoder to substitute 12-layers Transformer encoder. We firstly download [*reviews_lstm_lm_model.bin*](https://share.weiyun.com/57dZhqo) for 2-layers LSTM encoder. Then we fine-tune it on downstream classification dataset:
-```
-python3 run_classifier.py --pretrained_model_path models/reviews_lstm_lm_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/rnn_config.json \
-                          --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
-                          --epochs_num 5  --batch_size 64 --learning_rate 1e-3 --embedding word --encoder lstm --pooling mean
-
-python3 inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin --vocab_path models/google_zh_vocab.txt \
-                                          --config_path models/rnn_config.json --test_path datasets/douban_book_review/test_nolabel.tsv \
-                                          --prediction_path datasets/douban_book_review/prediction.tsv \
-                                          --labels_num 2 --embedding word --encoder lstm --pooling mean
-```
-We can achieve over 85.4 accuracy on testset, which is a competitive result. Using the same LSTM encoder without pre-training can only achieve around 81 accuracy.
-<br>
-
-UER-py also provides many other encoders and corresponding pre-trained models. <br>
-The example of pre-training and fine-tuning ELMo on Chnsenticorp dataset:
-```
-python3 preprocess.py --corpus_path corpora/chnsenticorp.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
-                      --processes_num 8 --seq_length 192 --target bilm
-
-python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/mixed_corpus_elmo_model.bin \
-                    --config_path models/birnn_config.json \
-                    --output_model_path models/chnsenticorp_elmo_model.bin --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
-                    --total_steps 5000 --save_checkpoint_steps 2500 --batch_size 64 --learning_rate 5e-4 \
-                    --embedding word --encoder bilstm --target bilm
-
-mv models/chnsenticorp_elmo_model.bin-5000 models/chnsenticorp_elmo_model.bin
-
-python3 run_classifier.py --pretrained_model_path models/chnsenticorp_elmo_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/birnn_config.json \
-                          --train_path datasets/chnsenticorp/train.tsv --dev_path datasets/chnsenticorp/dev.tsv --test_path datasets/chnsenticorp/test.tsv \
-                          --epochs_num 5  --batch_size 64 --seq_length 192 --learning_rate 5e-4 \
-                          --embedding word --encoder bilstm --pooling mean
-```
-Users can download *mixed_corpus_elmo_model.bin* from [here](https://share.weiyun.com/5Qihztq).
-
-The example of fine-tuning GatedCNN on Chnsenticorp dataset:
-```
-python3 run_classifier.py --pretrained_model_path models/wikizh_gatedcnn_lm_model.bin \
-                          --vocab_path models/google_zh_vocab.txt \
-                          --config_path models/gatedcnn_9_config.json \
-                          --train_path datasets/chnsenticorp/train.tsv --dev_path datasets/chnsenticorp/dev.tsv --test_path datasets/chnsenticorp/test.tsv \
-                          --epochs_num 5  --batch_size 64 --learning_rate 5e-5 \
-                          --embedding word --encoder gatedcnn --pooling max
-
-python3 inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin --vocab_path models/google_zh_vocab.txt \
-                                          --config_path models/gatedcnn_9_config.json \
-                                          --test_path datasets/chnsenticorp/test_nolabel.tsv \
-                                          --prediction_path datasets/chnsenticorp/prediction.tsv \
-                                          --labels_num 2 --embedding word --encoder gatedcnn --pooling max
-```
-Users can download *wikizh_gatedcnn_lm_model.bin* from [here](https://share.weiyun.com/W2gmPPeA).
-<br>
-
-UER-py supports cross validation for classification. The example of using cross validation on [SMP2020-EWECT](http://39.97.118.137/), a competition dataset:
-```
-CUDA_VISIBLE_DEVICES=0 python3 run_classifier_cv.py --pretrained_model_path models/google_zh_model.bin \
-                                                    --vocab_path models/google_zh_vocab.txt \
-                                                    --config_path models/bert/base_config.json \
-                                                    --output_model_path models/classifier_model.bin \
-                                                    --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
-                                                    --train_path datasets/smp2020-ewect/virus/train.tsv \
-                                                    --epochs_num 3 --batch_size 32 --folds_num 5 \
-                                                    --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
-The results of *google_zh_model.bin* are 79.1/63.8 (Accuracy/Marco F1). <br>
-*--folds_num* specifies the number of rounds of cross-validation. <br>
-*--output_path* specifies the path of the fine-tuned model. *--folds_num* models are saved and the *fold ID* suffix is added to the model's name. <br>
-*--train_features_path* specifies the path of out-of-fold (OOF) predictions. *run_classifier_cv.py* generates probabilities over classes on each fold by training a model on the other folds in the dataset. *train_features.npy* can be used as features for stacking. More details are introduced in [*Competition solutions*](https://github.com/dbiir/UER-py#competition-solutions) section. <br>
-
-We can further try different pre-trained models. For example, we download [*RoBERTa-wwm-ext-large from HIT*](https://github.com/ymcui/Chinese-BERT-wwm) and convert it into UER's format:
-```
-python3 scripts/convert_bert_from_huggingface_to_uer.py --input_model_path models/chinese_roberta_wwm_large_ext_pytorch/pytorch_model.bin \
-                                                        --output_model_path models/chinese_roberta_wwm_large_ext_pytorch/pytorch_model_uer.bin \
-                                                        --layers_num 24
-
-CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path models/chinese_roberta_wwm_large_ext_pytorch/pytorch_model_uer.bin \
-                                                      --vocab_path models/google_zh_vocab.txt \
-                                                      --config_path models/bert/large_config.json \
-                                                      --train_path datasets/smp2020-ewect/virus/train.tsv \
-                                                      --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
-                                                      --epochs_num 3 --batch_size 64 --folds_num 5 \
-                                                      --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
-The results of *RoBERTa-wwm-ext-large* are 80.3/66.8 (Accuracy/Marco F1). <br>
-The example of using our pre-trained model [*Reviews+BertEncoder(large)+MlmTarget*](https://share.weiyun.com/hn7kp9bs) (see model zoo for more details):
-```
-CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path models/reviews_bert_large_mlm_model.bin \
-                                                      --vocab_path models/google_zh_vocab.txt \
-                                                      --config_path models/bert/large_config.json \
-                                                      --train_path datasets/smp2020-ewect/virus/train.tsv \
-                                                      --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
-                                                      --folds_num 5 --epochs_num 3 --batch_size 64 --seed 17 \
-                                                      --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
-The results are 81.3/68.4 (Accuracy/Marco F1), which are very competitive compared with other open-source pre-trained models. The corpus used by the above pre-trained model is highly similar with SMP2020-EWECT, a Weibo review dataset. <br>
-Sometimes large model does not converge. We need to try different random seeds by specifying *--seed*. 
-<br>
-
-Besides classification, UER-py also provides scripts for other downstream tasks. For example, we could use *run_ner.py* for named entity recognition:
-```
-python3 run_ner.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
-                   --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
-                   --output_model_path models/ner_model.bin \
-                   --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 \
-                   --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
-*--label2id_path* specifies the path of label2id file for named entity recognition.
-Then we do inference with the fine-tuned ner model:
-```
-python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --vocab_path models/google_zh_vocab.txt \
-                                   --test_path datasets/msra_ner/test_nolabel.tsv \
-                                   --prediction_path datasets/msra_ner/prediction.tsv \
-                                   --label2id_path datasets/msra_ner/label2id.json \
-                                   --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
-<br>
-
-We could use *run_cmrc.py* for machine reading comprehension:
-```
-python3 run_cmrc.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
-                    --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json \
-                    --output_model_path models/cmrc_model.bin \
-                    --epochs_num 2 --batch_size 8 --seq_length 512 \
-                    --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
-We don't specify the *--test_path* because CMRC2018 dataset doesn't provide labels for testset. 
-Then we do inference with the fine-tuned cmrc model:
-```
-python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vocab_path models/google_zh_vocab.txt \
-                                    --test_path datasets/cmrc2018/test.json \
-                                    --prediction_path datasets/cmrc2018/prediction.json --seq_length 512 \
-                                    --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
+More use cases can be found in complete :arrow_right: [__quickstart__](https://github.com/dbiir/UER-py/wiki/Quickstart) :arrow_left:
 
 <br/>
 
