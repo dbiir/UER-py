@@ -223,7 +223,6 @@ def evaluate(args, dataset, print_confusion_matrix=False):
         print(confusion)
         print("Report precision, recall, and f1:")
         
-        # add a small value 1e-9 to denominators to prevent division by zero
         for i in range(confusion.size()[0]):
             p = confusion[i, i].item() / (confusion[i, :].sum().item() + eps)
             r = confusion[i, i].item() / (confusion[:, i].sum().item() + eps)

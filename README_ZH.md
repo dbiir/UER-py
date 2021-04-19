@@ -53,7 +53,7 @@ UER-py有如下几方面优势:
 <br/>
 
 ## 快速上手
-这里我们通过几个常见的例子来简要说明如何使用UER-py，更多的细节请参考[使用说明](https://github.com/dbiir/UER-py/blob/master/README_ZH.md#使用说明)。我们首先使用BERT模型和[豆瓣书评分类数据集](https://embedding.github.io/evaluation/)。我们在书评语料上对模型进行预训练，然后在书评分类数据集上对其进行微调。这个过程有三个输入文件：书评语料，书评分类数据集和中文词典。这些文件均为UTF-8编码，并被包括在这个项目中。
+这里我们通过常用的例子来简要说明如何使用UER-py，更多的细节请参考使用说明。我们首先使用BERT模型和[豆瓣书评分类数据集](https://embedding.github.io/evaluation/)。我们在书评语料上对模型进行预训练，然后在书评分类数据集上对其进行微调。这个过程有三个输入文件：书评语料，书评分类数据集和中文词典。这些文件均为UTF-8编码，并被包括在这个项目中。
 
 BERT模型要求的预训练语料格式是一行一个句子，不同文档使用空行分隔，如下所示：
 
@@ -172,140 +172,7 @@ doc3
 注意到当预训练目标被改为MLM后，我们使用的预训练语料为 *corpora/book_review.txt* 而不是 *corpora/book_review_bert.txt*。
 <br>
 
-BERT参数量大，计算较慢。我们希望加速模型的同时让模型仍然在下游任务上有好的表现。这里我们选择2层LSTM编码器来替代12层Transformer编码器。 我们首先下载2层LSTM编码器的预训练模型[*reviews_lstm_lm_model.bin*](https://share.weiyun.com/57dZhqo)。 然后在下游分类数据集上对其进行微调：
-```
-python3 run_classifier.py --pretrained_model_path models/reviews_lstm_lm_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/rnn_config.json \
-                          --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
-                          --epochs_num 5  --batch_size 64 --learning_rate 1e-3 --embedding word --encoder lstm --pooling mean
-
-python3 inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin --vocab_path models/google_zh_vocab.txt \
-                                          --config_path models/rnn_config.json --test_path datasets/douban_book_review/test_nolabel.tsv \
-                                          --prediction_path datasets/douban_book_review/prediction.tsv \
-                                          --labels_num 2 --embedding word --encoder lstm --pooling mean
-```
-我们可以在书评分类任务测试集上得到85.4的准确率。相比之下，我们使用相同的LSTM编码器，但是不加载预训练模型，只能得到约81的准确率。
-<br>
-
-UER-py还支持更多的预训练模型。 <br>
-在Chnsenticorp数据集上使用ELMo进行预训练和微调的示例：
-```
-python3 preprocess.py --corpus_path corpora/chnsenticorp.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
-                      --processes_num 8 --seq_length 192 --target bilm
-
-python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/mixed_corpus_elmo_model.bin \
-                    --config_path models/birnn_config.json \
-                    --output_model_path models/chnsenticorp_elmo_model.bin --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
-                    --total_steps 5000 --save_checkpoint_steps 2500 --batch_size 64 --learning_rate 5e-4 \
-                    --embedding word --encoder bilstm --target bilm
-
-mv models/chnsenticorp_elmo_model.bin-5000 models/chnsenticorp_elmo_model.bin
-
-python3 run_classifier.py --pretrained_model_path models/chnsenticorp_elmo_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/birnn_config.json \
-                          --train_path datasets/chnsenticorp/train.tsv --dev_path datasets/chnsenticorp/dev.tsv --test_path datasets/chnsenticorp/test.tsv \
-                          --epochs_num 5  --batch_size 64 --seq_length 192 --learning_rate 5e-4 \
-                          --embedding word --encoder bilstm --pooling mean
-```
-用户可以从[这里](https://share.weiyun.com/5Qihztq)下载 *mixed_corpus_elmo_model.bin*。
-
-在Chnsenticorp数据集上微调GatedCNN模型的示例：
-```
-python3 run_classifier.py --pretrained_model_path models/wikizh_gatedcnn_lm_model.bin \
-                          --vocab_path models/google_zh_vocab.txt \
-                          --config_path models/gatedcnn_9_config.json \
-                          --train_path datasets/chnsenticorp/train.tsv --dev_path datasets/chnsenticorp/dev.tsv --test_path datasets/chnsenticorp/test.tsv \
-                          --epochs_num 5  --batch_size 64 --learning_rate 5e-5 \
-                          --embedding word --encoder gatedcnn --pooling max
-
-python3 inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin --vocab_path models/google_zh_vocab.txt \
-                                          --config_path models/gatedcnn_9_config.json \
-                                          --test_path datasets/chnsenticorp/test_nolabel.tsv \
-                                          --prediction_path datasets/chnsenticorp/prediction.tsv \
-                                          --labels_num 2 --embedding word --encoder gatedcnn --pooling max
-```
-用户可以从[这里](https://share.weiyun.com/W2gmPPeA)下载 *wikizh_gatedcnn_lm_model.bin*。
-<br>
-
-UER-py支持分类任务的交叉验证，在竞赛数据集[SMP2020-EWECT](http://39.97.118.137/)上使用交叉验证的示例：
-```
-CUDA_VISIBLE_DEVICES=0 python3 run_classifier_cv.py --pretrained_model_path models/google_zh_model.bin \
-                                                    --vocab_path models/google_zh_vocab.txt \
-                                                    --config_path models/bert/base_config.json \
-                                                    --output_model_path models/classifier_model.bin \
-                                                    --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
-                                                    --train_path datasets/smp2020-ewect/virus/train.tsv \
-                                                    --epochs_num 3 --batch_size 32 --folds_num 5 \
-                                                    --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
-*google_zh_model.bin* 的结果为79.1/63.8（准确率/F1值）；<br>
-*--folds_num* 指定交叉验证的轮数；<br>
-*--output_path* 指定微调模型的路径，共保存 *--folds_num* 个微调后的模型，并将 *fold ID* 后缀添加到模型名称中；<br>
-*--train_features_path* 指定out-of-fold预测文件的路径；训练集被分成了 *--folds_num* 折。一折样本的预测概率是由其他折上的数据训练的模型预测得到的。*train_features.npy* 可用于stacking集成。[竞赛解决方案](https://github.com/dbiir/UER-py/blob/master/README_ZH.md#竞赛解决方案)部分给出了更多详细信息。<br>
-
-我们可以进一步尝试不同的预训练模型。例如，可以下载[*RoBERTa-wwm-ext-large from HIT*](https://github.com/ymcui/Chinese-BERT-wwm)并将其转换为UER格式：
-```
-python3 scripts/convert_bert_from_huggingface_to_uer.py --input_model_path models/chinese_roberta_wwm_large_ext_pytorch/pytorch_model.bin \
-                                                        --output_model_path models/chinese_roberta_wwm_large_ext_pytorch/pytorch_model_uer.bin \
-                                                        --layers_num 24
-
-CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path models/chinese_roberta_wwm_large_ext_pytorch/pytorch_model_uer.bin \
-                                                      --vocab_path models/google_zh_vocab.txt \
-                                                      --config_path models/bert/large_config.json \
-                                                      --train_path datasets/smp2020-ewect/virus/train.tsv \
-                                                      --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
-                                                      --epochs_num 3 --batch_size 64 --folds_num 5 \
-                                                      --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
-*RoBERTa-wwm-ext-large* 的结果为80.3/66.8（准确率/F1值）。 <br>
-使用我们的预训练模型[*Reviews+BertEncoder(large)+MlmTarget*](https://share.weiyun.com/hn7kp9bs)的示例如下（更多详细信息，请参见模型仓库）：
-```
-CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier_cv.py --pretrained_model_path models/reviews_bert_large_mlm_model.bin \
-                                                      --vocab_path models/google_zh_vocab.txt \
-                                                      --config_path models/bert/large_config.json \
-                                                      --train_path datasets/smp2020-ewect/virus/train.tsv \
-                                                      --train_features_path datasets/smp2020-ewect/virus/train_features.npy \
-                                                      --folds_num 5 --epochs_num 3 --batch_size 64 --seed 17 \
-                                                      --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
-结果为81.3/68.4（准确率/F1值），与其他开源预训练模型相比，这一结果很具有竞争力。这个预训练模型使用的语料和SMP2020-EWECT（微博评论数据集）高度相似。 <br>
-有时大模型无法收敛，我们需要通过指定 *--seed* 尝试不同的随机种子。
-<br>
-
-除了分类外，UER-py还提供其他下游任务的脚本。例如，我们可以使用*run_ner.py*进行命名实体识别：
-```
-python3 run_ner.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
-                   --train_path datasets/msra_ner/train.tsv --dev_path datasets/msra_ner/dev.tsv --test_path datasets/msra_ner/test.tsv \
-                   --output_model_path models/ner_model.bin \
-                   --label2id_path datasets/msra_ner/label2id.json --epochs_num 5 --batch_size 16 \
-                   --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
-*--label2id_path* 指定用于命名实体识别的label2id文件的路径。
-
-然后我们使用ner模型进行推理：
-```
-python3 inference/run_ner_infer.py --load_model_path models/ner_model.bin --vocab_path models/google_zh_vocab.txt \
-                                   --test_path datasets/msra_ner/test_nolabel.tsv \
-                                   --prediction_path datasets/msra_ner/prediction.tsv \
-                                   --label2id_path datasets/msra_ner/label2id.json \
-                                   --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
-<br>
-
-我们可以使用 *run_cmrc.py* 进行机器阅读理解：
-```
-python3 run_cmrc.py --pretrained_model_path models/google_zh_model.bin --vocab_path models/google_zh_vocab.txt \
-                    --train_path datasets/cmrc2018/train.json --dev_path datasets/cmrc2018/dev.json \
-                    --output_model_path models/cmrc_model.bin \
-                    --epochs_num 2 --batch_size 8 --seq_length 512 \
-                    --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
-我们不指定 *--test_path*，因为CMRC2018数据集不提供测试集的标签。
-然后，我们使用cmrc模型进行推理：
-```
-python3 inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vocab_path models/google_zh_vocab.txt \
-                                    --test_path datasets/cmrc2018/test.json  \
-                                    --prediction_path datasets/cmrc2018/prediction.json --seq_length 512 \
-                                    --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
+更多的例子参见完整的 :arrow_right: [__快速上手__](https://github.com/dbiir/UER-py/wiki/快速上手) :arrow_left: 。
 
 <br/>
 
