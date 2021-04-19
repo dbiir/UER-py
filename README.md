@@ -126,7 +126,8 @@ We need to explicitly specify the number of labels by *--labels_num*. Douban boo
 
 <br>
 
-__More use cases can be found in complete :arrow_right: [__quickstart__](https://github.com/dbiir/UER-py/wiki/Quickstart) :arrow_left: .__
+__The above content provides basic ways of using UER-py to pre-process, pre-train, fine-tune, and do inference. More use cases can be found in complete :arrow_right: [__quickstart__](https://github.com/dbiir/UER-py/wiki/Quickstart) :arrow_left: . It is recommended that users read the complete quickstart in order to use the project reasonably.__
+
 
 <br/>
 
