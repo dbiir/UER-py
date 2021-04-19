@@ -125,7 +125,7 @@ python3 inference/run_classifier_infer.py --load_model_path models/finetuned_mod
 
 <br>
 
-更多的例子参见完整的 :arrow_right: [__快速上手__](https://github.com/dbiir/UER-py/wiki/快速上手) :arrow_left: 。
+__更多的例子参见完整的 :arrow_right: [__快速上手__](https://github.com/dbiir/UER-py/wiki/快速上手) :arrow_left: 。__
 
 <br/>
 
