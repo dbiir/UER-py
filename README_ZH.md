@@ -123,53 +123,6 @@ python3 inference/run_classifier_infer.py --load_model_path models/finetuned_mod
 *--prediction_path* 指定预测结果的文件；<br>
 注意到我们需要指定分类任务标签的个数 *--labels_num* ，这里是二分类任务。
 
-推荐使用CUDA_VISIBLE_DEVICES指定程序可见的GPU（如果不指定，则使用所有的GPU）。假设我们需要使用0号GPU和2号GPU：
-```
-python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
-                      --processes_num 8 --target bert
-
-CUDA_VISIBLE_DEVICES=0,2 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
-                                             --output_model_path models/book_review_model.bin  --world_size 2 --gpu_ranks 0 1 \
-                                             --total_steps 5000 --save_checkpoint_steps 1000 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert
-
-mv models/book_review_model.bin-5000 models/book_review_model.bin
-
-CUDA_VISIBLE_DEVICES=0,2 python3 run_classifier.py --pretrained_model_path models/book_review_model.bin --vocab_path models/google_zh_vocab.txt \
-                                                   --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
-                                                   --output_model_path models/classifier_model.bin \
-                                                   --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
-
-CUDA_VISIBLE_DEVICES=0,2 python3 inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt \
-                                                                   --test_path datasets/douban_book_review/test_nolabel.tsv \
-                                                                   --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
-                                                                   --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
-注意到我们在微调阶段使用 *--output_model_path* 指定微调后的模型的输出路径。预训练的实际batch size大小是 *--batch_size* 乘以 *--world_size*；分类的实际的batch size大小是 *--batch_size* 。
-<br>
-
-预测是否是下一个句子（NSP）是BERT的目标任务之一，但是，NSP任务不适合句子级别的评论，因为我们需要将句子切分为多个部分去构造文档。 UER-py可以让用户自由选择不同的目标任务。这里我们选择使用遮罩语言模型（MLM）作为目标任务。MLM目标任务对书籍评论语料可能是更合适的选择：
-
-```
-python3 preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path dataset.pt \
-                      --processes_num 8 --target mlm
-
-python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
-                    --output_model_path models/book_review_mlm_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
-                    --total_steps 5000 --save_checkpoint_steps 2500 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible --target mlm
-
-mv models/book_review_mlm_model.bin-5000 models/book_review_mlm_model.bin
-
-CUDA_VISIBLE_DEVICES=0,1 python3 run_classifier.py --pretrained_model_path models/book_review_mlm_model.bin --vocab_path models/google_zh_vocab.txt \
-                                                   --train_path datasets/douban_book_review/train.tsv --dev_path datasets/douban_book_review/dev.tsv --test_path datasets/douban_book_review/test.tsv \
-                                                   --epochs_num 3 --batch_size 32 --embedding word_pos_seg --encoder transformer --mask fully_visible
-```
-不同的预训练目标需要不同格式的语料。MLM目标对应的语料格式为一行一个文档：
-```
-doc1
-doc2
-doc3
-``` 
-注意到当预训练目标被改为MLM后，我们使用的预训练语料为 *corpora/book_review.txt* 而不是 *corpora/book_review_bert.txt*。
 <br>
 
 更多的例子参见完整的 :arrow_right: [__快速上手__](https://github.com/dbiir/UER-py/wiki/快速上手) :arrow_left: 。
