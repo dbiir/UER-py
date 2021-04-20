@@ -125,7 +125,7 @@ python3 inference/run_classifier_infer.py --load_model_path models/finetuned_mod
 
 <br>
 
-__以上我们给出了用UER-py进行预处理、预训练、微调、推理的基本使用方式。更多的例子参见完整的 :arrow_right: [__快速上手__](https://github.com/dbiir/UER-py/wiki/快速上手) :arrow_left: 。推荐用户完整阅读快速上手章节，以便能合理的使用本项目。__
+以上我们给出了用UER-py进行预处理、预训练、微调、推理的基本使用方式。更多的例子参见完整的 :arrow_right: [__快速上手__](https://github.com/dbiir/UER-py/wiki/快速上手) :arrow_left: 。完整的快速上手包含了全面的例子，覆盖了大多数预训练相关的使用场景。推荐用户完整阅读快速上手章节，以便能合理的使用本项目。
 
 <br/>
 

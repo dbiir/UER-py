@@ -192,9 +192,10 @@ def evaluate(args, dataset):
                 correct += 1
 
     print("Report precision, recall, and f1:")
-    p = correct / pred_entities_num
-    r = correct / gold_entities_num
-    f1 = 2 * p * r / (p + r)
+    eps = 1e-9
+    p = correct / pred_entities_num + eps
+    r = correct / gold_entities_num + eps
+    f1 = 2 * p * r / (p + r + eps)
     print("{:.3f}, {:.3f}, {:.3f}".format(p, r, f1))
 
     return f1

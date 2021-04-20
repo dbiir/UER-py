@@ -153,10 +153,11 @@ def main():
         acc += result[0] / args.folds_num
         f1 = []
         confusion = result[1]
+        eps = 1e-9
         for i in range(confusion.size()[0]):
-            p = confusion[i, i].item() / confusion[i, :].sum().item()
-            r = confusion[i, i].item() / confusion[:, i].sum().item()
-            f1.append(2 * p * r / (p + r))
+            p = confusion[i, i].item() / confusion[i, :].sum().item() + eps
+            r = confusion[i, i].item() / confusion[:, i].sum().item() + eps
+            f1.append(2 * p * r / (p + r + eps))
 
         marco_f1 += sum(f1) / len(f1) / args.folds_num
 

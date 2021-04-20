@@ -218,11 +218,11 @@ def evaluate(args, dataset, print_confusion_matrix=False):
         correct += torch.sum(pred == gold).item()
 
     if print_confusion_matrix:
-        eps = 1e-9
         print("Confusion matrix:")
         print(confusion)
         print("Report precision, recall, and f1:")
-        
+
+        eps = 1e-9
         for i in range(confusion.size()[0]):
             p = confusion[i, i].item() / (confusion[i, :].sum().item() + eps)
             r = confusion[i, i].item() / (confusion[:, i].sum().item() + eps)
