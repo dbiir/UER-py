@@ -623,7 +623,7 @@ class AlbertDataset(Dataset):
                     sentence = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line))
                     if len(sentence) > 0:
                         document.append(sentence)
-                    if pos >= end - 1:
+                    if pos >= end:
                         if len(document) >= 1:
                             instances = self.build_instances(document)
                             for instance in instances:
@@ -806,7 +806,7 @@ class BilmDataset(Dataset):
                     seg.append(PAD_ID)
                 pickle.dump((src, tgt_forward, tgt_backward, seg), dataset_writer)
 
-                if pos >= end - 1:
+                if pos >= end:
                     break
 
         dataset_writer.close()
@@ -1052,7 +1052,7 @@ class ClsDataset(Dataset):
                 else:
                     pass
 
-                if pos >= end - 1:
+                if pos >= end:
                     break
 
         f_write.close()
