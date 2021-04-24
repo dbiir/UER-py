@@ -30,7 +30,7 @@ UER-py有如下几方面优势:
 - __可复现__ UER-py已在许多数据集上进行了测试，与原始预训练模型实现（例如BERT、GPT、ELMo、T5）的表现相匹配
 - __多GPU模式__ UER-py支持CPU、单机单GPU、单机多GPU、多机多GPU训练模式。BERT类模型计算量大。多GPU模式让UER-py能够在大规模语料上进行预训练
 - __模块化__ UER-py使用解耦的模块化设计框架。框架分成Embedding、Encoder、Target三个部分。各个部分之间有着清晰的接口并且每个部分包括了丰富的模块。可以对不同模块进行组合，构建出性质不同的预训练模型
-- __高效__ UER-py优化了预处理，预训练和微调阶段的代码，从而大大提高了速度并减少了内存需求
+- __高效__ UER-py优化了预处理，预训练和微调阶段的代码，从而大大提高了速度并减少了对内存和磁盘空间的需求
 - __模型仓库__ 我们维护并持续发布中文预训练模型。用户可以根据具体任务的要求，从中选择合适的预训练模型使用
 - __SOTA结果__ UER-py支持全面的下游任务，包括文本分类、文本对分类、序列标注、阅读理解等，并提供了多个竞赛获胜解决方案
 - __预训练相关功能__ UER-py提供了丰富的预训练相关的功能和优化，包括特征抽取、近义词检索、预训练模型转换、模型集成、混合精度训练等
@@ -47,8 +47,8 @@ UER-py有如下几方面优势:
 * 如果使用混合精度，需要安装英伟达的apex
 * 如果涉及到TensorFlow模型的转换，需要安装TensorFlow
 * 如果在tokenizer中使用sentencepiece模型，需要安装[SentencePiece](https://github.com/google/sentencepiece)
-* 如果使用模型集成stacking，需要LightGBM和[BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
-* 如果使用全词遮罩（whole word masking）预训练，需要分词工具，例如[jieba](https://github.com/fxsjy/jieba)
+* 如果使用模型集成stacking，需要安装LightGBM和[BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
+* 如果使用全词遮罩（whole word masking）预训练，需要安装分词工具，例如[jieba](https://github.com/fxsjy/jieba)
 
 <br/>
 
@@ -95,8 +95,8 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_voca
 
 mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
-*--mask* 指定注意力网络中使用的遮罩类型。BERT使用双向语言模型，句子中的任意一个词可以看到所有词的信息，因此我们使用 *fully_visible* 遮罩类型。默认情况下，配置文件为 *models/bert/base_config.json* 。配置文件指定了模型的超参数。
-请注意，*pretrain.py*输出的模型会带有记录训练步数的后缀，这里我们可以删除后缀以方便使用。
+*--mask* 指定注意力网络中使用的遮罩类型。BERT使用双向语言模型，句子中的任意一个词可以看到所有词的信息，因此我们使用 *fully_visible* 遮罩类型。BERT模型的词向量层是word（token）、position、segment向量的求和，因此我们使用 *--embedding word_pos_seg* 。默认情况下，配置文件为 *models/bert/base_config.json* 。配置文件指定了模型的超参数。
+请注意，*pretrain.py*输出的模型会带有记录训练步数的后缀（*--total_steps*），这里我们可以删除后缀以方便使用。
 
 然后，我们在下游分类数据集上微调预训练模型，我们可以用 *google_zh_model.bin*:
 ```
@@ -181,7 +181,7 @@ UER-py/
 <br/>
 
 ## 竞赛解决方案
-UER-py已用于许多NLP竞赛的获奖解决方案中。在本节中，我们提供了一些使用UER-py在NLP竞赛中获得SOTA成绩的示例，例如CLUE。更多详细信息参见 :arrow_right: [__竞赛解决方案__](https://github.com/dbiir/UER-py/wiki/竞赛解决方案) :arrow_left: 。
+UER-py已用于许多NLP竞赛的获奖解决方案中。在本章节中，我们提供了一些使用UER-py在NLP竞赛中获得SOTA成绩的示例，例如CLUE。更多详细信息参见 :arrow_right: [__竞赛解决方案__](https://github.com/dbiir/UER-py/wiki/竞赛解决方案) :arrow_left: 。
 
 <br/>
 
