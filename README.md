@@ -54,7 +54,7 @@ UER-py has the following features:
 <br/>
 
 ## Quickstart
-This section uses several commonly-used examples to demonstrate how to use UER-py. More details are discussed in Instructions. We firstly use BERT model on [Douban book review classification dataset](https://embedding.github.io/evaluation/). We pre-train model on book review corpus and then fine-tune it on classification dataset. There are three input files: book review corpus, book review classification dataset, and vocabulary. All files are encoded in UTF-8 and included in this project.
+This section uses several commonly-used examples to demonstrate how to use UER-py. More details are discussed in Instructions section. We firstly use BERT model on [Douban book review classification dataset](https://embedding.github.io/evaluation/). We pre-train model on book review corpus and then fine-tune it on classification dataset. There are three input files: book review corpus, book review classification dataset, and vocabulary. All files are encoded in UTF-8 and included in this project.
 
 The format of the corpus for BERT is as follows (one sentence per line and documents are delimited by empty lines)：
 ```
@@ -120,7 +120,7 @@ python3 inference/run_classifier_infer.py --load_model_path models/finetuned_mod
                                           --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
                                           --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-*--test_path* specifies the path of the file to be predicted. <br>
+*--test_path* specifies the path of the file to be predicted. The file should contain text_a column. <br>
 *--prediction_path* specifies the path of the file with prediction results. <br>
 We need to explicitly specify the number of labels by *--labels_num*. Douban book review is a two-way classification dataset.
 

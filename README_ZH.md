@@ -53,7 +53,7 @@ UER-py有如下几方面优势:
 <br/>
 
 ## 快速上手
-这里我们通过常用的例子来简要说明如何使用UER-py，更多的细节请参考使用说明。我们首先使用BERT模型和[豆瓣书评分类数据集](https://embedding.github.io/evaluation/)。我们在书评语料上对模型进行预训练，然后在书评分类数据集上对其进行微调。这个过程有三个输入文件：书评语料，书评分类数据集和中文词典。这些文件均为UTF-8编码，并被包括在这个项目中。
+这里我们通过常用的例子来简要说明如何使用UER-py，更多的细节请参考使用说明章节。我们首先使用BERT模型和[豆瓣书评分类数据集](https://embedding.github.io/evaluation/)。我们在书评语料上对模型进行预训练，然后在书评分类数据集上对其进行微调。这个过程有三个输入文件：书评语料，书评分类数据集和中文词典。这些文件均为UTF-8编码，并被包括在这个项目中。
 
 BERT模型要求的预训练语料格式是一行一个句子，不同文档使用空行分隔，如下所示：
 
@@ -119,7 +119,7 @@ python3 inference/run_classifier_infer.py --load_model_path models/finetuned_mod
                                           --prediction_path datasets/douban_book_review/prediction.tsv --labels_num 2 \
                                           --embedding word_pos_seg --encoder transformer --mask fully_visible
 ```
-*--test_path* 指定需要预测的文件；<br>
+*--test_path* 指定需要预测的文件，文件需要包括text_a列；<br>
 *--prediction_path* 指定预测结果的文件；<br>
 注意到我们需要指定分类任务标签的个数 *--labels_num* ，这里是二分类任务。
 

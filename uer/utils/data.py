@@ -1003,11 +1003,11 @@ class ClsDataset(Dataset):
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
         set_seed(self.seed)
-        f_write = open("dataset-tmp-" + str(proc_id) + ".pt", "wb")
+        dataset_writer = open("dataset-tmp-" + str(proc_id) + ".pt", "wb")
         pos = 0
         with open(self.corpus_path, mode="r", encoding="utf-8") as f:
             while pos < start:
-                line = f.readline()
+                f.readline()
                 pos += 1
             while True:
                 line = f.readline()
@@ -1016,7 +1016,7 @@ class ClsDataset(Dataset):
                 line = line.strip().split('\t')
                 if len(line) == 2:
                     label = int(line[0])
-                    text = " ".join(line[1:])
+                    text = line[1]
                     src = [self.vocab.get(t) for t in self.tokenizer.tokenize(text)]
                     src = [self.vocab.get(CLS_TOKEN)] + src
                     tgt = label
@@ -1028,7 +1028,7 @@ class ClsDataset(Dataset):
                         while len(src) != self.seq_length:
                             src.append(PAD_ID)
                             seg.append(PAD_ID)
-                    pickle.dump((src, tgt, seg), f_write)
+                    pickle.dump((src, tgt, seg), dataset_writer)
                 elif len(line) == 3:  # For sentence pair input.
                     label = int(line[0])
                     text_a, text_b = line[1], line[2]
@@ -1048,14 +1048,14 @@ class ClsDataset(Dataset):
                         while len(src) != self.seq_length:
                             src.append(PAD_ID)
                             seg.append(PAD_ID)
-                    pickle.dump((src, tgt, seg), f_write)
+                    pickle.dump((src, tgt, seg), dataset_writer)
                 else:
                     pass
 
                 if pos >= end:
                     break
 
-        f_write.close()
+        dataset_writer.close()
 
 
 class ClsDataLoader(DataLoader):
