@@ -31,8 +31,8 @@ UER-py has the following features:
 - __Reproducibility__ UER-py has been tested on many datasets and should match the performances of the original pre-training model implementations such as BERT, GPT, ELMo, and T5.
 - __Multi-GPU__ UER-py supports CPU mode, single GPU mode, and distributed training mode. 
 - __Model modularity__ UER-py is divided into multiple components: embedding, encoder, and target. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules to construct pre-training models with as few restrictions as possible.
-- __Efficiency__ UER-py refines its pre-processing, pre-training, and fine-tuning stages, which largely improves speed and needs less memory and disk space.
-- __Model zoo__ With the help of UER-py, we pre-trained models with different corpora, encoders, and targets. Proper selection of pre-trained models is important to the downstream task performances.
+- __Efficiency__ UER-py refines its pre-processing, pre-training, and fine-tuning stages, which largely improves speed while requires less memory and disk space.
+- __Model zoo__ With the help of UER-py, we pre-trained models with different corpora, encoders, and targets. Proper selection of pre-trained models is important to the performances of downstream tasks.
 - __SOTA results__ UER-py supports comprehensive downstream tasks (e.g. classification and machine reading comprehension) and provides winning solutions of many NLP competitions.
 - __Abundant functions__ UER-py provides abundant functions related with pre-training, such as feature extractor and mixed precision training.
 
@@ -67,7 +67,7 @@ doc2-sent1
 doc3-sent1
 doc3-sent2
 ```
-The book review corpus is obtained from book review classification dataset. We remove labels and split a review into two parts from the middle (See *book_review_bert.txt* in *corpora* folder). 
+The book review corpus is obtained from book review classification dataset. We remove labels and split a review into two parts from the middle (see *book_review_bert.txt* in *corpora* folder). 
 
 The format of the classification dataset is as follows:
 ```
@@ -96,7 +96,7 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_voca
 mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
 *--mask* specifies the attention mask types. BERT uses bidirectional LM. The word token can attend to all tokens and therefore we use *fully_visible* mask type. The embedding layer of BERT is the sum of word (token), position, and segment embeddings and therefore *--embedding word_pos_seg* is specified. By default, *models/bert/base_config.json* is used as configuration file, which specifies the model hyper-parameters. 
-Notice that the model trained by *pretrain.py* is attacted with the suffix which records the training step (*--total_steps*). We could remove the suffix for ease of use.
+Notice that the model trained by *pretrain.py* is attached with the suffix which records the training step (*--total_steps*). We could remove the suffix for ease of use.
 
 
 Then we fine-tune pre-trained models on downstream classification dataset. We can use *google_zh_model.bin*:
@@ -132,7 +132,7 @@ The above content provides basic ways of using UER-py to pre-process, pre-train,
 <br/>
 
 ## Datasets
-We collected a range of :arrow_right: [__downstream datasets__](https://github.com/dbiir/UER-py/wiki/Datasets) :arrow_left: and converted them into format that UER can load directly.
+We collected a range of :arrow_right: [__downstream datasets__](https://github.com/dbiir/UER-py/wiki/Datasets) :arrow_left: and converted them into the format that UER can load directly.
 
 <br/>
 
