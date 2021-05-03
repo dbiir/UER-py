@@ -1,8 +1,6 @@
-# -*- encoding:utf-8 -*-
 """
 Build vocabulary with given tokenizer
 """
-
 import sys
 import os
 import argparse
@@ -10,7 +8,7 @@ import argparse
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
-from uer.utils.tokenizers import *
+from uer.utils import *
 from uer.utils.vocab import Vocab
 
 
@@ -21,7 +19,7 @@ if __name__ == '__main__':
     parser.add_argument("--vocab_path", required=True)
     parser.add_argument("--workers_num", type=int, default=1, help="The number of processes to build vocabulary.")
     parser.add_argument("--min_count", type=int, default=1, help="The minimum count of words retained in the vocabulary.")
-    # Tokenizer options.
+
     parser.add_argument("--tokenizer", choices=["char", "space"], default="space",
                         help="Specify the tokenizer." 
                              "Char tokenizer segments sentences into characters."
@@ -34,7 +32,7 @@ if __name__ == '__main__':
     args.vocab_path, args.spm_model_path = "./models/reserved_vocab.txt", None
 
     # Build tokenizer.
-    tokenizer = globals()[args.tokenizer.capitalize() + "Tokenizer"](args)
+    tokenizer = str2tokenizer[args.tokenizer](args)
 
     # Build and save vocabulary.
     vocab = Vocab()
