@@ -63,7 +63,7 @@ class MultiHeadedAttention(nn.Module):
             scores = scores + position_bias
         if self.with_scale:
             scores = scores / math.sqrt(float(per_head_size))
-        scores = scores + mask
+        scores = scores + mask.type_as(scores)
         probs = nn.Softmax(dim=-1)(scores)
         probs = self.dropout(probs)
         output = unshape(torch.matmul(probs, value))
