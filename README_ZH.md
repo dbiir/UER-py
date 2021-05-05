@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/dbiir/UER-py.svg?branch=master)](https://travis-ci.org/dbiir/UER-py)
 [![codebeat badge](https://codebeat.co/badges/f75fab90-6d00-44b4-bb42-d19067400243)](https://codebeat.co/projects/github-com-dbiir-uer-py-master)
 ![](https://img.shields.io/badge/license-MIT-000000.svg)
+[![arXiv](https://img.shields.io/badge/arXiv-1909.05658-b31b1b.svg)](https://arxiv.org/abs/1909.05658)
 
 <img src="logo.jpg" width="390" hegiht="390" align=left />
 
@@ -10,6 +11,8 @@
 
 
 <br>
+
+#### 完整文档：https://github.com/dbiir/UER-py/wiki/主页
 
 目录
 =================
@@ -87,7 +90,7 @@ python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path mo
 ```
 注意我们需要安装 ``six>=1.12.0``。
 
-预处理非常耗时，使用多个进程可以大大加快预处理速度（*--processes_num*）。 原始文本在预处理之后被转换为*pretrain.py*的可以接受的输入，*dataset.pt*。然后下载Google中文预训练模型[*google_zh_model.bin*](https://share.weiyun.com/A1C49VPb)（此文件为UER支持的格式，原始模型来自于[这里](https://github.com/google-research/bert)），并将其放在 *models* 文件夹中。接着加载Google中文预训练模型，在书评语料上对其进行增量预训练。预训练模型由词向量层，编码层和目标任务层组成。因此要构建预训练模型，我们应明确指定模型的词向量层（*--embedding*），编码器层（*--encoder* 和 *--mask*）和目标任务层（*--target*）的类型。假设我们有一台带有8个GPU的机器：
+预处理非常耗时，使用多个进程可以大大加快预处理速度（*--processes_num*）。默认的分词器为 *--tokenizer bert* 。原始文本在预处理之后被转换为*pretrain.py*的可以接受的输入，*dataset.pt*。然后下载Google中文预训练模型[*google_zh_model.bin*](https://share.weiyun.com/A1C49VPb)（此文件为UER支持的格式，原始模型来自于[这里](https://github.com/google-research/bert)），并将其放在 *models* 文件夹中。接着加载Google中文预训练模型，在书评语料上对其进行增量预训练。预训练模型由词向量层，编码层和目标任务层组成。因此要构建预训练模型，我们应明确指定模型的词向量层（*--embedding*），编码器层（*--encoder* 和 *--mask*）和目标任务层（*--target*）的类型。假设我们有一台带有8个GPU的机器：
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt --pretrained_model_path models/google_zh_model.bin \
                     --output_model_path models/book_review_model.bin  --world_size 8 --gpu_ranks 0 1 2 3 4 5 6 7 \
