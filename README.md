@@ -3,7 +3,7 @@
 ![](https://img.shields.io/badge/license-MIT-000000.svg)
 [![arXiv](https://img.shields.io/badge/arXiv-1909.05658-<color>.svg)](https://arxiv.org/abs/1909.05658)
 
-[**English**](https://github.com/dbiir/UER-py) | [**中文**](https://github.com/dbiir/UER-py/blob/master/README_ZH.md) &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; **See the Wiki for [Full Documentation](https://github.com/dbiir/UER-py/wiki)**
+[**English**](https://github.com/dbiir/UER-py) | [**中文**](https://github.com/dbiir/UER-py/blob/master/README_ZH.md) &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; See the Wiki for [Full Documentation](https://github.com/dbiir/UER-py/wiki)
 
 <img src="logo.jpg" width="390" hegiht="390" align=left />
 
