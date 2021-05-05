@@ -1,9 +1,11 @@
-[**English**](https://github.com/dbiir/UER-py) | [**中文**](https://github.com/dbiir/UER-py/blob/master/README_ZH.md)
-
 [![Build Status](https://travis-ci.org/dbiir/UER-py.svg?branch=master)](https://travis-ci.org/dbiir/UER-py)
 [![codebeat badge](https://codebeat.co/badges/f75fab90-6d00-44b4-bb42-d19067400243)](https://codebeat.co/projects/github-com-dbiir-uer-py-master)
 ![](https://img.shields.io/badge/license-MIT-000000.svg)
 [![arXiv](https://img.shields.io/badge/arXiv-1909.05658-b31b1b.svg)](https://arxiv.org/abs/1909.05658)
+
+[**English**](https://github.com/dbiir/UER-py) | [**中文**](https://github.com/dbiir/UER-py/blob/master/README_ZH.md)
+
+#### Full documentation: https://github.com/dbiir/UER-py/wiki
 
 <img src="logo.jpg" width="390" hegiht="390" align=left />
 
@@ -11,8 +13,6 @@ Pre-training has become an essential part for NLP tasks and has led to remarkabl
 
 
 <br/>
-
-#### Full documentation: https://github.com/dbiir/UER-py/wiki
 
 Table of Contents
 =================
