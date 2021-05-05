@@ -5,7 +5,7 @@
 
 [**English**](https://github.com/dbiir/UER-py) | [**中文**](https://github.com/dbiir/UER-py/blob/master/README_ZH.md)
 
-#### Full documentation: https://github.com/dbiir/UER-py/wiki
+#### See the Wiki for [Full Documentation](https://github.com/dbiir/UER-py/wiki)
 
 <img src="logo.jpg" width="390" hegiht="390" align=left />
 
