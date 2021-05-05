@@ -1,1 +1,0 @@
-{"emb_size": 512, "hidden_size": 512, "layers_num": 6, "kernel_size": 3, "block_size": 2, "dropout": 0.1}
