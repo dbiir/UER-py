@@ -1,4 +1,3 @@
-# -*- encoding:utf-8 -*-
 """
 Modify model's embedding and softmax layers according to the vocabulary.
 """

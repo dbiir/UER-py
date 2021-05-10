@@ -36,7 +36,7 @@ def main():
                         help="Path of the testset.")
     parser.add_argument("--test_features_path", default=None, type=str,
                         help="Path of the test features for stacking.")
-    parser.add_argument("--config_path", default="./models/bert_base_config.json", type=str,
+    parser.add_argument("--config_path", default="models/bert/base_config.json", type=str,
                         help="Path of the config file.")
 
     # Model options.
@@ -116,7 +116,6 @@ def main():
 
     test_features = np.array(test_features)
     test_features = np.mean(test_features, axis=0)
-    print(test_features.shape)
     np.save(args.test_features_path, test_features)
 
 
