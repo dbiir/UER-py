@@ -1,8 +1,15 @@
+import os
+import sys
 import numpy as np
 import tensorflow as tf
 import torch
 import argparse
 import collections
+
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, uer_dir)
+
+from scripts.convert_bert_from_original_tf_to_uer import tensors_to_transopse
 
 
 def assign_tf_var(tensor: np.ndarray, name: str):
@@ -15,11 +22,9 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--layers_num", type=int, default="12",
                         help=".")
-    parser.add_argument("--input_model_path", type=str, default="models/google_model.bin",
+    parser.add_argument("--input_model_path", type=str, default="models/google_zh_model.bin",
                         help=".")
-    parser.add_argument("--output_model_path",
-                        type=str,
-                        default="models/bert_base_chinese.ckpt",
+    parser.add_argument("--output_model_path",type=str,default="models/bert_base_chinese.ckpt",
                         help=".")
 
     args = parser.parse_args()
@@ -66,12 +71,7 @@ def main():
     output_model["cls/predictions/output_bias"] = input_model["target.mlm_linear_2.bias"]
 
     tf_vars = []
-    tensors_to_transopse = (
-        "dense/kernel",
-        "attention/self/query",
-        "attention/self/key",
-        "attention/self/value"
-    )
+
     for k, v in output_model.items():
         tf_name = k
         torch_tensor = v.cpu().numpy()

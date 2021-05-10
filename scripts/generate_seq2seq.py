@@ -6,7 +6,7 @@ import argparse
 import random
 
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(uer_dir)
+sys.path.insert(0, uer_dir)
 
 from uer.layers import *
 from uer.encoders import *

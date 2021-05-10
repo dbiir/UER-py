@@ -1,6 +1,12 @@
+import os
+import sys
 import torch
 import argparse
 import collections
+
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, uer_dir)
+
 from scripts.convert_bert_from_uer_to_huggingface import convert_bert_transformer_encoder_from_uer_to_huggingface
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)

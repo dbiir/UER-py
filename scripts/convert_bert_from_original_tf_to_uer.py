@@ -5,6 +5,14 @@ import collections
 from tensorflow.python import pywrap_tensorflow
 
 
+tensors_to_transopse = (
+        "dense/kernel",
+        "attention/self/query",
+        "attention/self/key",
+        "attention/self/value"
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -14,22 +22,14 @@ def main():
                         help=".")
     parser.add_argument("--output_model_path", default=None, type=str, required=True,
                         help="Path to the output PyTorch model.")
-    parser.add_argument("--target", default=None, type=str, required=False,
-                        help=".")
 
     args = parser.parse_args()
 
     reader = pywrap_tensorflow.NewCheckpointReader(args.input_model_path)
     var_to_shape_map = reader.get_variable_to_shape_map()
 
-    count = 0
     input_model = collections.OrderedDict()
-    tensors_to_transopse = (
-        "dense/kernel",
-        "attention/self/query",
-        "attention/self/key",
-        "attention/self/value"
-    )
+
     for key in var_to_shape_map:
         torch_tensor = reader.get_tensor(key)
 
@@ -42,7 +42,6 @@ def main():
             sess.run(zeros_var.initializer)
             torch_tensor = sess.run(tf.concat([sess.run(zeros_var), torch_tensor], 0))
         input_model[key] = torch.Tensor(torch_tensor)
-        count += 1
 
     output_model = collections.OrderedDict()
     output_model["embedding.word_embedding.weight"] = input_model["bert/embeddings/word_embeddings"]
@@ -71,15 +70,14 @@ def main():
 
     output_model["target.nsp_linear_1.weight"] = input_model["bert/pooler/dense/kernel"]
     output_model["target.nsp_linear_1.bias"] = input_model["bert/pooler/dense/bias"]
-    if args.target is None:
-        output_model["target.nsp_linear_2.weight"] = input_model["cls/seq_relationship/output_weights"]
-        output_model["target.nsp_linear_2.bias"] = input_model["cls/seq_relationship/output_bias"]
-        output_model["target.mlm_linear_1.weight"] = input_model["cls/predictions/transform/dense/kernel"]
-        output_model["target.mlm_linear_1.bias"] = input_model["cls/predictions/transform/dense/bias"]
-        output_model["target.layer_norm.gamma"] = input_model["cls/predictions/transform/LayerNorm/gamma"]
-        output_model["target.layer_norm.beta"] = input_model["cls/predictions/transform/LayerNorm/beta"]
-        output_model["target.mlm_linear_2.weight"] = input_model["bert/embeddings/word_embeddings"]
-        output_model["target.mlm_linear_2.bias"] = input_model["cls/predictions/output_bias"]
+    output_model["target.nsp_linear_2.weight"] = input_model["cls/seq_relationship/output_weights"]
+    output_model["target.nsp_linear_2.bias"] = input_model["cls/seq_relationship/output_bias"]
+    output_model["target.mlm_linear_1.weight"] = input_model["cls/predictions/transform/dense/kernel"]
+    output_model["target.mlm_linear_1.bias"] = input_model["cls/predictions/transform/dense/bias"]
+    output_model["target.layer_norm.gamma"] = input_model["cls/predictions/transform/LayerNorm/gamma"]
+    output_model["target.layer_norm.beta"] = input_model["cls/predictions/transform/LayerNorm/beta"]
+    output_model["target.mlm_linear_2.weight"] = input_model["bert/embeddings/word_embeddings"]
+    output_model["target.mlm_linear_2.bias"] = input_model["cls/predictions/output_bias"]
 
     torch.save(output_model, args.output_model_path)
 
