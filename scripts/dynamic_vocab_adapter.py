@@ -75,6 +75,6 @@ if __name__ == '__main__':
 
     old_model = torch.load(args.old_model_path, map_location="cpu")
 
-    new_model = adapter(old_model,old_vocab,new_vocab)
+    new_model = adapter(old_model, old_vocab, new_vocab)
     print("Output adapted new model.")
     torch.save(new_model, args.new_model_path)

@@ -109,7 +109,7 @@ if __name__ == '__main__':
             filtered_logits = top_k_top_p_filtering(next_token_logits, args.top_k, args.top_p)
             next_token = torch.multinomial(F.softmax(filtered_logits, dim=-1), num_samples=1)
         
-            src_tensor = torch.cat([src_tensor, next_token.view(1,1)], dim=1)
+            src_tensor = torch.cat([src_tensor, next_token.view(1, 1)], dim=1)
             seg_tensor = torch.cat([seg_tensor, torch.tensor([[1]])], dim=1)
 
         f.write(line + "\n")

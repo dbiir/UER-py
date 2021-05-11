@@ -111,7 +111,7 @@ def main():
         "feature_fraction": (0.001, 0.5),
         "lambda_l1": (0, 10),
         "lambda_l2": (0, 10),
-        "max_depth":(3, 200),
+        "max_depth":(3, 200)
     }
 
     lgb_bo = BayesianOptimization(lgb_cv, bounds)
@@ -123,4 +123,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

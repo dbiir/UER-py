@@ -59,9 +59,9 @@ def main():
     model = lgb.train(params, lgb_train, valid_sets=lgb_eval, verbose_eval=50)
 
     test_pred = model.predict(test_features)
-    test_pred = np.argmax(test_pred,axis=1)
+    test_pred = np.argmax(test_pred, axis=1)
 
-    confusion = np.zeros((args.labels_num,args.labels_num))
+    confusion = np.zeros((args.labels_num, args.labels_num))
 
     for i in range(len(test_pred)):
         confusion[test_pred[i], test_labels[i]] += 1
@@ -85,4 +85,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
