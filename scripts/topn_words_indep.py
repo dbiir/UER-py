@@ -52,5 +52,5 @@ if __name__ == '__main__':
             sims = torch.nn.functional.cosine_similarity(target_embedding.view(1, -1), embedding)
             sorted_id = torch.argsort(sims, descending=True)
             for i in sorted_id[1: args.topn+1]:
-                print(vocab.i2w[i].strip()+ "\t" + str(sims[i].item()))
+                print(vocab.i2w[i].strip() + "\t" + str(sims[i].item()))
             print()

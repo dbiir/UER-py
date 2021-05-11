@@ -73,8 +73,8 @@ def main():
     print("Report precision, recall, and f1:")
     eps = 1e-9
     for i in range(args.labels_num):
-        p = confusion[i,i].item() / (confusion[i,:].sum().item() + eps)
-        r = confusion[i,i].item() / (confusion[:,i].sum().item() + eps)
+        p = confusion[i, i].item() / (confusion[i, :].sum().item() + eps)
+        r = confusion[i, i].item() / (confusion[:, i].sum().item() + eps)
         f1 = 2 * p * r / (p + r + eps)
         print("Label {}: {:.3f}, {:.3f}, {:.3f}".format(i, p, r, f1))
         macro_f1.append(f1)

@@ -43,7 +43,7 @@ if __name__ == '__main__':
     embedding = pretrained_model["embedding.word_embedding.weight"]
 
     with open(args.word_embedding_path, mode="w", encoding="utf-8") as f:
-        head=str(list(embedding.size())[0])+" "+str(list(embedding.size())[1])+"\n"
+        head=str(list(embedding.size())[0]) + " " + str(list(embedding.size())[1]) + "\n"
         f.write(head)
 
         for i in range(len(vocab.i2w)):

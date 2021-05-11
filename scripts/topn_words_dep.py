@@ -112,7 +112,7 @@ if __name__ == '__main__':
             output = output.cpu().data.numpy()
             output = output.reshape([args.seq_length, -1])
             target_embedding = output[position, :]
-            target_embedding = target_embedding.reshape(1,-1).astype("float")
+            target_embedding = target_embedding.reshape(1, -1).astype("float")
 
             cand_words_batch, cand_embeddings = [], []
             for i, word in enumerate(cand_vocab.i2w):

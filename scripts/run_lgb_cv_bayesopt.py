@@ -76,10 +76,10 @@ def main():
             lgb_train = lgb.Dataset(x_train, y_train) 
             lgb_eval = lgb.Dataset(x_val, y_val, reference=lgb_train)  
 
-            model = lgb.train(param, lgb_train,valid_sets=lgb_eval, verbose_eval=0)
+            model = lgb.train(param, lgb_train, valid_sets=lgb_eval, verbose_eval=0)
 
             pred = model.predict(x_val)
-            val_pred = np.argmax(pred,axis=1)
+            val_pred = np.argmax(pred, axis=1)
 
             confusion = np.zeros((args.labels_num, args.labels_num))
 
@@ -90,8 +90,8 @@ def main():
             marco_f1 = []
             eps = 1e-9
             for i in range(args.labels_num):
-                p = confusion[i,i].item() / (confusion[i,:].sum().item() + eps)
-                r = confusion[i,i].item() / (confusion[:,i].sum().item() + eps)
+                p = confusion[i, i].item() / (confusion[i, :].sum().item() + eps)
+                r = confusion[i, i].item() / (confusion[:, i].sum().item() + eps)
                 f1 = 2 * p * r / (p + r + eps)
                 marco_f1.append(f1)
             scores.append(np.mean(marco_f1))
@@ -111,7 +111,7 @@ def main():
         "feature_fraction": (0.001, 0.5),
         "lambda_l1": (0, 10),
         "lambda_l2": (0, 10),
-        "max_depth":(3,200),
+        "max_depth":(3, 200),
     }
 
     lgb_bo = BayesianOptimization(lgb_cv, bounds)
