@@ -16,7 +16,7 @@ tensors_to_transopse = (
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--layers_num", type=int, default="12",
+    parser.add_argument("--layers_num", type=int, default=12,
                         help=".")
     parser.add_argument("--input_model_path", default="models/bert_base_chinese/bert_model.ckpt", type=str,
                         help=".")
@@ -38,7 +38,7 @@ def main():
         if key == "bert/embeddings/token_type_embeddings":
             col_dim = torch_tensor.shape[1]
             sess = tf.Session()
-            zeros_var = tf.Variable(tf.zeros([1, col_dim], dtype=tf.float32), name='zeros_var')
+            zeros_var = tf.Variable(tf.zeros([1, col_dim], dtype=tf.float32), name="zeros_var")
             sess.run(zeros_var.initializer)
             torch_tensor = sess.run(tf.concat([sess.run(zeros_var), torch_tensor], 0))
         input_model[key] = torch.Tensor(torch_tensor)
