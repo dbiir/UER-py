@@ -1,7 +1,6 @@
 import torch
 import argparse
 import collections
-import re
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("--input_model_path", type=str, default="pytorch_model.bin",
@@ -20,9 +19,10 @@ output_model = collections.OrderedDict()
 
 output_model["transformer.wte.weight"] = input_model["embedding.word_embedding.weight"]
 output_model["transformer.wpe.weight"] = input_model["embedding.position_embedding.weight"]
+max_position = input_model["embedding.position_embedding.weight"].shape[0]
 
 for i in range(args.layers_num):
-    output_model["transformer.h." + str(i) + ".attn.bias"] = torch.tril(torch.ones(1024, 1024)).view(1, 1, 1024, 1024)
+    output_model["transformer.h." + str(i) + ".attn.bias"] = torch.tril(torch.ones(max_position, max_position)).view(1, 1, max_position, max_position)
     weight = []
     bias = []
     for j in range(3):

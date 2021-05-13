@@ -1,7 +1,6 @@
 import torch
 import argparse
 import collections
-import re
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("--input_model_path", type=str, default="pytorch_model.bin",
@@ -16,15 +15,15 @@ path = args.input_model_path
 input_model = torch.load(args.input_model_path)
 
 output_model = collections.OrderedDict()
-
+emb_size = input_model["transformer.h." + str(0) + ".attn.c_attn.weight"].shape[0]
 
 output_model["embedding.word_embedding.weight"] = input_model["transformer.wte.weight"]
 output_model["embedding.position_embedding.weight"] = input_model["transformer.wpe.weight"]
 
 for i in range(args.layers_num):
     for j in range(3):
-        output_model["encoder.transformer." + str(i) + ".self_attn.linear_layers." + str(j) + ".weight"] = input_model["transformer.h." + str(i) + ".attn.c_attn.weight"].t()[j*768:(j+1)*768,:]
-        output_model["encoder.transformer." + str(i) + ".self_attn.linear_layers." + str(j) + ".bias"] = input_model["transformer.h." + str(i) + ".attn.c_attn.bias"][j*768:(j+1)*768]
+        output_model["encoder.transformer." + str(i) + ".self_attn.linear_layers." + str(j) + ".weight"] = input_model["transformer.h." + str(i) + ".attn.c_attn.weight"].t()[j*emb_size:(j+1)*emb_size, :]
+        output_model["encoder.transformer." + str(i) + ".self_attn.linear_layers." + str(j) + ".bias"] = input_model["transformer.h." + str(i) + ".attn.c_attn.bias"][j*emb_size:(j+1)*emb_size]
 
     output_model["encoder.transformer." + str(i) + ".self_attn.final_linear.weight"] = input_model["transformer.h." + str(i) + ".attn.c_proj.weight"].t()
     output_model["encoder.transformer." + str(i) + ".self_attn.final_linear.bias"] = input_model["transformer.h." + str(i) + ".attn.c_proj.bias"]
@@ -44,6 +43,5 @@ for i in range(args.layers_num):
 output_model["encoder.layer_norm.gamma"] = input_model["transformer.ln_f.weight"]
 output_model["encoder.layer_norm.beta"] = input_model["transformer.ln_f.bias"]
 output_model["target.output_layer.weight"] = input_model["lm_head.weight"]
-output_model["target.output_layer.bias"] = torch.zeros([21128])
 
 torch.save(output_model, args.output_model_path)
