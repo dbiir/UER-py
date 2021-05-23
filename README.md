@@ -106,13 +106,13 @@ Notice that the model trained by *pretrain.py* is attacted with the suffix which
 
 Then we fine-tune the pre-trained model on downstream classification dataset. We use [*book_review_model.bin*](https://share.weiyun.com/xOFsYxZA), which is the output of *pretrain.py*:
 ```
-python3 run_classifier.py --pretrained_model_path models/book_review_model.bin \
-                          --vocab_path models/google_zh_vocab.txt \
-                          --train_path datasets/douban_book_review/train.tsv \
-                          --dev_path datasets/douban_book_review/dev.tsv \
-                          --test_path datasets/douban_book_review/test.tsv \
-                          --epochs_num 3 --batch_size 32 \
-                          --embedding word_pos_seg --encoder transformer --mask fully_visible
+python3 finetune/run_classifier.py --pretrained_model_path models/book_review_model.bin \
+                                   --vocab_path models/google_zh_vocab.txt \
+                                   --train_path datasets/douban_book_review/train.tsv \
+                                   --dev_path datasets/douban_book_review/dev.tsv \
+                                   --test_path datasets/douban_book_review/test.tsv \
+                                   --epochs_num 3 --batch_size 32 \
+                                   --embedding word_pos_seg --encoder transformer --mask fully_visible
 ``` 
 The result of *book_review_model.bin* on test set is 88.2. It is also noticeable that we don't need to specify the target in fine-tuning stage. Pre-training target is replaced with task-specific target.
 
@@ -165,21 +165,14 @@ UER-py/
     |--datasets/ # contains downstream tasks
     |--models/ # contains pre-trained models, vocabularies, and configuration files
     |--scripts/ # contains useful scripts for pre-training models
+    |--finetune/ # contains fine-tuning scripts for downstream tasks
     |--inference/ # contains inference scripts for downstream tasks
     |
     |--preprocess.py
     |--pretrain.py
-    |--run_classifier.py
-    |--run_classifier_cv.py # classification with cross validation
-    |--run_classifier_grid.py # classification with grid search
-    |--run_classifier_mt.py # multi-task classification
-    |--run_cmrc.py
-    |--run_ner.py
-    |--run_dbqa.py
-    |--run_c3.py
-    |--run_chid.py
     |--README.md
     |--README_ZH.md
+    |--requirements.txt
 
 ```
 

@@ -1,12 +1,18 @@
 """
 This script provides an exmaple to wrap UER-py for Chinese machine reading comprehension.
 """
+import sys
+import os
 import re
 import argparse
 import json
 import random
 import torch
 import torch.nn as nn
+
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
+
 from uer.layers import *
 from uer.encoders import *
 from uer.utils.constants import *
@@ -16,7 +22,7 @@ from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
 from uer.opts import finetune_opts
-from run_classifier import build_optimizer, load_or_initialize_parameters
+from finetune.run_classifier import build_optimizer, load_or_initialize_parameters
 
 
 class MachineReadingComprehension(nn.Module):

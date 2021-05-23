@@ -15,7 +15,7 @@ from uer.utils.constants import *
 from uer.utils.tokenizers import * 
 from uer.model_loader import load_model
 from uer.opts import infer_opts
-from run_cmrc import *
+from finetune.run_cmrc import *
 
 
 def main():

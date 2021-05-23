@@ -1,10 +1,16 @@
 """
 This script provides an exmaple to wrap UER-py for classification.
 """
+import sys
+import os
 import random
 import argparse
 import torch
 import torch.nn as nn
+
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
+
 from uer.layers import *
 from uer.encoders import *
 from uer.utils.vocab import Vocab

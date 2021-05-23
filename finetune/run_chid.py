@@ -1,10 +1,16 @@
 """
 This script provides an example to wrap UER-py for ChID (a multiple choice dataset).
 """
+import sys
+import os
 import argparse
 import json
 import random
 import torch
+
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
+
 from uer.layers import *
 from uer.encoders import *
 from uer.utils.constants import *
@@ -14,8 +20,8 @@ from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
 from uer.opts import finetune_opts
-from run_c3 import MultipleChoice
-from run_classifier import build_optimizer, load_or_initialize_parameters, train_model, batch_loader, evaluate
+from finetune.run_c3 import MultipleChoice
+from finetune.run_classifier import build_optimizer, load_or_initialize_parameters, train_model, batch_loader, evaluate
 
 
 def tokenize_chid(text):

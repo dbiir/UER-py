@@ -1,10 +1,16 @@
 """
 This script provides an exmaple to wrap UER-py for classification with cross validation.
 """
+import sys
+import os
 import random
 import argparse
 import torch.nn as nn
 import numpy as np
+
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
+
 from uer.layers import *
 from uer.encoders import *
 from uer.utils.constants import *
@@ -14,7 +20,7 @@ from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
 from uer.opts import *
-from run_classifier import *
+from finetune.run_classifier import *
 
 
 def main():

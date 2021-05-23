@@ -15,8 +15,8 @@ from uer.utils import *
 from uer.utils.config import load_hyperparam
 from uer.model_loader import load_model
 from uer.opts import infer_opts
-from run_classifier import batch_loader
-from run_c3 import MultipleChoice, read_dataset
+from finetune.run_classifier import batch_loader
+from finetune.run_c3 import MultipleChoice, read_dataset
 
 
 def main():

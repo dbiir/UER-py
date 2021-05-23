@@ -17,9 +17,9 @@ from uer.utils.tokenizers import *
 from uer.utils.config import load_hyperparam
 from uer.model_loader import load_model
 from uer.opts import infer_opts
-from run_classifier import batch_loader
-from run_c3 import MultipleChoice
-from run_chid import read_dataset
+from finetune.run_classifier import batch_loader
+from finetune.run_c3 import MultipleChoice
+from finetune.run_chid import read_dataset
 
 
 def postprocess_chid_predictions(results):

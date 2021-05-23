@@ -17,7 +17,7 @@ from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_loader import load_model
 from uer.opts import infer_opts
-from run_classifier import Classifier
+from finetune.run_classifier import Classifier
 
 
 def batch_loader(batch_size, src, seg):

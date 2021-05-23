@@ -1,11 +1,17 @@
 """
 This script provides an exmaple to wrap UER-py for classification with grid search.
 """
+import sys
+import os
 import torch
 import random
 import argparse
 from itertools import product
-from run_classifier import *
+
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
+
+from finetune.run_classifier import *
 
 
 def main():

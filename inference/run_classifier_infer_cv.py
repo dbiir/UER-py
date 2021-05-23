@@ -18,7 +18,7 @@ from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_loader import load_model
 from uer.opts import model_opts
-from run_classifier import Classifier
+from finetune.run_classifier import Classifier
 from inference.run_classifier_infer import *
 
 

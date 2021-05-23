@@ -104,13 +104,13 @@ mv models/book_review_model.bin-5000 models/book_review_model.bin
 
 然后，我们在下游分类数据集上微调预训练模型，我们使用 *pretrain.py* 的输出[*book_review_model.bin*](https://share.weiyun.com/xOFsYxZA)：
 ```
-python3 run_classifier.py --pretrained_model_path models/book_review_model.bin \
-                          --vocab_path models/google_zh_vocab.txt \
-                          --train_path datasets/douban_book_review/train.tsv \
-                          --dev_path datasets/douban_book_review/dev.tsv \
-                          --test_path datasets/douban_book_review/test.tsv \
-                          --epochs_num 3 --batch_size 32 \
-                          --embedding word_pos_seg --encoder transformer --mask fully_visible
+python3 finetune/run_classifier.py --pretrained_model_path models/book_review_model.bin \
+                                   --vocab_path models/google_zh_vocab.txt \
+                                   --train_path datasets/douban_book_review/train.tsv \
+                                   --dev_path datasets/douban_book_review/dev.tsv \
+                                   --test_path datasets/douban_book_review/test.tsv \
+                                   --epochs_num 3 --batch_size 32 \
+                                   --embedding word_pos_seg --encoder transformer --mask fully_visible
 ``` 
 *book_review_model.bin* 在书评分类任务测试集上的准确率为88.2。值得注意的是，我们不需要在微调阶段指定目标任务。预训练模型的目标任务已被替换为特定下游任务需要的目标任务。
 

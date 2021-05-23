@@ -1,11 +1,16 @@
 """
 This script provides an exmaple to wrap UER-py for multi-task classification.
 """
+import sys
 import os
 import random
 import argparse
 import torch
 import torch.nn as nn
+
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
+
 from uer.layers import *
 from uer.encoders import *
 from uer.utils.constants import *
@@ -15,7 +20,7 @@ from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
 from uer.opts import *
-from run_classifier import count_labels_num, batch_loader, build_optimizer, load_or_initialize_parameters, train_model, read_dataset, evaluate
+from finetune.run_classifier import count_labels_num, batch_loader, build_optimizer, load_or_initialize_parameters, train_model, read_dataset, evaluate
 
 
 class MultitaskClassifier(nn.Module):

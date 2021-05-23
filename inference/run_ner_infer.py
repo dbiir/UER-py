@@ -16,7 +16,7 @@ from uer.utils.constants import *
 from uer.utils.tokenizers import *
 from uer.model_loader import load_model
 from uer.opts import infer_opts
-from run_ner import NerTagger
+from finetune.run_ner import NerTagger
 
 
 def read_dataset(args, path):
