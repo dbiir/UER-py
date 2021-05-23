@@ -162,21 +162,15 @@ UER-py/
     |--datasets/ # 下游任务数据集存放文件夹
     |--models/ # 模型、词典、配置文件存放文件夹
     |--scripts/ # 实用脚本存放文件夹
+    |--finetune/ # 微调脚本存放文件夹
     |--inference/ # 前向推理脚本存放文件夹
     |
     |--preprocess.py
     |--pretrain.py
-    |--run_classifier.py
-    |--run_classifier_cv.py # 支持交叉验证的分类脚本
-    |--run_classifier_grid.py # 支持网格搜索的分类脚本
-    |--run_classifier_mt.py # 支持多任务的分类脚本
-    |--run_cmrc.py
-    |--run_ner.py
-    |--run_dbqa.py
-    |--run_c3.py
-    |--run_chid.py
     |--README.md
     |--README_ZH.md
+    |--requirements.txt
+    |--logo.jpg
 
 ```
 

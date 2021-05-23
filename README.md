@@ -173,6 +173,7 @@ UER-py/
     |--README.md
     |--README_ZH.md
     |--requirements.txt
+    |--logo.jpg
 
 ```
 
