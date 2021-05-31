@@ -13,7 +13,7 @@ parser.add_argument("--layers_num", type=int, default=6, help=".")
 args = parser.parse_args()
 path = args.input_model_path
 
-input_model = torch.load(args.input_model_path, map_location='cpu')
+input_model = torch.load(args.input_model_path, map_location="cpu")
 
 output_model = collections.OrderedDict()
 
