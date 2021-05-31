@@ -195,6 +195,7 @@ class Dataset(object):
         self.span_masking = args.span_masking
         self.span_geo_prob = args.span_geo_prob
         self.span_max_length = args.span_max_length
+        self.sentence_select_strategy = args.sentence_select_strategy
         self.docs_buffer_size = args.docs_buffer_size
         self.dup_factor = args.dup_factor
 
