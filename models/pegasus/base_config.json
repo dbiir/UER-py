@@ -1,0 +1,11 @@
+{
+  "emb_size": 768,
+  "feedforward_size": 3072,
+  "hidden_size": 768,
+  "hidden_act": "relu",
+  "heads_num": 12,
+  "layers_num": 12,
+  "max_seq_length": 1024,
+  "dropout": 0.1,
+  "share_embedding": true
+}

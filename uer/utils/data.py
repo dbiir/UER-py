@@ -999,6 +999,68 @@ class T5DataLoader(DataLoader):
                 torch.LongTensor(seg)
 
 
+class PegasusDataset(BertDataset):
+
+    def make_instance(self, src, tgt):
+        src = [self.vocab.get(CLS_TOKEN)] + src + [self.vocab.get(SEP_TOKEN)]
+        tgt = [self.vocab.get(CLS_TOKEN)] + tgt + [self.vocab.get(SEP_TOKEN)]
+        seg = ([1] * len(src) + [PAD_ID] * (self.seq_length - len(src)))
+        while len(src) != self.seq_length:
+            src.append(PAD_ID)
+        while len(tgt) != self.seq_length:
+            tgt.append(PAD_ID)
+        instance = (src, tgt, seg)
+        return instance
+
+    def create_ins_from_doc(self, all_documents, document_index):
+        sentence_select_strategy = self.sentence_select_strategy
+        instances = []
+        mask_seq_list = []
+        src = []
+        tgt = []
+        i = 0
+        document = all_documents[document_index]
+        target_seq_length = self.seq_length - 2
+        mask_seq_length = int(round(len(document) * 0.3, 0))
+        if sentence_select_strategy == "random":
+            mask_seq_list = random.sample(range(0, len(document) - 1), mask_seq_length)
+        elif sentence_select_strategy == "lead":
+            mask_seq_list = list(range(0, mask_seq_length))
+        else:
+            pass
+
+        while i < len(document):
+            segment = document[i]
+            if len(segment) >= target_seq_length:
+                i += 1
+                pass
+            if i in mask_seq_list and len(tgt) + len(segment) < target_seq_length:
+                tgt = tgt + segment
+                src = src + [self.vocab.get(MASK_TOKEN)]
+            elif i not in mask_seq_list and len(src) + len(segment) < target_seq_length:
+                src = src + segment
+            else:
+                if len(tgt) > 0 and len(src) > 0:
+                    instance = self.make_instance(src, tgt)
+                    instances.append(instance)
+                if i in mask_seq_list:
+                    tgt = segment
+                    src = [self.vocab.get(MASK_TOKEN)]
+                else:
+                    src = segment
+                    tgt = []
+            i += 1
+
+        if len(tgt) > 0 and len(src) > 0:
+            instance = self.make_instance(src, tgt)
+            instances.append(instance)
+        return instances
+
+
+class PegasusDataLoader(Seq2seqDataLoader):
+    pass
+
+
 class ClsDataset(Dataset):
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
