@@ -1002,7 +1002,7 @@ class T5DataLoader(DataLoader):
 
 class PegasusDataset(BertDataset):
 
-    def make_instance(self, src, tgt):
+    def get_instance(self, src, tgt):
         src = [self.vocab.get(CLS_TOKEN)] + src + [self.vocab.get(SEP_TOKEN)]
         tgt = [self.vocab.get(CLS_TOKEN)] + tgt + [self.vocab.get(SEP_TOKEN)]
         seg = ([1] * len(src) + [PAD_ID] * (self.seq_length - len(src)))
@@ -1042,7 +1042,7 @@ class PegasusDataset(BertDataset):
                 src = src + segment
             else:
                 if len(tgt) > 0 and len(src) > 0:
-                    instance = self.make_instance(src, tgt)
+                    instance = self.get_instance(src, tgt)
                     instances.append(instance)
                 if i in mask_seq_list:
                     tgt = segment
@@ -1053,7 +1053,7 @@ class PegasusDataset(BertDataset):
             i += 1
 
         if len(tgt) > 0 and len(src) > 0:
-            instance = self.make_instance(src, tgt)
+            instance = self.get_instance(src, tgt)
             instances.append(instance)
         return instances
 
