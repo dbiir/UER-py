@@ -59,8 +59,8 @@ def main():
                         help="Hyperparameter of geometric distribution for span masking.")
     parser.add_argument("--span_max_length", type=int, default=10,
                         help="Max length for span masking.")
-    parser.add_argument("--select_sentences_strategy", choices=["lead", "random", "rouge"], default="lead",
-                        help="Sentences select strategies for GSG task.")
+    parser.add_argument("--sentence_selection_strategy", choices=["lead", "random", "rouge"], default="lead",
+                        help="Sentences select strategies for gap-sentences generation task.")
 
     args = parser.parse_args()
 

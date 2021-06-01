@@ -1002,7 +1002,7 @@ class T5DataLoader(DataLoader):
 class GsgDataset(BertDataset):
     def __init__(self, args, vocab, tokenizer):
         super(GsgDataset, self).__init__(args, vocab, tokenizer)
-        self.select_sentences_strategy = args.select_sentences_strategy
+        self.sentence_selection_strategy = args.sentence_selection_strategy
 
     def create_single_instance(self, src, tgt):
         src = [self.vocab.get(CLS_TOKEN)] + src + [self.vocab.get(SEP_TOKEN)]
@@ -1016,7 +1016,7 @@ class GsgDataset(BertDataset):
         return instance
 
     def create_ins_from_doc(self, all_documents, document_index):
-        select_sentences_strategy = self.select_sentences_strategy
+        sentence_selection_strategy = self.sentence_selection_strategy
         instances = []
         mask_seq_list = []
         temp_document = []
@@ -1030,9 +1030,9 @@ class GsgDataset(BertDataset):
                 temp_document.append(segment)
         document = temp_document
         mask_seq_num = int(round(len(document) * 0.3, 0))
-        if select_sentences_strategy == "random":
+        if sentence_selection_strategy == "random":
             mask_seq_list = random.sample(range(0, len(document) - 1), mask_seq_num)
-        elif select_sentences_strategy == "lead":
+        elif sentence_selection_strategy == "lead":
             mask_seq_list = list(range(0, mask_seq_num))
         else:
             from rouge import Rouge
@@ -1057,7 +1057,7 @@ class GsgDataset(BertDataset):
 
         while i < len(document):
             segment = document[i]
-            if i in mask_seq_list and len(tgt) + len(segment) < target_seq_length:
+            if i in mask_seq_list and len(tgt) + len(segment) < target_seq_length and len(src) + 1 < target_seq_length:
                 tgt = tgt + segment
                 src = src + [self.vocab.get(MASK_TOKEN)]
             elif i not in mask_seq_list and len(src) + len(segment) < target_seq_length:
