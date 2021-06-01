@@ -999,6 +999,91 @@ class T5DataLoader(DataLoader):
                 torch.LongTensor(seg)
 
 
+class GsgDataset(BertDataset):
+    def __init__(self, args, vocab, tokenizer):
+        super(GsgDataset, self).__init__(args, vocab, tokenizer)
+        self.sentence_selection_strategy = args.sentence_selection_strategy
+
+    def create_single_instance(self, src, tgt):
+        src = [self.vocab.get(CLS_TOKEN)] + src + [self.vocab.get(SEP_TOKEN)]
+        tgt = [self.vocab.get(CLS_TOKEN)] + tgt + [self.vocab.get(SEP_TOKEN)]
+        seg = ([1] * len(src) + [PAD_ID] * (self.seq_length - len(src)))
+        while len(src) != self.seq_length:
+            src.append(PAD_ID)
+        while len(tgt) != self.seq_length:
+            tgt.append(PAD_ID)
+        instance = (src, tgt, seg)
+        return instance
+
+    def create_ins_from_doc(self, all_documents, document_index):
+        sentence_selection_strategy = self.sentence_selection_strategy
+        instances = []
+        mask_seq_list = []
+        tmp_document = []
+        src = []
+        tgt = []
+        i = 0
+        document = all_documents[document_index]
+        target_seq_length = self.seq_length - 2
+        for segment in document:
+            if len(segment) < target_seq_length:
+                tmp_document.append(segment)
+        document = tmp_document
+        mask_seq_num = int(round(len(document) * 0.3, 0))
+        if sentence_selection_strategy == "random":
+            mask_seq_list = random.sample(range(0, len(document) - 1), mask_seq_num)
+        elif sentence_selection_strategy == "lead":
+            mask_seq_list = list(range(0, mask_seq_num))
+        else:
+            from rouge import Rouge
+            rouge_score_list = []
+            rouge = Rouge()
+            for _ in range(mask_seq_num):
+                for k in range(len(document)):
+                    rest_sentences = ""
+                    mask_sentences = ""
+                    if k not in mask_seq_list:
+                        for segment_id, segment in enumerate(document):
+                            if k == segment_id or segment_id in mask_seq_list:
+                                mask_sentences = mask_sentences + " ".join(self.tokenizer.convert_ids_to_tokens(segment)) + " "
+                            else:
+                                rest_sentences = rest_sentences + " ".join(self.tokenizer.convert_ids_to_tokens(segment)) + " "
+                        rouge_score_list.append(rouge.get_scores(mask_sentences, rest_sentences)[0]["rouge-1"]["f"])
+                    else:
+                        rouge_score_list.append(0)
+                max_index = rouge_score_list.index(max(rouge_score_list))
+                mask_seq_list.append(max_index)
+                rouge_score_list = []
+
+        while i < len(document):
+            segment = document[i]
+            if i in mask_seq_list and len(tgt) + len(segment) < target_seq_length and len(src) + 1 < target_seq_length:
+                tgt = tgt + segment
+                src = src + [self.vocab.get(MASK_TOKEN)]
+            elif i not in mask_seq_list and len(src) + len(segment) < target_seq_length:
+                src = src + segment
+            else:
+                if len(tgt) > 0 and len(src) > 0:
+                    instance = self.create_single_instance(src, tgt)
+                    instances.append(instance)
+                if i in mask_seq_list:
+                    tgt = segment
+                    src = [self.vocab.get(MASK_TOKEN)]
+                else:
+                    src = segment
+                    tgt = []
+            i += 1
+
+        if len(tgt) > 0 and len(src) > 0:
+            instance = self.create_single_instance(src, tgt)
+            instances.append(instance)
+        return instances
+
+
+class GsgDataLoader(Seq2seqDataLoader):
+    pass
+
+
 class ClsDataset(Dataset):
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)

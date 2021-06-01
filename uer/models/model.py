@@ -15,12 +15,12 @@ class Model(nn.Module):
         self.encoder = encoder
         self.target = target
         
-        if args.target in ['bert', 'mlm'] and args.tie_weights:
+        if args.target in ["bert", "mlm", "albert"] and args.tie_weights:
             self.target.mlm_linear_2.weight = self.embedding.word_embedding.weight
-        elif args.target in ['lm','t5'] and args.tie_weights:
+        elif args.target in ["lm", "t5", "gsg"] and args.tie_weights:
             self.target.output_layer.weight = self.embedding.word_embedding.weight
 
-        if args.target == 't5' and args.share_embedding:
+        if args.target in ["t5", "gsg"] and args.share_embedding:
             self.target.embedding.word_embedding.weight = self.embedding.word_embedding.weight
 
     def forward(self, src, tgt, seg):
