@@ -37,7 +37,7 @@ def main():
     parser.add_argument("--processes_num", type=int, default=1,
                         help="Split the whole dataset into `processes_num` parts, "
                              "and each part is fed to a single process in training step.")
-    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "seq2seq", "t5", "cls", "prefixlm", "pegasus"], default="bert",
+    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "seq2seq", "t5", "cls", "prefixlm", "gsg"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--docs_buffer_size", type=int, default=100000,
                         help="The buffer size of documents in memory, specific to targets that require negative sampling.")
@@ -59,7 +59,7 @@ def main():
                         help="Hyperparameter of geometric distribution for span masking.")
     parser.add_argument("--span_max_length", type=int, default=10,
                         help="Max length for span masking.")
-    parser.add_argument("--sentence_select_strategy", choices=["lead", "random", "rouge"], default="lead",
+    parser.add_argument("--select_sentences_strategy", choices=["lead", "random", "rouge"], default="lead",
                         help="Sentences select strategies for GSG task.")
 
     args = parser.parse_args()

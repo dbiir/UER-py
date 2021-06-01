@@ -1,5 +1,5 @@
 from uer.targets import *
 
 
-class PegasusTarget(T5Target):
+class GsgTarget(T5Target):
     pass

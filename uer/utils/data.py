@@ -195,7 +195,6 @@ class Dataset(object):
         self.span_masking = args.span_masking
         self.span_geo_prob = args.span_geo_prob
         self.span_max_length = args.span_max_length
-        self.sentence_select_strategy = args.sentence_select_strategy
         self.docs_buffer_size = args.docs_buffer_size
         self.dup_factor = args.dup_factor
 
@@ -1000,7 +999,10 @@ class T5DataLoader(DataLoader):
                 torch.LongTensor(seg)
 
 
-class PegasusDataset(BertDataset):
+class GsgDataset(BertDataset):
+    def __init__(self, args, vocab, tokenizer):
+        super(GsgDataset, self).__init__(args, vocab, tokenizer)
+        self.select_sentences_strategy = args.select_sentences_strategy
 
     def get_instance(self, src, tgt):
         src = [self.vocab.get(CLS_TOKEN)] + src + [self.vocab.get(SEP_TOKEN)]
@@ -1014,7 +1016,7 @@ class PegasusDataset(BertDataset):
         return instance
 
     def create_ins_from_doc(self, all_documents, document_index):
-        sentence_select_strategy = self.sentence_select_strategy
+        select_sentences_strategy = self.select_sentences_strategy
         instances = []
         mask_seq_list = []
         src = []
@@ -1023,12 +1025,30 @@ class PegasusDataset(BertDataset):
         document = all_documents[document_index]
         target_seq_length = self.seq_length - 2
         mask_seq_num = int(round(len(document) * 0.3, 0))
-        if sentence_select_strategy == "random":
+        if select_sentences_strategy == "random":
             mask_seq_list = random.sample(range(0, len(document) - 1), mask_seq_num)
-        elif sentence_select_strategy == "lead":
+        elif select_sentences_strategy == "lead":
             mask_seq_list = list(range(0, mask_seq_num))
         else:
-            pass
+            from rouge import Rouge
+            rouge_score_list = []
+            rouge = Rouge()
+            for _ in range(mask_seq_num):
+                for k in range(len(document)):
+                    rest_sentences = ""
+                    mask_sentences = ""
+                    if k not in mask_seq_list:
+                        for segment_id, segment in enumerate(document):
+                            if k == segment_id or segment_id in mask_seq_list:
+                                mask_sentences = mask_sentences + " ".join(self.tokenizer.convert_ids_to_tokens(segment)) + " "
+                            else:
+                                rest_sentences = rest_sentences + " ".join(self.tokenizer.convert_ids_to_tokens(segment)) + " "
+                        rouge_score_list.append(rouge.get_scores(mask_sentences, rest_sentences)[0]["rouge-1"]["f"])
+                    else:
+                        rouge_score_list.append(0)
+                max_index = rouge_score_list.index(max(rouge_score_list))
+                mask_seq_list.append(max_index)
+                rouge_score_list = []
 
         while i < len(document):
             segment = document[i]
@@ -1058,7 +1078,7 @@ class PegasusDataset(BertDataset):
         return instances
 
 
-class PegasusDataLoader(Seq2seqDataLoader):
+class GsgDataLoader(Seq2seqDataLoader):
     pass
 
 
