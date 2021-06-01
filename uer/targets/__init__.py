@@ -12,7 +12,7 @@ from uer.targets.prefixlm_target import PrefixlmTarget
 
 str2target = {"bert": BertTarget, "mlm": MlmTarget, "lm": LmTarget,
               "bilm": BilmTarget, "albert": AlbertTarget, "seq2seq": Seq2seqTarget,
-              "t5": T5Target, "pegasus": GsgTarget, "cls": ClsTarget, "prefixlm": PrefixlmTarget}
+              "t5": T5Target, "gsg": GsgTarget, "cls": ClsTarget, "prefixlm": PrefixlmTarget}
 
 __all__ = ["BertTarget", "MlmTarget", "LmTarget", "BilmTarget", "AlbertTarget",
            "Seq2seqTarget", "T5Target", "GsgTarget", "ClsTarget", "PrefixlmTarget", "str2target"]
