@@ -1022,11 +1022,11 @@ class PegasusDataset(BertDataset):
         i = 0
         document = all_documents[document_index]
         target_seq_length = self.seq_length - 2
-        mask_seq_length = int(round(len(document) * 0.3, 0))
+        mask_seq_num = int(round(len(document) * 0.3, 0))
         if sentence_select_strategy == "random":
-            mask_seq_list = random.sample(range(0, len(document) - 1), mask_seq_length)
+            mask_seq_list = random.sample(range(0, len(document) - 1), mask_seq_num)
         elif sentence_select_strategy == "lead":
-            mask_seq_list = list(range(0, mask_seq_length))
+            mask_seq_list = list(range(0, mask_seq_num))
         else:
             pass
 
