@@ -1057,9 +1057,6 @@ class GsgDataset(BertDataset):
 
         while i < len(document):
             segment = document[i]
-            if len(segment) >= target_seq_length:
-                i += 1
-                pass
             if i in mask_seq_list and len(tgt) + len(segment) < target_seq_length:
                 tgt = tgt + segment
                 src = src + [self.vocab.get(MASK_TOKEN)]
