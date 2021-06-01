@@ -1019,11 +1019,16 @@ class GsgDataset(BertDataset):
         select_sentences_strategy = self.select_sentences_strategy
         instances = []
         mask_seq_list = []
+        temp_document = []
         src = []
         tgt = []
         i = 0
         document = all_documents[document_index]
         target_seq_length = self.seq_length - 2
+        for segment in document:
+            if len(segment) < target_seq_length:
+                temp_document.append(segment)
+        document = temp_document
         mask_seq_num = int(round(len(document) * 0.3, 0))
         if select_sentences_strategy == "random":
             mask_seq_list = random.sample(range(0, len(document) - 1), mask_seq_num)
