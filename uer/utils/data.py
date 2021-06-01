@@ -1004,7 +1004,7 @@ class GsgDataset(BertDataset):
         super(GsgDataset, self).__init__(args, vocab, tokenizer)
         self.select_sentences_strategy = args.select_sentences_strategy
 
-    def get_instance(self, src, tgt):
+    def create_single_instance(self, src, tgt):
         src = [self.vocab.get(CLS_TOKEN)] + src + [self.vocab.get(SEP_TOKEN)]
         tgt = [self.vocab.get(CLS_TOKEN)] + tgt + [self.vocab.get(SEP_TOKEN)]
         seg = ([1] * len(src) + [PAD_ID] * (self.seq_length - len(src)))
@@ -1062,7 +1062,7 @@ class GsgDataset(BertDataset):
                 src = src + segment
             else:
                 if len(tgt) > 0 and len(src) > 0:
-                    instance = self.get_instance(src, tgt)
+                    instance = self.create_single_instance(src, tgt)
                     instances.append(instance)
                 if i in mask_seq_list:
                     tgt = segment
@@ -1073,7 +1073,7 @@ class GsgDataset(BertDataset):
             i += 1
 
         if len(tgt) > 0 and len(src) > 0:
-            instance = self.get_instance(src, tgt)
+            instance = self.create_single_instance(src, tgt)
             instances.append(instance)
         return instances
 
