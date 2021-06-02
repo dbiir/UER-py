@@ -1084,6 +1084,110 @@ class GsgDataLoader(Seq2seqDataLoader):
     pass
 
 
+class BartDataset(BertDataset):
+
+    def create_single_instance(self, src, tgt):
+        src = [self.vocab.get(CLS_TOKEN)] + src + [self.vocab.get(SEP_TOKEN)]
+        tgt = [self.vocab.get(CLS_TOKEN)] + tgt + [self.vocab.get(SEP_TOKEN)]
+        seg_pos = len(src)
+        while len(src) != self.seq_length:
+            src.append(PAD_ID)
+            tgt.append(PAD_ID)
+        instance = (src, tgt, seg_pos)
+
+        return instance
+
+    def create_ins_from_doc(self, all_documents, document_index):
+        document = all_documents[document_index]
+        target_seq_length = self.seq_length - 2
+        src = []
+        tgt = []
+        instances = []
+        current_chunk = []
+        current_length = 0
+        i = 0
+        while i < len(document):
+            segment = document[i]
+            if len(segment) > target_seq_length:
+                i += 1
+                continue
+            if current_length + len(segment) < target_seq_length:
+                current_chunk.append(segment)
+                current_length += len(segment)
+            else:
+                shuf_chunk = current_chunk.copy()
+                random.shuffle(shuf_chunk)
+                for k in range(len(current_chunk)):
+                    src = src + shuf_chunk[k]
+                    tgt = tgt + current_chunk[k]
+                instance = self.create_single_instance(src, tgt)
+                instances.append(instance)
+                current_length = len(segment)
+                current_chunk = [segment]
+                src = []
+                tgt = []
+            i += 1
+        if len(tgt) > 0 and len(src) > 0:
+            shuf_chunk = current_chunk.copy()
+            random.shuffle(shuf_chunk)
+            for k in range(len(current_chunk)):
+                src = src + shuf_chunk[k]
+                tgt = tgt + current_chunk[k]
+            instance = self.create_single_instance(src, tgt)
+            instances.append(instance)
+
+        return instances
+
+
+class BartDataLoader(DataLoader):
+    def __iter__(self):
+        while True:
+            while self._empty():
+                self._fill_buf()
+            if self.start + self.batch_size >= self.end:
+                instances = self.buffer[self.start:]
+            else:
+                instances = self.buffer[self.start: self.start + self.batch_size]
+
+            self.start += self.batch_size
+
+            src = []
+            tgt_in = []
+            tgt_out = []
+            seg = []
+
+            for _, ins in enumerate(instances):
+                src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                seg_pos = ins[2]
+                tgt_in.append(ins[1][:-1])
+                tgt_out.append(ins[1][1:])
+
+                MASK_ID = self.vocab.get(MASK_TOKEN)
+
+                src_with_span_mask = []
+                for token_id in src_single:
+                    if token_id == MASK_ID:
+                        if len(src_with_span_mask) > 0 and src_with_span_mask[-1] == MASK_ID:
+                            seg_pos -= 1
+                            pass
+                        else:
+                            src_with_span_mask.append(MASK_ID)
+                    else:
+                        src_with_span_mask.append(token_id)
+
+                while len(src_with_span_mask) < len(src_single):
+                    src_with_span_mask.append(PAD_ID)
+
+                seg.append(([1] * seg_pos + [PAD_ID] * (len(ins[0]) - seg_pos)))
+                src.append(src_with_span_mask)
+
+
+            yield torch.LongTensor(src), \
+                torch.LongTensor(tgt_in), \
+                torch.LongTensor(tgt_out), \
+                torch.LongTensor(seg)
+
+
 class ClsDataset(Dataset):
     def worker(self, proc_id, start, end):
         print("Worker %d is building dataset ... " % proc_id)
