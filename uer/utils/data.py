@@ -1028,7 +1028,6 @@ class BartDataLoader(DataLoader):
                     if token_id == MASK_ID:
                         if len(src_with_span_mask) > 0 and src_with_span_mask[-1] == MASK_ID:
                             seg_pos -= 1
-                            pass
                         else:
                             src_with_span_mask.append(MASK_ID)
                     else:
