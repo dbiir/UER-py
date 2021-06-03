@@ -10,12 +10,11 @@ sys.path.insert(0, uer_dir)
 from scripts.convert_bart_from_uer_to_huggingface import convert_encoder_decoder_transformer_from_uer_to_huggingface
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--input_model_path", type=str, default="pytorch_model.bin",
+parser.add_argument("--input_model_path", type=str, default="input_model.bin",
                     help=".")
-parser.add_argument("--output_model_path", type=str, default="huggingface_model.bin",
+parser.add_argument("--output_model_path", type=str, default="output_model.bin",
                     help=".")
 parser.add_argument("--layers_num", type=int, default=12, help=".")
-
 
 args = parser.parse_args()
 

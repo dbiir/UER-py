@@ -3,16 +3,15 @@ import argparse
 import collections
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--input_model_path", type=str, default="pytorch_model.bin",
+parser.add_argument("--input_model_path", type=str, default="input_model.bin",
                     help=".")
-parser.add_argument("--output_model_path", type=str, default="huggingface_model.bin",
+parser.add_argument("--output_model_path", type=str, default="output_model.bin",
                     help=".")
 parser.add_argument("--layers_num", type=int, default=12, help=".")
 parser.add_argument("--type", choices=["t5", "t5-v1_1"], default="t5",
                     help="The version of the t5 model.")
 
 args = parser.parse_args()
-path = args.input_model_path
 
 input_model = torch.load(args.input_model_path)
 

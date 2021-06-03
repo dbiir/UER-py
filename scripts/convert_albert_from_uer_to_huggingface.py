@@ -4,9 +4,9 @@ import collections
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--input_model_path", type=str, default="pytorch_model.bin",
+parser.add_argument("--input_model_path", type=str, default="input_model.bin",
                     help=".")
-parser.add_argument("--output_model_path", type=str, default="huggingface_model.bin",
+parser.add_argument("--output_model_path", type=str, default="output_model.bin",
                     help=".")
 
 args = parser.parse_args()
