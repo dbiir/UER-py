@@ -63,14 +63,15 @@ def main():
 
     args = parser.parse_args()
 
-    input_model = torch.load(args.input_model_path)
+    input_model = torch.load(args.input_model_path, map_location="cpu")
 
     output_model = collections.OrderedDict()
 
+    emb_size = input_model["embedding.word_embedding.weight"].shape[1]
     output_model["model.shared.weight"] = input_model["embedding.word_embedding.weight"]
 
-    output_model["model.encoder.embed_positions.weight"] = input_model["embedding.position_embedding.weight"]
-    output_model["model.decoder.embed_positions.weight"] = input_model["target.embedding.position_embedding.weight"]
+    output_model["model.encoder.embed_positions.weight"] = torch.cat((torch.zeros(2, emb_size), input_model["embedding.position_embedding.weight"]), 0)
+    output_model["model.decoder.embed_positions.weight"] = torch.cat((torch.zeros(2, emb_size), input_model["target.embedding.position_embedding.weight"]), 0)
     output_model["model.encoder.embed_tokens.weight"] = input_model["embedding.word_embedding.weight"]
     output_model["model.decoder.embed_tokens.weight"] = input_model["embedding.word_embedding.weight"]
     output_model["lm_head.weight"] = input_model["target.output_layer.weight"]

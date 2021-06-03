@@ -67,8 +67,8 @@ def main():
 
     output_model = collections.OrderedDict()
 
-    output_model["embedding.position_embedding.weight"] = input_model["model.encoder.embed_positions.weight"]
-    output_model["target.embedding.position_embedding.weight"] = input_model["model.decoder.embed_positions.weight"]
+    output_model["embedding.position_embedding.weight"] = input_model["model.encoder.embed_positions.weight"][2:]
+    output_model["target.embedding.position_embedding.weight"] = input_model["model.decoder.embed_positions.weight"][2:]
     output_model["embedding.word_embedding.weight"] = input_model["model.encoder.embed_tokens.weight"]
     output_model["target.embedding.word_embedding.weight"] = input_model["model.decoder.embed_tokens.weight"]
     output_model["target.output_layer.weight"] = input_model["lm_head.weight"]
