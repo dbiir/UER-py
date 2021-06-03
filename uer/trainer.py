@@ -348,13 +348,17 @@ class GsgTrainer(Seq2seqTrainer):
     pass
 
 
+class BartTrainer(Seq2seqTrainer):
+    pass
+
+
 class PrefixlmTrainer(MlmTrainer):
     pass
 
 
 str2trainer = {"bert": BertTrainer, "mlm": MlmTrainer, "lm": LmTrainer,
                "albert": AlbertTrainer, "bilm": BilmTrainer, "cls": ClsTrainer,
-               "seq2seq": Seq2seqTrainer, "t5": T5Trainer, "gsg": GsgTrainer}
+               "seq2seq": Seq2seqTrainer, "t5": T5Trainer, "gsg": GsgTrainer, "bart": BartTrainer}
 
 def worker(proc_id, gpu_ranks, args, model):
     """

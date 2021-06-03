@@ -25,9 +25,9 @@ def convert_bert_transformer_encoder_from_uer_to_huggingface(input_model, output
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--input_model_path", type=str, default="pytorch_model.bin",
+    parser.add_argument("--input_model_path", type=str, default="input_model.bin",
                         help=".")
-    parser.add_argument("--output_model_path", type=str, default="huggingface_model.bin",
+    parser.add_argument("--output_model_path", type=str, default="output_model.bin",
                         help=".")
     parser.add_argument("--layers_num", type=int, default=12, help=".")
     parser.add_argument("--target", choices=["bert", "mlm"], default="bert",
