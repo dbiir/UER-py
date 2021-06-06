@@ -1,7 +1,53 @@
 import torch
 import math
 import torch.nn as nn
+import collections
 from uer.layers.layer_norm import LayerNorm
+
+
+
+class PatchEmbedding(nn.Module):
+    """
+    Image to Patch Embedding for Vision Transformer.
+    """
+    def to_2tuple(x):
+        if isinstance(x, collections.abc.Iterable):
+            return x
+        return (x, x)
+
+    def __init__(self, args, vocab_size=None):
+        super(PatchEmbedding, self).__init__()
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, args.emb_size))
+        self.image_size = self.to_2tuple(args.image_size)
+        patch_size = self.to_2tuple(args.patch_size)
+        num_channels = args.num_channels
+        num_patches = (args.image_size[1] // patch_size[1]) * (self.image_size[0] // patch_size[0])
+
+        self.projection = nn.Conv2d(num_channels, args.emb_size, kernel_size=patch_size, stride=patch_size)
+        self.position_embedding = nn.Embedding(num_patches + 1, args.emb_size)
+        self.dropout = nn.Dropout(args.dropout)
+        if not self.remove_embedding_layernorm:
+            self.layer_norm = LayerNorm(args.emb_size)
+
+    def forward(self, src, _):
+        batch_size, num_channels, height, width = src.shape
+        if height != self.image_size[0] or width != self.image_size[1]:
+            raise ValueError(
+                f"Input image size ({height}*{width}) doesn't match model ({self.image_size[0]}*{self.image_size[1]})."
+            )
+        patch_emb = self.projection(src).flatten(2).transpose(1, 2)
+        cls_tokens = self.cls_token.expand(batch_size, -1, -1)
+        patch_emb = torch.cat((cls_tokens, patch_emb), dim=1)
+        pos_emb = self.position_embedding(
+            torch.arange(0, patch_emb.size(1), device=patch_emb.device, dtype=torch.long)
+                .unsqueeze(0)
+                .repeat(patch_emb.size(0), 1)
+        )
+        emb = patch_emb + pos_emb
+        if not self.remove_embedding_layernorm:
+            emb = self.layer_norm(emb)
+        emb = self.dropout(emb)
+        return emb
 
 
 class WordEmbedding(nn.Module):
