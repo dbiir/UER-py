@@ -1126,7 +1126,7 @@ class ClsDataLoader(DataLoader):
                 tgt.append(ins[1])
                 seg.append(ins[2])
 
-            yield torch.Tensor(src), \
+            yield torch.stack(src, 0), \
                 torch.Tensor(tgt), \
                 torch.Tensor(seg)
 
