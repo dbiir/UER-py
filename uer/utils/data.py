@@ -1119,7 +1119,7 @@ class ClsDataLoader(DataLoader):
 
             src = []
             tgt = []
-            seg = []
+            seg = [0]
 
             for ins in instances:
                 src.append(ins[0])
