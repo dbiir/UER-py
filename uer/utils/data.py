@@ -1119,7 +1119,7 @@ class ClsDataLoader(DataLoader):
 
             src = []
             tgt = []
-            seg = [0]
+            seg = []
 
             for ins in instances:
                 src.append(ins[0])
@@ -1128,7 +1128,7 @@ class ClsDataLoader(DataLoader):
 
             yield torch.stack(src, 0), \
                 torch.Tensor(tgt), \
-                torch.Tensor(seg)
+                None
 
 
 class PrefixlmDataset(Dataset):
