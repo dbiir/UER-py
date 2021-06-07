@@ -21,7 +21,7 @@ class PatchEmbedding(nn.Module):
         self.image_size = to_2tuple(args.image_size)
         patch_size = to_2tuple(args.patch_size)
         num_channels = args.num_channels
-        num_patches = (args.image_size[1] // patch_size[1]) * (self.image_size[0] // patch_size[0])
+        num_patches = (self.image_size[1] // patch_size[1]) * (self.image_size[0] // patch_size[0])
 
         self.projection = nn.Conv2d(num_channels, args.emb_size, kernel_size=patch_size, stride=patch_size)
         self.position_embedding = nn.Embedding(num_patches + 1, args.emb_size)
