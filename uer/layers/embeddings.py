@@ -17,7 +17,6 @@ class PatchEmbedding(nn.Module):
     def __init__(self, args, vocab_size=None):
         super(PatchEmbedding, self).__init__()
         self.cls_token = nn.Parameter(torch.zeros(1, 1, args.emb_size))
-        print("image_size: ",args.image_size)
         self.image_size = to_2tuple(args.image_size)
         patch_size = to_2tuple(args.patch_size)
         num_channels = args.num_channels
@@ -26,6 +25,7 @@ class PatchEmbedding(nn.Module):
         self.projection = nn.Conv2d(num_channels, args.emb_size, kernel_size=patch_size, stride=patch_size)
         self.position_embedding = nn.Embedding(num_patches + 1, args.emb_size)
         self.dropout = nn.Dropout(args.dropout)
+        self.remove_embedding_layernorm = args.remove_embedding_layernorm
         if not self.remove_embedding_layernorm:
             self.layer_norm = LayerNorm(args.emb_size)
 
