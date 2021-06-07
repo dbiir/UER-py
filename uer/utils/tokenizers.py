@@ -59,7 +59,7 @@ class CharTokenizer(Tokenizer):
 
     def tokenize(self, text, use_vocab=True):
         if use_vocab:
-            return [token if token in self.vocab else "[UNK]" for token in list(text.strip())]
+            return [token if token in self.vocab else UNK_TOKEN for token in list(text.strip())]
         else:
             return [token for token in list(text.strip())]
 
@@ -71,7 +71,7 @@ class SpaceTokenizer(Tokenizer):
 
     def tokenize(self, text, use_vocab=True):
         if use_vocab:
-            return [token if token in self.vocab else "[UNK]" for token in text.strip().split(" ")]
+            return [token if token in self.vocab else UNK_TOKEN for token in text.strip().split(" ")]
         else:
             return [token for token in text.strip().split(" ")]
 
@@ -218,7 +218,7 @@ class BertTokenizer(Tokenizer):
         super().__init__(args, is_src)
         if not args.spm_model_path:
             self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case)
-            self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab)
+            self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab, unk_token=UNK_TOKEN)
 
     def tokenize(self, text):
         if self.sp_model:

@@ -251,7 +251,7 @@ class BertDataset(Dataset):
                     seg_pos.append(len(src))
 
                     while len(src) != self.seq_length:
-                        src.append(PAD_ID)
+                        src.append(self.vocab.get(PAD_TOKEN))
 
                     if not self.dynamic_masking:
                         src, tgt_mlm = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
@@ -293,7 +293,7 @@ class BertDataLoader(DataLoader):
                     for mask in ins[1]:
                         tgt_mlm[-1][mask[0]] = mask[1]
                     is_next.append(ins[2])
-                    seg.append([1] * ins[3][0] + [2] * (ins[3][1] - ins[3][0]) + [PAD_ID] * (len(ins[0]) - ins[3][1]))
+                    seg.append([1] * ins[3][0] + [2] * (ins[3][1] - ins[3][0]) + [0] * (len(ins[0]) - ins[3][1]))
                 else:
                     src_single, tgt_mlm_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
                     masked_words_num += len(tgt_mlm_single)
@@ -302,7 +302,7 @@ class BertDataLoader(DataLoader):
                     for mask in tgt_mlm_single:
                         tgt_mlm[-1][mask[0]] = mask[1]
                     is_next.append(ins[1])
-                    seg.append([1] * ins[2][0] + [2] * (ins[2][1] - ins[2][0]) + [PAD_ID] * (len(ins[0]) - ins[2][1]))
+                    seg.append([1] * ins[2][0] + [2] * (ins[2][1] - ins[2][0]) + [0] * (len(ins[0]) - ins[2][1]))
 
             if masked_words_num == 0:
                 continue
@@ -392,7 +392,7 @@ class MlmDataset(Dataset):
         seg_pos = [len(src)]
 
         while len(src) != self.seq_length:
-            src.append(PAD_ID)
+            src.append(self.vocab.get(PAD_TOKEN))
 
         if not self.dynamic_masking:
             src, tgt = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
@@ -429,7 +429,7 @@ class MlmDataLoader(DataLoader):
                     tgt.append([0] * len(ins[0]))
                     for mask in ins[1]:
                         tgt[-1][mask[0]] = mask[1]
-                    seg.append([1] * ins[2][0] + [PAD_ID] * (len(ins[0]) - ins[2][0]))
+                    seg.append([1] * ins[2][0] + [0] * (len(ins[0]) - ins[2][0]))
                 else:
                     src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
                     masked_words_num += len(tgt_single)
@@ -437,7 +437,7 @@ class MlmDataLoader(DataLoader):
                     tgt.append([0] * len(ins[0]))
                     for mask in tgt_single:
                         tgt[-1][mask[0]] = mask[1]
-                    seg.append([1] * ins[1][0] + [PAD_ID] * (len(ins[0]) - ins[1][0]))
+                    seg.append([1] * ins[1][0] + [0] * (len(ins[0]) - ins[1][0]))
 
             if masked_words_num == 0:
                 continue
@@ -541,7 +541,7 @@ class AlbertDataset(Dataset):
                     seg_pos.append(len(src))
 
                     while len(src) != self.seq_length:
-                        src.append(PAD_ID)
+                        src.append(self.vocab.get(PAD_TOKEN))
 
                     if not self.dynamic_masking:
                         src, tgt_mlm = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
@@ -590,7 +590,7 @@ class LmDataset(Dataset):
                 if len(src) > 0:
                     seg_pos = len(src)
                     while len(src) != self.seq_length + 1:
-                        src.append(PAD_ID)
+                        src.append(self.vocab.get(PAD_TOKEN))
                     pickle.dump((src, seg_pos), dataset_writer)
 
                 if pos >= end:
@@ -621,7 +621,7 @@ class LmDataLoader(DataLoader):
                 if ins[1] == len(ins[0]):
                     seg.append([1] * (ins[1] - 1))
                 else:
-                    seg.append([1] * ins[1] + [PAD_ID] * (len(ins[0]) - 1 - ins[1]))
+                    seg.append([1] * ins[1] + [0] * (len(ins[0]) - 1 - ins[1]))
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt), \
@@ -659,10 +659,10 @@ class BilmDataset(Dataset):
                 tgt_backward = [self.vocab.get(CLS_TOKEN)] + src[:-1]
                 seg = [1] * len(src)
                 while len(src) != self.seq_length:
-                    src.append(PAD_ID)
-                    tgt_forward.append(PAD_ID)
-                    tgt_backward.append(PAD_ID)
-                    seg.append(PAD_ID)
+                    src.append(self.vocab.get(PAD_TOKEN))
+                    tgt_forward.append(self.vocab.get(PAD_TOKEN))
+                    tgt_backward.append(self.vocab.get(PAD_TOKEN))
+                    seg.append(0)
                 pickle.dump((src, tgt_forward, tgt_backward, seg), dataset_writer)
 
                 if pos >= end:
@@ -735,10 +735,10 @@ class Seq2seqDataset(Dataset):
 
                 src, tgt, seg = src[:self.seq_length], tgt[:self.tgt_seq_length + 1], seg[:self.seq_length]
                 while len(src) != self.seq_length:
-                    src.append(PAD_ID)
-                    seg.append(PAD_ID)
+                    src.append(self.vocab.get(PAD_TOKEN))
+                    seg.append(0)
                 while len(tgt) != self.tgt_seq_length + 1:
-                    tgt.append(PAD_ID)
+                    tgt.append(self.vocab.get(PAD_TOKEN))
                 pickle.dump((src, tgt, seg), dataset_writer)
 
                 if pos >= end:
@@ -806,13 +806,14 @@ class T5DataLoader(DataLoader):
                 if len(ins) == 3:
                     src_single = ins[0]
                     tgt_single = ins[1]
-                    seg.append([1] * ins[2][0] + [PAD_ID] * (len(ins[0]) - ins[2][0]))
+                    seg.append([1] * ins[2][0] + [0] * (len(ins[0]) - ins[2][0]))
                 else:
                     src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
-                    seg.append([1] * ins[1][0] + [PAD_ID] * (len(ins[0]) - ins[1][0]))
+                    seg.append([1] * ins[1][0] + [0] * (len(ins[0]) - ins[1][0]))
 
                 MASK_ID = self.vocab.get(MASK_TOKEN)
                 SENTINEL_ID = self.vocab.get(SENTINEL_TOKEN)
+                PAD_ID = self.vocab.get(PAD_TOKEN)
 
                 for src_index, _ in tgt_single:
                     if src_single[src_index] != MASK_ID:
@@ -866,11 +867,11 @@ class GsgDataset(BertDataset):
     def create_single_instance(self, src, tgt):
         src = [self.vocab.get(CLS_TOKEN)] + src + [self.vocab.get(SEP_TOKEN)]
         tgt = [self.vocab.get(CLS_TOKEN)] + tgt + [self.vocab.get(SEP_TOKEN)]
-        seg = ([1] * len(src) + [PAD_ID] * (self.seq_length - len(src)))
+        seg = ([1] * len(src) + [0] * (self.seq_length - len(src)))
         while len(src) != self.seq_length:
-            src.append(PAD_ID)
+            src.append(self.vocab.get(PAD_TOKEN))
         while len(tgt) != self.seq_length:
-            tgt.append(PAD_ID)
+            tgt.append(self.vocab.get(PAD_TOKEN))
         instance = (src, tgt, seg)
         return instance
 
@@ -950,8 +951,8 @@ class BartDataset(BertDataset):
         tgt = [self.vocab.get(CLS_TOKEN)] + tgt + [self.vocab.get(SEP_TOKEN)]
         seg_pos = len(src)
         while len(src) != self.seq_length:
-            src.append(PAD_ID)
-            tgt.append(PAD_ID)
+            src.append(self.vocab.get(PAD_TOKEN))
+            tgt.append(self.vocab.get(PAD_TOKEN))
         instance = (src, tgt, seg_pos)
 
         return instance
@@ -1034,9 +1035,9 @@ class BartDataLoader(DataLoader):
                         src_with_span_mask.append(token_id)
 
                 while len(src_with_span_mask) < len(src_single):
-                    src_with_span_mask.append(PAD_ID)
+                    src_with_span_mask.append(self.vocab.get(PAD_TOKEN))
 
-                seg.append(([1] * seg_pos + [PAD_ID] * (len(ins[0]) - seg_pos)))
+                seg.append(([1] * seg_pos + [0] * (len(ins[0]) - seg_pos)))
                 src.append(src_with_span_mask)
 
 
@@ -1073,8 +1074,8 @@ class ClsDataset(Dataset):
                         seg = seg[:self.seq_length]
                     else:
                         while len(src) != self.seq_length:
-                            src.append(PAD_ID)
-                            seg.append(PAD_ID)
+                            src.append(self.vocab.get(PAD_TOKEN))
+                            seg.append(0)
                     pickle.dump((src, tgt, seg), dataset_writer)
                 elif len(line) == 3:  # For sentence pair input.
                     label = int(line[0])
@@ -1093,8 +1094,8 @@ class ClsDataset(Dataset):
                         seg = seg[:self.seq_length]
                     else:
                         while len(src) != self.seq_length:
-                            src.append(PAD_ID)
-                            seg.append(PAD_ID)
+                            src.append(self.vocab.get(PAD_TOKEN))
+                            seg.append(0)
                     pickle.dump((src, tgt, seg), dataset_writer)
                 else:
                     pass
@@ -1161,12 +1162,12 @@ class PrefixlmDataset(Dataset):
                     continue
 
                 src = src + tgt
-                tgt = [0] * seg_pos[0] + tgt[1:] + [PAD_ID]
+                tgt = [0] * seg_pos[0] + tgt[1:] + [self.vocab.get(PAD_TOKEN)]
                 seg_pos.append(len(src))
                 src, tgt = src[:self.seq_length], tgt[:self.seq_length]
                 while len(src) != self.seq_length:
-                    src.append(PAD_ID)
-                    tgt.append(PAD_ID)
+                    src.append(self.vocab.get(PAD_TOKEN))
+                    tgt.append(self.vocab.get(PAD_TOKEN))
                 if seg_pos[1] > self.seq_length:
                     seg_pos[1] = self.seq_length
 
@@ -1197,7 +1198,7 @@ class PrefixlmDataLoader(DataLoader):
             for ins in instances:
                 src.append(ins[0])
                 tgt.append(ins[1])
-                seg.append([1] * ins[2][0] + [2] * (ins[2][1] - ins[2][0]) + [PAD_ID] * (len(ins[0]) - ins[2][1]))
+                seg.append([1] * ins[2][0] + [2] * (ins[2][1] - ins[2][0]) + [0] * (len(ins[0]) - ins[2][1]))
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt), \

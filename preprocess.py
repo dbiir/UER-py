@@ -36,7 +36,7 @@ def main():
                         help="Specify the tokenizer.")
     parser.add_argument("--processes_num", type=int, default=1,
                         help="Split the whole dataset into `processes_num` parts, "
-                             "and each part is fed to a single process in training step.")
+                             "and process them with `processes_num` processes.")
     parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "seq2seq", "t5", "cls", "prefixlm", "gsg", "bart"], default="bert",
                         help="The training target of the pretraining model.")
     parser.add_argument("--docs_buffer_size", type=int, default=100000,

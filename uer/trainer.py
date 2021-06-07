@@ -26,19 +26,21 @@ def train_and_validate(args):
         sp_model.Load(args.spm_model_path)
         args.vocab = {sp_model.IdToPiece(i): i for i
                       in range(sp_model.GetPieceSize())}
-        args.tokenizer = str2tokenizer[args.tokenizer](args)
         if args.target == "seq2seq":
             tgt_sp_model = spm.SentencePieceProcessor()
             tgt_sp_model.Load(args.tgt_spm_model_path)
             args.tgt_vocab = {tgt_sp_model.IdToPiece(i): i for i
                               in range(tgt_sp_model.GetPieceSize())}
     else:
-        args.tokenizer = str2tokenizer[args.tokenizer](args)
-        args.vocab = args.tokenizer.vocab
+        vocab = Vocab()
+        vocab.load(args.tgt_vocab_path)
+        args.vocab = vocab.w2i
         if args.target == "seq2seq":
             tgt_vocab = Vocab()
             tgt_vocab.load(args.tgt_vocab_path)
             args.tgt_vocab = tgt_vocab.w2i
+
+    args.tokenizer = str2tokenizer[args.tokenizer](args)
 
     # Build model.
     model = build_model(args)
@@ -46,7 +48,7 @@ def train_and_validate(args):
     # Load or initialize parameters.
     if args.pretrained_model_path is not None:
         # Initialize with pretrained model.
-        model = load_model(model, args.pretrained_model_path) 
+        model = load_model(model, args.pretrained_model_path)
     else:
         # Initialize with normal distribution.
         for n, p in list(model.named_parameters()):
@@ -76,7 +78,7 @@ class Trainer(object):
 
         self.start_time = time.time()
         self.total_loss = 0.0
-        
+
         self.dist_train = args.dist_train
         self.batch_size = args.batch_size
         self.world_size = args.world_size
@@ -150,16 +152,16 @@ class MlmTrainer(Trainer):
               "| {:8.2f} tokens/s"
               "| loss {:7.2f}"
               "| acc: {:3.3f}".format(
-            self.current_step,
-            self.total_steps,
-            done_tokens / (time.time() - self.start_time),
-            self.total_loss / self.report_steps,
-            self.total_correct / self.total_denominator))
+                  self.current_step,
+                  self.total_steps,
+                  done_tokens / (time.time() - self.start_time),
+                  self.total_loss / self.report_steps,
+                  self.total_correct / self.total_denominator))
 
         self.total_loss = 0.0
         self.total_correct = 0.0
         self.total_denominator = 0.0
-        
+
 
 class BertTrainer(Trainer):
     def __init__(self, args):
@@ -200,14 +202,14 @@ class BertTrainer(Trainer):
               "| loss_sp: {:3.3f}"
               "| acc_mlm: {:3.3f}"
               "| acc_sp: {:3.3f}".format(
-            self.current_step,
-            self.total_steps,
-            done_tokens / (time.time() - self.start_time),
-            self.total_loss / self.report_steps,
-            self.total_loss_mlm / self.report_steps,
-            self.total_loss_sp / self.report_steps,
-            self.total_correct_mlm / self.total_denominator,
-            self.total_correct_sp / self.total_instances))
+                  self.current_step,
+                  self.total_steps,
+                  done_tokens / (time.time() - self.start_time),
+                  self.total_loss / self.report_steps,
+                  self.total_loss_mlm / self.report_steps,
+                  self.total_loss_sp / self.report_steps,
+                  self.total_correct_mlm / self.total_denominator,
+                  self.total_correct_sp / self.total_instances))
 
         self.total_loss, self.total_loss_mlm, self.total_loss_sp = 0.0, 0.0, 0.0
         self.total_correct_mlm, self.total_denominator = 0.0, 0.0
@@ -254,14 +256,14 @@ class BilmTrainer(Trainer):
                   "| loss_backward {:3.3f}"
                   "| acc_forward: {:3.3f}"
                   "| acc_backward: {:3.3f}".format(
-                    self.current_step,
-                    self.total_steps, 
-                    done_tokens / (time.time() - self.start_time), 
-                    self.total_loss / self.report_steps,
-                    self.total_loss_forward / self.report_steps,
-                    self.total_loss_backward / self.report_steps,
-                    self.total_correct_forward / self.total_denominator,
-                    self.total_correct_backward / self.total_denominator))
+                      self.current_step,
+                      self.total_steps, 
+                      done_tokens / (time.time() - self.start_time), 
+                      self.total_loss / self.report_steps,
+                      self.total_loss_forward / self.report_steps,
+                      self.total_loss_backward / self.report_steps,
+                      self.total_correct_forward / self.total_denominator,
+                      self.total_correct_backward / self.total_denominator))
 
         self.total_loss, self.total_loss_forward, self.total_loss_backward = 0.0, 0.0, 0.0
         self.total_correct_forward, self.total_correct_backward, self.total_denominator = 0.0, 0.0, 0.0
@@ -291,11 +293,11 @@ class ClsTrainer(Trainer):
               "| {:8.2f} tokens/s"
               "| loss {:7.2f}"
               "| acc: {:3.3f}".format(
-            self.current_step,
-            self.total_steps,
-            done_tokens / (time.time() - self.start_time),
-            self.total_loss / self.report_steps,
-            self.total_correct / self.total_instances))
+                  self.current_step,
+                  self.total_steps,
+                  done_tokens / (time.time() - self.start_time),
+                  self.total_loss / self.report_steps,
+                  self.total_correct / self.total_instances))
 
         self.total_loss = 0.0
         self.total_correct = 0.0
@@ -329,11 +331,11 @@ class Seq2seqTrainer(Trainer):
               "| {:8.2f} tokens/s"
               "| loss {:7.2f}"
               "| acc: {:3.3f}".format(
-            self.current_step,
-            self.total_steps,
-            done_tokens / (time.time() - self.start_time),
-            self.total_loss / self.report_steps,
-            self.total_correct / self.total_denominator))
+                  self.current_step,
+                  self.total_steps,
+                  done_tokens / (time.time() - self.start_time),
+                  self.total_loss / self.report_steps,
+                  self.total_correct / self.total_denominator))
 
         self.total_loss = 0.0
         self.total_correct = 0.0
@@ -359,6 +361,7 @@ class PrefixlmTrainer(MlmTrainer):
 str2trainer = {"bert": BertTrainer, "mlm": MlmTrainer, "lm": LmTrainer,
                "albert": AlbertTrainer, "bilm": BilmTrainer, "cls": ClsTrainer,
                "seq2seq": Seq2seqTrainer, "t5": T5Trainer, "gsg": GsgTrainer, "bart": BartTrainer}
+
 
 def worker(proc_id, gpu_ranks, args, model):
     """

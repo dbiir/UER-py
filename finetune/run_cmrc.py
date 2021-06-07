@@ -112,9 +112,9 @@ def convert_examples_to_dataset(args, examples):
             src_b = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(span_context) + [SEP_TOKEN])
             src = src_a + src_b
             seg = [1] * len(src_a) + [2] * len(src_b)
-
+            PAD_ID = args.tokenizer.convert_tokens_to_ids([PAD_TOKEN])[0]
             while len(src) < args.seq_length:
-                src.append(0)
+                src.append(PAD_ID)
                 seg.append(0)
 
             dataset.append((src, seg, start_position, end_position, answers, question_id, len(question), doc_span_index, start_offset))

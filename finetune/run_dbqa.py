@@ -42,8 +42,9 @@ def read_dataset(args, path):
             if len(src) > args.seq_length:
                 src = src[: args.seq_length]
                 seg = seg[: args.seq_length]
+            PAD_ID = args.tokenizer.convert_tokens_to_ids([PAD_TOKEN])[0]
             while len(src) < args.seq_length:
-                src.append(0)
+                src.append(PAD_ID)
                 seg.append(0)
             dataset.append((src, tgt, seg, qid))
 

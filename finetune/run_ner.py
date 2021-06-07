@@ -89,8 +89,9 @@ def read_dataset(args, path):
                 src = src[: args.seq_length]
                 tgt = tgt[: args.seq_length]
                 seg = seg[: args.seq_length]
+            PAD_ID = args.tokenizer.convert_tokens_to_ids([PAD_TOKEN])[0]
             while len(src) < args.seq_length:
-                src.append(0)
+                src.append(PAD_ID)
                 tgt.append(args.labels_num - 1)
                 seg.append(0)
             dataset.append([src, tgt, seg])
@@ -199,8 +200,8 @@ def evaluate(args, dataset):
 
     print("Report precision, recall, and f1:")
     eps = 1e-9
-    p = correct / pred_entities_num + eps
-    r = correct / gold_entities_num + eps
+    p = correct / (pred_entities_num + eps)
+    r = correct / (gold_entities_num + eps)
     f1 = 2 * p * r / (p + r + eps)
     print("{:.3f}, {:.3f}, {:.3f}".format(p, r, f1))
 

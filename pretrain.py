@@ -50,6 +50,7 @@ def main():
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."
                              "Space tokenizer segments sentences into words according to space."
+                             "It is necessary to specify the tokenizer when whole word masking is used."
                         )
 
     # Model options.
@@ -89,7 +90,7 @@ def main():
     if args.target == "cls":
         assert args.labels_num is not None, "Cls target needs the denotation of the number of labels."
 
-    # Load hyper-parameters from config file. 
+    # Load hyper-parameters from config file.
     if args.config_path:
         load_hyperparam(args)
 
