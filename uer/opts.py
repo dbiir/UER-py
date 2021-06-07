@@ -29,6 +29,13 @@ def model_opts(parser):
     parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
 
+    # image
+    parser.add_argument("--image_size", type=int, default=32,
+                        help="image_size.")
+    parser.add_argument("--patch_size", type=int, default=4,
+                        help="patch_size.")
+    parser.add_argument("--num_channels", type=int, default=1,
+                        help="num_channels.")
 
 def optimization_opts(parser):
     parser.add_argument("--learning_rate", type=float, default=2e-5,
