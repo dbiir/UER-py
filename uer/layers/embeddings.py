@@ -4,22 +4,22 @@ import torch.nn as nn
 import collections
 from uer.layers.layer_norm import LayerNorm
 
-
+def to_2tuple(x):
+    if isinstance(x, collections.abc.Iterable):
+        return x
+    return (x, x)
 
 class PatchEmbedding(nn.Module):
     """
     Image to Patch Embedding for Vision Transformer.
     """
-    def to_2tuple(x):
-        if isinstance(x, collections.abc.Iterable):
-            return x
-        return (x, x)
 
     def __init__(self, args, vocab_size=None):
         super(PatchEmbedding, self).__init__()
         self.cls_token = nn.Parameter(torch.zeros(1, 1, args.emb_size))
-        self.image_size = self.to_2tuple(args.image_size)
-        patch_size = self.to_2tuple(args.patch_size)
+        print("image_size: ",args.image_size)
+        self.image_size = to_2tuple(args.image_size)
+        patch_size = to_2tuple(args.patch_size)
         num_channels = args.num_channels
         num_patches = (args.image_size[1] // patch_size[1]) * (self.image_size[0] // patch_size[0])
 
