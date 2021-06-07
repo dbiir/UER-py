@@ -1126,9 +1126,9 @@ class ClsDataLoader(DataLoader):
                 tgt.append(ins[1])
                 seg.append(ins[2])
 
-            yield torch.LongTensor(src), \
-                torch.LongTensor(tgt), \
-                torch.LongTensor(seg)
+            yield torch.Tensor(src), \
+                torch.Tensor(tgt), \
+                torch.Tensor(seg)
 
 
 class PrefixlmDataset(Dataset):
