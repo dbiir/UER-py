@@ -1128,7 +1128,7 @@ class ClsDataLoader(DataLoader):
 
             yield torch.stack(src, 0), \
                 torch.Tensor(tgt), \
-                None
+                torch.Tensor(tgt)
 
 
 class PrefixlmDataset(Dataset):
