@@ -1122,7 +1122,10 @@ class ClsDataLoader(DataLoader):
             seg = []
 
             for ins in instances:
-                src.append(ins[0])
+                if isinstance(ins[0], list):
+                    src.append(torch.LongTensor(ins[0]))
+                else:
+                    src.append(ins[0])
                 tgt.append(ins[1])
                 seg.append(ins[2])
 
