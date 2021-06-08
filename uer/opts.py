@@ -30,7 +30,7 @@ def model_opts(parser):
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
 
     # image
-    parser.add_argument("--image_size", type=int, default=32,
+    parser.add_argument("--image_size", type=int, default=28,
                         help="image_size.")
     parser.add_argument("--patch_size", type=int, default=4,
                         help="patch_size.")
