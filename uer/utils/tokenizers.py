@@ -24,11 +24,11 @@ class Tokenizer(object):
                 import sentencepiece as spm
             except ImportError:
                 raise ImportError("You need to install SentencePiece to use XLNetTokenizer: https://github.com/google/sentencepiece"
-                                                    "pip install sentencepiece")
+                                  "pip install sentencepiece")
             self.sp_model = spm.SentencePieceProcessor()
             self.sp_model.Load(spm_model_path)
             self.vocab = {self.sp_model.IdToPiece(i): i for i
-                                        in range(self.sp_model.GetPieceSize())}
+                          in range(self.sp_model.GetPieceSize())}
         else:
             self.vocab = Vocab()
             self.vocab.load(vocab_path, is_quiet=True)
@@ -53,7 +53,7 @@ class Tokenizer(object):
 
 
 class CharTokenizer(Tokenizer):
-        
+
     def __init__(self, args, is_src=True):
         super().__init__(args, is_src)
 
@@ -65,7 +65,7 @@ class CharTokenizer(Tokenizer):
 
 
 class SpaceTokenizer(Tokenizer):
-     
+
     def __init__(self, args, is_src=True):
         super().__init__(args, is_src)
 
@@ -114,7 +114,7 @@ def encode_pieces(sp_model, text, return_unicode=True, sample=False):
         piece = printable_text(piece)
         if len(piece) > 1 and piece[-1] == "," and piece[-2].isdigit():
             cur_pieces = sp_model.EncodeAsPieces(
-                    six.ensure_binary(piece[:-1]).replace(SPIECE_UNDERLINE, b""))
+                six.ensure_binary(piece[:-1]).replace(SPIECE_UNDERLINE, b""))
             if piece[0] != SPIECE_UNDERLINE and cur_pieces[0][0] == SPIECE_UNDERLINE:
                 if len(cur_pieces[0]) == 1:
                     cur_pieces = cur_pieces[1:]
@@ -155,7 +155,7 @@ def convert_to_unicode(text):
     elif six.PY2:
         if isinstance(text, str):
             return six.ensure_text(text, "utf-8", "ignore")
-        elif isinstance(text, six.text_type):
+        if isinstance(text, six.text_type):
             return text
         else:
             raise ValueError("Unsupported string type: %s" % (type(text)))
@@ -190,7 +190,7 @@ def convert_by_vocab(vocab, items):
     """Converts a sequence of [tokens|ids] using the vocab."""
     output = []
     for item in items:
-        output.append(vocab[item])
+        output.append(vocab[item] if item in vocab else vocab.get(UNK_TOKEN))
     return output
 
 
@@ -218,11 +218,13 @@ class BertTokenizer(Tokenizer):
         super().__init__(args, is_src)
         if not args.spm_model_path:
             self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case)
-            self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab, unk_token=UNK_TOKEN)
+            self.wordpiece_tokenizer = WordpieceTokenizer(
+                vocab=self.vocab, unk_token=UNK_TOKEN)
 
     def tokenize(self, text):
         if self.sp_model:
-            split_tokens = encode_pieces(self.sp_model, text, return_unicode=False)
+            split_tokens = encode_pieces(
+                self.sp_model, text, return_unicode=False)
         else:
             split_tokens = []
             for token in self.basic_tokenizer.tokenize(text):
@@ -230,6 +232,31 @@ class BertTokenizer(Tokenizer):
                     split_tokens.append(sub_token)
 
         return split_tokens
+
+
+class HFXLMRobertaTokenizer(Tokenizer):
+    """Runs end-to-end tokenziation."""
+
+    def __init__(self, args, is_src=True):
+        super().__init__(args, is_src)
+        assert args.spm_model_path, \
+            "spm_model_path must provided for huggingface roberta tokenizer"
+
+        special_tokens = ["<s>", "<pad>", "</s>", "<unk>"]
+        vocab = [token for token in self.vocab if token not in special_tokens]
+        vocab = special_tokens + vocab + ["<mask>"]
+        self.vocab = {k: v for v, k in enumerate(vocab)}
+        self.inv_vocab = {v: k for k, v in self.vocab.items()}
+
+    def tokenize(self, text):
+        split_tokens = encode_pieces(self.sp_model, text, return_unicode=False)
+        return split_tokens
+
+    def convert_tokens_to_ids(self, tokens):
+        return convert_by_vocab(self.vocab, tokens)
+
+    def convert_ids_to_tokens(self, ids):
+        return convert_by_vocab(self.inv_vocab, ids)
 
 
 class BasicTokenizer(object):

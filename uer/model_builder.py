@@ -14,9 +14,9 @@ def build_model(args):
     We could select suitable one for downstream tasks.
     """
 
-    embedding = str2embedding[args.embedding](args, len(args.vocab))
+    embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
     encoder = str2encoder[args.encoder](args)
-    target = str2target[args.target](args, len(args.vocab))
+    target = str2target[args.target](args, len(args.tokenizer.vocab))
     model = Model(args, embedding, encoder, target)
 
     return model

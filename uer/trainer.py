@@ -16,31 +16,24 @@ def train_and_validate(args):
     set_seed(args.seed)
 
     # Load vocabulary.
-    if args.spm_model_path:
-        try:
-            import sentencepiece as spm
-        except ImportError:
-            raise ImportError("You need to install SentencePiece to use XLNetTokenizer: https://github.com/google/sentencepiece"
-                              "pip install sentencepiece")
-        sp_model = spm.SentencePieceProcessor()
-        sp_model.Load(args.spm_model_path)
-        args.vocab = {sp_model.IdToPiece(i): i for i
-                      in range(sp_model.GetPieceSize())}
-        if args.target == "seq2seq":
+    if args.target == "seq2seq":
+        if args.tgt_spm_model_path:
+            try:
+                import sentencepiece as spm
+            except ImportError:
+                raise ImportError("You need to install SentencePiece to use XLNetTokenizer: https://github.com/google/sentencepiece"
+                                  "pip install sentencepiece")
             tgt_sp_model = spm.SentencePieceProcessor()
             tgt_sp_model.Load(args.tgt_spm_model_path)
             args.tgt_vocab = {tgt_sp_model.IdToPiece(i): i for i
                               in range(tgt_sp_model.GetPieceSize())}
-    else:
-        vocab = Vocab()
-        vocab.load(args.vocab_path)
-        args.vocab = vocab.w2i
-        if args.target == "seq2seq":
+        else:
             tgt_vocab = Vocab()
             tgt_vocab.load(args.tgt_vocab_path)
             args.tgt_vocab = tgt_vocab.w2i
 
     args.tokenizer = str2tokenizer[args.tokenizer](args)
+    args.vocab = args.tokenizer.vocab
 
     # Build model.
     model = build_model(args)
@@ -57,7 +50,8 @@ def train_and_validate(args):
 
     if args.dist_train:
         # Multiprocessing distributed mode.
-        mp.spawn(worker, nprocs=args.ranks_num, args=(args.gpu_ranks, args, model), daemon=False)
+        mp.spawn(worker, nprocs=args.ranks_num, args=(
+            args.gpu_ranks, args, model), daemon=False)
     elif args.single_gpu:
         # Single GPU mode.
         worker(args.gpu_id, None, args, model)
@@ -123,7 +117,8 @@ class Trainer(object):
 
             if self.current_step % self.save_checkpoint_steps == 0 and \
                     (not self.dist_train or (self.dist_train and rank == 0)):
-                save_model(model, self.output_model_path + "-" + str(self.current_step))
+                save_model(model, self.output_model_path +
+                           "-" + str(self.current_step))
 
             self.current_step += 1
 
@@ -250,20 +245,20 @@ class BilmTrainer(Trainer):
         if self.dist_train:
             done_tokens *= self.world_size
         print("| {:8d}/{:8d} steps"
-                  "| {:8.2f} tokens/s"
-                  "| loss {:7.2f}"
-                  "| loss_forward {:3.3f}"
-                  "| loss_backward {:3.3f}"
-                  "| acc_forward: {:3.3f}"
-                  "| acc_backward: {:3.3f}".format(
-                      self.current_step,
-                      self.total_steps, 
-                      done_tokens / (time.time() - self.start_time), 
-                      self.total_loss / self.report_steps,
-                      self.total_loss_forward / self.report_steps,
-                      self.total_loss_backward / self.report_steps,
-                      self.total_correct_forward / self.total_denominator,
-                      self.total_correct_backward / self.total_denominator))
+              "| {:8.2f} tokens/s"
+              "| loss {:7.2f}"
+              "| loss_forward {:3.3f}"
+              "| loss_backward {:3.3f}"
+              "| acc_forward: {:3.3f}"
+              "| acc_backward: {:3.3f}".format(
+                  self.current_step,
+                  self.total_steps,
+                  done_tokens / (time.time() - self.start_time),
+                  self.total_loss / self.report_steps,
+                  self.total_loss_forward / self.report_steps,
+                  self.total_loss_backward / self.report_steps,
+                  self.total_correct_forward / self.total_denominator,
+                  self.total_correct_backward / self.total_denominator))
 
         self.total_loss, self.total_loss_forward, self.total_loss_backward = 0.0, 0.0, 0.0
         self.total_correct_forward, self.total_correct_backward, self.total_denominator = 0.0, 0.0, 0.0
@@ -383,9 +378,11 @@ def worker(proc_id, gpu_ranks, args, model):
         gpu_id = None
 
     if args.dist_train:
-        train_loader = str2dataloader[args.target](args, args.dataset_path, args.batch_size, rank, args.world_size, True)
+        train_loader = str2dataloader[args.target](
+            args, args.dataset_path, args.batch_size, rank, args.world_size, True)
     else:
-        train_loader = str2dataloader[args.target](args, args.dataset_path, args.batch_size, 0, 1, True)
+        train_loader = str2dataloader[args.target](
+            args, args.dataset_path, args.batch_size, 0, 1, True)
 
     if gpu_id is not None:
         torch.cuda.set_device(gpu_id)
@@ -395,27 +392,34 @@ def worker(proc_id, gpu_ranks, args, model):
     param_optimizer = list(model.named_parameters())
     no_decay = ["bias", "gamma", "beta"]
     optimizer_grouped_parameters = [
-        {"params": [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], "weight_decay_rate": 0.01},
-        {"params": [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], "weight_decay_rate": 0.0}
+        {"params": [p for n, p in param_optimizer if not any(
+            nd in n for nd in no_decay)], "weight_decay_rate": 0.01},
+        {"params": [p for n, p in param_optimizer if any(
+            nd in n for nd in no_decay)], "weight_decay_rate": 0.0}
     ]
     if args.optimizer in ["adamw"]:
-        optimizer = str2optimizer[args.optimizer](optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
+        optimizer = str2optimizer[args.optimizer](
+            optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
     else:
         optimizer = str2optimizer[args.optimizer](optimizer_grouped_parameters, lr=args.learning_rate,
                                                   scale_parameter=False, relative_step=False)
     if args.scheduler in ["constant"]:
         scheduler = str2scheduler[args.scheduler](optimizer)
     elif args.scheduler in ["constant_with_warmup"]:
-        scheduler = str2scheduler[args.scheduler](optimizer, args.total_steps*args.warmup)
+        scheduler = str2scheduler[args.scheduler](
+            optimizer, args.total_steps*args.warmup)
     else:
-        scheduler = str2scheduler[args.scheduler](optimizer, args.total_steps*args.warmup, args.total_steps)
+        scheduler = str2scheduler[args.scheduler](
+            optimizer, args.total_steps*args.warmup, args.total_steps)
 
     if args.fp16:
         try:
             from apex import amp
         except ImportError:
-            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
+            raise ImportError(
+                "Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
+        model, optimizer = amp.initialize(
+            model, optimizer, opt_level=args.fp16_opt_level)
         args.amp = amp
 
     if args.dist_train:
@@ -424,10 +428,12 @@ def worker(proc_id, gpu_ranks, args, model):
                                 init_method=args.master_ip,
                                 world_size=args.world_size,
                                 rank=rank)
-        model = DistributedDataParallel(model, device_ids=[gpu_id], find_unused_parameters=True)
+        model = DistributedDataParallel(
+            model, device_ids=[gpu_id], find_unused_parameters=True)
         print("Worker %d is training ... " % rank)
     else:
         print("Worker is training ...")
 
     trainer = str2trainer[args.target](args)
-    trainer.train(args, gpu_id, rank, train_loader, model, optimizer, scheduler)
+    trainer.train(args, gpu_id, rank, train_loader,
+                  model, optimizer, scheduler)
