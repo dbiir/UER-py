@@ -4,7 +4,7 @@ from uer.utils.constants import *
 
 def mask_seq(src, tokenizer, whole_word_masking, span_masking, span_geo_prob, span_max_length):
     vocab = tokenizer.vocab
-
+    PAD_ID = vocab.get(PAD_TOKEN)
     for i in range(len(src) - 1, -1, -1):
         if src[i] != PAD_ID:
             break
@@ -81,6 +81,7 @@ def create_index(src, tokenizer, whole_word_masking, span_masking, span_geo_prob
     tokens_index = []
     span_end_position = -1
     vocab = tokenizer.vocab
+    PAD_ID = vocab.get(PAD_TOKEN)
     if whole_word_masking:
         src_wwm = []
         src_length = len(src)
