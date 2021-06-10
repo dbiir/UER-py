@@ -9,12 +9,13 @@ from uer.targets.t5_target import T5Target
 from uer.targets.gsg_target import GsgTarget
 from uer.targets.bart_target import BartTarget
 from uer.targets.prefixlm_target import PrefixlmTarget
-
+from uer.targets.vilt_target import ViltTarget
 
 str2target = {"bert": BertTarget, "mlm": MlmTarget, "lm": LmTarget,
               "bilm": BilmTarget, "albert": AlbertTarget, "seq2seq": Seq2seqTarget,
               "t5": T5Target, "gsg": GsgTarget, "bart": BartTarget,
-              "cls": ClsTarget, "prefixlm": PrefixlmTarget}
+              "cls": ClsTarget, "prefixlm": PrefixlmTarget, "vilt": ViltTarget}
 
 __all__ = ["BertTarget", "MlmTarget", "LmTarget", "BilmTarget", "AlbertTarget",
-           "Seq2seqTarget", "T5Target", "GsgTarget", "BartTarget", "ClsTarget", "PrefixlmTarget", "str2target"]
+           "Seq2seqTarget", "T5Target", "GsgTarget", "BartTarget", "ClsTarget",
+           "PrefixlmTarget", "ViltTarget", "str2target"]

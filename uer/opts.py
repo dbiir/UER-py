@@ -30,11 +30,11 @@ def model_opts(parser):
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
 
     # image
-    parser.add_argument("--image_size", type=int, default=28,
+    parser.add_argument("--image_size", type=int, default=256,
                         help="image_size.")
-    parser.add_argument("--patch_size", type=int, default=4,
+    parser.add_argument("--patch_size", type=int, default=16,
                         help="patch_size.")
-    parser.add_argument("--num_channels", type=int, default=1,
+    parser.add_argument("--num_channels", type=int, default=3,
                         help="num_channels.")
 
 def optimization_opts(parser):

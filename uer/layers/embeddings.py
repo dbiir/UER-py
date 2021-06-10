@@ -9,13 +9,13 @@ def to_2tuple(x):
         return x
     return (x, x)
 
-class PatchEmbedding(nn.Module):
+class PatchPosEmbedding(nn.Module):
     """
     Image to Patch Embedding for Vision Transformer.
     """
 
     def __init__(self, args, vocab_size=None):
-        super(PatchEmbedding, self).__init__()
+        super(PatchPosEmbedding, self).__init__()
         self.cls_token = nn.Parameter(torch.zeros(1, 1, args.emb_size))
         self.image_size = to_2tuple(args.image_size)
         patch_size = to_2tuple(args.patch_size)
@@ -44,6 +44,59 @@ class PatchEmbedding(nn.Module):
                 .repeat(patch_emb.size(0), 1)
         )
         emb = patch_emb + pos_emb
+        if not self.remove_embedding_layernorm:
+            emb = self.layer_norm(emb)
+        emb = self.dropout(emb)
+        return emb
+
+
+class PatchEmbedding(nn.Module):
+    """
+    Image to Patch Embedding for Vision Transformer.
+    """
+
+    def __init__(self, args, vocab_size=None):
+        super(PatchEmbedding, self).__init__()
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, args.emb_size))
+        patch_size = to_2tuple(args.patch_size)
+        self.num_channels = args.num_channels
+
+        self.projection = nn.Conv2d(self.num_channels, args.emb_size, kernel_size=patch_size, stride=patch_size)
+        self.dropout = nn.Dropout(args.dropout)
+        self.remove_embedding_layernorm = args.remove_embedding_layernorm
+        if not self.remove_embedding_layernorm:
+            self.layer_norm = LayerNorm(args.emb_size)
+
+    def forward(self, src, seg):
+        batch_size, num_channels, height, width = src.shape
+        if num_channels != self.num_channels:
+            raise ValueError(
+                f"Input channel size ({num_channels}) doesn't match model ({self.num_channels})."
+            )
+        patch_emb = self.projection(src).flatten(2).transpose(1, 2)
+        cls_tokens = self.cls_token.expand(batch_size, -1, -1)
+        patch_emb = torch.cat((cls_tokens, patch_emb), dim=1)
+
+        if not self.remove_embedding_layernorm:
+            patch_emb = self.layer_norm(patch_emb)
+        patch_emb = self.dropout(patch_emb)
+        return patch_emb
+
+
+class ViLEmbedding(nn.Module):
+    """
+    """
+
+    def __init__(self, args, vocab_size):
+        super(ViLEmbedding, self).__init__()
+        self.language_embedding = WordPosEmbedding(args, vocab_size)
+        self.vision_embedding = PatchPosEmbedding(args)
+
+
+    def forward(self, src, seg):
+        l_emb = self.language_embedding(src[0], seg)
+        v_emb = self.vision_embedding(src[1], seg)
+        emb = torch.cat([l_emb,v_emb], dim=1)
         if not self.remove_embedding_layernorm:
             emb = self.layer_norm(emb)
         emb = self.dropout(emb)
