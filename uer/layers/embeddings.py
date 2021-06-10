@@ -91,7 +91,10 @@ class ViLEmbedding(nn.Module):
         super(ViLEmbedding, self).__init__()
         self.language_embedding = WordPosEmbedding(args, vocab_size)
         self.vision_embedding = PatchPosEmbedding(args)
-
+        self.remove_embedding_layernorm = args.remove_embedding_layernorm
+        if not self.remove_embedding_layernorm:
+            self.layer_norm = LayerNorm(args.emb_size)
+        self.dropout = nn.Dropout(args.dropout)
 
     def forward(self, src, seg):
         l_emb = self.language_embedding(src[0], seg)

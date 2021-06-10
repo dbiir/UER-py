@@ -1229,7 +1229,7 @@ class ViltDataLoader(DataLoader):
 
                 src_text_single, tgt_mlm_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
                 src_text.append(src_text_single)
-                tgt_mlm.append([0] * len(ins[0]))
+                tgt_mlm.append([0] * len(ins[2]))
                 for mask in tgt_mlm_single:
                     tgt_mlm[-1][mask[0]] = mask[1]
 
@@ -1237,7 +1237,7 @@ class ViltDataLoader(DataLoader):
                     src_image.append(ins[1])
                     tgt_match.append(1)
                 else:
-                    random_ins = random.sample(instances[0:i]+instances[i+1:], 1)
+                    random_ins = random.sample(instances[0:i]+instances[i+1:], 1)[0]
                     src_image.append(random_ins[1])
                     tgt_match.append(0)
 
