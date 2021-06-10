@@ -14,7 +14,7 @@ str2dataset = {"bert": BertDataset, "lm": LmDataset, "mlm": MlmDataset,
 str2dataloader = {"bert": BertDataLoader, "lm": LmDataLoader, "mlm": MlmDataLoader,
                   "bilm": BilmDataLoader, "albert": AlbertDataLoader, "seq2seq": Seq2seqDataLoader,
                   "t5": T5DataLoader, "gsg": GsgDataLoader, "bart": BartDataLoader,
-                  "cls": ClsDataLoader, "prefixlm": PrefixlmDataLoader}
+                  "cls": ClsDataLoader, "prefixlm": PrefixlmDataLoader, "vilt": ViltDataLoader}
 
 str2act = {"gelu": gelu, "gelu_fast": gelu_fast, "relu": relu, "silu": silu, "linear": linear}
 
@@ -31,7 +31,7 @@ __all__ = ["CharTokenizer", "SpaceTokenizer", "BertTokenizer", "str2tokenizer",
            "BartDataset", "ClsDataset", "PrefixlmDataset", "str2dataset",
            "BertDataLoader", "LmDataLoader", "MlmDataLoader", "BilmDataLoader",
            "AlbertDataLoader", "Seq2seqDataLoader", "T5DataLoader", "GsgDataLoader",
-           "BartDataLoader", "ClsDataLoader", "PrefixlmDataLoader", "str2dataloader",
+           "BartDataLoader", "ClsDataLoader", "PrefixlmDataLoader", "ViltDataLoader", "str2dataloader",
            "gelu", "gelu_fast", "relu", "silu", "linear", "str2act",
            "AdamW", "Adafactor", "str2optimizer",
            "get_linear_schedule_with_warmup", "get_cosine_schedule_with_warmup",
