@@ -50,8 +50,7 @@ def train_and_validate(args):
 
     if args.dist_train:
         # Multiprocessing distributed mode.
-        mp.spawn(worker, nprocs=args.ranks_num, args=(
-            args.gpu_ranks, args, model), daemon=False)
+        mp.spawn(worker, nprocs=args.ranks_num, args=(args.gpu_ranks, args, model), daemon=False)
     elif args.single_gpu:
         # Single GPU mode.
         worker(args.gpu_id, None, args, model)
@@ -117,8 +116,7 @@ class Trainer(object):
 
             if self.current_step % self.save_checkpoint_steps == 0 and \
                     (not self.dist_train or (self.dist_train and rank == 0)):
-                save_model(model, self.output_model_path +
-                           "-" + str(self.current_step))
+                save_model(model, self.output_model_path + "-" + str(self.current_step))
 
             self.current_step += 1
 
@@ -252,8 +250,8 @@ class BilmTrainer(Trainer):
               "| acc_forward: {:3.3f}"
               "| acc_backward: {:3.3f}".format(
                   self.current_step,
-                  self.total_steps,
-                  done_tokens / (time.time() - self.start_time),
+                  self.total_steps, 
+                  done_tokens / (time.time() - self.start_time), 
                   self.total_loss / self.report_steps,
                   self.total_loss_forward / self.report_steps,
                   self.total_loss_backward / self.report_steps,
@@ -378,11 +376,9 @@ def worker(proc_id, gpu_ranks, args, model):
         gpu_id = None
 
     if args.dist_train:
-        train_loader = str2dataloader[args.target](
-            args, args.dataset_path, args.batch_size, rank, args.world_size, True)
+        train_loader = str2dataloader[args.target](args, args.dataset_path, args.batch_size, rank, args.world_size, True)
     else:
-        train_loader = str2dataloader[args.target](
-            args, args.dataset_path, args.batch_size, 0, 1, True)
+        train_loader = str2dataloader[args.target](args, args.dataset_path, args.batch_size, 0, 1, True)
 
     if gpu_id is not None:
         torch.cuda.set_device(gpu_id)
@@ -392,34 +388,27 @@ def worker(proc_id, gpu_ranks, args, model):
     param_optimizer = list(model.named_parameters())
     no_decay = ["bias", "gamma", "beta"]
     optimizer_grouped_parameters = [
-        {"params": [p for n, p in param_optimizer if not any(
-            nd in n for nd in no_decay)], "weight_decay_rate": 0.01},
-        {"params": [p for n, p in param_optimizer if any(
-            nd in n for nd in no_decay)], "weight_decay_rate": 0.0}
+        {"params": [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], "weight_decay_rate": 0.01},
+        {"params": [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], "weight_decay_rate": 0.0}
     ]
     if args.optimizer in ["adamw"]:
-        optimizer = str2optimizer[args.optimizer](
-            optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
+        optimizer = str2optimizer[args.optimizer](optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
     else:
         optimizer = str2optimizer[args.optimizer](optimizer_grouped_parameters, lr=args.learning_rate,
                                                   scale_parameter=False, relative_step=False)
     if args.scheduler in ["constant"]:
         scheduler = str2scheduler[args.scheduler](optimizer)
     elif args.scheduler in ["constant_with_warmup"]:
-        scheduler = str2scheduler[args.scheduler](
-            optimizer, args.total_steps*args.warmup)
+        scheduler = str2scheduler[args.scheduler](optimizer, args.total_steps*args.warmup)
     else:
-        scheduler = str2scheduler[args.scheduler](
-            optimizer, args.total_steps*args.warmup, args.total_steps)
+        scheduler = str2scheduler[args.scheduler](optimizer, args.total_steps*args.warmup, args.total_steps)
 
     if args.fp16:
         try:
             from apex import amp
         except ImportError:
-            raise ImportError(
-                "Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(
-            model, optimizer, opt_level=args.fp16_opt_level)
+            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
+        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
         args.amp = amp
 
     if args.dist_train:
@@ -428,12 +417,10 @@ def worker(proc_id, gpu_ranks, args, model):
                                 init_method=args.master_ip,
                                 world_size=args.world_size,
                                 rank=rank)
-        model = DistributedDataParallel(
-            model, device_ids=[gpu_id], find_unused_parameters=True)
+        model = DistributedDataParallel(model, device_ids=[gpu_id], find_unused_parameters=True)
         print("Worker %d is training ... " % rank)
     else:
         print("Worker is training ...")
 
     trainer = str2trainer[args.target](args)
-    trainer.train(args, gpu_id, rank, train_loader,
-                  model, optimizer, scheduler)
+    trainer.train(args, gpu_id, rank, train_loader, model, optimizer, scheduler)

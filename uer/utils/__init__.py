@@ -6,8 +6,7 @@ from uer.utils.act_fun import *
 from uer.utils.optimizers import *
 
 
-str2tokenizer = {"char": CharTokenizer, "space": SpaceTokenizer,
-                 "bert": BertTokenizer, "xlmroberta": HFXLMRobertaTokenizer}
+str2tokenizer = {"char": CharTokenizer, "space": SpaceTokenizer, "bert": BertTokenizer, "xlmroberta": HFXLMRobertaTokenizer}
 str2dataset = {"bert": BertDataset, "lm": LmDataset, "mlm": MlmDataset,
                "bilm": BilmDataset, "albert": AlbertDataset, "seq2seq": Seq2seqDataset,
                "t5": T5Dataset, "gsg": GsgDataset, "bart": BartDataset,
@@ -17,8 +16,7 @@ str2dataloader = {"bert": BertDataLoader, "lm": LmDataLoader, "mlm": MlmDataLoad
                   "t5": T5DataLoader, "gsg": GsgDataLoader, "bart": BartDataLoader,
                   "cls": ClsDataLoader, "prefixlm": PrefixlmDataLoader}
 
-str2act = {"gelu": gelu, "gelu_fast": gelu_fast,
-           "relu": relu, "silu": silu, "linear": linear}
+str2act = {"gelu": gelu, "gelu_fast": gelu_fast, "relu": relu, "silu": silu, "linear": linear}
 
 str2optimizer = {"adamw": AdamW, "adafactor": Adafactor}
 

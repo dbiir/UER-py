@@ -10,8 +10,7 @@ def mask_seq(src, tokenizer, whole_word_masking, span_masking, span_geo_prob, sp
             break
     src_no_pad = src[:i + 1]
 
-    tokens_index, src_no_pad = create_index(
-        src_no_pad, tokenizer, whole_word_masking, span_masking, span_geo_prob, span_max_length)
+    tokens_index, src_no_pad = create_index(src_no_pad, tokenizer, whole_word_masking, span_masking, span_geo_prob, span_max_length)
     if len(src_no_pad) < len(src):
         src = src_no_pad + (len(src) - len(src_no_pad)) * [PAD_ID]
     else:
@@ -93,16 +92,14 @@ def create_index(src, tokenizer, whole_word_masking, span_masking, span_geo_prob
         if src[-1] == vocab.get(SEP_TOKEN):
             src = src[:-1]
             has_sep = True
-        sentence = "".join(tokenizer.convert_ids_to_tokens(
-            src)).replace('[UNK]', '').replace('##', '')
+        sentence = "".join(tokenizer.convert_ids_to_tokens(src)).replace('[UNK]', '').replace('##', '')
         import jieba
         wordlist = jieba.cut(sentence)
         if has_cls:
             src_wwm += [vocab.get(CLS_TOKEN)]
         for word in wordlist:
             position = len(src_wwm)
-            src_wwm += tokenizer.convert_tokens_to_ids(
-                tokenizer.tokenize(word))
+            src_wwm += tokenizer.convert_tokens_to_ids(tokenizer.tokenize(word))
             if len(src_wwm) < src_length:
                 tokens_index.append([position, len(src_wwm)-position])
         if has_sep:
