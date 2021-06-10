@@ -17,20 +17,22 @@ def train_and_validate(args):
 
     # Load vocabulary.
     if args.target == "seq2seq":
-        if args.tgt_spm_model_path:
-            try:
-                import sentencepiece as spm
-            except ImportError:
-                raise ImportError("You need to install SentencePiece to use XLNetTokenizer: https://github.com/google/sentencepiece"
-                                  "pip install sentencepiece")
-            tgt_sp_model = spm.SentencePieceProcessor()
-            tgt_sp_model.Load(args.tgt_spm_model_path)
-            args.tgt_vocab = {tgt_sp_model.IdToPiece(i): i for i
-                              in range(tgt_sp_model.GetPieceSize())}
-        else:
-            tgt_vocab = Vocab()
-            tgt_vocab.load(args.tgt_vocab_path)
-            args.tgt_vocab = tgt_vocab.w2i
+        args.tgt_tokenizer = str2tokenizer[args.tgt_tokenizer](args)
+        args.tgt_vocab = args.tgt_tokenizer.vocab
+        # if args.tgt_spm_model_path:
+        #     try:
+        #         import sentencepiece as spm
+        #     except ImportError:
+        #         raise ImportError("You need to install SentencePiece to use XLNetTokenizer: https://github.com/google/sentencepiece"
+        #                           "pip install sentencepiece")
+        #     tgt_sp_model = spm.SentencePieceProcessor()
+        #     tgt_sp_model.Load(args.tgt_spm_model_path)
+        #     args.tgt_vocab = {tgt_sp_model.IdToPiece(i): i for i
+        #                       in range(tgt_sp_model.GetPieceSize())}
+        # else:
+        #     tgt_vocab = Vocab()
+        #     tgt_vocab.load(args.tgt_vocab_path)
+        #     args.tgt_vocab = tgt_vocab.w2i
 
     args.tokenizer = str2tokenizer[args.tokenizer](args)
     args.vocab = args.tokenizer.vocab

@@ -51,6 +51,8 @@ def main():
                              "Char tokenizer segments sentences into characters."
                              "Space tokenizer segments sentences into words according to space."
                         )
+    parser.add_argument("--tgt_tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
+                        help="Specify the tokenizer.")
 
     # Model options.
     model_opts(parser)
