@@ -8,9 +8,9 @@ class Seq2seqTarget(LmTarget):
     """
 
     def __init__(self, args, vocab_size):
-        super(Seq2seqTarget, self).__init__(args, len(args.tgt_vocab))
+        super(Seq2seqTarget, self).__init__(args, vocab_size)
 
-        self.embedding = str2embedding[args.tgt_embedding](args, len(args.tgt_vocab))
+        self.embedding = str2embedding[args.tgt_embedding](args, vocab_size)
 
         self.decoder = str2decoder[args.decoder](args)
 

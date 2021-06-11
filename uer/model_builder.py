@@ -16,7 +16,10 @@ def build_model(args):
 
     embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
     encoder = str2encoder[args.encoder](args)
-    target = str2target[args.target](args, len(args.tokenizer.vocab))
+    if args.target == "seq2seq":
+        target = str2target[args.target](args, len(args.tgt_tokenizer.vocab))
+    else:
+        target = str2target[args.target](args, len(args.tokenizer.vocab))
     model = Model(args, embedding, encoder, target)
 
     return model
