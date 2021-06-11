@@ -76,7 +76,7 @@ def main():
     parser.add_argument("--labels_num", type=int, required=True,
                         help="Number of prediction labels.")
 
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
+    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
                         help="Specify the tokenizer." 
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."

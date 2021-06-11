@@ -53,6 +53,7 @@ def batch_loader(batch_size, src, seg, mask_pos, label):
 
 def read_dataset(args, path):
     dataset = []
+    PAD_ID = args.tokenizer.vocab.get(PAD_TOKEN)
     with open(path, mode="r", encoding="utf-8") as f:
         for line in f:
             src = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(line.strip()))
@@ -100,7 +101,7 @@ if __name__ == '__main__':
     parser.add_argument("--target", choices=["bert", "mlm", "albert"], default="bert",
                         help="The training target of the pretraining model.")
 
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
+    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
                         help="Specify the tokenizer."
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."

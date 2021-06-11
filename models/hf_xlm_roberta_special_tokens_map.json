@@ -1,8 +1,0 @@
-{
-  "pad_token": "<pad>",
-  "unk_token": "<unk>",
-  "cls_token": "<s>",
-  "sep_token": "</s>",
-  "mask_token": "<mask>",
-  "sentinel_token": "<extra_id_0>"
-}

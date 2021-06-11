@@ -27,7 +27,7 @@ def main():
     parser.add_argument("--max_choices_num", default=4, type=int,
                         help="The maximum number of cadicate answer, shorter than this will be padded.")
 
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
+    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
                         help="Specify the tokenizer."
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."

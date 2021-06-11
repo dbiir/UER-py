@@ -73,7 +73,7 @@ if __name__ == '__main__':
     parser.add_argument("--top_p", type=float, default=0)
     parser.add_argument("--temperature", type=float, default=1.0)
  
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
+    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
                         help="Specify the tokenizer."
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."

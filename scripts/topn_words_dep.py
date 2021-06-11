@@ -45,7 +45,7 @@ if __name__ == '__main__':
     parser.add_argument("--config_path", default="models/bert/base_config.json", type=str,
                         help="Path of the config file.")
 
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space"], default="bert",
+    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
                         help="Specify the tokenizer."
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."
@@ -84,6 +84,7 @@ if __name__ == '__main__':
     model = model.to(device)
     model.eval()
 
+    PAD_ID = args.tokenizer.vocab.get(PAD_TOKEN)
     with open(args.test_path, mode="r", encoding="utf-8") as f:
         for line in f:
             line = line.strip().split("\t")
