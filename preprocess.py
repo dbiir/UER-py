@@ -9,8 +9,7 @@ assert version.parse(six.__version__) >= version.parse("1.12.0")
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     # Path options.
     parser.add_argument("--corpus_path", type=str, required=True,
@@ -27,12 +26,12 @@ def main():
                         help="Path of the preprocessed dataset.")
 
     # Preprocess options.
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="xlmroberta",
-                        help="Specify the tokenizer."
+    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
+                        help="Specify the tokenizer." 
                              "Original Google BERT uses bert tokenizer on Chinese corpus."
                              "Char tokenizer segments sentences into characters."
                              "Space tokenizer segments sentences into words according to space."
-                        )
+                             )
     parser.add_argument("--tgt_tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
                         help="Specify the tokenizer.")
     parser.add_argument("--processes_num", type=int, default=1,
@@ -42,26 +41,20 @@ def main():
                         help="The training target of the pretraining model.")
     parser.add_argument("--docs_buffer_size", type=int, default=100000,
                         help="The buffer size of documents in memory, specific to targets that require negative sampling.")
-    parser.add_argument("--seq_length", type=int, default=128,
-                        help="Sequence length of instances.")
-    parser.add_argument("--tgt_seq_length", type=int, default=128,
-                        help="Target sequence length of instances.")
+    parser.add_argument("--seq_length", type=int, default=128, help="Sequence length of instances.")
+    parser.add_argument("--tgt_seq_length", type=int, default=128, help="Target sequence length of instances.")
     parser.add_argument("--dup_factor", type=int, default=5,
                         help="Duplicate instances multiple times.")
     parser.add_argument("--short_seq_prob", type=float, default=0.1,
                         help="Probability of truncating sequence."
                              "The larger value, the higher probability of using short (truncated) sequence.")
-    parser.add_argument("--full_sentences",
-                        action="store_true", help="Full sentences.")
+    parser.add_argument("--full_sentences", action="store_true", help="Full sentences.")
     parser.add_argument("--seed", type=int, default=7, help="Random seed.")
 
     # Masking options.
-    parser.add_argument("--dynamic_masking",
-                        action="store_true", help="Dynamic masking.")
-    parser.add_argument("--whole_word_masking",
-                        action="store_true", help="Whole word masking.")
-    parser.add_argument(
-        "--span_masking", action="store_true", help="Span masking.")
+    parser.add_argument("--dynamic_masking", action="store_true", help="Dynamic masking.")
+    parser.add_argument("--whole_word_masking", action="store_true", help="Whole word masking.")
+    parser.add_argument("--span_masking", action="store_true", help="Span masking.")
     parser.add_argument("--span_geo_prob", type=float, default=0.2,
                         help="Hyperparameter of geometric distribution for span masking.")
     parser.add_argument("--span_max_length", type=int, default=10,
