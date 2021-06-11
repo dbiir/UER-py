@@ -55,7 +55,7 @@ script:
 
     python preprocess.py --corpus_path corpora/parallel_corpus_en_zh.txt --vocab_path models/google_uncased_en_vocab.txt --tgt_vocab_path models/google_zh_vocab.txt --dataset_path mt_dataset.pt --processes_num 8 --target seq2seq --seq_length 64 --tgt_seq_length 64
 
-    python pretrain.py --dataset_path mt_dataset.pt --vocab_path models/google_uncased_en_vocab.txt --tgt_vocab_path models/google_zh_vocab.txt --output_model_path mt_model.bin --config_path models/encoder_decoder_config.json --embedding word_sinusoidalpos --tgt_embedding word_sinusoidalpos --encoder transformer --mask fully_visible --decoder transformer --target seq2seq --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
+    python pretrain.py --dataset_path mt_dataset.pt --vocab_path models/google_uncased_en_vocab.txt --tgt_vocab_path models/google_zh_vocab.txt --output_model_path models/mt_model.bin --config_path models/encoder_decoder_config.json --embedding word_sinusoidalpos --tgt_embedding word_sinusoidalpos --encoder transformer --mask fully_visible --decoder transformer --target seq2seq --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
 
     mv models/mt_model.bin-10 models/cls_model.bin
 

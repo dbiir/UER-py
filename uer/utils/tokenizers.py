@@ -248,6 +248,7 @@ class HFXLMRobertaTokenizer(Tokenizer):
 
     def tokenize(self, text):
         split_tokens = encode_pieces(self.sp_model, text, return_unicode=False)
+
         return split_tokens
 
     def convert_tokens_to_ids(self, tokens):
@@ -257,7 +258,6 @@ class HFXLMRobertaTokenizer(Tokenizer):
     def convert_ids_to_tokens(self, ids):
 
         return convert_by_vocab(self.inv_vocab, ids)
-
 
 
 class BasicTokenizer(object):
