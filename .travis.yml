@@ -53,6 +53,12 @@ script:
     
     mv models/cls_model.bin-10 models/cls_model.bin
 
+    python preprocess.py --corpus_path corpora/parallel_corpus_en_zh.txt --vocab_path models/google_uncased_en_vocab.txt --tgt_vocab_path models/google_zh_vocab.txt --dataset_path mt_dataset.pt --processes_num 8 --target seq2seq --seq_length 64 --tgt_seq_length 64
+
+    python pretrain.py --dataset_path mt_dataset.pt --vocab_path models/google_uncased_en_vocab.txt --tgt_vocab_path models/google_zh_vocab.txt --output_model_path mt_model.bin --config_path models/encoder_decoder_config.json --embedding word_sinusoidalpos --tgt_embedding word_sinusoidalpos --encoder transformer --mask fully_visible --decoder transformer --target seq2seq --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
+
+    mv models/mt_model.bin-10 models/cls_model.bin
+
     python finetune/run_classifier.py --pretrained_model_path models/bert_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --output_model_path models/classifier_model.bin --train_path datasets/test_data/chnsenticorp_test/train.tsv --dev_path datasets/test_data/chnsenticorp_test/dev.tsv --epochs_num 3 --batch_size 2 --embedding word_pos_seg --encoder transformer --mask fully_visible
 
     python inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --test_path datasets/test_data/chnsenticorp_test/test_nolabel.tsv --prediction_path datasets/test_data/chnsenticorp_test/prediction.tsv --embedding word_pos_seg --encoder transformer --mask fully_visible --labels_num 2

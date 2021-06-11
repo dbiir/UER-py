@@ -238,8 +238,8 @@ class BilmTrainer(Trainer):
               "| acc_forward: {:3.3f}"
               "| acc_backward: {:3.3f}".format(
                   self.current_step,
-                  self.total_steps, 
-                  done_tokens / (time.time() - self.start_time), 
+                  self.total_steps,
+                  done_tokens / (time.time() - self.start_time),
                   self.total_loss / self.report_steps,
                   self.total_loss_forward / self.report_steps,
                   self.total_loss_backward / self.report_steps,
