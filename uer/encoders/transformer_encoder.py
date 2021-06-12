@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import numpy as np
 from uer.layers.transformer import TransformerLayer
 from uer.layers.layer_norm import LayerNorm, T5LayerNorm
 from uer.layers.relative_position_embedding import RelativePositionEmbedding
@@ -100,3 +101,27 @@ class TransformerEncoder(nn.Module):
             return self.layer_norm(hidden)
         else:
             return hidden
+
+
+class ClipEncoder(nn.Module):
+    def __init__(self, args):
+        super(ClipEncoder, self).__init__()
+        self.tranformer_encoders = (TransformerEncoder(args), TransformerEncoder(args))
+        self.layer_norm = LayerNorm(args.hidden_size)
+        self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
+
+    def forward(self, emb, seg):
+
+        features_text = (self.tranformer_encoders[0](emb[0], seg[0]))
+        features_image = (self.tranformer_encoders[1](emb[1], seg[1]))
+
+        features_text = self.layer_norm(features_text)
+        features_image = self.layer_norm(features_image)
+
+        # cosine similarity as logits
+        logit_scale = self.logit_scale.exp()
+        logits_per_image = logit_scale * torch.matmal(features_text, features_image.t())
+        logits_per_text = logit_scale * torch.matmal(features_image , features_text.t())
+
+        # shape = [global_batch_size, global_batch_size]
+        return (logits_per_image, logits_per_text)

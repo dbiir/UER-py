@@ -1206,6 +1206,8 @@ class PrefixlmDataLoader(DataLoader):
                 torch.LongTensor(tgt), \
                 torch.LongTensor(seg)
 
+class ViltDataset(Dataset):
+    pass
 
 class ViltDataLoader(DataLoader):
     def __iter__(self):
@@ -1249,3 +1251,42 @@ class ViltDataLoader(DataLoader):
                   torch.LongTensor(tgt_match), \
                   torch.LongTensor(seg)
 
+class ClipDataLoader(DataLoader):
+    def __iter__(self):
+        while True:
+            while self._empty():
+                self._fill_buf()
+            if self.start + self.batch_size >= self.end:
+                instances = self.buffer[self.start:]
+            else:
+                instances = self.buffer[self.start: self.start + self.batch_size]
+
+            self.start += self.batch_size
+
+            src_text = []
+            src_image = []
+            tgt_mlm = []
+            tgt_match = []
+            seg = []
+
+            for i, ins in enumerate(instances):
+
+                src_text_single, tgt_mlm_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                src_text.append(src_text_single)
+                tgt_mlm.append([0] * len(ins[2]))
+                for mask in tgt_mlm_single:
+                    tgt_mlm[-1][mask[0]] = mask[1]
+
+                if random.random() < 0.5:
+                    src_image.append(ins[1])
+                    tgt_match.append(1)
+                else:
+                    random_ins = random.sample(instances[0:i]+instances[i+1:], 1)[0]
+                    src_image.append(random_ins[1])
+                    tgt_match.append(0)
+
+                seg.append(ins[2])
+
+            yield torch.LongTensor(src_text), \
+                  torch.stack(src_image, 0), \
+                  torch.LongTensor(seg)

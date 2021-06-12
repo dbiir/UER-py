@@ -356,17 +356,7 @@ class PrefixlmTrainer(MlmTrainer):
     pass
 
 
-class ViltTrainer(Trainer):
-    def __init__(self, args):
-        super(ViltTrainer, self).__init__(args)
-        self.total_loss_match = 0.0
-        self.total_correct_sp = 0.0
-        self.total_instances = 0.0
-
-        self.total_loss_mlm = 0.0
-        self.total_correct_mlm = 0.0
-        self.total_denominator = 0.0
-
+class ViltTrainer(BertTrainer):
     def forward_propagation(self, batch, model):
         src_text, src_image, tgt_mlm, tgt_match, seg = batch
         loss_info = model((src_text, src_image), (tgt_mlm, tgt_match), seg)
@@ -374,7 +364,7 @@ class ViltTrainer(Trainer):
         loss = loss_mlm + loss_match
         self.total_loss += loss.item()
         self.total_loss_mlm += loss_mlm.item()
-        self.total_loss_match += loss_match.item()
+        self.total_loss_sp += loss_match.item()
         self.total_correct_mlm += correct_mlm.item()
         self.total_correct_sp += correct_match.item()
         self.total_denominator += denominator.item()
@@ -400,14 +390,25 @@ class ViltTrainer(Trainer):
             done_tokens / (time.time() - self.start_time),
             self.total_loss / self.report_steps,
             self.total_loss_mlm / self.report_steps,
-            self.total_loss_match / self.report_steps,
+            self.total_loss_sp / self.report_steps,
             self.total_correct_mlm / self.total_denominator,
             self.total_correct_sp / self.total_instances))
 
-        self.total_loss, self.total_loss_mlm, self.total_loss_match = 0.0, 0.0, 0.0
+        self.total_loss, self.total_loss_mlm, self.total_loss_sp = 0.0, 0.0, 0.0
         self.total_correct_mlm, self.total_denominator = 0.0, 0.0
         self.total_correct_sp, self.total_instances = 0.0, 0.0
 
+
+class ClipTrainer(ClsTrainer):
+    def forward_propagation(self, batch, model):
+        src_text, src_img, seg = batch
+        loss_info = model((src_text, src_img), (seg, None), None)
+        loss, correct = loss_info
+        self.total_loss += loss.item()
+        self.total_correct += correct.item()
+        self.total_instances += src_text.size(0)
+        loss = loss / self.accumulation_steps
+        return loss
 
 
 str2trainer = {"bert": BertTrainer, "mlm": MlmTrainer, "lm": LmTrainer,

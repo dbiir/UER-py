@@ -107,6 +107,31 @@ class ViLEmbedding(nn.Module):
         return emb
 
 
+class ClipEmbedding(nn.Module):
+    """
+    """
+
+    def __init__(self, args, vocab_size):
+        super(ViLEmbedding, self).__init__()
+        self.language_embedding = WordPosEmbedding(args, vocab_size)
+        self.vision_embedding = PatchPosEmbedding(args)
+        self.remove_embedding_layernorm = args.remove_embedding_layernorm
+        if not self.remove_embedding_layernorm:
+            self.layer_norm = LayerNorm(args.emb_size)
+        self.dropout = nn.Dropout(args.dropout)
+
+    def forward(self, src, seg):
+        l_emb = self.language_embedding(src[0], seg[0])
+        v_emb = self.vision_embedding(src[1], seg[1])
+
+        if not self.remove_embedding_layernorm:
+            l_emb = self.layer_norm(l_emb)
+            v_emb = self.layer_norm(v_emb)
+        l_emb = self.dropout(l_emb)
+        v_emb = self.dropout(v_emb)
+        return (l_emb, v_emb)
+
+
 class WordEmbedding(nn.Module):
     """
     """
