@@ -414,7 +414,7 @@ class ClipTrainer(ClsTrainer):
 str2trainer = {"bert": BertTrainer, "mlm": MlmTrainer, "lm": LmTrainer,
                "albert": AlbertTrainer, "bilm": BilmTrainer, "cls": ClsTrainer,
                "seq2seq": Seq2seqTrainer, "t5": T5Trainer, "gsg": GsgTrainer,
-               "bart": BartTrainer, "vilt": ViltTrainer}
+               "bart": BartTrainer, "vilt": ViltTrainer, "clip": ClipTrainer}
 
 def worker(proc_id, gpu_ranks, args, model):
     """

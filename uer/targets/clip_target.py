@@ -5,11 +5,11 @@ from uer.layers.layer_norm import LayerNorm
 from uer.utils.act_fun import gelu
 
 
-class ClsTarget(nn.Module):
+class ClipTarget(nn.Module):
     """
     """
     def __init__(self, args, vocab_size):
-        super(ClsTarget, self).__init__()
+        super(ClipTarget, self).__init__()
         self.vocab_size = vocab_size
         self.hidden_size = args.hidden_size
         self.batch_size = args.batch_size
