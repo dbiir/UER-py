@@ -17,10 +17,11 @@ class PatchPosEmbedding(nn.Module):
     def __init__(self, args, vocab_size=None):
         super(PatchPosEmbedding, self).__init__()
         self.cls_token = nn.Parameter(torch.zeros(1, 1, args.emb_size))
-        self.image_size = to_2tuple(args.image_size)
+        self.image_height = args.image_height
+        self.image_width = args.image_width
         patch_size = to_2tuple(args.patch_size)
         num_channels = args.num_channels
-        num_patches = (self.image_size[1] // patch_size[1]) * (self.image_size[0] // patch_size[0])
+        num_patches = (self.image_width // patch_size[1]) * (self.image_height // patch_size[0])
 
         self.projection = nn.Conv2d(num_channels, args.emb_size, kernel_size=patch_size, stride=patch_size)
         self.position_embedding = nn.Embedding(num_patches + 1, args.emb_size)
@@ -31,9 +32,9 @@ class PatchPosEmbedding(nn.Module):
 
     def forward(self, src, _):
         batch_size, num_channels, height, width = src.shape
-        if height != self.image_size[0] or width != self.image_size[1]:
+        if height != self.image_height or width != self.image_width:
             raise ValueError(
-                f"Input image size ({height}*{width}) doesn't match model ({self.image_size[0]}*{self.image_size[1]})."
+                f"Input image size ({height}*{width}) doesn't match model ({self.image_height}*{self.image_width})."
             )
         patch_emb = self.projection(src).flatten(2).transpose(1, 2)
         cls_tokens = self.cls_token.expand(batch_size, -1, -1)
