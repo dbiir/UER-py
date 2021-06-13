@@ -30,7 +30,7 @@ class PatchPosEmbedding(nn.Module):
         if not self.remove_embedding_layernorm:
             self.layer_norm = LayerNorm(args.emb_size)
 
-    def forward(self, src, _):
+    def forward(self, src, seg = None):
         batch_size, num_channels, height, width = src.shape
         if height != self.image_height or width != self.image_width:
             raise ValueError(
@@ -68,7 +68,7 @@ class PatchEmbedding(nn.Module):
         if not self.remove_embedding_layernorm:
             self.layer_norm = LayerNorm(args.emb_size)
 
-    def forward(self, src, seg):
+    def forward(self, src, seg = None):
         batch_size, num_channels, height, width = src.shape
         if num_channels != self.num_channels:
             raise ValueError(
@@ -121,8 +121,8 @@ class ClipEmbedding(nn.Module):
         self.dropout = nn.Dropout(args.dropout)
 
     def forward(self, src, seg):
-        l_emb = self.language_embedding(src[0], seg[0])
-        v_emb = self.vision_embedding(src[1], seg[1])
+        l_emb = self.language_embedding(src[0], seg)
+        v_emb = self.vision_embedding(src[1])
 
         if not self.remove_embedding_layernorm:
             l_emb = self.layer_norm(l_emb)
