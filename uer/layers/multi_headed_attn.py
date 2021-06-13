@@ -51,6 +51,7 @@ class MultiHeadedAttention(nn.Module):
                    contiguous(). \
                    view(batch_size, seq_length, self.inner_hidden_size)
 
+        #print(query.,key.device,value.device,)
 
         query, key, value = [l(x). \
                              view(batch_size, -1, heads_num, per_head_size). \

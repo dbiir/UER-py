@@ -111,7 +111,8 @@ class ClipEncoder(nn.Module):
         self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
 
     def forward(self, emb, seg):
-
+        print(emb[0].size(), emb[1].size())
+        print(seg[0].size(), seg[1].size())
         features_text = (self.tranformer_encoders[0](emb[0], seg[0]))
         features_image = (self.tranformer_encoders[1](emb[1], seg[1]))
 
@@ -120,8 +121,8 @@ class ClipEncoder(nn.Module):
 
         # cosine similarity as logits
         logit_scale = self.logit_scale.exp()
-        logits_per_image = logit_scale * torch.matmal(features_text, features_image.t())
-        logits_per_text = logit_scale * torch.matmal(features_image , features_text.t())
+        logits_per_image = logit_scale * torch.matmal(features_text, features_image.transpose(-2, -1))
+        logits_per_text = logit_scale * torch.matmal(features_image , features_text.transpose(-2, -1))
 
         # shape = [global_batch_size, global_batch_size]
         return (logits_per_image, logits_per_text)
