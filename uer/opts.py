@@ -1,5 +1,5 @@
 def model_opts(parser):
-    parser.add_argument("--embedding", choices=["patch_pos", "patch", "vil", "word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
+    parser.add_argument("--embedding", choices=["patch_pos", "patch", "vil", "clip", "word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
                         help="Emebdding type.")
     parser.add_argument("--max_seq_length", type=int, default=512,
                         help="Max sequence length for word embedding.")
@@ -11,7 +11,7 @@ def model_opts(parser):
                         help="Remove layernorm on embedding.")
     parser.add_argument("--remove_attention_scale", action="store_true",
                         help="Remove attention scale.")
-    parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru",
+    parser.add_argument("--encoder", choices=["transformer", "clip", "rnn", "lstm", "gru",
                                               "birnn", "bilstm", "bigru",
                                               "gatedcnn"],
                         default="transformer", help="Encoder type.")
