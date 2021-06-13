@@ -1287,7 +1287,7 @@ class ClipDataLoader(DataLoader):
                     tgt_match.append(0)
 
                 seg_text.append(ins[2])
-                seg_text.append([1] * 257)
+                seg_image.append([1] * 257)
 
             yield torch.LongTensor(src_text), \
                   torch.stack(src_image, 0), \
