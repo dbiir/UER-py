@@ -402,7 +402,7 @@ class ViltTrainer(BertTrainer):
 class ClipTrainer(ClsTrainer):
     def forward_propagation(self, batch, model):
         src_text, src_img, seg_text, seg_img = batch
-        loss_info = model((src_text, src_img), (seg_text, seg_img), None)
+        loss_info = model((src_text, src_img), None, (seg_text, seg_img))
         loss, correct = loss_info
         self.total_loss += loss.item()
         self.total_correct += correct.item()
