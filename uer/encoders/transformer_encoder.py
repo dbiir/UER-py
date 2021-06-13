@@ -113,8 +113,10 @@ class ClipEncoder(nn.Module):
     def forward(self, emb, seg):
         print(emb[0].size(), emb[1].size())
         print(seg[0].size(), seg[1].size())
-        features_text = (self.tranformer_encoders[0](emb[0], seg[0]))
-        features_image = (self.tranformer_encoders[1](emb[1], seg[1]))
+        features_text = self.tranformer_encoders[0](emb[0], seg[0])
+        features_image = self.tranformer_encoders[1](emb[1], seg[1])
+
+        print(features_text.size(), features_image.size())
 
         features_text = self.layer_norm(features_text)
         features_image = self.layer_norm(features_image)
