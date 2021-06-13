@@ -14,9 +14,9 @@ class ClipTarget(nn.Module):
         self.hidden_size = args.hidden_size
         self.batch_size = args.batch_size
 
-
         self.criterion_img = nn.CrossEntropyLoss()
         self.criterion_text = nn.CrossEntropyLoss()
+        self.softmax = nn.LogSoftmax(dim=-1)
 
     def forward(self, memory_bank, tgt):
         """
