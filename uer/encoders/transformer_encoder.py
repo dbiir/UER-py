@@ -115,15 +115,14 @@ class ClipEncoder(nn.Module):
         features_text = self.text_encoder(emb[0], seg[0])
         features_image = self.image_encoder(emb[1], seg[1])
 
-        print(features_text.size(), features_image.size())
 
-        features_text = self.layer_norm(features_text)
-        features_image = self.layer_norm(features_image)
+        features_text = self.layer_norm(features_text[:,0,:])
+        features_image = self.layer_norm(features_image[:,0,:])
 
         # cosine similarity as logits
         logit_scale = self.logit_scale.exp()
-        logits_per_image = logit_scale * torch.matmal(features_text, features_image.transpose(-2, -1))
-        logits_per_text = logit_scale * torch.matmal(features_image , features_text.transpose(-2, -1))
+        logits_per_image = logit_scale * torch.matmul(features_text, features_image.transpose(-2, -1))
+        logits_per_text = logit_scale * torch.matmul(features_image , features_text.transpose(-2, -1))
 
         # shape = [global_batch_size, global_batch_size]
         return (logits_per_image, logits_per_text)

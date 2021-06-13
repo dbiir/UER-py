@@ -51,18 +51,13 @@ class MultiHeadedAttention(nn.Module):
                    contiguous(). \
                    view(batch_size, seq_length, self.inner_hidden_size)
 
-        print(query.size(),key.size(),value.size())
-        print(self.linear_layers[0].weight.device)
-
         query, key, value = [l(x). \
                              view(batch_size, -1, heads_num, per_head_size). \
                              transpose(1, 2) \
                              for l, x in zip(self.linear_layers, (query, key, value))
                             ]
-        print(query.size(),key.size(),value.size())
 
         scores = torch.matmul(query, key.transpose(-2, -1))
-        print(query.size(),key.size(),value.size())
 
         if position_bias is not None:
             scores = scores + position_bias
