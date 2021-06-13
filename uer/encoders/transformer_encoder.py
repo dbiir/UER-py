@@ -106,15 +106,14 @@ class TransformerEncoder(nn.Module):
 class ClipEncoder(nn.Module):
     def __init__(self, args):
         super(ClipEncoder, self).__init__()
-        self.tranformer_encoders = (TransformerEncoder(args), TransformerEncoder(args))
+        self.text_encoder = TransformerEncoder(args)
+        self.image_encoder = TransformerEncoder(args)
         self.layer_norm = LayerNorm(args.hidden_size)
         self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
 
     def forward(self, emb, seg):
-        print(emb[0].size(), emb[1].size())
-        print(seg[0].size(), seg[1].size())
-        features_text = self.tranformer_encoders[0](emb[0], seg[0])
-        features_image = self.tranformer_encoders[1](emb[1], seg[1])
+        features_text = self.text_encoder(emb[0], seg[0])
+        features_image = self.image_encoder(emb[1], seg[1])
 
         print(features_text.size(), features_image.size())
 
