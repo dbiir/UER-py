@@ -1267,7 +1267,8 @@ class ClipDataLoader(DataLoader):
             src_image = []
             tgt_mlm = []
             tgt_match = []
-            seg = []
+            seg_text = []
+            seg_image = []
 
             for i, ins in enumerate(instances):
 
@@ -1285,8 +1286,10 @@ class ClipDataLoader(DataLoader):
                     src_image.append(random_ins[1])
                     tgt_match.append(0)
 
-                seg.append(ins[2])
+                seg_text.append(ins[2])
+                seg_text.append([1] * 257)
 
             yield torch.LongTensor(src_text), \
                   torch.stack(src_image, 0), \
-                  torch.LongTensor(seg)
+                  torch.LongTensor(seg_text), \
+                  torch.LongTensor(seg_image)

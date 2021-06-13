@@ -121,8 +121,8 @@ class ClipEmbedding(nn.Module):
         self.dropout = nn.Dropout(args.dropout)
 
     def forward(self, src, seg):
-        l_emb = self.language_embedding(src[0], seg)
-        v_emb = self.vision_embedding(src[1])
+        l_emb = self.language_embedding(src[0], seg[0])
+        v_emb = self.vision_embedding(src[1], seg[1])
 
         if not self.remove_embedding_layernorm:
             l_emb = self.layer_norm(l_emb)
