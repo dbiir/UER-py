@@ -58,8 +58,11 @@ class MultiHeadedAttention(nn.Module):
                              transpose(1, 2) \
                              for l, x in zip(self.linear_layers, (query, key, value))
                             ]
+        print(query.size(),key.size(),value.size())
 
         scores = torch.matmul(query, key.transpose(-2, -1))
+        print(query.size(),key.size(),value.size())
+
         if position_bias is not None:
             scores = scores + position_bias
         if self.with_scale:
