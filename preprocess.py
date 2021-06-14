@@ -28,12 +28,13 @@ def main():
     # Preprocess options.
     parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
                         help="Specify the tokenizer." 
-                             "Original Google BERT uses bert tokenizer on Chinese corpus."
+                             "Original Google BERT uses bert tokenizer."
                              "Char tokenizer segments sentences into characters."
                              "Space tokenizer segments sentences into words according to space."
+                             "Original XLM-RoBERTa uses xlmroberta tokenizer."
                              )
     parser.add_argument("--tgt_tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
-                        help="Specify the tokenizer.")
+                        help="Specify the tokenizer for target side.")
     parser.add_argument("--processes_num", type=int, default=1,
                         help="Split the whole dataset into `processes_num` parts, "
                              "and process them with `processes_num` processes.")
@@ -59,8 +60,10 @@ def main():
                         help="Hyperparameter of geometric distribution for span masking.")
     parser.add_argument("--span_max_length", type=int, default=10,
                         help="Max length for span masking.")
+
+    # Sentence selection strategy options.
     parser.add_argument("--sentence_selection_strategy", choices=["lead", "random", "rouge"], default="lead",
-                        help="Sentences select strategies for gap-sentences generation task.")
+                        help="Sentence selection strategy for gap-sentences generation task.")
 
     args = parser.parse_args()
 

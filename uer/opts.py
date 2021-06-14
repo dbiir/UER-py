@@ -115,3 +115,12 @@ def infer_opts(parser):
                         help="Batch size.")
     parser.add_argument("--seq_length", type=int, default=128,
                         help="Sequence length.")
+
+def tokenizer_opts(parser):
+    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
+                        help="Specify the tokenizer." 
+                             "Original Google BERT uses bert tokenizer."
+                             "Char tokenizer segments sentences into characters."
+                             "Space tokenizer segments sentences into words according to space."
+                             "Original XLM-RoBERTa uses xlmroberta tokenizer."
+                             )

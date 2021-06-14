@@ -20,7 +20,7 @@ from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
-from uer.opts import finetune_opts
+from uer.opts import finetune_opts, tokenizer_opts
 
 
 class Classifier(nn.Module):
@@ -248,12 +248,7 @@ def main():
     parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
                         help="Pooling type.")
 
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
-                        help="Specify the tokenizer."
-                             "Original Google BERT uses bert tokenizer on Chinese corpus."
-                             "Char tokenizer segments sentences into characters."
-                             "Space tokenizer segments sentences into words according to space."
-                             )
+    tokenizer_opts(parser)
 
     parser.add_argument("--soft_targets", action='store_true',
                         help="Train model with logits.")
@@ -338,9 +333,9 @@ def main():
     if args.test_path is not None:
         print("Test set evaluation.")
         if torch.cuda.device_count() > 1:
-            model.module.load_state_dict(torch.load(args.output_model_path))
+            args.model.module.load_state_dict(torch.load(args.output_model_path))
         else:
-            model.load_state_dict(torch.load(args.output_model_path))
+            args.model.load_state_dict(torch.load(args.output_model_path))
         evaluate(args, read_dataset(args, args.test_path), True)
 
 

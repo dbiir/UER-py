@@ -48,12 +48,7 @@ def main():
                         help="Pooling type.")
 
     # Tokenizer options.
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
-                        help="Specify the tokenizer." 
-                             "Original Google BERT uses bert tokenizer on Chinese corpus."
-                             "Char tokenizer segments sentences into characters."
-                             "Space tokenizer segments sentences into words according to space."
-                             )
+    tokenizer_opts(parser)
 
     # Optimization options.
     optimization_opts(parser) 

@@ -53,18 +53,9 @@ if __name__ == '__main__':
     parser.add_argument("--temperature", type=float, default=1.0)
     parser.add_argument("--tgt_vocab_path", type=str,
                         help="Path of the vocabulary file.")
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
-                        help="Specify the tokenizer."
-                             "Original Google BERT uses bert tokenizer on Chinese corpus."
-                             "Char tokenizer segments sentences into characters."
-                             "Space tokenizer segments sentences into words according to space."
-                        )
+    tokenizer_opts(parser)
     parser.add_argument("--tgt_tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
-                        help="Specify the tokenizer."
-                             "Original Google BERT uses bert tokenizer on Chinese corpus."
-                             "Char tokenizer segments sentences into characters."
-                             "Space tokenizer segments sentences into words according to space."
-                        )
+                        help="Specify the tokenizer for target side.")
     parser.add_argument("--tgt_seq_length", type=int, default=128,
                         help="Sequence length.")
     parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word",

@@ -29,10 +29,10 @@ Table of Contents
 
 ## Features
 UER-py has the following features:
-- __Reproducibility__ UER-py has been tested on many datasets and should match the performances of the original pre-training model implementations such as BERT, GPT, ELMo, and T5.
+- __Reproducibility__ UER-py has been tested on many datasets and should match the performances of the original pre-training model implementations such as BERT, GPT-2, ELMo, and T5.
 - __Multi-GPU__ UER-py supports CPU mode, single GPU mode, and distributed training mode. 
 - __Model modularity__ UER-py is divided into multiple components: embedding, encoder, and target. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules to construct pre-training models with as few restrictions as possible.
-- __Efficiency__ UER-py refines its pre-processing, pre-training, and fine-tuning stages, which largely improves speed while requires less memory and disk space.
+- __Efficiency__ UER-py refines its pre-processing, pre-training, fine-tuning, and inference stages, which largely improves speed while requires less memory and disk space.
 - __Model zoo__ With the help of UER-py, we pre-trained models with different corpora, encoders, and targets. Proper selection of pre-trained models is important to the performances of downstream tasks.
 - __SOTA results__ UER-py supports comprehensive downstream tasks (e.g. classification and machine reading comprehension) and provides winning solutions of many NLP competitions.
 - __Abundant functions__ UER-py provides abundant functions related with pre-training, such as feature extractor and mixed precision training.
@@ -51,6 +51,7 @@ UER-py has the following features:
 * For the tokenization with sentencepiece model you will need [SentencePiece](https://github.com/google/sentencepiece)
 * For developing a stacking model you will need LightGBM and [BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
 * For the pre-training with whole word masking you will need word segmentation tool such as [jieba](https://github.com/fxsjy/jieba)
+* For the gap sentence generation (GSG) target with rouge sentence selection strategy you will need [rouge](https://github.com/pltrdy/rouge)
 
 <br/>
 
@@ -114,7 +115,7 @@ python3 finetune/run_classifier.py --pretrained_model_path models/book_review_mo
                                    --epochs_num 3 --batch_size 32 \
                                    --embedding word_pos_seg --encoder transformer --mask fully_visible
 ``` 
-The result of *book_review_model.bin* on test set is 88.2. It is also noticeable that we don't need to specify the target in fine-tuning stage. Pre-training target is replaced with task-specific target.
+It is noticeable that we don't need to specify the target in fine-tuning stage. Pre-training target is replaced with task-specific target.
 
 The default path of the fine-tuned classifier model is *models/finetuned_model.bin* . Then we do inference with the fine-tuned model. 
 ```
@@ -179,7 +180,7 @@ UER-py/
 
 The code is well-organized. Users can use and extend upon it with little efforts.
 
-More examples of using UER can be found in :arrow_right: [__instructions__](https://github.com/dbiir/UER-py/wiki/Instructions) :arrow_left: , which help users quickly implement pre-training models such as BERT, GPT, ELMo, T5 and fine-tune pre-trained models on a range of downstream tasks.
+More examples of using UER can be found in :arrow_right: [__instructions__](https://github.com/dbiir/UER-py/wiki/Instructions) :arrow_left: , which help users quickly implement pre-training models such as BERT, GPT-2, ELMo, T5 and fine-tune pre-trained models on a range of downstream tasks.
 
 <br/>
 

@@ -18,7 +18,7 @@ from uer.utils.constants import *
 from uer.utils import *
 from uer.utils.config import load_hyperparam
 from uer.model_loader import load_model
-from uer.opts import infer_opts
+from uer.opts import infer_opts, tokenizer_opts
 
 
 def batch_loader(batch_size, src, seg):                                                                                             
@@ -136,12 +136,7 @@ if __name__ == '__main__':
                                               default="first", help="Pooling Type.")
     parser.add_argument("--whitening_size", type=int, default=None, help="Output vector size after whitening.")
 
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
-                        help="Specify the tokenizer." 
-                             "Original Google BERT uses bert tokenizer on Chinese corpus."
-                             "Char tokenizer segments sentences into characters."
-                             "Space tokenizer segments sentences into words according to space."
-                             )
+    tokenizer_opts(parser)
 
     args = parser.parse_args()
     args = load_hyperparam(args)

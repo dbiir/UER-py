@@ -13,7 +13,7 @@ from uer.utils.constants import *
 from uer.utils import *
 from uer.utils.config import load_hyperparam
 from uer.utils.vocab import Vocab
-from uer.opts import model_opts
+from uer.opts import model_opts, tokenizer_opts
 
 
 class SequenceEncoder(torch.nn.Module):
@@ -45,12 +45,7 @@ if __name__ == '__main__':
     parser.add_argument("--config_path", default="models/bert/base_config.json", type=str,
                         help="Path of the config file.")
 
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
-                        help="Specify the tokenizer."
-                             "Original Google BERT uses bert tokenizer on Chinese corpus."
-                             "Char tokenizer segments sentences into characters."
-                             "Space tokenizer segments sentences into words according to space."
-                             )
+    tokenizer_opts(parser)
 
     parser.add_argument("--batch_size", type=int, default=64,
                         help="Batch size.")

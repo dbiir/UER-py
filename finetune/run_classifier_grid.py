@@ -11,6 +11,7 @@ from itertools import product
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
+from uer.opts import *
 from finetune.run_classifier import *
 
 
@@ -22,12 +23,7 @@ def main():
     parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
                         help="Pooling type.")
 
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
-                        help="Specify the tokenizer."
-                             "Original Google BERT uses bert tokenizer on Chinese corpus."
-                             "Char tokenizer segments sentences into characters."
-                             "Space tokenizer segments sentences into words according to space."
-                        )
+    tokenizer_opts(parser)
 
     parser.add_argument("--soft_targets", action='store_true',
                         help="Train model with logits.")

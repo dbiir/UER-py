@@ -19,7 +19,7 @@ from uer.utils.constants import *
 from uer.utils import *
 from uer.utils.config import load_hyperparam
 from uer.model_loader import load_model
-from uer.opts import infer_opts
+from uer.opts import infer_opts, tokenizer_opts
 
 
 def mask_token(tokens, seq_length, tokenizer):
@@ -101,12 +101,7 @@ if __name__ == '__main__':
     parser.add_argument("--target", choices=["bert", "mlm", "albert"], default="bert",
                         help="The training target of the pretraining model.")
 
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
-                        help="Specify the tokenizer."
-                             "Original Google BERT uses bert tokenizer on Chinese corpus."
-                             "Char tokenizer segments sentences into characters."
-                             "Space tokenizer segments sentences into words according to space."
-                             )
+    tokenizer_opts(parser)
 
     parser.add_argument("--topn", type=int, default=10,
                         help="Print top n nearest neighbours.")

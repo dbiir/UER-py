@@ -20,7 +20,7 @@ from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
-from uer.opts import finetune_opts
+from uer.opts import finetune_opts, tokenizer_opts
 from finetune.run_classifier import build_optimizer, load_or_initialize_parameters, train_model, batch_loader, evaluate
 
 
@@ -117,12 +117,7 @@ def main():
     parser.add_argument("--max_choices_num", default=4, type=int,
                         help="The maximum number of cadicate answer, shorter than this will be padded.")
 
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
-                        help="Specify the tokenizer."
-                             "Original Google BERT uses bert tokenizer on Chinese corpus."
-                             "Char tokenizer segments sentences into characters."
-                             "Space tokenizer segments sentences into words according to space."
-                        )
+    tokenizer_opts(parser)
 
     args = parser.parse_args()
     args.labels_num = args.max_choices_num
@@ -198,9 +193,9 @@ def main():
     if args.test_path is not None:
         print("Test set evaluation.")
         if torch.cuda.device_count() > 1:
-            model.module.load_state_dict(torch.load(args.output_model_path))
+            args.model.module.load_state_dict(torch.load(args.output_model_path))
         else:
-            model.load_state_dict(torch.load(args.output_model_path))
+            args.model.load_state_dict(torch.load(args.output_model_path))
         evaluate(args, read_dataset(args, args.test_path))
 
 

@@ -10,6 +10,7 @@ sys.path.append(uer_dir)
 
 from uer.utils import *
 from uer.utils.vocab import Vocab
+from uer.opts import tokenizer_opts
 
 
 if __name__ == '__main__':
@@ -20,11 +21,7 @@ if __name__ == '__main__':
     parser.add_argument("--workers_num", type=int, default=1, help="The number of processes to build vocabulary.")
     parser.add_argument("--min_count", type=int, default=1, help="The minimum count of words retained in the vocabulary.")
 
-    parser.add_argument("--tokenizer", choices=["char", "space"], default="space",
-                        help="Specify the tokenizer." 
-                             "Char tokenizer segments sentences into characters."
-                             "Space tokenizer segments sentences into words according to space."
-                             )
+    tokenizer_opts(parser)
 
     args = parser.parse_args()
 

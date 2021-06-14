@@ -46,13 +46,14 @@ def main():
 
     # Preprocess options.
     parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
-                        help="Specify the tokenizer."
-                             "Original Google BERT uses bert tokenizer on Chinese corpus."
+                        help="Specify the tokenizer." 
+                             "Original Google BERT uses bert tokenizer."
                              "Char tokenizer segments sentences into characters."
                              "Space tokenizer segments sentences into words according to space."
-                        )
+                             "Original XLM-RoBERTa uses xlmroberta tokenizer."
+                             )
     parser.add_argument("--tgt_tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
-                        help="Specify the tokenizer.")
+                        help="Specify the tokenizer for target side.")
 
     # Model options.
     model_opts(parser)

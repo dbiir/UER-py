@@ -17,7 +17,7 @@ from uer.utils import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_loader import load_model
-from uer.opts import model_opts
+from uer.opts import *
 from finetune.run_classifier import Classifier
 from inference.run_classifier_infer import *
 
@@ -53,11 +53,7 @@ def main():
                         help="Number of prediction labels.")
 
     # Tokenizer options.
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
-                        help="Specify the tokenizer." 
-                             "Original Google BERT uses bert tokenizer on Chinese corpus."
-                             "Char tokenizer segments sentences into characters."
-                             "Space tokenizer segments sentences into words according to space.")
+    tokenizer_opts(parser)
 
     # Output options.
     parser.add_argument("--output_logits", action="store_true", help="Write logits to output file.")
