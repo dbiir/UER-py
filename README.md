@@ -41,7 +41,7 @@ UER-py has the following features:
 <br/>
 
 ## Requirements
-* Python 3.6
+* Python >= 3.6
 * torch >= 1.1
 * six >= 1.12.0
 * argparse

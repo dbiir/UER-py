@@ -19,7 +19,7 @@ from uer.utils.constants import *
 from uer.utils import *
 from uer.utils.config import load_hyperparam
 from uer.model_loader import load_model
-from uer.opts import infer_opts
+from uer.opts import infer_opts, tokenizer_opts
 
 
 class GenerateLm(torch.nn.Module):

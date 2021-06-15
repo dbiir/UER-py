@@ -116,6 +116,7 @@ def infer_opts(parser):
     parser.add_argument("--seq_length", type=int, default=128,
                         help="Sequence length.")
 
+
 def tokenizer_opts(parser):
     parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
                         help="Specify the tokenizer." 

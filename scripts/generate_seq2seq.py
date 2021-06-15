@@ -15,7 +15,7 @@ from uer.utils.constants import *
 from uer.utils import *
 from uer.utils.config import load_hyperparam
 from uer.model_loader import load_model
-from uer.opts import infer_opts
+from uer.opts import infer_opts, tokenizer_opts
 from scripts.generate_lm import top_k_top_p_filtering
 
 
