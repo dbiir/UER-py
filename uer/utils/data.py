@@ -3,6 +3,8 @@ import random
 import pickle
 import torch
 from multiprocessing import Pool
+from PIL import Image
+from torchvision import transforms
 from uer.utils.constants import *
 from uer.utils.tokenizers import *
 from uer.utils.misc import count_lines
@@ -91,6 +93,7 @@ class DataLoader(object):
         self.proc_id = proc_id
         self.proc_num = proc_num
         self.shuffle = shuffle
+        self.dataset_path = dataset_path
         self.dataset_reader = open(dataset_path, "rb")
         self.read_count = 0
         self.start = 0
@@ -1206,8 +1209,10 @@ class PrefixlmDataLoader(DataLoader):
                 torch.LongTensor(tgt), \
                 torch.LongTensor(seg)
 
+
 class ViltDataset(Dataset):
     pass
+
 
 class ViltDataLoader(DataLoader):
     def __iter__(self):
@@ -1251,7 +1256,12 @@ class ViltDataLoader(DataLoader):
                   torch.LongTensor(tgt_match), \
                   torch.LongTensor(seg)
 
+
 class ClipDataLoader(DataLoader):
+    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=False):
+        super(ClipDataLoader, self).__init__(args, dataset_path, batch_size, proc_id, proc_num, shuffle)
+        self.dataset_folder = os.path.dirname(dataset_path)
+
     def __iter__(self):
         while True:
             while self._empty():
@@ -1265,29 +1275,17 @@ class ClipDataLoader(DataLoader):
 
             src_text = []
             src_image = []
-            tgt_mlm = []
-            tgt_match = []
             seg_text = []
             seg_image = []
 
             for i, ins in enumerate(instances):
 
-                src_text_single, tgt_mlm_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
-                src_text.append(src_text_single)
-                tgt_mlm.append([0] * len(ins[2]))
-                for mask in tgt_mlm_single:
-                    tgt_mlm[-1][mask[0]] = mask[1]
-
-                if random.random() < 0.5:
-                    src_image.append(ins[1])
-                    tgt_match.append(1)
-                else:
-                    random_ins = random.sample(instances[0:i]+instances[i+1:], 1)[0]
-                    src_image.append(random_ins[1])
-                    tgt_match.append(0)
-
+                src_text.append(ins[0])
+                image = Image.open(self.dataset_folder + "/" + ins[1])
+                src_image_single = transforms.ToTensor(image)
+                src_image.append(src_image_single)
                 seg_text.append(ins[2])
-                seg_image.append([1] * 257)
+                seg_image.append(ins[3])
 
             yield torch.LongTensor(src_text), \
                   torch.stack(src_image, 0), \
