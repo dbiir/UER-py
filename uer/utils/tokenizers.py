@@ -232,7 +232,7 @@ class BertTokenizer(Tokenizer):
         return split_tokens
 
 
-class HFXLMRobertaTokenizer(Tokenizer):
+class XLMRobertaTokenizer(Tokenizer):
     """Runs end-to-end tokenziation."""
 
     def __init__(self, args, is_src=True):

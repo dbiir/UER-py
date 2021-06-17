@@ -32,9 +32,20 @@ def train_and_validate(args):
         model = load_model(model, args.pretrained_model_path)
     else:
         # Initialize with normal distribution.
-        for n, p in list(model.named_parameters()):
-            if "gamma" not in n and "beta" not in n:
-                p.data.normal_(0, 0.02)
+        if args.deep_init:
+            scaled_factor = 1 / math.sqrt(2.0 * args.layers_num)
+            for n, p in list(model.named_parameters()):
+                if "gamma" not in n and "beta" not in n:
+                    if "linear_2.weight" in n or "final_linear.weight" in n:
+                        p.data.normal_(0, 0.02 * scaled_factor)
+                    elif "linear_2.bias" in n or "final_linear.bias" in n:
+                        p.data.zero_()
+                    else:
+                        p.data.normal_(0, 0.02)
+        else:
+            for n, p in list(model.named_parameters()):
+                if "gamma" not in n and "beta" not in n:
+                    p.data.normal_(0, 0.02)
 
     if args.dist_train:
         # Multiprocessing distributed mode.

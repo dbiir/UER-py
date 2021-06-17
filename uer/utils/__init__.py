@@ -1,12 +1,9 @@
-from uer.utils.tokenizers import CharTokenizer
-from uer.utils.tokenizers import SpaceTokenizer
-from uer.utils.tokenizers import BertTokenizer
 from uer.utils.data import *
 from uer.utils.act_fun import *
 from uer.utils.optimizers import *
 
 
-str2tokenizer = {"char": CharTokenizer, "space": SpaceTokenizer, "bert": BertTokenizer, "xlmroberta": HFXLMRobertaTokenizer}
+str2tokenizer = {"char": CharTokenizer, "space": SpaceTokenizer, "bert": BertTokenizer, "xlmroberta": XLMRobertaTokenizer}
 str2dataset = {"bert": BertDataset, "lm": LmDataset, "mlm": MlmDataset,
                "bilm": BilmDataset, "albert": AlbertDataset, "seq2seq": Seq2seqDataset,
                "t5": T5Dataset, "gsg": GsgDataset, "bart": BartDataset,
@@ -25,7 +22,7 @@ str2scheduler = {"linear": get_linear_schedule_with_warmup, "cosine": get_cosine
                  "polynomial": get_polynomial_decay_schedule_with_warmup,
                  "constant": get_constant_schedule, "constant_with_warmup": get_constant_schedule_with_warmup}
 
-__all__ = ["CharTokenizer", "SpaceTokenizer", "BertTokenizer", "HFXLMRobertaTokenizer", "str2tokenizer",
+__all__ = ["CharTokenizer", "SpaceTokenizer", "BertTokenizer", "XLMRobertaTokenizer", "str2tokenizer",
            "BertDataset", "LmDataset", "MlmDataset", "BilmDataset",
            "AlbertDataset", "Seq2seqDataset", "T5Dataset", "GsgDataset",
            "BartDataset", "ClsDataset", "PrefixlmDataset", "str2dataset",
