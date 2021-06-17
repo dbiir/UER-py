@@ -11,8 +11,6 @@ import torch
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
-from uer.layers import *
-from uer.encoders import *
 from uer.utils.constants import *
 from uer.utils.tokenizers import *
 from uer.utils.optimizers import *
@@ -95,16 +93,16 @@ def read_dataset(args, data_path, answer_path):
 
                 for i in range(len(left_tokens)):
                     if "#idiom" in left_tokens[i] and left_tokens[i] != tag:
-                        left_tokens[i] = "[MASK]"
+                        left_tokens[i] = MASK_TOKEN
                 for i in range(len(right_tokens)):
                     if "#idiom" in right_tokens[i] and right_tokens[i] != tag:
-                        right_tokens[i] = "[MASK]"
+                        right_tokens[i] = MASK_TOKEN
 
                 dataset.append(([], tgt, [], tag, group_index))
 
                 for option in options:
                     option_tokens = args.tokenizer.tokenize(option)
-                    tokens = ["[CLS]"] + option_tokens + ["[SEP]"] + left_tokens + ["[unused1]"] + right_tokens + ["[SEP]"]
+                    tokens = [CLS_TOKEN] + option_tokens + [SEP_TOKEN] + left_tokens + [SEP_TOKEN] + right_tokens + [SEP_TOKEN]
 
                     src = args.tokenizer.convert_tokens_to_ids(tokens)[: args.seq_length]
                     seg = [0] * len(src)
