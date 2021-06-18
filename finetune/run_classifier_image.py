@@ -25,20 +25,6 @@ from uer.opts import finetune_opts
 from finetune.run_classifier import *
 
 
-
-def count_labels_num(path):
-    labels_set, columns = set(), {}
-    with open(path, mode="r", encoding="utf-8") as f:
-        for line_id, line in enumerate(f):
-            if line_id == 0:
-                for i, column_name in enumerate(line.strip().split("\t")):
-                    columns[column_name] = i
-                continue
-            line = line.strip().split("\t")
-            label = int(line[columns["label"]])
-            labels_set.add(label)
-    return len(labels_set)
-
 str2dest = {"cifar10": dest.CIFAR10, "cifar100": dest.CIFAR100, "mnist": dest.MNIST}
 
 def read_dataset(args, path, train = True):
@@ -85,13 +71,12 @@ def main():
 
     parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
                         help="Pooling type.")
-
     parser.add_argument("--dataset", choices=["mnist", "cifar10", "cifar100"], default="mnist",
                         help="Image dataset type.")
-
+    parser.add_argument("--labels_num", type=int, required=False,
+                        help="Number of prediction labels.")
     parser.add_argument("--download", action='store_true',
                         help="Download from internet and save on train path.")
-
     parser.add_argument("--soft_targets", action='store_true',
                         help="Train model with logits.")
     parser.add_argument("--soft_alpha", type=float, default=0.5,
@@ -105,7 +90,7 @@ def main():
     set_seed(args.seed)
 
     # Count the number of labels.
-    args.labels_num = count_labels_num(args.train_path)
+    args.labels_num = args.labels_num
 
     # Build classification model.
     model = Classifier(args)
