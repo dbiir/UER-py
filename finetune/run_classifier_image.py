@@ -39,7 +39,7 @@ def count_labels_num(path):
             labels_set.add(label)
     return len(labels_set)
 
-str2dest = {"cifar10": dset.CIFAR10, "cifar100": dset.CIFAR100, "mnist": dset.MNIST}
+str2dest = {"cifar10": dest.CIFAR10, "cifar100": dest.CIFAR100, "mnist": dest.MNIST}
 
 def read_dataset(args, path, train = True):
     datasource = str2dest[args.dataset](path, train=train, transform=None, target_transform=None, download=args.download)
