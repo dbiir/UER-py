@@ -71,7 +71,7 @@ def train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_bat
 
 
 def evaluate(args, dataset, print_confusion_matrix=False):
-    src = torch.stack([example[0] for example in trainset], 0)
+    src = torch.stack([example[0] for example in dataset], 0)
     tgt = torch.LongTensor([sample[1] for sample in dataset])
     seg = torch.LongTensor([sample[2] for sample in dataset])
 
