@@ -114,7 +114,7 @@ def main():
     instances_num = len(trainset)
     batch_size = args.batch_size
 
-    src = torch.LongTensor([example[0] for example in trainset])
+    src = torch.stack([example[0] for example in trainset], 0)
     tgt = torch.LongTensor([example[1] for example in trainset])
     seg = torch.LongTensor([example[2] for example in trainset])
     if args.soft_targets:
