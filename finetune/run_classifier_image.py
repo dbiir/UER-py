@@ -30,8 +30,9 @@ str2dest = {"cifar10": dest.CIFAR10, "cifar100": dest.CIFAR100, "mnist": dest.MN
 def read_dataset(args, path, train = True):
     datasource = str2dest[args.dataset](path, train=train, transform=None, target_transform=None, download=args.download)
     dataset = []
+    transform = transforms.ToTensor()
     for i in range(len(datasource)):
-        src = transforms.ToTensor(datasource[i][0])
+        src = transform(datasource[i][0])
         tgt = datasource[i][1]
         seg = [1] * ((src.size()[1] // args.patch_size) * (src.size()[2] // args.patch_size) + 1)
         dataset.append((src, tgt, seg))
@@ -73,7 +74,7 @@ def main():
                         help="Pooling type.")
     parser.add_argument("--dataset", choices=["mnist", "cifar10", "cifar100"], default="mnist",
                         help="Image dataset type.")
-    parser.add_argument("--labels_num", type=int, required=False,
+    parser.add_argument("--labels_num", type=int, required=True,
                         help="Number of prediction labels.")
     parser.add_argument("--download", action='store_true',
                         help="Download from internet and save on train path.")

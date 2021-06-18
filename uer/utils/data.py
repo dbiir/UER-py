@@ -1261,6 +1261,7 @@ class ClipDataLoader(DataLoader):
     def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=False):
         super(ClipDataLoader, self).__init__(args, dataset_path, batch_size, proc_id, proc_num, shuffle)
         self.dataset_folder = os.path.dirname(dataset_path)
+        self.transform = transforms.ToTensor()
 
     def __iter__(self):
         while True:
@@ -1282,7 +1283,7 @@ class ClipDataLoader(DataLoader):
 
                 src_text.append(ins[0])
                 image = Image.open(self.dataset_folder + "/" + ins[1])
-                src_image_single = transforms.ToTensor(image)
+                src_image_single = self.transform(image)
                 src_image.append(src_image_single)
                 seg_text.append(ins[2])
                 seg_image.append(ins[3])
