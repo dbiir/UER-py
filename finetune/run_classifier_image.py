@@ -35,6 +35,11 @@ def read_dataset(args, path, train = True):
         src = transform(datasource[i][0])
         tgt = datasource[i][1]
         seg = [1] * ((src.size()[1] // args.patch_size) * (src.size()[2] // args.patch_size) + 1)
+        if src.size()[1] %  args.patch_size != 0 or src.size()[2] %  args.patch_size != 0:
+            raise ValueError(
+                f"Input image size ({src.size()[1]}*{src.size()[2]}) are not divisible by patch size ({args.patch_size})."
+            )
+
         dataset.append((src, tgt, seg))
 
     return dataset
