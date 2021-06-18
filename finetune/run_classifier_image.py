@@ -91,7 +91,8 @@ def main():
 
     # Count the number of labels.
     args.labels_num = args.labels_num
-    args.tokenizer.vocab = []
+    args.vocab_size = 0
+
     # Build classification model.
     model = Classifier(args)
 

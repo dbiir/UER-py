@@ -26,7 +26,7 @@ from uer.opts import finetune_opts
 class Classifier(nn.Module):
     def __init__(self, args):
         super(Classifier, self).__init__()
-        self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
+        self.embedding = str2embedding[args.embedding](args, args.vocab_size)
         self.encoder = str2encoder[args.encoder](args)
         self.labels_num = args.labels_num
         self.pooling = args.pooling
@@ -271,6 +271,7 @@ def main():
 
     # Build tokenizer.
     args.tokenizer = str2tokenizer[args.tokenizer](args)
+    args.vocab_size = len(args.tokenizer.vocab)
 
     # Build classification model.
     model = Classifier(args)
