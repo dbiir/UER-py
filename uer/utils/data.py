@@ -1215,6 +1215,11 @@ class ViltDataset(Dataset):
 
 
 class ViltDataLoader(DataLoader):
+    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=False):
+        super(ViltDataLoader, self).__init__(args, dataset_path, batch_size, proc_id, proc_num, shuffle)
+        self.dataset_folder = os.path.dirname(dataset_path)
+        self.transform = transforms.ToTensor()
+
     def __iter__(self):
         while True:
             while self._empty():
@@ -1240,15 +1245,18 @@ class ViltDataLoader(DataLoader):
                 for mask in tgt_mlm_single:
                     tgt_mlm[-1][mask[0]] = mask[1]
 
-                if random.random() < 0.5:
-                    src_image.append(ins[1])
+                image = Image.open(self.dataset_folder + "/" + ins[1])
+                src_image_single = self.transform(image)
+
+                if random.random() < 0.5 or i == 0:
+                    src_image.append(src_image_single)
                     tgt_match.append(1)
                 else:
-                    random_ins = random.sample(instances[0:i]+instances[i+1:], 1)[0]
-                    src_image.append(random_ins[1])
+                    random_img = random.sample(src_image[0:i]+instances[i+1:], 1)[0]
+                    src_image.append(random_img)
                     tgt_match.append(0)
 
-                seg.append(ins[2])
+                seg.append(ins[2]+ins[3])
 
             yield torch.LongTensor(src_text), \
                   torch.stack(src_image, 0), \
