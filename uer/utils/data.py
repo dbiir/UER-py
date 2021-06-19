@@ -16,7 +16,7 @@ def merge_dataset(dataset_path, workers_num):
     for i in range(workers_num):
         tmp_dataset_reader = open("dataset-tmp-" + str(i) + ".pt", "rb")
         while True:
-            tmp_data = tmp_dataset_reader.read(2^20)
+            tmp_data = tmp_dataset_reader.read(2**20)
             if tmp_data:
                 dataset_writer.write(tmp_data)
             else:
