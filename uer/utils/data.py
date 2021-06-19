@@ -1253,7 +1253,7 @@ class ViltDataLoader(DataLoader):
                     src_image.append(src_image_single)
                     tgt_match.append(1)
                 else:
-                    random_img = random.sample(src_image[0:i]+instances[i+1:], 1)[0]
+                    random_img = random.sample(src_image[0:i], 1)[0]
                     src_image.append(random_img)
                     tgt_match.append(0)
 
