@@ -1244,6 +1244,7 @@ class ViltDataLoader(DataLoader):
                 tgt_mlm.append([0] * len(ins[2]))
                 for mask in tgt_mlm_single:
                     tgt_mlm[-1][mask[0]] = mask[1]
+                tgt_mlm[-1].extend([0] * len(ins[3]))
 
                 image = Image.open(self.dataset_folder + "/" + ins[1])
                 src_image_single = self.transform(image)
