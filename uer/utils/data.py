@@ -1258,7 +1258,7 @@ class VitDataLoader(VisionDataLoader):
 
                 image = Image.open(os.path.join(self.dataset_folder , ins[1]))
                 src.append(self.transform(image))
-                tgt.append(ins[2])
+                tgt.append(ins[0])
                 seg.append([1] * (self.patch_size * self.patch_size + 1))
 
             yield torch.stack(src, 0), \
