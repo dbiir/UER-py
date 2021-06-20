@@ -1125,14 +1125,11 @@ class ClsDataLoader(DataLoader):
             seg = []
 
             for ins in instances:
-                if isinstance(ins[0], list):
-                    src.append(torch.LongTensor(ins[0]))
-                else:
-                    src.append(ins[0])
+                src.append(ins[0])
                 tgt.append(ins[1])
                 seg.append(ins[2])
 
-            yield torch.stack(src, 0), \
+            yield torch.LongTensor(src), \
                   torch.LongTensor(tgt), \
                   torch.LongTensor(seg)
 
@@ -1210,16 +1207,66 @@ class PrefixlmDataLoader(DataLoader):
                 torch.LongTensor(seg)
 
 
-class ViltDataset(Dataset):
-    pass
 
-
-class ViltDataLoader(DataLoader):
+class VisionDataLoader(DataLoader):
     def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=False):
-        super(ViltDataLoader, self).__init__(args, dataset_path, batch_size, proc_id, proc_num, shuffle)
+        super(VisionDataLoader, self).__init__(args, dataset_path, batch_size, proc_id, proc_num, shuffle)
         self.dataset_folder = os.path.dirname(dataset_path)
-        self.transform = transforms.ToTensor()
+        self.patch_size = args.patch_size
 
+        def convert_color(image, channel):
+            if channel == 3:
+                if image.mode == 'RGBA':
+                    r, g, b, a = image.split()
+                    image = Image.merge("RGB", (r, g, b))
+                elif image.mode != 'RGB':
+                    image = image.convert("RGBA")
+                    r, g, b, a = image.split()
+                    image = Image.merge("RGB", (r, g, b))
+            elif channel == 1:
+                image = image.convert("L")
+
+            return image
+
+        self.transform = transforms.Compose([
+            #transforms.RandomSizedCrop(224),
+            #transforms.RandomHorizontalFlip(),
+            transforms.Scale(args.image_height, args.image_width),
+            transforms.Lambda(lambda img: convert_color(img, args.num_channels)),
+            transforms.ToTensor(),
+        ])
+
+
+
+class VitDataLoader(VisionDataLoader):
+    def __iter__(self):
+        while True:
+            while self._empty():
+                self._fill_buf()
+            if self.start + self.batch_size >= self.end:
+                instances = self.buffer[self.start:]
+            else:
+                instances = self.buffer[self.start: self.start + self.batch_size]
+
+            self.start += self.batch_size
+
+            src = []
+            tgt = []
+            seg = []
+
+            for ins in instances:
+
+                image = Image.open(os.path.join(self.dataset_folder , ins[1]))
+                src.append(self.transform(image))
+                tgt.append(ins[2])
+                seg.append([1] * (self.patch_size * self.patch_size + 1))
+
+            yield torch.stack(src, 0), \
+                      torch.LongTensor(tgt), \
+                      torch.LongTensor(seg)
+
+
+class ViltDataLoader(VisionDataLoader):
     def __iter__(self):
         while True:
             while self._empty():
@@ -1247,6 +1294,11 @@ class ViltDataLoader(DataLoader):
                 tgt_mlm[-1].extend([0] * len(ins[3]))
 
                 image = Image.open(self.dataset_folder + "/" + ins[1])
+
+                # Convert grayscale images into 3 channels
+                if image.mode != "RGB":
+                    image = image.convert(mode="RGB")
+
                 src_image_single = self.transform(image)
 
                 if random.random() < 0.5 or i == 0:
@@ -1266,12 +1318,7 @@ class ViltDataLoader(DataLoader):
                   torch.LongTensor(seg)
 
 
-class ClipDataLoader(DataLoader):
-    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=False):
-        super(ClipDataLoader, self).__init__(args, dataset_path, batch_size, proc_id, proc_num, shuffle)
-        self.dataset_folder = os.path.dirname(dataset_path)
-        self.transform = transforms.ToTensor()
-
+class ClipDataLoader(VisionDataLoader):
     def __iter__(self):
         while True:
             while self._empty():
