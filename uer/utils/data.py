@@ -863,6 +863,7 @@ class GsgDataset(BertDataset):
     def __init__(self, args, vocab, tokenizer):
         super(GsgDataset, self).__init__(args, vocab, tokenizer)
         self.sentence_selection_strategy = args.sentence_selection_strategy
+        self.tgt_seq_length = args.tgt_seq_length
 
     def create_single_instance(self, src, tgt):
         src = [self.vocab.get(CLS_TOKEN)] + src + [self.vocab.get(SEP_TOKEN)]
@@ -870,7 +871,7 @@ class GsgDataset(BertDataset):
         seg = ([1] * len(src) + [0] * (self.seq_length - len(src)))
         while len(src) != self.seq_length:
             src.append(self.vocab.get(PAD_TOKEN))
-        while len(tgt) != self.seq_length:
+        while len(tgt) != self.tgt_seq_length:
             tgt.append(self.vocab.get(PAD_TOKEN))
         instance = (src, tgt, seg)
         return instance
@@ -884,9 +885,9 @@ class GsgDataset(BertDataset):
         tgt = []
         i = 0
         document = all_documents[document_index]
-        target_seq_length = self.seq_length - 2
+        target_seq_length, target_tgt_seq_length = self.seq_length - 2, self.tgt_seq_length - 2
         for segment in document:
-            if len(segment) < target_seq_length:
+            if len(segment) < target_seq_length and len(segment) < target_tgt_seq_length:
                 tmp_document.append(segment)
         document = tmp_document
         mask_seq_num = int(round(len(document) * 0.3, 0))
@@ -917,7 +918,7 @@ class GsgDataset(BertDataset):
 
         while i < len(document):
             segment = document[i]
-            if i in mask_seq_list and len(tgt) + len(segment) < target_seq_length and len(src) + 1 < target_seq_length:
+            if i in mask_seq_list and len(tgt) + len(segment) < target_tgt_seq_length and len(src) + 1 < target_seq_length:
                 tgt = tgt + segment
                 src = src + [self.vocab.get(MASK_TOKEN)]
             elif i not in mask_seq_list and len(src) + len(segment) < target_seq_length:
