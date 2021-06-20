@@ -1231,7 +1231,7 @@ class VisionDataLoader(DataLoader):
         self.transform = transforms.Compose([
             #transforms.RandomSizedCrop(224),
             #transforms.RandomHorizontalFlip(),
-            transforms.Resize(args.image_height, args.image_width),
+            transforms.Resize((args.image_height, args.image_width)),
             transforms.Lambda(lambda img: convert_color(img, args.num_channels)),
             transforms.ToTensor(),
         ])
