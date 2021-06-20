@@ -1213,6 +1213,8 @@ class VisionDataLoader(DataLoader):
         super(VisionDataLoader, self).__init__(args, dataset_path, batch_size, proc_id, proc_num, shuffle)
         self.dataset_folder = os.path.dirname(dataset_path)
         self.patch_size = args.patch_size
+        self.image_height = args.image_height
+        self.image_width = args.image_width
 
         def convert_color(image, channel):
             if channel == 3:
@@ -1231,7 +1233,7 @@ class VisionDataLoader(DataLoader):
         self.transform = transforms.Compose([
             #transforms.RandomSizedCrop(224),
             #transforms.RandomHorizontalFlip(),
-            transforms.Resize((args.image_height, args.image_width)),
+            transforms.Resize((self.image_height, self.image_width)),
             transforms.Lambda(lambda img: convert_color(img, args.num_channels)),
             transforms.ToTensor(),
         ])
@@ -1259,7 +1261,7 @@ class VitDataLoader(VisionDataLoader):
                 image = Image.open(os.path.join(self.dataset_folder , ins[1]))
                 src.append(self.transform(image))
                 tgt.append(ins[0])
-                seg.append([1] * (self.patch_size * self.patch_size + 1))
+                seg.append([1] * ((self.image_height // self.patch_size) * (self.image_width // self.patch_size) + 1))
 
             yield torch.stack(src, 0), \
                       torch.LongTensor(tgt), \
