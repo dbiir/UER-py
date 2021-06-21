@@ -731,15 +731,14 @@ class Seq2seqDataset(Dataset):
 
                 src = [self.src_vocab.get(CLS_TOKEN)] + src + [self.src_vocab.get(SEP_TOKEN)]
                 tgt = [self.tgt_vocab.get(CLS_TOKEN)] + tgt + [self.tgt_vocab.get(SEP_TOKEN)]
-                seg = [1] * len(src)
 
-                src, tgt, seg = src[:self.seq_length], tgt[:self.tgt_seq_length + 1], seg[:self.seq_length]
+                src, tgt = src[:self.seq_length], tgt[:self.tgt_seq_length + 1]
+                seg_pos = [len(src)]
                 while len(src) != self.seq_length:
                     src.append(self.vocab.get(PAD_TOKEN))
-                    seg.append(0)
                 while len(tgt) != self.tgt_seq_length + 1:
                     tgt.append(self.vocab.get(PAD_TOKEN))
-                pickle.dump((src, tgt, seg), dataset_writer)
+                pickle.dump((src, tgt, seg_pos), dataset_writer)
 
                 if pos >= end:
                     break
@@ -768,7 +767,7 @@ class Seq2seqDataLoader(DataLoader):
                 src.append(ins[0])
                 tgt_in.append(ins[1][:-1])
                 tgt_out.append(ins[1][1:])
-                seg.append(ins[2])
+                seg.append([1] * ins[2][0] + [0] * (len(ins[0]) - ins[2][0]))
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt_in), \
@@ -868,12 +867,12 @@ class GsgDataset(BertDataset):
     def create_single_instance(self, src, tgt):
         src = [self.vocab.get(CLS_TOKEN)] + src + [self.vocab.get(SEP_TOKEN)]
         tgt = [self.vocab.get(CLS_TOKEN)] + tgt + [self.vocab.get(SEP_TOKEN)]
-        seg = ([1] * len(src) + [0] * (self.seq_length - len(src)))
+        seg_pos = [len(src)]
         while len(src) != self.seq_length:
             src.append(self.vocab.get(PAD_TOKEN))
         while len(tgt) != self.tgt_seq_length:
             tgt.append(self.vocab.get(PAD_TOKEN))
-        instance = (src, tgt, seg)
+        instance = (src, tgt, seg_pos)
         return instance
 
     def create_ins_from_doc(self, all_documents, document_index):
