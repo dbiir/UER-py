@@ -12,6 +12,6 @@ str2encoder = {"transformer": TransformerEncoder, "bistream": BistreamEncoder, "
                "gru": GruEncoder, "birnn": BirnnEncoder, "bilstm": BilstmEncoder, "bigru": BigruEncoder,
                "gatedcnn": GatedcnnEncoder}
 
-__all__ = ["TransformerEncoder", "ClipEncoder", "RnnEncoder", "LstmEncoder", "GruEncoder", "BirnnEncoder",
+__all__ = ["TransformerEncoder", "BilstmEncoder", "RnnEncoder", "LstmEncoder", "GruEncoder", "BirnnEncoder",
            "BilstmEncoder", "BigruEncoder", "GatedcnnEncoder", "str2encoder"]
 
