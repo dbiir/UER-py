@@ -109,7 +109,6 @@ class BistreamEncoder(nn.Module):
         self.text_encoder = TransformerEncoder(args)
         self.image_encoder = TransformerEncoder(args)
         self.layer_norm = LayerNorm(args.hidden_size)
-        self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
 
     def forward(self, emb, seg):
         features_text = self.text_encoder(emb[0], seg[0])

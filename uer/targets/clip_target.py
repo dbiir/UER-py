@@ -17,6 +17,7 @@ class ClipTarget(nn.Module):
         self.criterion_img = nn.CrossEntropyLoss()
         self.criterion_text = nn.CrossEntropyLoss()
         self.softmax = nn.LogSoftmax(dim=-1)
+        self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
 
     def forward(self, memory_bank, tgt):
         """
