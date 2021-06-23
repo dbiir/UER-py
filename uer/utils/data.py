@@ -1318,23 +1318,22 @@ class ViltDataLoader(VisionDataLoader):
 
 class ClipDataLoader(VisionDataLoader):
 
+    def preprocess(instances):
+        src_text = []
+        src_image = []
+        seg_text = []
+        seg_image = []
+        for i, ins in enumerate(instances):
+            src_text.append(ins[0])
+            image = Image.open(os.path.join(self.dataset_folder , ins[1]))
+            src_image_single = self.transform(image)
+            src_image.append(src_image_single)
+            seg_text.append(ins[2])
+            seg_image.append([1] * ((self.image_height // self.patch_size) * (self.image_width // self.patch_size) + 1))
+
+        return (src_text, src_image, seg_text, seg_image)
 
     def __iter__(self):
-
-        def preprocess(instances):
-            src_text = []
-            src_image = []
-            seg_text = []
-            seg_image = []
-            for i, ins in enumerate(instances):
-                src_text.append(ins[0])
-                image = Image.open(os.path.join(self.dataset_folder , ins[1]))
-                src_image_single = self.transform(image)
-                src_image.append(src_image_single)
-                seg_text.append(ins[2])
-                seg_image.append([1] * ((self.image_height // self.patch_size) * (self.image_width // self.patch_size) + 1))
-
-            return (src_text, src_image, seg_text, seg_image)
 
         while True:
             while self._empty():
@@ -1352,7 +1351,7 @@ class ClipDataLoader(VisionDataLoader):
             result = []
             for i in range(threads_num):
                 batch_ins = copy.copy(instances[i * num_per_batch : (i + 1) * num_per_batch])
-                result.append(pool.apply(func=preprocess, args=(batch_ins,)))
+                result.append(pool.apply(func=self.preprocess, args=(batch_ins,)))
             pool.close()
             pool.join()
 
