@@ -107,12 +107,12 @@ class ViLEmbedding(nn.Module):
         return emb
 
 
-class ClipEmbedding(nn.Module):
+class BistreamEmbedding(nn.Module):
     """
     """
 
     def __init__(self, args, vocab_size):
-        super(ClipEmbedding, self).__init__()
+        super(BistreamEmbedding, self).__init__()
         self.language_embedding = WordPosEmbedding(args, vocab_size)
         self.vision_embedding = PatchPosEmbedding(args)
         self.remove_embedding_layernorm = args.remove_embedding_layernorm
