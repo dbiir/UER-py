@@ -16,6 +16,7 @@ class TransformerEncoder(nn.Module):
         self.factorized_embedding_parameterization = args.factorized_embedding_parameterization
         self.layernorm_positioning = args.layernorm_positioning
         self.relative_position_embedding = args.relative_position_embedding
+        self.residual_attn = args.residual_attention
 
         has_bias = bool(1 - args.remove_transformer_bias)
 
@@ -90,11 +91,14 @@ class TransformerEncoder(nn.Module):
         else:
             position_bias = None
 
+        prev_attention = None
         for i in range(self.layers_num):
             if self.parameter_sharing:
-                hidden = self.transformer(hidden, mask, position_bias=position_bias)
+                hidden, prev_attention = self.transformer(hidden, mask, position_bias=position_bias,
+                                                          residual_attn=self.residual_attn, prev_attn=prev_attention)
             else:
-                hidden = self.transformer[i](hidden, mask, position_bias=position_bias)
+                hidden, prev_attention = self.transformer[i](hidden, mask, position_bias=position_bias,
+                                                             residual_attn=self.residual_attn, prev_attn=prev_attention)
 
         if self.layernorm_positioning == "pre":
             return self.layer_norm(hidden)
