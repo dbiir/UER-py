@@ -1348,7 +1348,8 @@ class ClipDataLoader(VisionDataLoader):
             pool = Pool(threads_num)
             result = []
             for i in range(threads_num):
-                result.append(pool.apply(func=self.preprocess, args=instances[i * num_per_batch : (i + 1) * num_per_batch]))
+                batch_ins = instances[i * num_per_batch : (i + 1) * num_per_batch]
+                result.append(pool.apply(func=self.preprocess, args=(batch_ins,)))
             pool.close()
             pool.join()
 
