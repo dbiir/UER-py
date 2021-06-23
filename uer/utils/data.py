@@ -1317,22 +1317,6 @@ class ViltDataLoader(VisionDataLoader):
 
 
 class ClipDataLoader(VisionDataLoader):
-
-    def preprocess(instances):
-        src_text = []
-        src_image = []
-        seg_text = []
-        seg_image = []
-        for i, ins in enumerate(instances):
-            src_text.append(ins[0])
-            image = Image.open(os.path.join(self.dataset_folder , ins[1]))
-            src_image_single = self.transform(image)
-            src_image.append(src_image_single)
-            seg_text.append(ins[2])
-            seg_image.append([1] * ((self.image_height // self.patch_size) * (self.image_width // self.patch_size) + 1))
-
-        return (src_text, src_image, seg_text, seg_image)
-
     def __iter__(self):
 
         while True:
@@ -1345,28 +1329,24 @@ class ClipDataLoader(VisionDataLoader):
 
             self.start += self.batch_size
 
-            threads_num = 4
-            num_per_batch = self.batch_size // threads_num
-            pool = Pool(threads_num)
-            result = []
-            for i in range(threads_num):
-                batch_ins = copy.copy(instances[i * num_per_batch : (i + 1) * num_per_batch])
-                result.append(pool.apply(func=self.preprocess, args=(batch_ins,)))
-            pool.close()
-            pool.join()
+            src_text = []
+            src_image = []
+            seg_text = []
+            seg_image = []
 
-            src_text_fin = []
-            src_image_fin = []
-            seg_text_fin = []
-            seg_image_fin = []
+            try:
+                for i, ins in enumerate(instances):
 
-            for src_text_thread, src_image_thread, seg_text_thread, seg_image_thread in result:
-                src_text_fin.extend(src_text_thread)
-                src_image_fin.extend(src_image_thread)
-                seg_text_fin.extend(seg_text_thread)
-                seg_image_fin.extend(seg_image_thread)
+                    src_text.append(ins[0])
+                    image = Image.open(os.path.join(self.dataset_folder , ins[1]))
+                    src_image_single = self.transform(image)
+                    src_image.append(src_image_single)
+                    seg_text.append(ins[2])
+                    seg_image.append([1] * ((self.image_height // self.patch_size) * (self.image_width // self.patch_size) + 1))
 
-            yield torch.LongTensor(src_text_fin), \
-                    torch.stack(src_image_fin, 0), \
-                    torch.LongTensor(seg_text_fin), \
-                    torch.LongTensor(seg_image_fin)
+                yield torch.LongTensor(src_text), \
+                      torch.stack(src_image, 0), \
+                      torch.LongTensor(seg_text), \
+                      torch.LongTensor(seg_image)
+            except:
+                continue
