@@ -62,7 +62,7 @@ def main():
                         help="Max length for span masking.")
 
     # Sentence selection strategy options.
-    parser.add_argument("--sentence_selection_strategy", choices=["lead", "random", "rouge"], default="lead",
+    parser.add_argument("--sentence_selection_strategy", choices=["lead", "random"], default="lead",
                         help="Sentence selection strategy for gap-sentences generation task.")
 
     args = parser.parse_args()

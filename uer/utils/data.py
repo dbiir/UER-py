@@ -892,31 +892,8 @@ class GsgDataset(BertDataset):
         mask_seq_num = int(round(len(document) * 0.3, 0))
         if sentence_selection_strategy == "random":
             mask_seq_list = random.sample(range(0, len(document) - 1), mask_seq_num)
-        elif sentence_selection_strategy == "lead":
+        else sentence_selection_strategy == "lead":
             mask_seq_list = list(range(0, mask_seq_num))
-        else:
-            from rouge import Rouge
-            rouge_score_list = []
-            rouge = Rouge()
-            try:
-                for _ in range(mask_seq_num):
-                    for k in range(len(document)):
-                        rest_sentences = ""
-                        mask_sentences = ""
-                        if k not in mask_seq_list:
-                            for segment_id, segment in enumerate(document):
-                                if k == segment_id or segment_id in mask_seq_list:
-                                    mask_sentences = mask_sentences + " ".join(self.tokenizer.convert_ids_to_tokens(segment)) + " "
-                                else:
-                                    rest_sentences = rest_sentences + " ".join(self.tokenizer.convert_ids_to_tokens(segment)) + " "
-                            rouge_score_list.append(rouge.get_scores(mask_sentences, rest_sentences)[0]["rouge-1"]["f"])
-                        else:
-                            rouge_score_list.append(0)
-                    max_index = rouge_score_list.index(max(rouge_score_list))
-                    mask_seq_list.append(max_index)
-                    rouge_score_list = []
-            except RecursionError:
-                mask_seq_list = random.sample(range(0, len(document) - 1), mask_seq_num)
 
         while i < len(document):
             segment = document[i]
