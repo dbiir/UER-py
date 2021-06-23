@@ -1332,16 +1332,19 @@ class ClipDataLoader(VisionDataLoader):
             seg_text = []
             seg_image = []
 
-            for i, ins in enumerate(instances):
+            try:
+                for i, ins in enumerate(instances):
 
-                src_text.append(ins[0])
-                image = Image.open(os.path.join(self.dataset_folder , ins[1]))
-                src_image_single = self.transform(image)
-                src_image.append(src_image_single)
-                seg_text.append(ins[2])
-                seg_image.append([1] * ((self.image_height // self.patch_size) * (self.image_width // self.patch_size) + 1))
+                    src_text.append(ins[0])
+                    image = Image.open(os.path.join(self.dataset_folder , ins[1]))
+                    src_image_single = self.transform(image)
+                    src_image.append(src_image_single)
+                    seg_text.append(ins[2])
+                    seg_image.append([1] * ((self.image_height // self.patch_size) * (self.image_width // self.patch_size) + 1))
 
-            yield torch.LongTensor(src_text), \
-                  torch.stack(src_image, 0), \
-                  torch.LongTensor(seg_text), \
-                  torch.LongTensor(seg_image)
+                yield torch.LongTensor(src_text), \
+                      torch.stack(src_image, 0), \
+                      torch.LongTensor(seg_text), \
+                      torch.LongTensor(seg_image)
+            except:
+                continue
