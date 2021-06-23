@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 
 
 def count_lines(file_path):

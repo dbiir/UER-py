@@ -87,7 +87,7 @@ label    text_a
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt \
                       --dataset_path dataset.pt --processes_num 8 --target bert
 ```
-注意我们需要安装 ``six>=1.12.0``。
+注意我们需要安装 *six>=1.12.0*。
 
 预处理非常耗时，使用多个进程可以大大加快预处理速度（*--processes_num*）。默认的分词器为 *--tokenizer bert* 。原始文本在预处理之后被转换为*pretrain.py*的可以接收的输入，*dataset.pt*。然后下载Google中文预训练模型[*google_zh_model.bin*](https://share.weiyun.com/A1C49VPb)（此文件为UER支持的格式，原始模型来自于[这里](https://github.com/google-research/bert)），并将其放在 *models* 文件夹中。接着加载Google中文预训练模型，在书评语料上对其进行增量预训练。预训练模型由词向量层，编码层和目标任务层组成。因此要构建预训练模型，我们应明确指定模型的词向量层（*--embedding*），编码器层（*--encoder* 和 *--mask*）和目标任务层（*--target*）的类型。假设我们有一台带有8个GPU的机器：
 ```

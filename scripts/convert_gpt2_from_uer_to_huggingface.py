@@ -1,6 +1,7 @@
-import torch
 import argparse
 import collections
+import torch
+
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("--input_model_path", type=str, default="input_model.bin",

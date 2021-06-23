@@ -1,6 +1,6 @@
-import torch
 import argparse
 import collections
+import torch
 
 
 def convert_bert_transformer_encoder_from_uer_to_huggingface(input_model, output_model, layers_num):

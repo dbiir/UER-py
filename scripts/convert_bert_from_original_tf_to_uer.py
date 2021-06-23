@@ -1,7 +1,7 @@
 import argparse
+import collections
 import tensorflow as tf
 import torch
-import collections
 from tensorflow.python import pywrap_tensorflow
 
 
