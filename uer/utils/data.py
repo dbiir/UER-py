@@ -2,6 +2,7 @@ import os
 import random
 import pickle
 import torch
+import copy
 from multiprocessing import Pool
 from PIL import Image
 from torchvision import transforms
@@ -1348,7 +1349,7 @@ class ClipDataLoader(VisionDataLoader):
             pool = Pool(threads_num)
             result = []
             for i in range(threads_num):
-                batch_ins = instances[i * num_per_batch : (i + 1) * num_per_batch]
+                batch_ins = copy.copy(instances[i * num_per_batch : (i + 1) * num_per_batch])
                 result.append(pool.apply(func=self.preprocess, args=(batch_ins,)))
             pool.close()
             pool.join()
