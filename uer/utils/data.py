@@ -892,7 +892,7 @@ class GsgDataset(BertDataset):
         mask_seq_num = int(round(len(document) * 0.3, 0))
         if sentence_selection_strategy == "random":
             mask_seq_list = random.sample(range(0, len(document) - 1), mask_seq_num)
-        else sentence_selection_strategy == "lead":
+        else:
             mask_seq_list = list(range(0, mask_seq_num))
 
         while i < len(document):

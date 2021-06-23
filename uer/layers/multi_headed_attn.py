@@ -24,7 +24,7 @@ class MultiHeadedAttention(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.final_linear = nn.Linear(self.inner_hidden_size, hidden_size, bias=has_bias)
 
-    def forward(self, key, value, query, mask, position_bias=None, residual_attn=False, prev_attn=None):
+    def forward(self, key, value, query, mask, position_bias=None, has_residual_attention=False, prev_attn=None):
         """
         Args:
             key: [batch_size x seq_length x hidden_size]
@@ -65,7 +65,7 @@ class MultiHeadedAttention(nn.Module):
             scores = scores / math.sqrt(float(per_head_size))
         scores = scores + mask.type_as(scores)
         prev_attn_out = None
-        if residual_attn:
+        if has_residual_attention:
             if prev_attn != None:
                 scores += prev_attn
             prev_attn_out = scores

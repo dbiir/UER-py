@@ -28,7 +28,7 @@ def model_opts(parser):
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
-    parser.add_argument("--residual_attention", action="store_true", help="Add residual attention.")
+    parser.add_argument("--has_residual_attention", action="store_true", help="Add residual attention.")
 
 
 def optimization_opts(parser):
@@ -41,7 +41,7 @@ def optimization_opts(parser):
     parser.add_argument("--fp16_opt_level", choices=["O0", "O1", "O2", "O3" ], default='O1',
                         help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
                              "See details at https://nvidia.github.io/apex/amp.html")
-    parser.add_argument("--optimizer", choices=["adamw", "adafactor"],
+    parser.add_argument("--optimizer", choices=["adamw", "adafactor"],\
                         default="adamw",
                         help="Optimizer type.")
     parser.add_argument("--scheduler", choices=["linear", "cosine", "cosine_with_restarts", "polynomial",
