@@ -1,6 +1,7 @@
 import math
 import torch
 import torch.nn as nn
+import numpy as np
 from uer.layers.layer_norm import LayerNorm
 from uer.utils.act_fun import gelu
 
