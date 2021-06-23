@@ -1295,12 +1295,7 @@ class ViltDataLoader(VisionDataLoader):
                     tgt_mlm[-1][mask[0]] = mask[1]
                 tgt_mlm[-1].extend([0] * len(ins[3]))
 
-                image = Image.open(self.dataset_folder + "/" + ins[1])
-
-                # Convert grayscale images into 3 channels
-                if image.mode != "RGB":
-                    image = image.convert(mode="RGB")
-
+                image = Image.open(os.path.join(self.dataset_folder , ins[1]))
                 src_image_single = self.transform(image)
 
                 if random.random() < 0.5 or i == 0:
@@ -1340,11 +1335,11 @@ class ClipDataLoader(VisionDataLoader):
             for i, ins in enumerate(instances):
 
                 src_text.append(ins[0])
-                image = Image.open(self.dataset_folder + "/" + ins[1])
+                image = Image.open(os.path.join(self.dataset_folder , ins[1]))
                 src_image_single = self.transform(image)
                 src_image.append(src_image_single)
                 seg_text.append(ins[2])
-                seg_image.append(ins[3])
+                seg_image.append([1] * ((self.image_height // self.patch_size) * (self.image_width // self.patch_size) + 1))
 
             yield torch.LongTensor(src_text), \
                   torch.stack(src_image, 0), \

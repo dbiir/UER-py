@@ -103,9 +103,9 @@ class TransformerEncoder(nn.Module):
             return hidden
 
 
-class ClipEncoder(nn.Module):
+class BistreamEncoder(nn.Module):
     def __init__(self, args):
-        super(ClipEncoder, self).__init__()
+        super(BistreamEncoder, self).__init__()
         self.text_encoder = TransformerEncoder(args)
         self.image_encoder = TransformerEncoder(args)
         self.layer_norm = LayerNorm(args.hidden_size)
@@ -119,10 +119,6 @@ class ClipEncoder(nn.Module):
         features_text = self.layer_norm(features_text[:,0,:])
         features_image = self.layer_norm(features_image[:,0,:])
 
-        # cosine similarity as logits
-        logit_scale = self.logit_scale.exp()
-        logits_per_image = logit_scale * torch.matmul(features_text, features_image.transpose(-2, -1))
-        logits_per_text = logit_scale * torch.matmul(features_image , features_text.transpose(-2, -1))
 
-        # shape = [global_batch_size, global_batch_size]
-        return (logits_per_image, logits_per_text)
+        # shape = [global_batch_size, emb_size]
+        return (features_text, features_image)

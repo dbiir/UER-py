@@ -28,7 +28,12 @@ class ClipTarget(nn.Module):
             loss: Classification loss.
             correct: Number of sentences that are predicted correctly.
         """
-        logits_per_image, logits_per_text = memory_bank
+        features_text, features_image = memory_bank
+
+        # cosine similarity as logits
+        logit_scale = self.logit_scale.exp()
+        logits_per_image = logit_scale * torch.matmul(features_text, features_image.transpose(-2, -1))
+        logits_per_text = logit_scale * torch.matmul(features_image , features_text.transpose(-2, -1))
 
         tgt = torch.arange(self.batch_size, device = logits_per_image.device, dtype=torch.long)
         loss = (self.criterion_img(logits_per_image, tgt) + self.criterion_text(logits_per_text, tgt)) / 2
