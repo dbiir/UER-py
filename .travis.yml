@@ -59,7 +59,7 @@ script:
 
     mv models/mt_model.bin-10 models/mt_model.bin
 
-    python preprocess.py --corpus_path corpora/CLUECorpusSmall_5000_lines_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path pegasus_dataset.pt --processes_num 8 --seq_length 512 --tgt_seq_length 256 --dup_factor 1 --target gsg --sentence_selection_strategy random
+    python preprocess.py --corpus_path corpora/CLUECorpusSmall_5000_lines_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path pegasus_dataset.pt --processes_num 8 --seq_length 128 --tgt_seq_length 128 --dup_factor 1 --target gsg --sentence_selection_strategy random
 
     python pretrain.py --dataset_path pegasus_dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/pegasus_model.bin --config_path models/pegasus/base_config.json --learning_rate 1e-4 --batch_size 8 --embedding word_sinusoidalpos --tgt_embedding word_sinusoidalpos --remove_embedding_layernorm --encoder transformer --mask fully_visible --layernorm_positioning pre --decoder transformer --target gsg --has_lmtarget_bias --tie_weights --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
 
