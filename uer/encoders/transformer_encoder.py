@@ -95,7 +95,7 @@ class TransformerEncoder(nn.Module):
         for i in range(self.layers_num):
             if self.parameter_sharing:
                 hidden, prev_attn = self.transformer(hidden, mask, position_bias=position_bias,
-                                                     has_residual_attention=self.residual_attn, prev_attn=prev_attn)
+                                                     has_residual_attention=self.has_residual_attention, prev_attn=prev_attn)
             else:
                 hidden, prev_attn = self.transformer[i](hidden, mask, position_bias=position_bias,
                                                         has_residual_attention=self.has_residual_attention, prev_attn=prev_attn)
