@@ -37,7 +37,7 @@ class ClipTarget(nn.Module):
         logits_per_image = logit_scale * torch.matmul(features_text, features_image.transpose(-2, -1))
         logits_per_text = logit_scale * torch.matmul(features_image , features_text.transpose(-2, -1))
 
-        tgt = torch.arange(self.batch_size, device = logits_per_image.device, dtype=torch.long)
+        tgt = torch.arange(features_text.size()[0], device = logits_per_image.device, dtype=torch.long)
         loss = (self.criterion_img(logits_per_image, tgt) + self.criterion_text(logits_per_text, tgt)) / 2
         correct = self.softmax(logits_per_image).argmax(dim=-1).eq(tgt).sum()
 
