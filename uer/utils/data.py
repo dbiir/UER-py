@@ -1067,6 +1067,7 @@ class ClsDataset(Dataset):
                     src_b = src_b + [self.vocab.get(SEP_TOKEN)]
 
                     src = src_a + src_b
+                    tgt = label
                     seg = [1] * len(src_a) + [2] * len(src_b)
 
                     if len(src) >= self.seq_length:
