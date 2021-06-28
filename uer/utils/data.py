@@ -4,6 +4,7 @@ import pickle
 import torch
 import copy
 from multiprocessing import Pool
+from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED, as_completed
 from PIL import Image
 from torchvision import transforms
 from uer.utils.constants import *
@@ -1317,8 +1318,24 @@ class ViltDataLoader(VisionDataLoader):
 
 
 class ClipDataLoader(VisionDataLoader):
-    def __iter__(self):
 
+    def preprocess_image(self, instances):
+        src_text = []
+        src_image = []
+        seg_text = []
+        seg_image = []
+        for ins in instances:
+            src_text.append(ins[0])
+            image = Image.open(os.path.join(self.dataset_folder , ins[1]))
+            src_image_single = self.transform(image)
+            src_image.append(src_image_single)
+            seg_text.append(ins[2])
+            seg_image.append([1] * ((self.image_height // self.patch_size) * (self.image_width // self.patch_size) + 1))
+
+        return  src_text, src_image, seg_text, seg_image
+
+
+    def __iter__(self):
         while True:
             while self._empty():
                 self._fill_buf()
@@ -1329,24 +1346,28 @@ class ClipDataLoader(VisionDataLoader):
 
             self.start += self.batch_size
 
-            src_text = []
-            src_image = []
-            seg_text = []
-            seg_image = []
+            src_text_batch = []
+            src_image_batch = []
+            seg_text_batch = []
+            seg_image_batch = []
 
-            try:
-                for i, ins in enumerate(instances):
+            thread_num = 4
+            executor = ThreadPoolExecutor(max_workers=thread_num)
+            ins_per_thread = self.batch_size // thread_num
+            thread_list = []
 
-                    src_text.append(ins[0])
-                    image = Image.open(os.path.join(self.dataset_folder , ins[1]))
-                    src_image_single = self.transform(image)
-                    src_image.append(src_image_single)
-                    seg_text.append(ins[2])
-                    seg_image.append([1] * ((self.image_height // self.patch_size) * (self.image_width // self.patch_size) + 1))
+            for ins in [instances[i: i + ins_per_thread] for i in range(0, len(instances), ins_per_thread)]:
+                thrd = executor.submit(self.preprocess_image, ins)
+                thread_list.append(thrd)
 
-                yield torch.LongTensor(src_text), \
-                      torch.stack(src_image, 0), \
-                      torch.LongTensor(seg_text), \
-                      torch.LongTensor(seg_image)
-            except:
-                continue
+            for task in as_completed(thread_list):  # 等待线程全部完成
+                src_text_thrd, src_image_thrd, seg_text_thrd, seg_image_thrd = task.result()
+                src_text_batch.extend(src_text_thrd)
+                src_image_batch.extend(src_image_thrd)
+                seg_text_batch.extend(seg_text_thrd)
+                seg_image_batch.extend(seg_image_thrd)
+
+            yield  torch.LongTensor(src_text_batch), \
+                    torch.stack(src_image_batch, 0), \
+                    torch.LongTensor(seg_text_batch), \
+                    torch.LongTensor(seg_image_batch)
