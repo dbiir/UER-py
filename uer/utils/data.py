@@ -1356,18 +1356,21 @@ class ClipDataLoader(VisionDataLoader):
             ins_per_thread = self.batch_size // thread_num
             thread_list = []
 
-            for ins in [instances[i: i + ins_per_thread] for i in range(0, len(instances), ins_per_thread)]:
-                thrd = executor.submit(self.preprocess_image, ins)
-                thread_list.append(thrd)
+            try:
+                for ins in [instances[i: i + ins_per_thread] for i in range(0, len(instances), ins_per_thread)]:
+                    thrd = executor.submit(self.preprocess_image, ins)
+                    thread_list.append(thrd)
 
-            for task in as_completed(thread_list):  # 等待线程全部完成
-                src_text_thrd, src_image_thrd, seg_text_thrd, seg_image_thrd = task.result()
-                src_text_batch.extend(src_text_thrd)
-                src_image_batch.extend(src_image_thrd)
-                seg_text_batch.extend(seg_text_thrd)
-                seg_image_batch.extend(seg_image_thrd)
+                for task in as_completed(thread_list):  # 等待线程全部完成
+                    src_text_thrd, src_image_thrd, seg_text_thrd, seg_image_thrd = task.result()
+                    src_text_batch.extend(src_text_thrd)
+                    src_image_batch.extend(src_image_thrd)
+                    seg_text_batch.extend(seg_text_thrd)
+                    seg_image_batch.extend(seg_image_thrd)
 
-            yield  torch.LongTensor(src_text_batch), \
-                    torch.stack(src_image_batch, 0), \
-                    torch.LongTensor(seg_text_batch), \
-                    torch.LongTensor(seg_image_batch)
+                yield  torch.LongTensor(src_text_batch), \
+                        torch.stack(src_image_batch, 0), \
+                        torch.LongTensor(seg_text_batch), \
+                        torch.LongTensor(seg_image_batch)
+            except:
+                continue
