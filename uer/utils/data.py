@@ -1142,7 +1142,7 @@ class PrefixlmDataset(Dataset):
                     continue
 
                 src = src + tgt
-                tgt = [0] * (seg_pos[0]-1) + tgt + [self.vocab.get(PAD_TOKEN)]
+                tgt = [0] * (seg_pos[0] - 1) + tgt + [self.vocab.get(PAD_TOKEN)]
                 seg_pos.append(len(src))
                 src, tgt = src[:self.seq_length], tgt[:self.seq_length]
                 while len(src) != self.seq_length:
