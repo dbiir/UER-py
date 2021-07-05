@@ -1,13 +1,14 @@
 import sys
 import os
-import torch
 import argparse
 import collections
+import torch
 
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, uer_dir)
 
 from scripts.convert_bert_from_huggingface_to_uer import convert_bert_transformer_encoder_from_huggingface_to_uer
+
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("--input_model_path", type=str, default="input_model.bin",

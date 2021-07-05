@@ -69,10 +69,8 @@ def main():
     parser.add_argument("--has_lmtarget_bias", action="store_true",
                         help="Add bias on output_layer for lm target.")
     parser.add_argument("--deep_init", action="store_true",
-                        help="initialize bert model similar to gpt2 model."
-                             "scales initialization of projection layers by a "
-                             "factor of 1/sqrt(2N). Necessary to train bert "
-                             "models larger than BERT-Large.")
+                        help="Scaling initialization of projection layers by a "
+                             "factor of 1/sqrt(2N). Necessary to large models.")
 
     # Masking options.
     parser.add_argument("--whole_word_masking", action="store_true", help="Whole word masking.")

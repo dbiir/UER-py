@@ -1,6 +1,6 @@
 [**English**](https://github.com/dbiir/UER-py) | [**中文**](https://github.com/dbiir/UER-py/blob/master/README_ZH.md)
 
-[![Build Status](https://travis-ci.org/dbiir/UER-py.svg?branch=master)](https://travis-ci.org/dbiir/UER-py)
+[![Build Status](https://travis-ci.com/dbiir/UER-py.svg?branch=master)](https://travis-ci.com/dbiir/UER-py)
 [![codebeat badge](https://codebeat.co/badges/f75fab90-6d00-44b4-bb42-d19067400243)](https://codebeat.co/projects/github-com-dbiir-uer-py-master)
 ![](https://img.shields.io/badge/license-MIT-000000.svg)
 [![arXiv](https://img.shields.io/badge/arXiv-1909.05658-<color>.svg)](https://arxiv.org/abs/1909.05658)
@@ -51,7 +51,7 @@ UER-py has the following features:
 * For the tokenization with sentencepiece model you will need [SentencePiece](https://github.com/google/sentencepiece)
 * For developing a stacking model you will need LightGBM and [BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
 * For the pre-training with whole word masking you will need word segmentation tool such as [jieba](https://github.com/fxsjy/jieba)
-* For the gap sentence generation (GSG) target with rouge sentence selection strategy you will need [rouge](https://github.com/pltrdy/rouge)
+
 
 <br/>
 
@@ -87,7 +87,7 @@ We firstly pre-process the book review corpus. We need to specify the model's ta
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt \
                       --dataset_path dataset.pt --processes_num 8 --target bert
 ```
-Notice that ``six>=1.12.0`` is required.
+Notice that *six>=1.12.0* is required.
 
 
 Pre-processing is time-consuming. Using multiple processes can largely accelerate the pre-processing speed (*--processes_num*). BERT tokenizer is used in default (*--tokenizer bert*). After pre-processing, the raw text is converted to *dataset.pt*, which is the input of *pretrain.py*. Then we download Google's pre-trained Chinese BERT model [*google_zh_model.bin*](https://share.weiyun.com/A1C49VPb) (in UER format and the original model is from [here](https://github.com/google-research/bert)), and put it in *models* folder. We load the pre-trained Chinese BERT model and further pre-train it on book review corpus. Pre-training model is composed of embedding, encoder, and target layers. To build a pre-training model, we should explicitly specify model's embedding (*--embedding*), encoder (*--encoder* and *--mask*), and target (*--target*). Suppose we have a machine with 8 GPUs:

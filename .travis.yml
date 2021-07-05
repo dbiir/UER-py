@@ -57,7 +57,13 @@ script:
 
     python pretrain.py --dataset_path mt_dataset.pt --vocab_path models/google_uncased_en_vocab.txt --tgt_vocab_path models/google_zh_vocab.txt --output_model_path models/mt_model.bin --config_path models/encoder_decoder_config.json --embedding word_sinusoidalpos --tgt_embedding word_sinusoidalpos --encoder transformer --mask fully_visible --decoder transformer --target seq2seq --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
 
-    mv models/mt_model.bin-10 models/cls_model.bin
+    mv models/mt_model.bin-10 models/mt_model.bin
+
+    python preprocess.py --corpus_path corpora/CLUECorpusSmall_5000_lines_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path pegasus_dataset.pt --processes_num 8 --seq_length 128 --tgt_seq_length 128 --dup_factor 1 --target gsg --sentence_selection_strategy random
+
+    python pretrain.py --dataset_path pegasus_dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/pegasus_model.bin --config_path models/pegasus/base_config.json --learning_rate 1e-4 --batch_size 8 --embedding word_sinusoidalpos --tgt_embedding word_sinusoidalpos --remove_embedding_layernorm --encoder transformer --mask fully_visible --layernorm_positioning pre --decoder transformer --target gsg --has_lmtarget_bias --tie_weights --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
+
+    mv models/pegasus_model.bin-10 models/pegasus_model.bin
 
     python finetune/run_classifier.py --pretrained_model_path models/bert_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --output_model_path models/classifier_model.bin --train_path datasets/test_data/chnsenticorp_test/train.tsv --dev_path datasets/test_data/chnsenticorp_test/dev.tsv --epochs_num 3 --batch_size 2 --embedding word_pos_seg --encoder transformer --mask fully_visible
 

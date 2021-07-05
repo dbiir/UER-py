@@ -28,6 +28,7 @@ def model_opts(parser):
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
+    parser.add_argument("--has_residual_attention", action="store_true", help="Add residual attention.")
 
 
 def optimization_opts(parser):

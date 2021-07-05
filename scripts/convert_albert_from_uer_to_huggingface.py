@@ -1,6 +1,6 @@
-import torch
 import argparse
 import collections
+import torch
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)

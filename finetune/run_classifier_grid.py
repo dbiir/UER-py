@@ -1,5 +1,5 @@
 """
-This script provides an exmaple to wrap UER-py for classification with grid search.
+This script provides an example to wrap UER-py for classification with grid search.
 """
 import sys
 import os

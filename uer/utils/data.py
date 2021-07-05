@@ -16,7 +16,7 @@ def merge_dataset(dataset_path, workers_num):
     for i in range(workers_num):
         tmp_dataset_reader = open("dataset-tmp-" + str(i) + ".pt", "rb")
         while True:
-            tmp_data = tmp_dataset_reader.read(2^20)
+            tmp_data = tmp_dataset_reader.read(2**20)
             if tmp_data:
                 dataset_writer.write(tmp_data)
             else:
@@ -731,15 +731,14 @@ class Seq2seqDataset(Dataset):
 
                 src = [self.src_vocab.get(CLS_TOKEN)] + src + [self.src_vocab.get(SEP_TOKEN)]
                 tgt = [self.tgt_vocab.get(CLS_TOKEN)] + tgt + [self.tgt_vocab.get(SEP_TOKEN)]
-                seg = [1] * len(src)
 
-                src, tgt, seg = src[:self.seq_length], tgt[:self.tgt_seq_length + 1], seg[:self.seq_length]
+                src, tgt = src[:self.seq_length], tgt[:self.tgt_seq_length + 1]
+                seg_pos = [len(src)]
                 while len(src) != self.seq_length:
                     src.append(self.vocab.get(PAD_TOKEN))
-                    seg.append(0)
                 while len(tgt) != self.tgt_seq_length + 1:
                     tgt.append(self.vocab.get(PAD_TOKEN))
-                pickle.dump((src, tgt, seg), dataset_writer)
+                pickle.dump((src, tgt, seg_pos), dataset_writer)
 
                 if pos >= end:
                     break
@@ -768,7 +767,7 @@ class Seq2seqDataLoader(DataLoader):
                 src.append(ins[0])
                 tgt_in.append(ins[1][:-1])
                 tgt_out.append(ins[1][1:])
-                seg.append(ins[2])
+                seg.append([1] * ins[2][0] + [0] * (len(ins[0]) - ins[2][0]))
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt_in), \
@@ -863,16 +862,17 @@ class GsgDataset(BertDataset):
     def __init__(self, args, vocab, tokenizer):
         super(GsgDataset, self).__init__(args, vocab, tokenizer)
         self.sentence_selection_strategy = args.sentence_selection_strategy
+        self.tgt_seq_length = args.tgt_seq_length
 
     def create_single_instance(self, src, tgt):
         src = [self.vocab.get(CLS_TOKEN)] + src + [self.vocab.get(SEP_TOKEN)]
         tgt = [self.vocab.get(CLS_TOKEN)] + tgt + [self.vocab.get(SEP_TOKEN)]
-        seg = ([1] * len(src) + [0] * (self.seq_length - len(src)))
+        seg_pos = [len(src)]
         while len(src) != self.seq_length:
             src.append(self.vocab.get(PAD_TOKEN))
-        while len(tgt) != self.seq_length:
+        while len(tgt) != self.tgt_seq_length:
             tgt.append(self.vocab.get(PAD_TOKEN))
-        instance = (src, tgt, seg)
+        instance = (src, tgt, seg_pos)
         return instance
 
     def create_ins_from_doc(self, all_documents, document_index):
@@ -884,40 +884,20 @@ class GsgDataset(BertDataset):
         tgt = []
         i = 0
         document = all_documents[document_index]
-        target_seq_length = self.seq_length - 2
+        target_seq_length, target_tgt_seq_length = self.seq_length - 2, self.tgt_seq_length - 2
         for segment in document:
-            if len(segment) < target_seq_length:
+            if len(segment) < target_seq_length and len(segment) < target_tgt_seq_length:
                 tmp_document.append(segment)
         document = tmp_document
         mask_seq_num = int(round(len(document) * 0.3, 0))
         if sentence_selection_strategy == "random":
             mask_seq_list = random.sample(range(0, len(document) - 1), mask_seq_num)
-        elif sentence_selection_strategy == "lead":
-            mask_seq_list = list(range(0, mask_seq_num))
         else:
-            from rouge import Rouge
-            rouge_score_list = []
-            rouge = Rouge()
-            for _ in range(mask_seq_num):
-                for k in range(len(document)):
-                    rest_sentences = ""
-                    mask_sentences = ""
-                    if k not in mask_seq_list:
-                        for segment_id, segment in enumerate(document):
-                            if k == segment_id or segment_id in mask_seq_list:
-                                mask_sentences = mask_sentences + " ".join(self.tokenizer.convert_ids_to_tokens(segment)) + " "
-                            else:
-                                rest_sentences = rest_sentences + " ".join(self.tokenizer.convert_ids_to_tokens(segment)) + " "
-                        rouge_score_list.append(rouge.get_scores(mask_sentences, rest_sentences)[0]["rouge-1"]["f"])
-                    else:
-                        rouge_score_list.append(0)
-                max_index = rouge_score_list.index(max(rouge_score_list))
-                mask_seq_list.append(max_index)
-                rouge_score_list = []
+            mask_seq_list = list(range(0, mask_seq_num))
 
         while i < len(document):
             segment = document[i]
-            if i in mask_seq_list and len(tgt) + len(segment) < target_seq_length and len(src) + 1 < target_seq_length:
+            if i in mask_seq_list and len(tgt) + len(segment) < target_tgt_seq_length and len(src) + 1 < target_seq_length:
                 tgt = tgt + segment
                 src = src + [self.vocab.get(MASK_TOKEN)]
             elif i not in mask_seq_list and len(src) + len(segment) < target_seq_length:
@@ -1087,6 +1067,7 @@ class ClsDataset(Dataset):
                     src_b = src_b + [self.vocab.get(SEP_TOKEN)]
 
                     src = src_a + src_b
+                    tgt = label
                     seg = [1] * len(src_a) + [2] * len(src_b)
 
                     if len(src) >= self.seq_length:
@@ -1162,7 +1143,7 @@ class PrefixlmDataset(Dataset):
                     continue
 
                 src = src + tgt
-                tgt = [0] * seg_pos[0] + tgt[1:] + [self.vocab.get(PAD_TOKEN)]
+                tgt = [0] * (seg_pos[0] - 1) + tgt + [self.vocab.get(PAD_TOKEN)]
                 seg_pos.append(len(src))
                 src, tgt = src[:self.seq_length], tgt[:self.seq_length]
                 while len(src) != self.seq_length:

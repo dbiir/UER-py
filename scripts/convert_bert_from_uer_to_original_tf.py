@@ -1,10 +1,10 @@
 import sys
 import os
+import argparse
+import collections
 import numpy as np
 import tensorflow as tf
 import torch
-import argparse
-import collections
 
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, uer_dir)
