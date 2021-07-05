@@ -1,5 +1,5 @@
 """
-This script provides an exmaple to wrap UER-py for multi-task classification.
+This script provides an example to wrap UER-py for multi-task classification.
 """
 import sys
 import os
