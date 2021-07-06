@@ -37,6 +37,7 @@ class NerTagger(nn.Module):
         self.output_dim = args.hidden_size
         self.use_birnn = args.use_birnn
         self.use_crf = args.use_crf
+        self.logSoftmax = nn.LogSoftmax(dim=1)
         if args.use_birnn:
             self.birnn = nn.LSTM(
                 args.hidden_size,
@@ -80,8 +81,8 @@ class NerTagger(nn.Module):
                     .to(torch.device(tgt.device))
                     .scatter_(1, tgt, 1.0)
                 )
-                _logits = logits.contiguous().view(-1, self.labels_num)
-                numerator = -torch.sum(nn.LogSoftmax(dim=-1)(_logits) * one_hot, 1)
+
+                numerator = -torch.sum(self.logSoftmax(logits.contiguous().view(-1, self.labels_num)) * one_hot, 1)
                 tgt = tgt.contiguous().view(-1)
                 tgt_mask = ((tgt < self.labels_num - 1).float().to(torch.device(tgt.device)))
 
