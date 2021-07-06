@@ -85,8 +85,7 @@ def count_labels_num(path):
 def load_or_initialize_parameters(args, model):
     if args.pretrained_model_path is not None:
         # Initialize with pretrained model.
-        model.load_state_dict(torch.load(
-            args.pretrained_model_path, map_location=args.device), strict=False)        
+        model.load_state_dict(torch.load(args.pretrained_model_path), strict=False)
     else:
         # Initialize with normal distribution.
         for n, p in list(model.named_parameters()):
