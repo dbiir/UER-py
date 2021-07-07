@@ -62,7 +62,7 @@ class NerTagger(nn.Module):
             for j in range(len(pred)):
                 while len(pred[j]) < self.seq_length:
                     pred[j].append(self.labels_num - 1)
-            pred = torch.tensor(pred).contiguous().view(-1, 1)
+            pred = torch.tensor(pred).contiguous().view(-1)
             if tgt is not None:
                 loss = -self.crf(F.log_softmax(logits, 2), tgt, mask=tgt_mask, reduction='mean')
                 return loss, pred
