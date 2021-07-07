@@ -8,7 +8,6 @@ import argparse
 import json
 import torch
 import torch.nn as nn
-from torchcrf import CRF
 import torch.nn.functional as F
 
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -36,6 +35,7 @@ class NerTagger(nn.Module):
         self.output_layer = nn.Linear(args.hidden_size, self.labels_num)
         self.crf_target = args.crf_target
         if args.crf_target:
+            from torchcrf import CRF
             self.crf = CRF(self.labels_num, batch_first=True)
             self.seq_length = args.seq_length
 
