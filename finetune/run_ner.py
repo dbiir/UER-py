@@ -8,6 +8,7 @@ import argparse
 import json
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
@@ -32,6 +33,11 @@ class NerTagger(nn.Module):
         self.encoder = str2encoder[args.encoder](args)
         self.labels_num = args.labels_num
         self.output_layer = nn.Linear(args.hidden_size, self.labels_num)
+        self.crf_target = args.crf_target
+        if args.crf_target:
+            from torchcrf import CRF
+            self.crf = CRF(self.labels_num, batch_first=True)
+            self.seq_length = args.seq_length
 
     def forward(self, src, tgt, seg):
         """
@@ -47,26 +53,37 @@ class NerTagger(nn.Module):
         emb = self.embedding(src, seg)
         # Encoder.
         output = self.encoder(emb, seg)
+
         # Target.
-        logits = self.output_layer(output).contiguous().view(-1, self.labels_num)
-
-        if tgt is not None:
-            tgt = tgt.contiguous().view(-1,1)
-            one_hot = torch.zeros(tgt.size(0), self.labels_num). \
-                      to(torch.device(tgt.device)). \
-                      scatter_(1, tgt, 1.0)
-
-            numerator = -torch.sum(nn.LogSoftmax(dim=-1)(logits) * one_hot, 1)
-
-            tgt = tgt.contiguous().view(-1)
-            tgt_mask = (tgt < self.labels_num - 1).float().to(torch.device(tgt.device))
-
-            numerator = torch.sum(tgt_mask * numerator)
-            denominator = torch.sum(tgt_mask) + 1e-6
-            loss = numerator / denominator
-            return loss, logits
+        logits = self.output_layer(output)
+        if self.crf_target:
+            tgt_mask = seg.type(torch.uint8)
+            pred = self.crf.decode(logits, mask=tgt_mask)
+            for j in range(len(pred)):
+                while len(pred[j]) < self.seq_length:
+                    pred[j].append(self.labels_num - 1)
+            pred = torch.tensor(pred).contiguous().view(-1)
+            if tgt is not None:
+                loss = -self.crf(F.log_softmax(logits, 2), tgt, mask=tgt_mask, reduction='mean')
+                return loss, pred
+            else:
+                return None, pred
         else:
-            return None, logits
+            tgt_mask = seg.contiguous().view(-1).float()
+            logits = logits.contiguous().view(-1, self.labels_num)
+            pred = logits.argmax(dim=-1)
+            if tgt is not None:
+                tgt = tgt.contiguous().view(-1, 1)
+                one_hot = torch.zeros(tgt.size(0), self.labels_num). \
+                    to(torch.device(tgt.device)). \
+                    scatter_(1, tgt, 1.0)
+                numerator = -torch.sum(nn.LogSoftmax(dim=-1)(logits) * one_hot, 1)
+                numerator = torch.sum(tgt_mask * numerator)
+                denominator = torch.sum(tgt_mask) + 1e-6
+                loss = numerator / denominator
+                return loss, pred
+            else:
+                return None, pred
 
 
 def read_dataset(args, path):
@@ -152,9 +169,8 @@ def evaluate(args, dataset):
         src_batch = src_batch.to(args.device)
         tgt_batch = tgt_batch.to(args.device)
         seg_batch = seg_batch.to(args.device)
-        loss, logits = args.model(src_batch, tgt_batch, seg_batch)
+        loss, pred = args.model(src_batch, tgt_batch, seg_batch)
 
-        pred = logits.argmax(dim=-1)
         gold = tgt_batch.contiguous().view(-1, 1)
 
         for j in range(gold.size()[0]):
@@ -215,6 +231,8 @@ def main():
 
     parser.add_argument("--label2id_path", type=str, required=True,
                         help="Path of the label2id file.")
+    parser.add_argument("--crf_target", action="store_true",
+                        help="Use CRF loss as the target function or not, default False.")
 
     args = parser.parse_args()
 

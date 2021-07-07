@@ -50,6 +50,7 @@ UER-py有如下几方面优势:
 * 如果在tokenizer中使用sentencepiece模型，需要安装[SentencePiece](https://github.com/google/sentencepiece)
 * 如果使用模型集成stacking，需要安装LightGBM和[BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
 * 如果使用全词遮罩（whole word masking）预训练，需要安装分词工具，例如[jieba](https://github.com/fxsjy/jieba)
+* 如果在序列标注下游任务中使用CRF，需要安装[pytorch-crf](https://github.com/kmkurn/pytorch-crf)
 
 
 <br/>

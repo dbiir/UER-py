@@ -91,6 +91,8 @@ def main():
     acc, marco_f1 = 0.0, 0.0
 
     for fold_id in range(args.folds_num):
+        torch.cuda.empty_cache()
+
         # Build classification model.
         model = Classifier(args)
 
