@@ -51,7 +51,7 @@ UER-py has the following features:
 * For the tokenization with sentencepiece model you will need [SentencePiece](https://github.com/google/sentencepiece)
 * For developing a stacking model you will need LightGBM and [BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
 * For the pre-training with whole word masking you will need word segmentation tool such as [jieba](https://github.com/fxsjy/jieba)
-* For the use of CRF loss as the target function you will need [pytorch-crf](https://github.com/kmkurn/pytorch-crf)
+* For the use of CRF in sequence labeling downstream task you will need [pytorch-crf](https://github.com/kmkurn/pytorch-crf)
 
 
 <br/>
