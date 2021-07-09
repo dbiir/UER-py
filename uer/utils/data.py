@@ -967,7 +967,7 @@ class BartDataset(BertDataset):
                 src = []
                 tgt = []
             i += 1
-        if len(tgt) > 0 and len(src) > 0:
+        if len(current_chunk) > 0:
             shuf_chunk = current_chunk.copy()
             random.shuffle(shuf_chunk)
             for k in range(len(current_chunk)):
