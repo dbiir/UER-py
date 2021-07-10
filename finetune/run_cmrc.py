@@ -1,5 +1,5 @@
 """
-This script provides an example to wrap UER-py for Chinese machine reading comprehension.
+This script provides an exmaple to wrap UER-py for Chinese machine reading comprehension.
 """
 import sys
 import os
