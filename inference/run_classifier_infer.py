@@ -1,5 +1,5 @@
 """
-  This script provides an exmaple to wrap UER-py for classification inference.
+  This script provides an example to wrap UER-py for classification inference.
 """
 import sys
 import os

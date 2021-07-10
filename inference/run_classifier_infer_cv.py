@@ -1,5 +1,5 @@
 """
-  This script provides an exmaple to wrap UER-py for classification inference (cross validation).
+  This script provides an example to wrap UER-py for classification inference (cross validation).
 """
 import sys
 import os
