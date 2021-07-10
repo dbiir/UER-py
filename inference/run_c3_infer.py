@@ -1,5 +1,5 @@
 """
-  This script provides an exmaple to wrap UER-py for C3 (a multiple choice dataset) inference.
+  This script provides an example to wrap UER-py for C3 (a multiple choice dataset) inference.
 """
 import sys
 import os
