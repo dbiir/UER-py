@@ -380,10 +380,6 @@ def worker(proc_id, gpu_ranks, args, model):
     else:
         train_loader = str2dataloader[args.target](args, args.dataset_path, args.batch_size, 0, 1, True)
 
-    if gpu_id is not None:
-        torch.cuda.set_device(gpu_id)
-        model.cuda(gpu_id)
-
     # Build optimizer.
     param_optimizer = list(model.named_parameters())
     no_decay = ["bias", "gamma", "beta"]
@@ -402,6 +398,9 @@ def worker(proc_id, gpu_ranks, args, model):
         scheduler = str2scheduler[args.scheduler](optimizer, args.total_steps*args.warmup)
     else:
         scheduler = str2scheduler[args.scheduler](optimizer, args.total_steps*args.warmup, args.total_steps)
+
+    if gpu_id is not None:
+        model.cuda(gpu_id)
 
     if args.fp16:
         try:
