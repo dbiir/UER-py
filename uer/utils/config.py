@@ -10,4 +10,8 @@ def load_hyperparam(args):
     args_dict.update(param)
     args = Namespace(**args_dict)
 
+    if "deepspeed" in args.__dict__:
+        with open(args.deepspeed_config, mode="r", encoding="utf-8") as f:
+            args.deepspeed_config_param = json.load(f)
+
     return args

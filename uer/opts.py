@@ -126,3 +126,11 @@ def tokenizer_opts(parser):
                              "Space tokenizer segments sentences into words according to space."
                              "Original XLM-RoBERTa uses xlmroberta tokenizer."
                              )
+
+
+def deepspeed_opts(parser):
+    parser.add_argument("--deepspeed", action="store_true",
+                        help=".")
+    parser.add_argument("--deepspeed_config", default="models/deepspeed_config.json", type=str,
+                        help=".")
+    parser.add_argument("--local_rank", type=int, required=False)
