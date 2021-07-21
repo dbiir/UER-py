@@ -408,14 +408,15 @@ def worker(proc_id, gpu_ranks, args, model):
     if args.optimizer in ["adamw"]:
         custom_optimizer = str2optimizer[args.optimizer](optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
     else:
-        custom_optimizer = str2optimizer[args.optimizer](optimizer_grouped_parameters, lr=args.learning_rate, scale_parameter=False, relative_step=False)
+        custom_optimizer = str2optimizer[args.optimizer](optimizer_grouped_parameters, lr=args.learning_rate,
+                                                         scale_parameter=False, relative_step=False)
 
     if args.scheduler in ["constant"]:
         custom_scheduler = str2scheduler[args.scheduler](custom_optimizer)
     elif args.scheduler in ["constant_with_warmup"]:
-        custom_scheduler = str2scheduler[args.scheduler](custom_optimizer, args.total_steps * args.warmup)
+        custom_scheduler = str2scheduler[args.scheduler](custom_optimizer, args.total_steps*args.warmup)
     else:
-        custom_scheduler = str2scheduler[args.scheduler](custom_optimizer, args.total_steps * args.warmup, args.total_steps)
+        custom_scheduler = str2scheduler[args.scheduler](custom_optimizer, args.total_steps*args.warmup, args.total_steps)
 
     if args.deepspeed:
         optimizer = None
