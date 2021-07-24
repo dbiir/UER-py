@@ -11,16 +11,16 @@ uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
 from uer.model_saver import save_model
-from uer.targets import *
+from uer.targets import Seq2seqTarget
 from finetune.run_classifier import *
 
 
-class Text2Text(torch.nn.Module):
+class Text2text(torch.nn.Module):
     def __init__(self, args):
-        super(Text2Text, self).__init__()
+        super(Text2text, self).__init__()
         self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
         self.encoder = str2encoder[args.encoder](args)
-        self.target = str2target[args.target](args, len(args.tokenizer.vocab))
+        self.target = Seq2seqTarget(args, len(args.tokenizer.vocab))
 
     def forward(self, src, tgt, seg):
         tgt_in, tgt_out, _ = tgt
@@ -185,8 +185,6 @@ def main():
     parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
                         help="Target embedding type.")
     parser.add_argument("--decoder", choices=["transformer"], default="transformer", help="Decoder type.")
-    parser.add_argument("--target",  choices=["lm", "seq2seq", "t5", "prefixlm"], default="t5",
-                        help="The training target of the pretraining model.")
     parser.add_argument("--tie_weights", action="store_true",
                         help="Tie the word embedding and softmax weights.")
     parser.add_argument("--has_lmtarget_bias", action="store_true",
@@ -205,7 +203,7 @@ def main():
     args.tokenizer = str2tokenizer[args.tokenizer](args)
 
     # Build classification model.
-    model = Text2Text(args)
+    model = Text2text(args)
 
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
