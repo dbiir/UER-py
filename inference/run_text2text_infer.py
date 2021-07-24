@@ -16,7 +16,7 @@ from uer.utils.config import load_hyperparam
 from uer.utils.vocab import Vocab
 from uer.model_loader import load_model
 from uer.opts import infer_opts, tokenizer_opts
-from finetune.run_text2text import Text2Text
+from finetune.run_text2text import Text2text
 from inference.run_classifier_infer import batch_loader
 
 
@@ -61,8 +61,6 @@ def main():
     parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
                         help="Target embedding type.")
     parser.add_argument("--decoder", choices=["transformer"], default="transformer", help="Decoder type.")
-    parser.add_argument("--target", choices=["lm", "seq2seq", "t5", "prefixlm"], default="t5",
-                        help="The training target of the pretraining model.")
     parser.add_argument("--tie_weights", action="store_true",
                         help="Tie the word embedding and softmax weights.")
     parser.add_argument("--has_lmtarget_bias", action="store_true",
@@ -78,7 +76,7 @@ def main():
     args.tokenizer = str2tokenizer[args.tokenizer](args)
 
     # Build classification model.
-    model = Text2Text(args)
+    model = Text2text(args)
     model = load_model(model, args.load_model_path)
 
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
