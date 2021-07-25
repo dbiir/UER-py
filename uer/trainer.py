@@ -17,7 +17,7 @@ def train_and_validate(args):
 
     # Load vocabulary.
     if args.target == "seq2seq":
-        args.tgt_tokenizer = str2tokenizer[args.tgt_tokenizer](args)
+        args.tgt_tokenizer = str2tokenizer[args.tgt_tokenizer](args, is_src=False)
         args.tgt_vocab = args.tgt_tokenizer.vocab
 
     args.tokenizer = str2tokenizer[args.tokenizer](args)
