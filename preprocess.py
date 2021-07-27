@@ -1,8 +1,8 @@
 import argparse
 import six
-from packaging import version
 from uer.utils.data import *
 from uer.utils import *
+from uer.opts import *
 
 
 assert version.parse(six.__version__) >= version.parse("1.12.0")
@@ -14,27 +14,12 @@ def main():
     # Path options.
     parser.add_argument("--corpus_path", type=str, required=True,
                         help="Path of the corpus for pretraining.")
-    parser.add_argument("--vocab_path", default=None, type=str,
-                        help="Path of the vocabulary file.")
-    parser.add_argument("--spm_model_path", default=None, type=str,
-                        help="Path of the sentence piece model.")
-    parser.add_argument("--tgt_vocab_path", default=None, type=str,
-                        help="Path of the target vocabulary file.")
-    parser.add_argument("--tgt_spm_model_path", default=None, type=str,
-                        help="Path of the target sentence piece model.")
     parser.add_argument("--dataset_path", type=str, default="dataset.pt",
                         help="Path of the preprocessed dataset.")
 
     # Preprocess options.
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
-                        help="Specify the tokenizer." 
-                             "Original Google BERT uses bert tokenizer."
-                             "Char tokenizer segments sentences into characters."
-                             "Space tokenizer segments sentences into words according to space."
-                             "Original XLM-RoBERTa uses xlmroberta tokenizer."
-                             )
-    parser.add_argument("--tgt_tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
-                        help="Specify the tokenizer for target side.")
+    tokenizer_opts(parser)
+    tgt_tokenizer_opts(parser)
     parser.add_argument("--processes_num", type=int, default=1,
                         help="Split the whole dataset into `processes_num` parts, "
                              "and process them with `processes_num` processes.")
