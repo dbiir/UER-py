@@ -75,9 +75,6 @@ def main():
     parser.add_argument("--master_ip", default="tcp://localhost:12345", type=str, help="IP-Port of master for training.")
     parser.add_argument("--backend", choices=["nccl", "gloo"], default="nccl", type=str, help="Distributed backend.")
 
-    # Deepspeed options.
-    deepspeed_opts(parser)
-
     args = parser.parse_args()
 
     if args.target == "cls":
@@ -89,36 +86,28 @@ def main():
 
     ranks_num = len(args.gpu_ranks)
 
-    if args.deepspeed:
-        if args.world_size > 1:
-            args.dist_train = True
-            print("Using distributed mode for training.")
-        else:
-            args.dist_train = False
-            print("Using single GPU for training.")
+    if args.world_size > 1:
+        # Multiprocessing distributed mode.
+        assert torch.cuda.is_available(), "No available GPUs."
+        assert ranks_num <= args.world_size, "Started processes exceed `world_size` upper limit."
+        assert ranks_num <= torch.cuda.device_count(), "Started processes exceeds the available GPUs."
+        args.dist_train = True
+        args.ranks_num = ranks_num
+        print("Using distributed mode for training.")
+    elif args.world_size == 1 and ranks_num == 1:
+        # Single GPU mode.
+        assert torch.cuda.is_available(), "No available GPUs."
+        args.gpu_id = args.gpu_ranks[0]
+        assert args.gpu_id < torch.cuda.device_count(), "Invalid specified GPU device."
+        args.dist_train = False
+        args.single_gpu = True
+        print("Using GPU %d for training." % args.gpu_id)
     else:
-        if args.world_size > 1:
-            # Multiprocessing distributed mode.
-            assert torch.cuda.is_available(), "No available GPUs."
-            assert ranks_num <= args.world_size, "Started processes exceed `world_size` upper limit."
-            assert ranks_num <= torch.cuda.device_count(), "Started processes exceeds the available GPUs."
-            args.dist_train = True
-            args.ranks_num = ranks_num
-            print("Using distributed mode for training.")
-        elif args.world_size == 1 and ranks_num == 1:
-            # Single GPU mode.
-            assert torch.cuda.is_available(), "No available GPUs."
-            args.gpu_id = args.gpu_ranks[0]
-            assert args.gpu_id < torch.cuda.device_count(), "Invalid specified GPU device."
-            args.dist_train = False
-            args.single_gpu = True
-            print("Using GPU %d for training." % args.gpu_id)
-        else:
-            # CPU mode.
-            assert ranks_num == 0, "GPUs are specified, please check the arguments."
-            args.dist_train = False
-            args.single_gpu = False
-            print("Using CPU mode for training.")
+        # CPU mode.
+        assert ranks_num == 0, "GPUs are specified, please check the arguments."
+        args.dist_train = False
+        args.single_gpu = False
+        print("Using CPU mode for training.")
 
     trainer.train_and_validate(args)
 

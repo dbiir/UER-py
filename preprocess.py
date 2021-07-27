@@ -1,5 +1,6 @@
 import argparse
 import six
+from packaging import version
 from uer.utils.data import *
 from uer.utils import *
 from uer.opts import *
