@@ -6,14 +6,11 @@ import numpy as np
 import tensorflow as tf
 import torch
 
-#tencentpretrain_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-#sys.path.insert(0, tencentpretrain_dir)
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, uer_dir)
 
-#from scripts.convert_bert_from_original_tf_to_tencentpretrain import tensors_to_transopse
+from scripts.convert_albert_from_original_tf_to_uer import tensors_to_transopse
 
-tensors_to_transopse = (
-        "kernel",
-    )
 
 def assign_tf_var(tensor: np.ndarray, name: str):
     tf_var = tf.get_variable(dtype=tensor.dtype, shape=tensor.shape, name=name)
@@ -23,9 +20,9 @@ def assign_tf_var(tensor: np.ndarray, name: str):
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--input_model_path", type=str, default="uer.bin",
+    parser.add_argument("--input_model_path", type=str, default="models/albert_model.bin",
                         help=".")
-    parser.add_argument("--output_model_path", type=str, default="models/albert_base_chinese.ckpt",
+    parser.add_argument("--output_model_path", type=str, default="models/bert_base_chinese.ckpt",
                         help=".")
 
     args = parser.parse_args()
