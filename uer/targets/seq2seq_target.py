@@ -25,11 +25,11 @@ class Seq2seqTarget(LmTarget):
             correct: Number of words that are predicted correctly.
             denominator: Number of predicted words.
         """
-        tgt_in, tgt_out, src = tgt
+        tgt_in, tgt_out, seg = tgt
 
         emb = self.embedding(tgt_in, None)
 
-        hidden = self.decoder(memory_bank, emb, (src,))
+        hidden = self.decoder(memory_bank, emb, (seg,))
 
         # Language modeling (LM) with full softmax prediction.
         loss, correct, denominator = self.lm(hidden, tgt_out)

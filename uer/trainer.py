@@ -304,7 +304,7 @@ class Seq2seqTrainer(Trainer):
 
     def forward_propagation(self, batch, model):
         src, tgt_in, tgt_out, seg = batch
-        loss_info = model(src, (tgt_in, tgt_out, src), seg)
+        loss_info = model(src, (tgt_in, tgt_out, seg), seg)
         loss, correct, denominator = loss_info
         self.total_loss += loss.item()
         self.total_correct += correct.item()
