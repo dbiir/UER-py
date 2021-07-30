@@ -15,7 +15,7 @@ from uer.utils.config import load_hyperparam
 from uer.utils.constants import *
 from uer.utils.tokenizers import *
 from uer.model_loader import load_model
-from uer.opts import infer_opts
+from uer.opts import infer_opts, tokenizer_opts
 from finetune.run_ner import NerTagger
 
 
@@ -65,6 +65,8 @@ def main():
                         help="Path of the label2id file.")
     parser.add_argument("--crf_target", action="store_true",
                         help="Use CRF loss as the target function or not, default False.")
+
+    tokenizer_opts(parser)
     
     args = parser.parse_args()
 
