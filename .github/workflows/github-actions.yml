@@ -1,0 +1,55 @@
+name: Python package
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+              pip install -r requirements.txt
+      - name: Test with pytest
+        run: |
+              python preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path bert_dataset.pt --processes_num 8 --target bert --seq_length 64
+              python pretrain.py --dataset_path bert_dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/bert_model.bin --config_path models/bert/mini_config.json --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
+              mv models/bert_model.bin-10 models/bert_model.bin
+              python preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path roberta_dataset.pt --processes_num 8 --target mlm --seq_length 64 --dynamic_masking
+              python pretrain.py --dataset_path roberta_dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/roberta_model.bin --config_path models/bert/mini_config.json --embedding word_pos_seg --encoder transformer --mask fully_visible --target mlm --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
+              mv models/roberta_model.bin-10 models/roberta_model.bin
+              python preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path albert_dataset.pt --processes_num 8 --target albert --seq_length 64
+              python pretrain.py --dataset_path albert_dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/albert_model.bin --config_path models/albert/base_config.json --embedding word_pos_seg --encoder transformer --mask fully_visible --factorized_embedding_parameterization --parameter_sharing --target albert --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
+              mv models/albert_model.bin-10 models/albert_model.bin
+              python preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path lm_dataset.pt --processes_num 8 --target lm --seq_length 64
+              python pretrain.py --dataset_path lm_dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/gpt_model.bin --config_path models/bert/mini_config.json --embedding word_pos --encoder transformer --mask causal --target lm --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
+              mv models/gpt_model.bin-10 models/gpt_model.bin
+              python preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path spanbert_dataset.pt --processes_num 8 --target bert --seq_length 64 --span_masking
+              python pretrain.py --dataset_path spanbert_dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/spanbert_model.bin --config_path models/bert/mini_config.json --embedding word_pos_seg --encoder transformer --mask fully_visible --target bert --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
+              mv models/spanbert_model.bin-10 models/spanbert_model.bin
+              python preprocess.py --corpus_path corpora/book_review_cls.txt --vocab_path models/google_zh_vocab.txt --dataset_path cls_dataset.pt --processes_num 8 --target cls --seq_length 64
+              python pretrain.py --dataset_path cls_dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/cls_model.bin --config_path models/bert/mini_config.json --embedding word_pos_seg --encoder transformer --mask fully_visible --target cls --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2 --labels_num 2
+              mv models/cls_model.bin-10 models/cls_model.bin
+              python preprocess.py --corpus_path corpora/parallel_corpus_en_zh.txt --vocab_path models/google_uncased_en_vocab.txt --tgt_vocab_path models/google_zh_vocab.txt --dataset_path mt_dataset.pt --processes_num 8 --target seq2seq --seq_length 64 --tgt_seq_length 64
+              python pretrain.py --dataset_path mt_dataset.pt --vocab_path models/google_uncased_en_vocab.txt --tgt_vocab_path models/google_zh_vocab.txt --output_model_path models/mt_model.bin --config_path models/encoder_decoder_config.json --embedding word_sinusoidalpos --tgt_embedding word_sinusoidalpos --encoder transformer --mask fully_visible --decoder transformer --target seq2seq --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
+              mv models/mt_model.bin-10 models/mt_model.bin
+              python preprocess.py --corpus_path corpora/CLUECorpusSmall_5000_lines_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path pegasus_dataset.pt --processes_num 8 --seq_length 128 --tgt_seq_length 128 --dup_factor 1 --target gsg --sentence_selection_strategy random
+              python pretrain.py --dataset_path pegasus_dataset.pt --vocab_path models/google_zh_vocab.txt --output_model_path models/pegasus_model.bin --config_path models/pegasus/base_config.json --learning_rate 1e-4 --batch_size 8 --embedding word_sinusoidalpos --tgt_embedding word_sinusoidalpos --remove_embedding_layernorm --encoder transformer --mask fully_visible --layernorm_positioning pre --decoder transformer --target gsg --has_lmtarget_bias --tie_weights --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
+              mv models/pegasus_model.bin-10 models/pegasus_model.bin
+              python finetune/run_classifier.py --pretrained_model_path models/bert_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --output_model_path models/classifier_model.bin --train_path datasets/test_data/chnsenticorp_test/train.tsv --dev_path datasets/test_data/chnsenticorp_test/dev.tsv --epochs_num 3 --batch_size 2 --embedding word_pos_seg --encoder transformer --mask fully_visible
+              python inference/run_classifier_infer.py --load_model_path models/classifier_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --test_path datasets/test_data/chnsenticorp_test/test_nolabel.tsv --prediction_path datasets/test_data/chnsenticorp_test/prediction.tsv --embedding word_pos_seg --encoder transformer --mask fully_visible --labels_num 2
+              python finetune/run_classifier.py --pretrained_model_path models/albert_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/albert/base_config.json --output_model_path models/classifier_model.bin --train_path datasets/test_data/chnsenticorp_test/train.tsv --dev_path datasets/test_data/chnsenticorp_test/dev.tsv --learning_rate 4e-5 --epochs_num 3 --batch_size 2 --embedding word_pos_seg --encoder transformer --mask fully_visible --factorized_embedding_parameterization --parameter_sharing
+              python finetune/run_classifier_mt.py --pretrained_model_path models/bert_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --dataset_path_list datasets/test_data/douban_test/ datasets/test_data/chnsenticorp_test/ --epochs_num 1 --batch_size 2 --embedding word_pos_seg --encoder transformer --mask fully_visible
+              python finetune/run_ner.py --pretrained_model_path models/bert_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --output_model_path models/ner_model.bin --train_path datasets/test_data/msra_ner_test/train.tsv --dev_path datasets/test_data/msra_ner_test/dev.tsv --label2id_path datasets/msra_ner/label2id.json --epochs_num 2 --batch_size 2 --embedding word_pos_seg --encoder transformer --mask fully_visible
+              python inference/run_ner_infer.py --load_model_path models/ner_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --test_path datasets/test_data/msra_ner_test/test_nolabel.tsv --prediction_path datasets/test_data/msra_ner_test/prediction.tsv --label2id_path datasets/msra_ner/label2id.json --embedding word_pos_seg --encoder transformer --mask fully_visible
+              python finetune/run_cmrc.py --pretrained_model_path models/bert_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --output_model_path models/cmrc_model.bin --train_path datasets/test_data/cmrc_test/train.json --dev_path datasets/test_data/cmrc_test/dev.json --epochs_num 2 --batch_size 2 --embedding word_pos_seg --encoder transformer --mask fully_visible --seq_length 128
+              python inference/run_cmrc_infer.py --load_model_path models/cmrc_model.bin --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --test_path datasets/test_data/cmrc_test/test.json --prediction_path datasets/test_data/cmrc_test/prediction.json --embedding word_pos_seg --encoder transformer --mask fully_visible --seq_length 128

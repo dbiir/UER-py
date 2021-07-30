@@ -1,6 +1,6 @@
 [**English**](https://github.com/dbiir/UER-py) | [**中文**](https://github.com/dbiir/UER-py/blob/master/README_ZH.md) 
 
-[![Build Status](https://travis-ci.com/dbiir/UER-py.svg?branch=master)](https://travis-ci.com/dbiir/UER-py)
+[![Build Status](https://github.com/dbiir/UER-py/actions/workflows/github-actions.yml/badge.svg)](https://github.com/dbiir/UER-py/actions/workflows/github-actions.yml)
 [![codebeat badge](https://codebeat.co/badges/f75fab90-6d00-44b4-bb42-d19067400243)](https://codebeat.co/projects/github-com-dbiir-uer-py-master)
 ![](https://img.shields.io/badge/license-MIT-000000.svg)
 [![arXiv](https://img.shields.io/badge/arXiv-1909.05658-<color>.svg)](https://arxiv.org/abs/1909.05658)
