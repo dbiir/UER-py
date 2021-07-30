@@ -92,8 +92,6 @@ def main():
     parser.add_argument("--dataset_path_list", default=[], nargs='+', type=str, help="Dataset path list.")
     parser.add_argument("--output_model_path", default="models/multitask_classifier_model.bin", type=str,
                         help="Path of the output model.")
-    parser.add_argument("--vocab_path", default=None, type=str,
-                        help="Path of the vocabulary file.")
     parser.add_argument("--spm_model_path", default=None, type=str,
                         help="Path of the sentence piece model.")    
     parser.add_argument("--config_path", default="models/bert/base_config.json", type=str,
