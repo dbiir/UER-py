@@ -11,9 +11,9 @@ from scripts.convert_bert_from_huggingface_to_uer import convert_bert_transforme
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--input_model_path", type=str, default="input_model.bin",
+parser.add_argument("--input_model_path", type=str, default="models/input_model.bin",
                     help=".")
-parser.add_argument("--output_model_path", type=str, default="output_model.bin",
+parser.add_argument("--output_model_path", type=str, default="models/output_model.bin",
                     help=".")
 parser.add_argument("--layers_num", type=int, default=12, help=".")
 
