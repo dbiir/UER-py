@@ -21,7 +21,7 @@ from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
-from uer.opts import finetune_opts
+from uer.opts import finetune_opts, tokenizer_opts
 from finetune.run_classifier import build_optimizer, load_or_initialize_parameters
 
 
@@ -348,6 +348,9 @@ def main():
 
     parser.add_argument("--doc_stride", default=128, type=int,
                         help="When splitting up a long document into chunks, how much stride to take between chunks.")
+
+    # Tokenizer options.
+    tokenizer_opts(parser)
 
     args = parser.parse_args()
 

@@ -17,7 +17,7 @@ from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
-from uer.opts import finetune_opts
+from uer.opts import finetune_opts, tokenizer_opts
 from finetune.run_c3 import MultipleChoice
 from finetune.run_classifier import build_optimizer, load_or_initialize_parameters, train_model, batch_loader, evaluate
 
@@ -134,6 +134,9 @@ def main():
 
     parser.add_argument("--max_choices_num", default=10, type=int,
                         help="The maximum number of cadicate answer, shorter than this will be padded.")
+
+    # Tokenizer options.
+    tokenizer_opts(parser)
 
     args = parser.parse_args()
 
