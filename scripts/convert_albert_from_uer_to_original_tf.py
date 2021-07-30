@@ -20,9 +20,9 @@ def assign_tf_var(tensor: np.ndarray, name: str):
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--input_model_path", type=str, default="models/albert_model.bin",
+    parser.add_argument("--input_model_path", type=str, default="models/input_model.bin",
                         help=".")
-    parser.add_argument("--output_model_path", type=str, default="models/bert_base_chinese.ckpt",
+    parser.add_argument("--output_model_path", type=str, default="models/output_model.ckpt",
                         help=".")
 
     args = parser.parse_args()

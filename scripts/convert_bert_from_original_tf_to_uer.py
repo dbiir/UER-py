@@ -18,9 +18,9 @@ def main():
 
     parser.add_argument("--layers_num", type=int, default=12,
                         help=".")
-    parser.add_argument("--input_model_path", default="models/bert_base_chinese/bert_model.ckpt", type=str,
+    parser.add_argument("--input_model_path", default="models/input_model.ckpt", type=str,
                         help=".")
-    parser.add_argument("--output_model_path", default=None, type=str, required=True,
+    parser.add_argument("--output_model_path", default="models/output_model.bin", type=str,
                         help="Path to the output PyTorch model.")
     parser.add_argument("--target", choices=["bert", "mlm"], default="bert",
                         help="The training target of the pretraining model.")
