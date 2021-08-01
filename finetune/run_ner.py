@@ -22,7 +22,7 @@ from uer.utils.vocab import Vocab
 from uer.utils.seed import set_seed
 from uer.utils.tokenizers import *
 from uer.model_saver import save_model
-from uer.opts import finetune_opts, tokenizer_opts
+from uer.opts import finetune_opts
 from finetune.run_classifier import build_optimizer, load_or_initialize_parameters
 
 
@@ -229,13 +229,12 @@ def main():
 
     finetune_opts(parser)
 
+    parser.add_argument("--vocab_path", required=True, type=str,
+                        help="Path of the vocabulary file.")
     parser.add_argument("--label2id_path", type=str, required=True,
                         help="Path of the label2id file.")
     parser.add_argument("--crf_target", action="store_true",
                         help="Use CRF loss as the target function or not, default False.")
-
-    # Tokenizer options.
-    tokenizer_opts(parser)
 
     args = parser.parse_args()
 

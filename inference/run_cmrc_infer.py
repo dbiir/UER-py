@@ -14,7 +14,7 @@ from uer.utils.config import load_hyperparam
 from uer.utils.constants import *
 from uer.utils.tokenizers import * 
 from uer.model_loader import load_model
-from uer.opts import infer_opts, tokenizer_opts
+from uer.opts import infer_opts
 from finetune.run_cmrc import *
 
 
@@ -22,10 +22,11 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     infer_opts(parser)
+
+    parser.add_argument("--vocab_path", required=True, type=str,
+                        help="Path of the vocabulary file.")
     parser.add_argument("--doc_stride", default=128, type=int,
                         help="When splitting up a long document into chunks, how much stride to take between chunks.")
-
-    tokenizer_opts(parser)
 
     args = parser.parse_args()
 
