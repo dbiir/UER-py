@@ -51,8 +51,10 @@ def main():
 
     infer_opts(parser)
 
-    parser.add_argument("--vocab_path", required=True, type=str,
+    parser.add_argument("--vocab_path", default=None, type=str,
                         help="Path of the vocabulary file.")
+    parser.add_argument("--spm_model_path", default=None, type=str,
+                        help="Path of the sentence piece model.")
     parser.add_argument("--max_choices_num", default=10, type=int,
                         help="The maximum number of cadicate answer, shorter than this will be padded.")
 

@@ -61,8 +61,10 @@ def main():
 
     infer_opts(parser)
 
-    parser.add_argument("--vocab_path", required=True, type=str,
+    parser.add_argument("--vocab_path", default=None, type=str,
                         help="Path of the vocabulary file.")
+    parser.add_argument("--spm_model_path", default=None, type=str,
+                        help="Path of the sentence piece model.")
     parser.add_argument("--label2id_path", type=str, required=True,
                         help="Path of the label2id file.")
     parser.add_argument("--crf_target", action="store_true",
