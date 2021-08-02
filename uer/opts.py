@@ -131,3 +131,11 @@ def tgt_tokenizer_opts(parser):
                         help="Path of the target vocabulary file.")
     parser.add_argument("--tgt_spm_model_path", default=None, type=str,
                         help="Path of the target sentence piece model.")
+
+
+def deepspeed_opts(parser):
+    parser.add_argument("--deepspeed", action="store_true",
+                        help=".")
+    parser.add_argument("--deepspeed_config", default="models/deepspeed_config.json", type=str,
+                        help=".")
+    parser.add_argument("--local_rank", type=int, required=False)
