@@ -29,9 +29,11 @@ class Text2text(torch.nn.Module):
         decoder_emb = self.target.embedding(tgt_in, None)
         hidden = self.target.decoder(memory_bank, decoder_emb, (src,))
         output = self.target.output_layer(hidden)
-        loss = self.target(memory_bank, tgt)[0]
-        return loss, output
-
+        if tgt_out is None:
+            return None, output
+        else:
+            loss = self.target(memory_bank, tgt)[0]
+            return loss, output
 
 def read_dataset(args, path):
     dataset, columns = [], {}
@@ -51,13 +53,13 @@ def read_dataset(args, path):
 
             src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text) + [SEP_TOKEN])
             tgt_in = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(label) + [SEP_TOKEN])
+            PAD_ID = args.tokenizer.convert_tokens_to_ids([PAD_TOKEN])[0]
             tgt_out = tgt_in[1:] + [PAD_ID]
             seg = [1] * len(src)
 
             if len(src) > args.seq_length:
                 src = src[: args.seq_length]
                 seg = seg[: args.seq_length]
-            PAD_ID = args.tokenizer.convert_tokens_to_ids([PAD_TOKEN])[0]
             while len(src) < args.seq_length:
                 src.append(PAD_ID)
                 seg.append(0)
