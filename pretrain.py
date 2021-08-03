@@ -92,7 +92,6 @@ def main():
     if args.deepspeed:
         if args.world_size > 1:
             args.dist_train = True
-            print("Using distributed mode for training.")
         else:
             args.dist_train = False
             print("Using single GPU for training.")
