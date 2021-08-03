@@ -94,7 +94,6 @@ def main():
             args.dist_train = True
         else:
             args.dist_train = False
-            print("Using single GPU for training.")
     else:
         if args.world_size > 1:
             # Multiprocessing distributed mode.
