@@ -37,6 +37,8 @@ def main():
     parser.add_argument("--epochs_num_list", type=int, default=[3, 5, 8], nargs='+',
                         help="A list of number of epochs for grid search.")
 
+    adv_opts(parser)
+
     args = parser.parse_args()
 
     # Load the hyperparameters from the config file.
@@ -91,6 +93,9 @@ def main():
         if torch.cuda.device_count() > 1:
             model = torch.nn.DataParallel(model)
         args.model = model
+
+        if args.use_adv:
+            args.adv_method = str2adv[args.adv_type](model)
 
         # Training phase.
 

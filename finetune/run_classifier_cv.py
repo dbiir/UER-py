@@ -63,7 +63,9 @@ def main():
     # Cross validation options.
     parser.add_argument("--folds_num", type=int, default=5,
                         help="The number of folds for cross validation.")
-    
+
+    adv_opts(parser)
+
     args = parser.parse_args()
 
     # Load the hyperparameters from the config file.
@@ -108,6 +110,9 @@ def main():
         if torch.cuda.device_count() > 1:
             model = torch.nn.DataParallel(model)
         args.model = model
+
+        if args.use_adv:
+            args.adv_method = str2adv[args.adv_type](model)
 
         trainset = dataset[0 : fold_id * instances_num_per_fold] + dataset[(fold_id + 1) * instances_num_per_fold :]
         random.shuffle(trainset)

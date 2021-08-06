@@ -20,7 +20,7 @@ from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
-from uer.opts import finetune_opts, tokenizer_opts
+from uer.opts import finetune_opts, tokenizer_opts, adv_opts
 from finetune.run_classifier import build_optimizer, load_or_initialize_parameters, train_model, batch_loader, evaluate
 
 
@@ -119,6 +119,8 @@ def main():
 
     tokenizer_opts(parser)
 
+    adv_opts(parser)
+
     args = parser.parse_args()
     args.labels_num = args.max_choices_num
 
@@ -168,6 +170,9 @@ def main():
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
     args.model = model
+
+    if args.use_adv:
+        args.adv_method = str2adv[args.adv_type](model)
 
     total_loss, result, best_result = 0.0, 0.0, 0.0
 

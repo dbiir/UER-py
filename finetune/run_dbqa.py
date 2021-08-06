@@ -18,7 +18,7 @@ from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
-from uer.opts import finetune_opts, tokenizer_opts
+from uer.opts import finetune_opts, tokenizer_opts, adv_opts
 from finetune.run_classifier import Classifier, count_labels_num, build_optimizer, batch_loader, train_model, load_or_initialize_parameters
 
 
@@ -138,7 +138,9 @@ def main():
                         help="Train model with logits.")
     parser.add_argument("--soft_alpha", type=float, default=0.5,
                         help="Weight of the soft targets loss.")
-    
+
+    adv_opts(parser)
+
     args = parser.parse_args()
 
     # Load the hyperparameters from the config file.
@@ -190,6 +192,9 @@ def main():
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
     args.model = model
+
+    if args.use_adv:
+        args.adv_method = str2adv[args.adv_type](model)
 
     total_loss, result, best_result = 0.0, 0.0, 0.0
 

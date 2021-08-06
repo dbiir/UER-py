@@ -20,7 +20,7 @@ from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
-from uer.opts import finetune_opts, tokenizer_opts
+from uer.opts import finetune_opts, tokenizer_opts, adv_opts
 
 
 class Classifier(nn.Module):
@@ -193,6 +193,31 @@ def train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_bat
     else:
         loss.backward()
 
+    if args.use_adv and args.adv_type == "fgm":
+        args.adv_method.attack(epsilon=args.fgm_epsilon)
+        loss_adv, _ = model(src_batch, tgt_batch, seg_batch, soft_tgt_batch)
+        if torch.cuda.device_count() > 1:
+            loss_adv = torch.mean(loss_adv)
+        loss_adv.backward()
+        args.adv_method.restore()
+
+    if args.use_adv and args.adv_type == "pgd":
+        K = args.pgd_k
+        args.adv_method.backup_grad()
+        for t in range(K):
+            # apply the perturbation to embedding
+            args.adv_method.attack(epsilon=args.pgd_epsilon, alpha=args.pgd_alpha,
+                                   is_first_attack=(t == 0))
+            if t != K - 1:
+                model.zero_grad()
+            else:
+                args.adv_method.restore_grad()
+            loss_adv, _ = model(src_batch, tgt_batch, seg_batch, soft_tgt_batch)
+            if torch.cuda.device_count() > 1:
+                loss_adv = torch.mean(loss_adv)
+            loss_adv.backward()
+        args.adv_method.restore()
+
     optimizer.step()
     scheduler.step()
 
@@ -255,6 +280,8 @@ def main():
     parser.add_argument("--soft_alpha", type=float, default=0.5,
                         help="Weight of the soft targets loss.")
 
+    adv_opts(parser)
+
     args = parser.parse_args()
 
     # Load the hyperparameters from the config file.
@@ -310,6 +337,9 @@ def main():
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
     args.model = model
+
+    if args.use_adv:
+        args.adv_method = str2adv[args.adv_type](model)
 
     total_loss, result, best_result = 0.0, 0.0, 0.0
 

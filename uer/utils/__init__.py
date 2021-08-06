@@ -1,6 +1,7 @@
 from uer.utils.data import *
 from uer.utils.act_fun import *
 from uer.utils.optimizers import *
+from uer.utils.adversarial import *
 
 
 str2tokenizer = {"char": CharTokenizer, "space": SpaceTokenizer, "bert": BertTokenizer, "xlmroberta": XLMRobertaTokenizer}
@@ -22,6 +23,8 @@ str2scheduler = {"linear": get_linear_schedule_with_warmup, "cosine": get_cosine
                  "polynomial": get_polynomial_decay_schedule_with_warmup,
                  "constant": get_constant_schedule, "constant_with_warmup": get_constant_schedule_with_warmup}
 
+str2adv = {"fgm": FGM, "pgd": PGD}
+
 __all__ = ["CharTokenizer", "SpaceTokenizer", "BertTokenizer", "XLMRobertaTokenizer", "str2tokenizer",
            "BertDataset", "LmDataset", "MlmDataset", "BilmDataset",
            "AlbertDataset", "Seq2seqDataset", "T5Dataset", "GsgDataset",
@@ -34,4 +37,5 @@ __all__ = ["CharTokenizer", "SpaceTokenizer", "BertTokenizer", "XLMRobertaTokeni
            "get_linear_schedule_with_warmup", "get_cosine_schedule_with_warmup",
            "get_cosine_with_hard_restarts_schedule_with_warmup",
            "get_polynomial_decay_schedule_with_warmup",
-           "get_constant_schedule", "get_constant_schedule_with_warmup", "str2scheduler"]
+           "get_constant_schedule", "get_constant_schedule_with_warmup", "str2scheduler",
+           "FGM", "PGD", "str2adv"]

@@ -109,6 +109,8 @@ def main():
     # Training options.
     training_opts(parser)
 
+    adv_opts(parser)
+
     args = parser.parse_args()
 
     args.soft_targets = False
@@ -135,6 +137,9 @@ def main():
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
     args.model = model
+
+    if args.use_adv:
+        args.adv_method = str2adv[args.adv_type](model)
 
     # Training phase.
     dataset_list = [read_dataset(args, os.path.join(path, "train.tsv")) for path in args.dataset_path_list]

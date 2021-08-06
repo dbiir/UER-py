@@ -139,3 +139,18 @@ def deepspeed_opts(parser):
     parser.add_argument("--deepspeed_config", default="models/deepspeed_config.json", type=str,
                         help=".")
     parser.add_argument("--local_rank", type=int, required=False)
+
+
+def adv_opts(parser):
+    parser.add_argument("--use_adv", action="store_true",
+                        help=".")
+    parser.add_argument("--adv_type", choices=["fgm", "pgd"], default="fgm",
+                        help="Specify the adversal training type.")
+    parser.add_argument("--fgm_epsilon", type=float, default=1e-6,
+                        help="Epsilon for FGM.")
+    parser.add_argument("--pgd_k", type=int, default=3,
+                        help="Steps for PGD.")
+    parser.add_argument("--pgd_epsilon", type=float, default=1.,
+                        help="Epsilon for PGD.")
+    parser.add_argument("--pgd_alpha", type=float, default=0.3,
+                        help="Alpha for PGD.")

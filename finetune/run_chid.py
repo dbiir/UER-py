@@ -14,10 +14,11 @@ sys.path.append(uer_dir)
 from uer.utils.constants import *
 from uer.utils.tokenizers import *
 from uer.utils.optimizers import *
+from uer.utils import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.model_saver import save_model
-from uer.opts import finetune_opts
+from uer.opts import finetune_opts, adv_opts
 from finetune.run_c3 import MultipleChoice
 from finetune.run_classifier import build_optimizer, load_or_initialize_parameters, train_model, batch_loader, evaluate
 
@@ -139,6 +140,8 @@ def main():
     parser.add_argument("--max_choices_num", default=10, type=int,
                         help="The maximum number of cadicate answer, shorter than this will be padded.")
 
+    adv_opts(parser)
+
     args = parser.parse_args()
 
     args.labels_num = args.max_choices_num
@@ -189,6 +192,9 @@ def main():
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
     args.model = model
+
+    if args.use_adv:
+        args.adv_method = str2adv[args.adv_type](model)
 
     total_loss, result, best_result = 0.0, 0.0, 0.0
 
