@@ -1,4 +1,9 @@
 {
+  "embedding": "word",
+  "tgt_embedding": "word",
+  "encoder": "transformer",
+  "decoder": "transformer",
+  "target": "t5",
   "emb_size": 1024,
   "feedforward_size": 16384,
   "hidden_size": 1024,
@@ -10,5 +15,10 @@
   "share_embedding": true,
   "remove_attention_scale": true,
   "layernorm": "t5",
-  "remove_transformer_bias": true
+  "remove_transformer_bias": true,
+  "mask": "fully_visible",
+  "layernorm_positioning": "pre",
+  "relative_position_embedding": true,
+  "remove_embedding_layernorm": true,
+  "tie_weights": true
 }

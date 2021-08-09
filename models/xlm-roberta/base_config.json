@@ -1,4 +1,7 @@
 {
+  "embedding": "word_pos_seg",
+  "encoder": "transformer",
+  "target": "mlm",
   "emb_size": 768,
   "feedforward_size": 3072,
   "hidden_size": 768,
@@ -6,5 +9,6 @@
   "heads_num": 12,
   "layers_num": 12,
   "max_seq_length": 514,
-  "dropout": 0.1
+  "dropout": 0.1,
+  "mask": "fully_visible"
 }

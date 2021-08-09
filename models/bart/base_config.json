@@ -1,4 +1,9 @@
 {
+  "embedding": "word_pos",
+  "tgt_embedding": "word_pos",
+  "encoder": "transformer",
+  "decoder": "transformer",
+  "target": "bart",
   "emb_size": 768,
   "feedforward_size": 3072,
   "hidden_size": 768,
@@ -7,5 +12,8 @@
   "layers_num": 6,
   "max_seq_length": 1024,
   "dropout": 0.1,
-  "share_embedding": true
+  "share_embedding": true,
+  "tie_weights": true,
+  "has_lmtarget_bias": true,
+  "mask": "fully_visible"
 }

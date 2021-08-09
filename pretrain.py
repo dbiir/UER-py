@@ -85,7 +85,7 @@ def main():
 
     # Load hyper-parameters from config file.
     if args.config_path:
-        load_hyperparam(args)
+        args = load_hyperparam(args)
 
     ranks_num = len(args.gpu_ranks)
 

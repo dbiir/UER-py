@@ -1,4 +1,9 @@
 {
+  "embedding": "word_sinusoidalpos",
+  "tgt_embedding": "word_sinusoidalpos",
+  "encoder": "transformer",
+  "decoder": "transformer",
+  "target": "gsg",
   "emb_size": 1024,
   "feedforward_size": 4096,
   "hidden_size": 1024,
@@ -7,5 +12,10 @@
   "layers_num": 16,
   "max_seq_length": 1024,
   "dropout": 0.1,
-  "share_embedding": true
+  "share_embedding": true,
+  "has_lmtarget_bias": true,
+  "tie_weights": true,
+  "layernorm_positioning": "pre",
+  "mask": "fully_visible",
+  "remove_embedding_layernorm": true
 }
