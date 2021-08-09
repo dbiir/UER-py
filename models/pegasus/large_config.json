@@ -16,5 +16,5 @@
   "decoder": "transformer",
   "target": "gsg",
   "has_lmtarget_bias": true,
-  "tie_weights": true,
+  "tie_weights": true
 }
