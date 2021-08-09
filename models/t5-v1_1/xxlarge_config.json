@@ -1,9 +1,4 @@
 {
-  "embedding": "word",
-  "tgt_embedding": "word",
-  "encoder": "transformer",
-  "decoder": "transformer",
-  "target": "t5",
   "emb_size": 4096,
   "feedforward_size": 10240,
   "hidden_size": 4096,
@@ -12,13 +7,18 @@
   "heads_num": 64,
   "layers_num": 24,
   "dropout": 0.0,
+  "embedding": "word",
+  "relative_position_embedding": true,
+  "remove_embedding_layernorm": true,
+  "tgt_embedding": "word",
   "share_embedding": true,
+  "encoder": "transformer",
+  "mask": "fully_visible",
+  "layernorm_positioning": "pre",
+  "feed_forward": "gated",
   "remove_attention_scale": true,
   "layernorm": "t5",
   "remove_transformer_bias": true,
-  "feed_forward": "gated",
-  "mask": "fully_visible",
-  "layernorm_positioning": "pre",
-  "relative_position_embedding": true,
-  "remove_embedding_layernorm": true
+  "decoder": "transformer",
+  "target": "t5"
 }

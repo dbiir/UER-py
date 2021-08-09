@@ -1,7 +1,4 @@
 {
-  "embedding": "word_pos_seg",
-  "encoder": "transformer",
-  "target": "albert",
   "emb_size": 128,
   "feedforward_size": 3072,
   "hidden_size": 768,
@@ -10,7 +7,10 @@
   "layers_num": 12,
   "max_seq_length": 512,
   "dropout": 0.0,
+  "embedding": "word_pos_seg",
+  "encoder": "transformer",
+  "mask": "fully_visible",
   "factorized_embedding_parameterization": true,
   "parameter_sharing": true,
-  "mask": "fully_visible"
+  "target": "albert"
 }

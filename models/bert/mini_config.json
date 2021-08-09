@@ -1,7 +1,4 @@
 {
-  "embedding": "word_pos_seg",
-  "encoder": "transformer",
-  "target": "bert",
   "emb_size": 256,
   "feedforward_size": 1024,
   "hidden_size": 256,
@@ -9,6 +6,8 @@
   "heads_num": 4,
   "layers_num": 4,
   "max_seq_length": 512,
-  "dropout": 0.1,
-  "mask": "fully_visible"
+  "embedding": "word_pos_seg",
+  "encoder": "transformer",
+  "mask": "fully_visible",
+  "target": "bert"
 }

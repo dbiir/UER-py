@@ -54,7 +54,7 @@ def training_opts(parser):
                         help="Batch size.")                                                                               
     parser.add_argument("--seq_length", type=int, default=128,                                                            
                         help="Sequence length.")                                                                          
-    parser.add_argument("--dropout", type=float, default=0.5,                                                             
+    parser.add_argument("--dropout", type=float, default=0.1,                                                             
                         help="Dropout.")                                                                                  
     parser.add_argument("--epochs_num", type=int, default=3,                                                              
                         help="Number of epochs.")                                                                         

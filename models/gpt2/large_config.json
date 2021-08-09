@@ -1,7 +1,4 @@
 {
-  "embedding": "word_pos",
-  "encoder": "transformer",
-  "target": "lm",
   "emb_size": 1280,
   "feedforward_size": 5120,
   "hidden_size": 1280,
@@ -9,9 +6,11 @@
   "heads_num": 20,
   "layers_num": 36,
   "max_seq_length": 1024,
-  "dropout": 0.1,
-  "mask": "causal",
+  "embedding": "word_pos",
   "remove_embedding_layernorm": true,
+  "encoder": "transformer",
+  "mask": "causal",
   "layernorm_positioning": "pre",
+  "target": "lm",
   "tie_weights": true
 }
