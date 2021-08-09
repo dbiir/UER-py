@@ -6,6 +6,7 @@
   "heads_num": 12,
   "layers_num": 12,
   "max_seq_length": 1024,
+  "dropout": 0.1,
   "embedding": "word_pos",
   "remove_embedding_layernorm": true,
   "encoder": "transformer",

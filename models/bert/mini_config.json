@@ -6,6 +6,7 @@
   "heads_num": 4,
   "layers_num": 4,
   "max_seq_length": 512,
+  "dropout": 0.1,
   "embedding": "word_pos_seg",
   "encoder": "transformer",
   "mask": "fully_visible",

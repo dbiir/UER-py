@@ -6,6 +6,7 @@
   "attention_head_size": 128,
   "heads_num": 32,
   "layers_num": 24,
+  "dropout": 0.1,
   "embedding": "word",
   "relative_position_embedding": true,
   "remove_embedding_layernorm": true,
