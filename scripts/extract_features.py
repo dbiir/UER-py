@@ -68,7 +68,8 @@ class FeatureExtractor(torch.nn.Module):
         output = output * seg
 
         if self.pooling == "mean":
-            output = torch.mean(output, dim=1)
+            output = torch.sum(output, dim=1)
+            output = torch.div(output, torch.sum(seg, dim=1))
         elif self.pooling == "max":
             output = torch.max(output, dim=1)[0]
         elif self.pooling == "last":
