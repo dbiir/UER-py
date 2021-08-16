@@ -6,12 +6,13 @@ from uer.encoders.rnn_encoder import BirnnEncoder
 from uer.encoders.rnn_encoder import BilstmEncoder
 from uer.encoders.rnn_encoder import BigruEncoder
 from uer.encoders.cnn_encoder import GatedcnnEncoder
+from uer.encoders.dual_encoder import DualEncoder
 
 
 str2encoder = {"transformer": TransformerEncoder, "rnn": RnnEncoder, "lstm": LstmEncoder,
                "gru": GruEncoder, "birnn": BirnnEncoder, "bilstm": BilstmEncoder, "bigru": BigruEncoder,
-               "gatedcnn": GatedcnnEncoder}
+               "gatedcnn": GatedcnnEncoder, "dual": DualEncoder}
 
 __all__ = ["TransformerEncoder", "RnnEncoder", "LstmEncoder", "GruEncoder", "BirnnEncoder",
-           "BilstmEncoder", "BigruEncoder", "GatedcnnEncoder", "str2encoder"]
+           "BilstmEncoder", "BigruEncoder", "GatedcnnEncoder", "DualEncoder", "str2encoder"]
 

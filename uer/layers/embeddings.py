@@ -1,7 +1,47 @@
 import torch
 import math
+import sys
+import inspect
 import torch.nn as nn
+from argparse import Namespace
 from uer.layers.layer_norm import LayerNorm
+
+class DualEmbedding(nn.Module):
+    """
+    """
+    def __init__(self, args, vocab_size=None):
+        super(DualEmbedding, self).__init__()
+        str2embedding = {name: obj for name, obj in inspect.getmembers(sys.modules[__name__])}
+
+        stream_0_args = vars(args)
+        stream_0_args.update(args.stream_0)
+        stream_0_args = Namespace(**stream_0_args)
+        self.embedding_0 = str2embedding["".join([p.capitalize() for p in args.embedding.split("_")] + ["Embedding"])](stream_0_args, args.vocab_size)
+
+        stream_1_args = vars(args)
+        stream_1_args.update(args.stream_1)
+        stream_1_args = Namespace(**stream_1_args)
+        self.embedding_1 = str2embedding["".join([p.capitalize() for p in args.embedding.split("_")] + ["Embedding"])](stream_1_args, args.vocab_size)
+
+        self.dropout = nn.Dropout(args.dropout)
+
+        if args.tie_weights:
+            self.embedding_0 = self.embedding_1
+
+    def forward(self, src, seg):
+        emb_0 = self.get_embedding_0(src[0], seg[0])
+        emb_1 = self.get_embedding_1(src[1], seg[1])
+
+        emb_0 = self.dropout(emb_0)
+        emb_1 = self.dropout(emb_1)
+
+        return emb_0, emb_1
+
+    def get_embedding_0(self, src, seg):
+        return self.embedding_0(src, seg)
+
+    def get_embedding_1(self, src, seg):
+        return self.embedding_1(src, seg)
 
 
 class WordEmbedding(nn.Module):
