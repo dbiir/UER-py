@@ -71,9 +71,9 @@ class FeatureExtractor(torch.nn.Module):
             output = torch.sum(output, dim=1)
             output = torch.div(output, torch.sum(seg, dim=1))
         elif self.pooling == "max":
-            output = torch.max(output, dim=1)[0]
+            output = torch.max(output + (seg - 1) * sys.maxsize, dim=1)[0]
         elif self.pooling == "last":
-            output = output[:, -1, :]
+            output = output[torch.arange(output.shape[0]), torch.squeeze(torch.sum(seg, dim=1) - 1), :]
         else:
             output = output[:, 0, :]
 
