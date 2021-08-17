@@ -11,9 +11,8 @@ def model_opts(parser):
                         help="Remove layernorm on embedding.")
     parser.add_argument("--remove_attention_scale", action="store_true",
                         help="Remove attention scale.")
-    parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru",
-                                              "birnn", "bilstm", "bigru",
-                                              "gatedcnn", "dual"],
+    parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", "birnn",
+                                              "bilstm", "bigru", "gatedcnn", "dual"],
                         default="transformer", help="Encoder type.")
     parser.add_argument("--mask", choices=["fully_visible", "causal", "causal_with_prefix"], default="fully_visible",
                         help="Mask type.")
