@@ -71,19 +71,19 @@ class SiameseClassifier(nn.Module):
         else:
             return None, logits
 
-    def pooling(self, output, seg, pooling_type):
+    def pooling(self, memory_bank, seg, pooling_type):
         seg = torch.unsqueeze(seg, dim=-1)
-        output = output * seg
+        memory_bank = memory_bank * seg
         if pooling_type == "mean":
-            output = torch.sum(output, dim=1)
-            output = torch.div(output, torch.sum(seg, dim=1))
+            features = torch.sum(memory_bank, dim=1)
+            features = torch.div(features, torch.sum(seg, dim=1))
         elif pooling_type == "last":
-            output = output[torch.arange(output.shape[0]), torch.squeeze(torch.sum(seg, dim=1) - 1), :]
+            features = memory_bank[torch.arange(memory_bank.shape[0]), torch.squeeze(torch.sum(seg, dim=1) - 1), :]
         elif pooling_type == "max":
-            output = torch.max(output + (seg - 1) * sys.maxsize, dim=1)[0]
+            features = torch.max(memory_bank + (seg - 1) * sys.maxsize, dim=1)[0]
         else:
-            output = output[:, 0, :]
-        return output
+            features = memory_bank[:, 0, :]
+        return features
 
 
 def load_or_initialize_parameters(args, model):
