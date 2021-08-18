@@ -72,7 +72,7 @@ class SiameseClassifier(nn.Module):
             return None, logits
 
     def pooling(self, memory_bank, seg, pooling_type):
-        seg = torch.unsqueeze(seg, dim=-1)
+        seg = torch.unsqueeze(seg, dim=-1).type(torch.float)
         memory_bank = memory_bank * seg
         if pooling_type == "mean":
             features = torch.sum(memory_bank, dim=1)
@@ -92,7 +92,7 @@ def load_or_initialize_parameters(args, model):
         state_dict = torch.load(args.pretrained_model_path)
         load_siamese_weights = False
         for key in state_dict.keys():
-            if key.find("embedding_0"):
+            if key.find("embedding_0") != -1:
                 load_siamese_weights = True
                 break
         if not load_siamese_weights:
