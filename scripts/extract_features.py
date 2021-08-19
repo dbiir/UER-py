@@ -64,7 +64,7 @@ class FeatureExtractor(torch.nn.Module):
     def forward(self, src, seg):
         emb = self.embedding(src, seg)
         output = self.encoder(emb, seg)
-        seg = torch.unsqueeze(seg, dim=-1)
+        seg = torch.unsqueeze(seg, dim=-1).type(torch.float)
         output = output * seg
 
         if self.pooling == "mean":
@@ -73,7 +73,7 @@ class FeatureExtractor(torch.nn.Module):
         elif self.pooling == "max":
             output = torch.max(output + (seg - 1) * sys.maxsize, dim=1)[0]
         elif self.pooling == "last":
-            output = output[torch.arange(output.shape[0]), torch.squeeze(torch.sum(seg, dim=1) - 1), :]
+            output = output[torch.arange(output.shape[0]), torch.squeeze(torch.sum(seg, dim=1).type(torch.int64) - 1), :]
         else:
             output = output[:, 0, :]
 
