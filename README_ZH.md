@@ -101,7 +101,7 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_voca
 
 mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
-*--mask* 指定注意力网络中使用的遮罩类型。BERT使用双向语言模型，句子中的任意一个词可以看到所有词的信息，因此我们使用 *fully_visible* 遮罩类型。BERT模型的词向量层是word（token）、position、segment向量的求和，因此我们使用 *--embedding word_pos_seg* 。默认情况下，配置文件为 *models/bert/base_config.json* 。配置文件指定了模型的超参数。
+*--mask* 指定注意力网络中使用的遮罩类型。BERT使用双向语言模型，句子中的任意一个词可以看到所有词的信息，因此我们使用 *fully_visible* 遮罩类型。BERT模型的词向量层是word（token）、position、segment向量的求和，因此我们使用 *--embedding word_pos_seg* 。默认情况下，配置文件为 *models/bert/base_config.json* 。配置文件指定了模型的超参数。我们可以通过多种方式去控制模型的超参数，它们的优先级如下：命令行、配置文件、默认设置。也就是说，我们在命令行中指定的超参数会覆盖配置文件中的超参数以及默认的超参数。
 请注意，*pretrain.py*输出的模型会带有记录训练步数的后缀（*--total_steps*），这里我们可以删除后缀以方便使用。
 
 然后，我们在下游分类数据集上微调预训练模型，我们使用 *pretrain.py* 的输出[*book_review_model.bin*](https://share.weiyun.com/xOFsYxZA)：

@@ -102,7 +102,7 @@ python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_voca
 
 mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
-*--mask* specifies the attention mask types. BERT uses bidirectional LM. The word token can attend to all tokens and therefore we use *fully_visible* mask type. The embedding layer of BERT is the sum of word (token), position, and segment embeddings and therefore *--embedding word_pos_seg* is specified. By default, *models/bert/base_config.json* is used as configuration file, which specifies the model hyper-parameters. 
+*--mask* specifies the attention mask types. BERT uses bidirectional LM. The word token can attend to all tokens and therefore we use *fully_visible* mask type. The embedding layer of BERT is the sum of word (token), position, and segment embeddings and therefore *--embedding word_pos_seg* is specified. By default, *models/bert/base_config.json* is used as configuration file, which specifies the model hyper-parameters. There are multiple ways to specify the hyper-parameters and their priority order is as follows: command line, configuration file, and default setting. The hyper-parameters specified in command line can overwrite those specified in configuration file and default setting.
 Notice that the model trained by *pretrain.py* is attacted with the suffix which records the training step (*--total_steps*). We could remove the suffix for ease of use.
 
 
