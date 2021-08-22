@@ -17,7 +17,7 @@ def load_hyperparam(args):
 
     args_dict = vars(args)
 
-    input_args = {k: args_dict[k] for k in [a[2:] for a in sys.argv if a[:2] == "--"]}
+    input_args = {k: args_dict[k] for k in [a[2:] for a in sys.argv (if a[:2] == "--" and "local_rank" not in a)]}
     args_dict.update(param)
     args_dict.update(input_args)
     args = Namespace(**args_dict)
