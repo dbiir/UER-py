@@ -27,14 +27,16 @@ def mask_seq(src, tokenizer, whole_word_masking, span_masking, span_geo_prob, sp
             mask_len = index_set[1]
             if len(tgt_mlm) + mask_len > num_to_predict:
                 continue
-
-            for j in range(mask_len):
-                token = src[i + j]
-                tgt_mlm.append((i + j, token))
-                prob = random.random()
-                if prob < 0.8:
+            prob = random.random()
+            if prob < 0.8:
+                for j in range(mask_len):
+                    token = src[i + j]
+                    tgt_mlm.append((i + j, token))                
                     src[i + j] = vocab.get(MASK_TOKEN)
-                elif prob < 0.9:
+            elif prob < 0.9:
+                for j in range(mask_len):
+                    token = src[i + j]
+                    tgt_mlm.append((i + j, token))                
                     while True:
                         rdi = random.randint(1, len(vocab) - 1)
                         if rdi not in [vocab.get(CLS_TOKEN), vocab.get(SEP_TOKEN), vocab.get(MASK_TOKEN), PAD_ID]:
