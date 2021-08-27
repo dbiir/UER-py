@@ -54,12 +54,15 @@ def read_dataset(args, path):
             src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text) + [SEP_TOKEN])
             tgt_in = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(label) + [SEP_TOKEN])
             PAD_ID = args.tokenizer.convert_tokens_to_ids([PAD_TOKEN])[0]
-            tgt_out = tgt_in[1:] + [PAD_ID]
             seg = [1] * len(src)
 
             if len(src) > args.seq_length:
                 src = src[: args.seq_length]
                 seg = seg[: args.seq_length]
+            if len(tgt_in) > args.tgt_seq_length:
+                tgt_in = tgt_in[: args.seq_length]
+            tgt_out = tgt_in[1:] + [PAD_ID]
+            
             while len(src) < args.seq_length:
                 src.append(PAD_ID)
                 seg.append(0)
