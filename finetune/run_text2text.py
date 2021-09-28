@@ -60,7 +60,7 @@ def read_dataset(args, path):
                 src = src[: args.seq_length]
                 seg = seg[: args.seq_length]
             if len(tgt_in) > args.tgt_seq_length:
-                tgt_in = tgt_in[: args.seq_length]
+                tgt_in = tgt_in[: args.tgt_seq_length]
             tgt_out = tgt_in[1:] + [PAD_ID]
             
             while len(src) < args.seq_length:
