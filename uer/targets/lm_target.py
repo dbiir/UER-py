@@ -14,7 +14,7 @@ class LmTarget(nn.Module):
         self.output_layer = nn.Linear(self.hidden_size, self.vocab_size, bias=args.has_lmtarget_bias)
 
         self.softmax = nn.LogSoftmax(dim=-1)
-        self.criterion = nn.NLLLoss() 
+        self.criterion = nn.NLLLoss()
 
     def lm(self, memory_bank, tgt_lm):
         # Language modeling (LM) with full softmax prediction.
@@ -32,7 +32,7 @@ class LmTarget(nn.Module):
             correct = torch.sum((output.argmax(dim=-1).eq(tgt_lm)).float())
 
         loss = self.criterion(output, tgt_lm)
-        return loss, correct, denominator      
+        return loss, correct, denominator
 
     def forward(self, memory_bank, tgt):
         """

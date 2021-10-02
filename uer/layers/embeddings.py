@@ -1,9 +1,10 @@
-import torch
 import math
 import sys
 import inspect
-import torch.nn as nn
 from argparse import Namespace
+import torch
+import torch.nn as nn
+
 from uer.layers.layer_norm import LayerNorm
 
 class DualEmbedding(nn.Module):
@@ -16,12 +17,16 @@ class DualEmbedding(nn.Module):
         stream_0_args = vars(args)
         stream_0_args.update(args.stream_0)
         stream_0_args = Namespace(**stream_0_args)
-        self.embedding_0 = str2embedding["".join([p.capitalize() for p in args.embedding.split("_")] + ["Embedding"])](stream_0_args, args.vocab_size)
+        self.embedding_0 = str2embedding[
+            "".join([p.capitalize() for p in args.embedding.split("_")] + ["Embedding"])
+        ](stream_0_args, args.vocab_size)
 
         stream_1_args = vars(args)
         stream_1_args.update(args.stream_1)
         stream_1_args = Namespace(**stream_1_args)
-        self.embedding_1 = str2embedding["".join([p.capitalize() for p in args.embedding.split("_")] + ["Embedding"])](stream_1_args, args.vocab_size)
+        self.embedding_1 = str2embedding[
+            "".join([p.capitalize() for p in args.embedding.split("_")] + ["Embedding"])
+        ](stream_1_args, args.vocab_size)
 
         self.dropout = nn.Dropout(args.dropout)
 

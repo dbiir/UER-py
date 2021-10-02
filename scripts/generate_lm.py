@@ -4,12 +4,11 @@
 """
 import sys
 import os
+import argparse
 import torch
 import torch.nn.functional as F
-import argparse
-import random
 
-uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")) 
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
 from uer.layers import *
@@ -72,9 +71,9 @@ if __name__ == '__main__':
     parser.add_argument("--top_k", type=int, default=70)
     parser.add_argument("--top_p", type=float, default=0)
     parser.add_argument("--temperature", type=float, default=1.0)
- 
+
     tokenizer_opts(parser)
-    
+
     args = parser.parse_args()
 
     args.batch_size = 1
@@ -103,10 +102,12 @@ if __name__ == '__main__':
             next_token_logits = output[0][-1] / args.temperature
             filtered_logits = top_k_top_p_filtering(next_token_logits, args.top_k, args.top_p)
             next_token = torch.multinomial(F.softmax(filtered_logits, dim=-1), num_samples=1)
-        
+
             src_tensor = torch.cat([src_tensor, next_token.view(1, 1)], dim=1)
             seg_tensor = torch.cat([seg_tensor, torch.tensor([[1]])], dim=1)
 
         f.write(line + "\n")
-        generated_sentence = "".join(args.tokenizer.convert_ids_to_tokens([token_id.item() for token_id in src_tensor[0]]))
+        generated_sentence = "".join(
+            args.tokenizer.convert_ids_to_tokens([token_id.item() for token_id in src_tensor[0]])
+        )
         f.write(generated_sentence)

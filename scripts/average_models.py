@@ -1,12 +1,10 @@
+import argparse
 import sys
 import os
 import torch
-import argparse
 
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
-
-from uer.model_saver import save_model
 
 
 def average(model_list_path):
@@ -15,9 +13,9 @@ def average(model_list_path):
         if i == 0:
             avg_model = model
         else:
-            for k, v in avg_model.items():
+            for k, _ in avg_model.items():
                 avg_model[k].mul_(i).add_(model[k]).div_(i+1)
-     
+
     return avg_model
 
 

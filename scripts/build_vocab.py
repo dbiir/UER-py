@@ -18,8 +18,10 @@ if __name__ == '__main__':
 
     parser.add_argument("--corpus_path", required=True)
     parser.add_argument("--vocab_path", required=True)
-    parser.add_argument("--workers_num", type=int, default=1, help="The number of processes to build vocabulary.")
-    parser.add_argument("--min_count", type=int, default=1, help="The minimum count of words retained in the vocabulary.")
+    parser.add_argument("--workers_num", type=int, default=1,
+                        help="The number of processes to build vocabulary.")
+    parser.add_argument("--min_count", type=int, default=1,
+                        help="The minimum count of words retained in the vocabulary.")
 
     tokenizer_opts(parser)
 

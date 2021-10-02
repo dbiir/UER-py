@@ -29,7 +29,7 @@ class GatedcnnEncoder(nn.Module):
                 for _ in range(args.layers_num - 1)
             ]
         )
-        
+
         self.conv_b = nn.ParameterList(
             nn.Parameter(torch.randn(1, args.hidden_size, 1, 1))
             for _ in range(args.layers_num - 1)

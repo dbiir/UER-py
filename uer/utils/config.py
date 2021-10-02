@@ -17,7 +17,9 @@ def load_hyperparam(default_args):
 
     default_args_dict = vars(default_args)
 
-    command_line_args_dict = {k: default_args_dict[k] for k in [a[2:] for a in sys.argv if (a[:2] == "--" and "local_rank" not in a)]}
+    command_line_args_dict = {k: default_args_dict[k] for k in [
+        a[2:] for a in sys.argv if (a[:2] == "--" and "local_rank" not in a)
+    ]}
     default_args_dict.update(config_args_dict)
     default_args_dict.update(command_line_args_dict)
     args = Namespace(**default_args_dict)

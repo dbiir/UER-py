@@ -4,7 +4,8 @@ from uer.utils.optimizers import *
 from uer.utils.adversarial import *
 
 
-str2tokenizer = {"char": CharTokenizer, "space": SpaceTokenizer, "bert": BertTokenizer, "xlmroberta": XLMRobertaTokenizer}
+str2tokenizer = {"char": CharTokenizer, "space": SpaceTokenizer, "bert": BertTokenizer,
+                 "xlmroberta": XLMRobertaTokenizer}
 str2dataset = {"bert": BertDataset, "lm": LmDataset, "mlm": MlmDataset,
                "bilm": BilmDataset, "albert": AlbertDataset, "seq2seq": Seq2seqDataset,
                "t5": T5Dataset, "gsg": GsgDataset, "bart": BartDataset,
