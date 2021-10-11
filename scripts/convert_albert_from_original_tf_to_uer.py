@@ -49,22 +49,38 @@ def main():
     output_model["embedding.layer_norm.gamma"] = input_model["bert/embeddings/LayerNorm/gamma"]
     output_model["embedding.layer_norm.beta"] = input_model["bert/embeddings/LayerNorm/beta"]
 
-    output_model["encoder.transformer.self_attn.linear_layers.0.weight"] = input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/self/query/kernel"]
-    output_model["encoder.transformer.self_attn.linear_layers.0.bias"] = input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/self/query/bias"]
-    output_model["encoder.transformer.self_attn.linear_layers.1.weight"] = input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/self/key/kernel"]
-    output_model["encoder.transformer.self_attn.linear_layers.1.bias"] = input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/self/key/bias"]
-    output_model["encoder.transformer.self_attn.linear_layers.2.weight"] = input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/self/value/kernel"]
-    output_model["encoder.transformer.self_attn.linear_layers.2.bias"] = input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/self/value/bias"]
-    output_model["encoder.transformer.self_attn.final_linear.weight"] = input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/output/dense/kernel"]
-    output_model["encoder.transformer.self_attn.final_linear.bias"] = input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/output/dense/bias"]
-    output_model["encoder.transformer.layer_norm_1.gamma"] = input_model["bert/encoder/transformer/group_0/inner_group_0/LayerNorm/gamma"]
-    output_model["encoder.transformer.layer_norm_1.beta"] = input_model["bert/encoder/transformer/group_0/inner_group_0/LayerNorm/beta"]
-    output_model["encoder.transformer.feed_forward.linear_1.weight"] = input_model["bert/encoder/transformer/group_0/inner_group_0/ffn_1/intermediate/dense/kernel"]
-    output_model["encoder.transformer.feed_forward.linear_1.bias"] = input_model["bert/encoder/transformer/group_0/inner_group_0/ffn_1/intermediate/dense/bias"]
-    output_model["encoder.transformer.feed_forward.linear_2.weight"] = input_model["bert/encoder/transformer/group_0/inner_group_0/ffn_1/intermediate/output/dense/kernel"]
-    output_model["encoder.transformer.feed_forward.linear_2.bias"] = input_model["bert/encoder/transformer/group_0/inner_group_0/ffn_1/intermediate/output/dense/bias"]
-    output_model["encoder.transformer.layer_norm_2.gamma"] = input_model["bert/encoder/transformer/group_0/inner_group_0/LayerNorm_1/gamma"]
-    output_model["encoder.transformer.layer_norm_2.beta"] = input_model["bert/encoder/transformer/group_0/inner_group_0/LayerNorm_1/beta"]
+    output_model["encoder.transformer.self_attn.linear_layers.0.weight"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/self/query/kernel"]
+    output_model["encoder.transformer.self_attn.linear_layers.0.bias"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/self/query/bias"]
+    output_model["encoder.transformer.self_attn.linear_layers.1.weight"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/self/key/kernel"]
+    output_model["encoder.transformer.self_attn.linear_layers.1.bias"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/self/key/bias"]
+    output_model["encoder.transformer.self_attn.linear_layers.2.weight"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/self/value/kernel"]
+    output_model["encoder.transformer.self_attn.linear_layers.2.bias"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/self/value/bias"]
+    output_model["encoder.transformer.self_attn.final_linear.weight"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/output/dense/kernel"]
+    output_model["encoder.transformer.self_attn.final_linear.bias"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/attention_1/output/dense/bias"]
+    output_model["encoder.transformer.layer_norm_1.gamma"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/LayerNorm/gamma"]
+    output_model["encoder.transformer.layer_norm_1.beta"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/LayerNorm/beta"]
+    output_model["encoder.transformer.feed_forward.linear_1.weight"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/ffn_1/intermediate/dense/kernel"]
+    output_model["encoder.transformer.feed_forward.linear_1.bias"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/ffn_1/intermediate/dense/bias"]
+    output_model["encoder.transformer.feed_forward.linear_2.weight"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/ffn_1/intermediate/output/dense/kernel"]
+    output_model["encoder.transformer.feed_forward.linear_2.bias"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/ffn_1/intermediate/output/dense/bias"]
+    output_model["encoder.transformer.layer_norm_2.gamma"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/LayerNorm_1/gamma"]
+    output_model["encoder.transformer.layer_norm_2.beta"] = \
+        input_model["bert/encoder/transformer/group_0/inner_group_0/LayerNorm_1/beta"]
 
     output_model["target.sop_linear_1.weight"] = input_model["bert/pooler/dense/kernel"]
     output_model["target.sop_linear_1.bias"] = input_model["bert/pooler/dense/bias"]

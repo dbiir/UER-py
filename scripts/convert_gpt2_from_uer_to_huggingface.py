@@ -22,28 +22,41 @@ output_model["transformer.wpe.weight"] = input_model["embedding.position_embeddi
 max_position = input_model["embedding.position_embedding.weight"].shape[0]
 
 for i in range(args.layers_num):
-    output_model["transformer.h." + str(i) + ".attn.bias"] = torch.tril(torch.ones(max_position, max_position)).view(1, 1, max_position, max_position)
+    output_model["transformer.h." + str(i) + ".attn.bias"] = \
+        torch.tril(torch.ones(max_position, max_position)).view(1, 1, max_position, max_position)
     weight = []
     bias = []
     for j in range(3):
         weight.append(input_model["encoder.transformer." + str(i) + ".self_attn.linear_layers." + str(j) + ".weight"])
         bias.append(input_model["encoder.transformer." + str(i) + ".self_attn.linear_layers." + str(j) + ".bias"])
-    output_model["transformer.h." + str(i) + ".attn.c_attn.weight"] = torch.cat(weight, 0).t()
-    output_model["transformer.h." + str(i) + ".attn.c_attn.bias"] = torch.cat(bias, 0)
+    output_model["transformer.h." + str(i) + ".attn.c_attn.weight"] = \
+        torch.cat(weight, 0).t()
+    output_model["transformer.h." + str(i) + ".attn.c_attn.bias"] = \
+        torch.cat(bias, 0)
 
-    output_model["transformer.h." + str(i) + ".attn.c_proj.weight"] = input_model["encoder.transformer." + str(i) + ".self_attn.final_linear.weight"].t()
-    output_model["transformer.h." + str(i) + ".attn.c_proj.bias"] = input_model["encoder.transformer." + str(i) + ".self_attn.final_linear.bias"]
+    output_model["transformer.h." + str(i) + ".attn.c_proj.weight"] = \
+        input_model["encoder.transformer." + str(i) + ".self_attn.final_linear.weight"].t()
+    output_model["transformer.h." + str(i) + ".attn.c_proj.bias"] = \
+        input_model["encoder.transformer." + str(i) + ".self_attn.final_linear.bias"]
 
-    output_model["transformer.h." + str(i) + ".ln_1.weight"] = input_model["encoder.transformer." + str(i) + ".layer_norm_1.gamma"]
-    output_model["transformer.h." + str(i) + ".ln_1.bias"] = input_model["encoder.transformer." + str(i) + ".layer_norm_1.beta"]
+    output_model["transformer.h." + str(i) + ".ln_1.weight"] = \
+        input_model["encoder.transformer." + str(i) + ".layer_norm_1.gamma"]
+    output_model["transformer.h." + str(i) + ".ln_1.bias"] = \
+        input_model["encoder.transformer." + str(i) + ".layer_norm_1.beta"]
 
-    output_model["transformer.h." + str(i) + ".mlp.c_fc.weight"] = input_model["encoder.transformer." + str(i) + ".feed_forward.linear_1.weight"].t()
-    output_model["transformer.h." + str(i) + ".mlp.c_fc.bias"] = input_model["encoder.transformer." + str(i) + ".feed_forward.linear_1.bias"]
-    output_model["transformer.h." + str(i) + ".mlp.c_proj.weight"] = input_model["encoder.transformer." + str(i) + ".feed_forward.linear_2.weight"].t()
-    output_model["transformer.h." + str(i) + ".mlp.c_proj.bias"] = input_model["encoder.transformer." + str(i) + ".feed_forward.linear_2.bias"]
+    output_model["transformer.h." + str(i) + ".mlp.c_fc.weight"] = \
+        input_model["encoder.transformer." + str(i) + ".feed_forward.linear_1.weight"].t()
+    output_model["transformer.h." + str(i) + ".mlp.c_fc.bias"] = \
+        input_model["encoder.transformer." + str(i) + ".feed_forward.linear_1.bias"]
+    output_model["transformer.h." + str(i) + ".mlp.c_proj.weight"] = \
+        input_model["encoder.transformer." + str(i) + ".feed_forward.linear_2.weight"].t()
+    output_model["transformer.h." + str(i) + ".mlp.c_proj.bias"] = \
+        input_model["encoder.transformer." + str(i) + ".feed_forward.linear_2.bias"]
 
-    output_model["transformer.h." + str(i) + ".ln_2.weight"] = input_model["encoder.transformer." + str(i) + ".layer_norm_2.gamma"]
-    output_model["transformer.h." + str(i) + ".ln_2.bias"] = input_model["encoder.transformer." + str(i) + ".layer_norm_2.beta"]
+    output_model["transformer.h." + str(i) + ".ln_2.weight"] = \
+        input_model["encoder.transformer." + str(i) + ".layer_norm_2.gamma"]
+    output_model["transformer.h." + str(i) + ".ln_2.bias"] = \
+        input_model["encoder.transformer." + str(i) + ".layer_norm_2.beta"]
 
 
 output_model["transformer.ln_f.weight"] = input_model["encoder.layer_norm.gamma"]
