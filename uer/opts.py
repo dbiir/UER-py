@@ -1,6 +1,6 @@
 def model_opts(parser):
-    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos", "dual"], default="word_pos_seg",
-                        help="Emebdding type.")
+    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos", "dual", "word_pos_seg_pinyin_bushou"],
+                        default="word_pos_seg", help="Emebdding type.")
     parser.add_argument("--max_seq_length", type=int, default=512,
                         help="Max sequence length for word embedding.")
     parser.add_argument("--relative_position_embedding", action="store_true",

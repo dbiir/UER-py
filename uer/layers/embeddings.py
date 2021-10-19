@@ -132,6 +132,47 @@ class WordPosSegEmbedding(nn.Module):
         return emb
 
 
+class WordPosSegPinyinBushouEmbedding(nn.Module):
+    """
+    Pinyin Bushou enhanced embedding consists of five parts:
+    word embedding, pinyin embedding, bushou embedding, position embedding, and segment embedding.
+    """
+    def __init__(self, args, vocab_size, pinyin_vocab_size=0, bushou_vocab_size=0, pinyin_bushou_vocab_ids=[]):
+        super(WordPosSegEmbedding, self).__init__()
+        self.remove_embedding_layernorm = args.remove_embedding_layernorm
+        self.dropout = nn.Dropout(args.dropout)
+        self.max_seq_length = args.max_seq_length
+        self.word_embedding = nn.Embedding(vocab_size, args.emb_size)
+        self.pinyin_embedding = nn.Embedding(pinyin_vocab_size, args.emb_size)
+        self.bushou_embedding = nn.Embedding(bushou_vocab_size, args.emb_size)
+        
+        for word_id, pinyin_ids, bushou_ids in pinyin_bushou_vocab_ids:
+            for py_id in pinyin_ids:
+                self.word_embedding.weight[word_id] += self.pinyin_embedding.weight[py_id]
+            for bs_id in bushou_ids:
+                self.word_embedding.weight[word_id] += self.pinyin_embedding.weight[bs_id]
+
+        self.position_embedding = nn.Embedding(self.max_seq_length, args.emb_size)
+        self.segment_embedding = nn.Embedding(3, args.emb_size)
+        if not self.remove_embedding_layernorm:
+            self.layer_norm = LayerNorm(args.emb_size)
+
+    def forward(self, src, seg):
+        word_emb = self.word_embedding(src)
+        pos_emb = self.position_embedding(
+            torch.arange(0, word_emb.size(1), device=word_emb.device, dtype=torch.long)
+            .unsqueeze(0)
+            .repeat(word_emb.size(0), 1)
+        )
+        seg_emb = self.segment_embedding(seg)
+
+        emb = word_emb + pos_emb + seg_emb
+        if not self.remove_embedding_layernorm:
+            emb = self.layer_norm(emb)
+        emb = self.dropout(emb)
+        return emb
+
+
 class WordSinusoidalposEmbedding(nn.Module):
     """Sinusoidal positional encoding for non-recurrent neural networks.
     Implementation based on "Attention Is All You Need"
