@@ -4,6 +4,7 @@ import torch.nn as nn
 
 class LmTarget(nn.Module):
     """
+    Language Model Target
     """
 
     def __init__(self, args, vocab_size):

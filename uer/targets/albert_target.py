@@ -5,8 +5,9 @@ from uer.targets import *
 
 class AlbertTarget(MlmTarget):
     """
-    BERT exploits masked language modeling (MLM)
+    ALBERT exploits masked language modeling (MLM)
     and sentence order prediction (SOP) for pretraining.
+    https://arxiv.org/abs/1909.11942
     """
 
     def __init__(self, args, vocab_size):

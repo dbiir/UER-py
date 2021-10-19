@@ -4,6 +4,7 @@ from uer.utils.misc import *
 
 class BilmTarget(LmTarget):
     """
+    Bi-directional Language Model Target
     """
     def __init__(self, args, vocab_size):
         args.hidden_size = args.hidden_size // 2

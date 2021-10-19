@@ -7,6 +7,7 @@ import torch.nn as nn
 
 from uer.layers.layer_norm import LayerNorm
 
+
 class DualEmbedding(nn.Module):
     """
     """
@@ -34,6 +35,14 @@ class DualEmbedding(nn.Module):
             self.embedding_0 = self.embedding_1
 
     def forward(self, src, seg):
+        """
+        Args:
+            src: ([batch_size x seq_length], [batch_size x seq_length])
+            seg: ([batch_size x seq_length], [batch_size x seq_length])
+        Returns:
+            emb_0: [batch_size x seq_length x hidden_size]
+            emb_1: [batch_size x seq_length x hidden_size]
+        """
         emb_0 = self.get_embedding_0(src[0], seg[0])
         emb_1 = self.get_embedding_1(src[1], seg[1])
 
@@ -62,6 +71,13 @@ class WordEmbedding(nn.Module):
             self.layer_norm = LayerNorm(args.emb_size)
 
     def forward(self, src, _):
+        """
+        Args:
+            src: [batch_size x seq_length]
+            seg: [batch_size x seq_length]
+        Returns:
+            emb: [batch_size x seq_length x hidden_size]
+        """
         emb = self.word_embedding(src)
         if not self.remove_embedding_layernorm:
             emb = self.layer_norm(emb)
@@ -86,6 +102,13 @@ class WordPosEmbedding(nn.Module):
             self.layer_norm = LayerNorm(args.emb_size)
 
     def forward(self, src, _):
+        """
+        Args:
+            src: [batch_size x seq_length]
+            seg: [batch_size x seq_length]
+        Returns:
+            emb: [batch_size x seq_length x hidden_size]
+        """
         word_emb = self.word_embedding(src)
         pos_emb = self.position_embedding(
             torch.arange(0, word_emb.size(1), device=word_emb.device, dtype=torch.long)
@@ -117,6 +140,13 @@ class WordPosSegEmbedding(nn.Module):
             self.layer_norm = LayerNorm(args.emb_size)
 
     def forward(self, src, seg):
+        """
+        Args:
+            src: [batch_size x seq_length]
+            seg: [batch_size x seq_length]
+        Returns:
+            emb: [batch_size x seq_length x hidden_size]
+        """
         word_emb = self.word_embedding(src)
         pos_emb = self.position_embedding(
             torch.arange(0, word_emb.size(1), device=word_emb.device, dtype=torch.long)

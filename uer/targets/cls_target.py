@@ -4,6 +4,7 @@ import torch.nn as nn
 
 class ClsTarget(nn.Module):
     """
+    Classification Target
     """
     def __init__(self, args, vocab_size):
         super(ClsTarget, self).__init__()

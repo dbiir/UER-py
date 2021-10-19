@@ -5,6 +5,7 @@ from uer.targets import *
 
 class Seq2seqTarget(LmTarget):
     """
+    Sequence-to-sequence Target
     """
 
     def __init__(self, args, vocab_size):
