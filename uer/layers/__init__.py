@@ -4,6 +4,7 @@ from uer.layers.embeddings import WordPosSegEmbedding
 from uer.layers.embeddings import WordSinusoidalposEmbedding
 from uer.layers.embeddings import DualEmbedding
 
+
 str2embedding = {"word": WordEmbedding, "word_pos": WordPosEmbedding, "word_pos_seg": WordPosSegEmbedding,
                  "word_sinusoidalpos": WordSinusoidalposEmbedding, "dual": DualEmbedding}
 

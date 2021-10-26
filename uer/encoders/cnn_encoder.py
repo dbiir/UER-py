@@ -3,6 +3,9 @@ import torch.nn as nn
 
 
 class GatedcnnEncoder(nn.Module):
+    """
+    Gated CNN encoder.
+    """
     def __init__(self, args):
         super(GatedcnnEncoder, self).__init__()
         self.layers_num = args.layers_num

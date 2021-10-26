@@ -15,4 +15,3 @@ str2encoder = {"transformer": TransformerEncoder, "rnn": RnnEncoder, "lstm": Lst
 
 __all__ = ["TransformerEncoder", "RnnEncoder", "LstmEncoder", "GruEncoder", "BirnnEncoder",
            "BilstmEncoder", "BigruEncoder", "GatedcnnEncoder", "DualEncoder", "str2encoder"]
-

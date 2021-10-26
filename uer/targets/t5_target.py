@@ -9,5 +9,3 @@ class T5Target(Seq2seqTarget):
     https://www.jmlr.org/papers/volume21/20-074/20-074.pdf
     """
     pass
-
-
