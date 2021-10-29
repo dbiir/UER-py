@@ -150,7 +150,7 @@ class WordPosSegPinyinBushouEmbedding(nn.Module):
             for py_id in pinyin_ids:
                 self.word_embedding.weight[word_id] += self.pinyin_embedding.weight[py_id]
             for bs_id in bushou_ids:
-                self.word_embedding.weight[word_id] += self.pinyin_embedding.weight[bs_id]
+                self.word_embedding.weight[word_id] += self.bushou_embedding.weight[bs_id]
 
         self.position_embedding = nn.Embedding(self.max_seq_length, args.emb_size)
         self.segment_embedding = nn.Embedding(3, args.emb_size)

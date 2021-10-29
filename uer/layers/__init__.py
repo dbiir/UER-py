@@ -10,4 +10,4 @@ str2embedding = {"word": WordEmbedding, "word_pos": WordPosEmbedding, "word_pos_
                  'word_pos_seg_pinyin_bushou': WordPosSegPinyinBushouEmbedding}
 
 __all__ = ["WordEmbedding", "WordPosEmbedding", "WordPosSegEmbedding", "WordSinusoidalposEmbedding",
-           "DualEmbedding", "str2embedding"]
+           "WordPosSegPinyinBushouEmbedding", "DualEmbedding", "str2embedding"]
