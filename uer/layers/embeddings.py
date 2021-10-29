@@ -138,7 +138,7 @@ class WordPosSegPinyinBushouEmbedding(nn.Module):
     word embedding, pinyin embedding, bushou embedding, position embedding, and segment embedding.
     """
     def __init__(self, args, vocab_size, pinyin_vocab_size=0, bushou_vocab_size=0, pinyin_bushou_vocab_ids=[]):
-        super(WordPosSegEmbedding, self).__init__()
+        super(WordPosSegPinyinBushouEmbedding, self).__init__()
         self.remove_embedding_layernorm = args.remove_embedding_layernorm
         self.dropout = nn.Dropout(args.dropout)
         self.max_seq_length = args.max_seq_length
