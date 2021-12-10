@@ -417,25 +417,12 @@ def worker(proc_id, gpu_ranks, args, model):
         custom_scheduler = str2scheduler[args.scheduler](custom_optimizer, args.total_steps*args.warmup, args.total_steps)
 
     if args.deepspeed:
-        optimizer = None
-        scheduler = None
-
-        # IF User NOT defined optimezer in deepspeed config,
-        # Then use Self Defined Optimizer
-        if "optimizer" not in args.deepspeed_config_param:
-            optimizer = custom_optimizer
-            if args.local_rank == 0:
-                print("Use Custum Optimizer", optimizer)
-        if "scheduler" not in args.deepspeed_config_param:
-            scheduler = custom_scheduler
-            if args.local_rank == 0:
-                print("Use Custom LR Schedule", scheduler)
         model, optimizer, _, scheduler = deepspeed.initialize(
                                                     model=model,
                                                     model_parameters=optimizer_grouped_parameters,
                                                     args=args,
-                                                    optimizer=optimizer,
-                                                    lr_scheduler=scheduler,
+                                                    optimizer=custom_optimizer,
+                                                    lr_scheduler=custom_scheduler,
                                                     mpu=None,
                                                     dist_init_required=False)
     else:

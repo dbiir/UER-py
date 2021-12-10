@@ -11,10 +11,6 @@ def load_hyperparam(default_args):
     with open(default_args.config_path, mode="r", encoding="utf-8") as f:
         config_args_dict = json.load(f)
 
-    if "deepspeed" in default_args.__dict__:
-        with open(default_args.deepspeed_config, mode="r", encoding="utf-8") as f:
-            default_args.deepspeed_config_param = json.load(f)
-
     default_args_dict = vars(default_args)
 
     command_line_args_dict = {k: default_args_dict[k] for k in [
