@@ -1,6 +1,5 @@
 # -*- encoding:utf-8 -*-
 import os
-import torch
 from multiprocessing import Pool
 from uer.utils.constants import *
 from uer.utils.misc import count_lines
@@ -52,7 +51,9 @@ class Vocab(object):
                 line = f.readline()
                 pos += 1
 
+                # tokenizer is only either CharTokenizer or SpaceTokenizer
                 tokens = tokenizer.tokenize(line, use_vocab=False)
+                
                 for t in tokens:
                     if t not in w2i:
                         w2i[t], w2c[t] = len(i2w), 1
