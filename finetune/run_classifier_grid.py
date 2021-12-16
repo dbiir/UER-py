@@ -57,16 +57,7 @@ def main():
 
     #Build dataset
     trainset = read_dataset(args, args.train_path)
-    random.shuffle(trainset)
     instances_num = len(trainset)
-
-    src = torch.LongTensor([example[0] for example in trainset])
-    tgt = torch.LongTensor([example[1] for example in trainset])
-    seg = torch.LongTensor([example[2] for example in trainset])
-    if args.soft_targets:
-        soft_tgt = torch.FloatTensor([example[3] for example in trainset])
-    else:
-        soft_tgt = None
 
     for batch_size, learning_rate, epochs_num in product(args.batch_size_list, args.learning_rate_list, args.epochs_num_list):
 
@@ -102,6 +93,15 @@ def main():
         total_loss, _, _ = 0., 0., 0.
 
         for _ in range(1, args.epochs_num+1):
+            random.shuffle(trainset)
+            src = torch.LongTensor([example[0] for example in trainset])
+            tgt = torch.LongTensor([example[1] for example in trainset])
+            seg = torch.LongTensor([example[2] for example in trainset])
+            if args.soft_targets:
+                soft_tgt = torch.FloatTensor([example[3] for example in trainset])
+            else:
+                soft_tgt = None
+        
             model.train()
             for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, src, tgt, seg, soft_tgt)):
                 _ = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch, soft_tgt_batch)

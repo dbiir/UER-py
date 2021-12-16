@@ -149,7 +149,6 @@ def main():
     for packed_dataset in packed_dataset_list:
         packed_dataset_all += packed_dataset
 
-    random.shuffle(packed_dataset_all)
     instances_num = sum([len(dataset) for dataset in dataset_list])
     batch_size = args.batch_size
 
@@ -177,6 +176,8 @@ def main():
     print("Start training.")
 
     for epoch in range(1, args.epochs_num + 1):
+        random.shuffle(packed_dataset_all)
+        
         model.train()
         for i, (dataset_id, src_batch, tgt_batch, seg_batch) in enumerate(packed_dataset_all):
             if hasattr(model, "module"):
