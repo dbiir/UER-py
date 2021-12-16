@@ -31,10 +31,6 @@ def main():
                         help="Path of the pretrained model.")
     parser.add_argument("--output_model_path", default="models/classifier_model.bin", type=str,
                         help="Path of the output model.")
-    parser.add_argument("--vocab_path", default=None, type=str,
-                        help="Path of the vocabulary file.")
-    parser.add_argument("--spm_model_path", default=None, type=str,
-                        help="Path of the sentence piece model.")
     parser.add_argument("--train_path", type=str, required=True,
                         help="Path of the trainset.")
     parser.add_argument("--config_path", default="models/bert/base_config.json", type=str,
@@ -115,17 +111,7 @@ def main():
             args.adv_method = str2adv[args.adv_type](model)
 
         trainset = dataset[0 : fold_id * instances_num_per_fold] + dataset[(fold_id + 1) * instances_num_per_fold :]
-        random.shuffle(trainset)
-
-        train_src = torch.LongTensor([example[0] for example in trainset])
-        train_tgt = torch.LongTensor([example[1] for example in trainset])
-        train_seg = torch.LongTensor([example[2] for example in trainset])
-
-        if args.soft_targets:
-            train_soft_tgt = torch.FloatTensor([example[3] for example in trainset])
-        else:
-            train_soft_tgt = None
-
+        
         devset = dataset[fold_id * instances_num_per_fold : (fold_id + 1) * instances_num_per_fold]
 
         dev_src = torch.LongTensor([example[0] for example in devset])
@@ -134,6 +120,16 @@ def main():
         dev_soft_tgt = None
 
         for epoch in range(1, args.epochs_num + 1):
+            random.shuffle(trainset)
+            train_src = torch.LongTensor([example[0] for example in trainset])
+            train_tgt = torch.LongTensor([example[1] for example in trainset])
+            train_seg = torch.LongTensor([example[2] for example in trainset])
+
+            if args.soft_targets:
+                train_soft_tgt = torch.FloatTensor([example[3] for example in trainset])
+            else:
+                train_soft_tgt = None
+                
             model.train()
             for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, train_src, train_tgt, train_seg, train_soft_tgt)):
                 loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch, soft_tgt_batch)
