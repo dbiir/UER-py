@@ -218,14 +218,8 @@ def main():
 
     # Training phase.
     trainset = read_dataset(args, args.train_path)
-    random.shuffle(trainset)
     instances_num = len(trainset)
     batch_size = args.batch_size
-
-    src = torch.LongTensor([example[0] for example in trainset])
-    tgt_in = torch.LongTensor([example[1] for example in trainset])
-    tgt_out = torch.LongTensor([example[2] for example in trainset])
-    seg = torch.LongTensor([example[3] for example in trainset])
 
     args.train_steps = int(instances_num * args.epochs_num / batch_size) + 1
 
@@ -252,6 +246,12 @@ def main():
     print("Start training.")
 
     for epoch in range(1, args.epochs_num + 1):
+        random.shuffle(trainset)
+        src = torch.LongTensor([example[0] for example in trainset])
+        tgt_in = torch.LongTensor([example[1] for example in trainset])
+        tgt_out = torch.LongTensor([example[2] for example in trainset])
+        seg = torch.LongTensor([example[3] for example in trainset])
+        
         model.train()
         for i, (src_batch, tgt_in_batch, tgt_out_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt_in, tgt_out, seg)):
             loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_in_batch, tgt_out_batch, seg_batch)
