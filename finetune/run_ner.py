@@ -171,7 +171,7 @@ def evaluate(args, dataset):
         seg_batch = seg_batch.to(args.device)
         loss, pred = args.model(src_batch, tgt_batch, seg_batch)
 
-        gold = tgt_batch.contiguous().view(-1, 1).squeeze(-1)
+        gold = tgt_batch.contiguous().view(-1, 1)
 
         for j in range(gold.size()[0]):
             if gold[j].item() in args.begin_ids:
@@ -190,8 +190,8 @@ def evaluate(args, dataset):
                     if gold[k].item() == args.l2i["[PAD]"] or gold[k].item() == args.l2i["O"] or gold[k].item() in args.begin_ids:
                         end = k - 1
                         break
-                    else:
-                        end = gold.size()[0] - 1
+                else:
+                    end = gold.size()[0] - 1
                 gold_entities_pos.add((start, end))
 
         for j in range(pred.size()[0]):
@@ -201,14 +201,17 @@ def evaluate(args, dataset):
                     if pred[k].item() == args.l2i["[PAD]"] or pred[k].item() == args.l2i["O"] or pred[k].item() in args.begin_ids:
                         end = k - 1
                         break
-                    else:
-                        end = pred.size()[0] - 1
+                else:
+                    end = pred.size()[0] - 1
                 pred_entities_pos.add((start, end))
 
         for entity in pred_entities_pos:
             if entity not in gold_entities_pos:
                 continue
-            if torch.equal(gold[entity[0]: entity[1] + 1], pred[entity[0]: entity[1] + 1]):
+            for j in range(entity[0], entity[1] + 1):
+                if gold[j].item() != pred[j].item():
+                    break
+            else:
                 correct += 1
                 
     print("Report precision, recall, and f1:")
