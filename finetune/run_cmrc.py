@@ -71,7 +71,7 @@ def read_examples(path):
 def convert_examples_to_dataset(args, examples):
     # Converts a list of examples into a dataset that can be directly given as input to a model.
     dataset = []
-    args.logger.info("The number of questions in the dataset:{}".format(examples))
+    print("The number of questions in the dataset:{}".format(examples))
     for i in range(len(examples)):
         context = examples[i][0]
         question = examples[i][1]
