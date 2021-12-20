@@ -18,7 +18,7 @@ class AlbertTarget(MlmTarget):
         self.sop_linear_1 = nn.Linear(args.hidden_size, args.hidden_size)
         self.sop_linear_2 = nn.Linear(args.hidden_size, 2)
 
-    def forward(self, memory_bank, tgt):
+    def forward(self, memory_bank, tgt, seg):
         """
         Args:
             memory_bank: [batch_size x seq_length x hidden_size]

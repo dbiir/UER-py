@@ -18,7 +18,7 @@ class ClsTarget(nn.Module):
         self.criterion = nn.NLLLoss()
 
 
-    def forward(self, memory_bank, tgt):
+    def forward(self, memory_bank, tgt, seg):
         """
         Args:
             memory_bank: [batch_size x seq_length x hidden_size]

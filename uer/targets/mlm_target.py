@@ -32,7 +32,7 @@ class MlmTarget(nn.Module):
         self.criterion = nn.NLLLoss()
         #self.criterion = nn.CrossEntropyLoss()
 
-    def mlm(self, memory_bank, tgt_mlm):
+    def mlm(self, memory_bank, tgt_mlm, seg):
         # Masked language modeling (MLM) with full softmax prediction.
         output_mlm = self.act(self.mlm_linear_1(memory_bank))
         output_mlm = self.layer_norm(output_mlm)

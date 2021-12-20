@@ -17,7 +17,7 @@ class LmTarget(nn.Module):
         self.softmax = nn.LogSoftmax(dim=-1)
         self.criterion = nn.NLLLoss()
 
-    def lm(self, memory_bank, tgt_lm):
+    def lm(self, memory_bank, tgt_lm, seg):
         # Language modeling (LM) with full softmax prediction.
 
         tgt_lm = tgt_lm.contiguous().view(-1)
