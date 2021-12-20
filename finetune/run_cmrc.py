@@ -20,6 +20,7 @@ from uer.utils.tokenizers import *
 from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
+from uer.utils.logging import init_logger
 from uer.model_saver import save_model
 from uer.opts import finetune_opts
 from finetune.run_classifier import build_optimizer, load_or_initialize_parameters
