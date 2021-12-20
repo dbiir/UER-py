@@ -19,6 +19,7 @@ from uer.utils import *
 from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
+from uer.utils.logging import init_logger
 from uer.model_saver import save_model
 from uer.opts import finetune_opts, tokenizer_opts, adv_opts
 
@@ -97,8 +98,8 @@ def build_optimizer(args, model):
     param_optimizer = list(model.named_parameters())
     no_decay = ['bias', 'gamma', 'beta']
     optimizer_grouped_parameters = [
-                {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
-                {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+        {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
+        {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
     ]
     if args.optimizer in ["adamw"]:
         optimizer = str2optimizer[args.optimizer](optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
@@ -224,7 +225,7 @@ def train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_bat
     return loss
 
 
-def evaluate(args, dataset, print_confusion_matrix=False):
+def evaluate(args, dataset):
     src = torch.LongTensor([sample[0] for sample in dataset])
     tgt = torch.LongTensor([sample[1] for sample in dataset])
     seg = torch.LongTensor([sample[2] for sample in dataset])
@@ -249,19 +250,19 @@ def evaluate(args, dataset, print_confusion_matrix=False):
             confusion[pred[j], gold[j]] += 1
         correct += torch.sum(pred == gold).item()
 
-    if print_confusion_matrix:
-        print("Confusion matrix:")
-        print(confusion)
-        print("Report precision, recall, and f1:")
 
-        eps = 1e-9
-        for i in range(confusion.size()[0]):
-            p = confusion[i, i].item() / (confusion[i, :].sum().item() + eps)
-            r = confusion[i, i].item() / (confusion[:, i].sum().item() + eps)
-            f1 = 2 * p * r / (p + r + eps)
-            print("Label {}: {:.3f}, {:.3f}, {:.3f}".format(i, p, r, f1))
+    args.logger.debug("Confusion matrix:")
+    args.logger.debug(confusion)
+    args.logger.debug("Report precision, recall, and f1:")
 
-    print("Acc. (Correct/Total): {:.4f} ({}/{}) ".format(correct / len(dataset), correct, len(dataset)))
+    eps = 1e-9
+    for i in range(confusion.size()[0]):
+        p = confusion[i, i].item() / (confusion[i, :].sum().item() + eps)
+        r = confusion[i, i].item() / (confusion[:, i].sum().item() + eps)
+        f1 = 2 * p * r / (p + r + eps)
+        args.logger.debug("Label {}: {:.3f}, {:.3f}, {:.3f}".format(i, p, r, f1))
+
+    args.logger.info("Acc. (Correct/Total): {:.4f} ({}/{}) ".format(correct / len(dataset), correct, len(dataset)))
     return correct / len(dataset), confusion
 
 
@@ -286,20 +287,21 @@ def main():
 
     # Load the hyperparameters from the config file.
     args = load_hyperparam(args)
-
-    set_seed(args.seed)
-
     # Count the number of labels.
     args.labels_num = count_labels_num(args.train_path)
 
     # Build tokenizer.
     args.tokenizer = str2tokenizer[args.tokenizer](args)
+    set_seed(args.seed)
 
     # Build classification model.
     model = Classifier(args)
 
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
+
+    # Get logger.
+    args.logger = init_logger(args)
 
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
@@ -311,9 +313,8 @@ def main():
 
     args.train_steps = int(instances_num * args.epochs_num / batch_size) + 1
 
-    print("Batch size: ", batch_size)
-    print("The number of training instances:", instances_num)
-
+    args.logger.info("Batch size: {}".format(batch_size))
+    args.logger.info("The number of training instances: {}".format(instances_num))
     optimizer, scheduler = build_optimizer(args, model)
 
     if args.fp16:
@@ -325,7 +326,7 @@ def main():
         args.amp = amp
 
     if torch.cuda.device_count() > 1:
-        print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
+        args.logger.info("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
     args.model = model
 
@@ -334,8 +335,7 @@ def main():
 
     total_loss, result, best_result = 0.0, 0.0, 0.0
 
-    print("Start training.")
-
+    args.logger.info("Start training.")
     for epoch in range(1, args.epochs_num + 1):
         random.shuffle(trainset)
         src = torch.LongTensor([example[0] for example in trainset])
@@ -345,13 +345,13 @@ def main():
             soft_tgt = torch.FloatTensor([example[3] for example in trainset])
         else:
             soft_tgt = None
-            
+
         model.train()
         for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, src, tgt, seg, soft_tgt)):
             loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch, soft_tgt_batch)
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
+                args.logger.info("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
                 total_loss = 0.0
 
         result = evaluate(args, read_dataset(args, args.dev_path))
@@ -361,12 +361,12 @@ def main():
 
     # Evaluation phase.
     if args.test_path is not None:
-        print("Test set evaluation.")
+        args.logger.info("Test set evaluation.")
         if torch.cuda.device_count() > 1:
             args.model.module.load_state_dict(torch.load(args.output_model_path))
         else:
             args.model.load_state_dict(torch.load(args.output_model_path))
-        evaluate(args, read_dataset(args, args.test_path), True)
+        evaluate(args, read_dataset(args, args.test_path))
 
 
 if __name__ == "__main__":

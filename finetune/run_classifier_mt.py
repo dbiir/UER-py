@@ -18,6 +18,7 @@ from uer.utils import *
 from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
+from uer.utils.logging import init_logger
 from uer.model_saver import save_model
 from uer.opts import *
 from finetune.run_classifier import count_labels_num, batch_loader, build_optimizer, load_or_initialize_parameters, train_model, read_dataset, evaluate
@@ -97,7 +98,7 @@ def main():
 
     # Model options.
     model_opts(parser)
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",                           
+    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
                         help="Pooling type.")
 
     # Tokenizer options.
@@ -134,6 +135,9 @@ def main():
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
 
+    # Get logger.
+    args.logger = init_logger(args)
+
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
     args.model = model
@@ -154,8 +158,8 @@ def main():
 
     args.train_steps = int(instances_num * args.epochs_num / batch_size) + 1
 
-    print("Batch size: ", batch_size)
-    print("The number of training instances:", instances_num)
+    args.logger.info("Batch size: {}".format(batch_size))
+    args.logger.info("The number of training instances: {}".format(instances_num))
 
     optimizer, scheduler = build_optimizer(args, model)
 
@@ -168,12 +172,12 @@ def main():
         args.amp = amp
 
     if torch.cuda.device_count() > 1:
-        print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
+        args.logger.info("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
 
     total_loss, result, best_result = 0.0, 0.0, 0.0
 
-    print("Start training.")
+    args.logger.info("Start training.")
 
     for epoch in range(1, args.epochs_num + 1):
         random.shuffle(packed_dataset_all)
@@ -187,7 +191,7 @@ def main():
             loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch, None)
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
+                args.logger.info("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
                 total_loss = 0.0
 
         for dataset_id, path in enumerate(args.dataset_path_list):

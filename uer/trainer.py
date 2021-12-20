@@ -152,7 +152,7 @@ class MlmTrainer(Trainer):
         done_tokens = self.batch_size * self.seq_length * self.report_steps
         if self.dist_train:
             done_tokens *= self.world_size
-        print("| {:8d}/{:8d} steps"
+        self.logger.info("| {:8d}/{:8d} steps"
               "| {:8.2f} tokens/s"
               "| loss {:7.2f}"
               "| acc: {:3.3f}".format(
@@ -199,7 +199,7 @@ class BertTrainer(Trainer):
         if self.dist_train:
             done_tokens *= self.world_size
 
-        print("| {:8d}/{:8d} steps"
+        self.logger.info("| {:8d}/{:8d} steps"
               "| {:8.2f} tokens/s"
               "| loss {:7.2f}"
               "| loss_mlm: {:3.3f}"
@@ -253,7 +253,7 @@ class BilmTrainer(Trainer):
         done_tokens = self.batch_size * self.seq_length * self.report_steps
         if self.dist_train:
             done_tokens *= self.world_size
-        print("| {:8d}/{:8d} steps"
+        self.logger.info("| {:8d}/{:8d} steps"
               "| {:8.2f} tokens/s"
               "| loss {:7.2f}"
               "| loss_forward {:3.3f}"
@@ -293,7 +293,7 @@ class ClsTrainer(Trainer):
         done_tokens = self.batch_size * self.seq_length * self.report_steps
         if self.dist_train:
             done_tokens *= self.world_size
-        print("| {:8d}/{:8d} steps"
+        self.logger.info("| {:8d}/{:8d} steps"
               "| {:8.2f} tokens/s"
               "| loss {:7.2f}"
               "| acc: {:3.3f}".format(
@@ -331,7 +331,7 @@ class Seq2seqTrainer(Trainer):
         if self.dist_train:
             done_tokens *= self.world_size
 
-        print("| {:8d}/{:8d} steps"
+        self.logger.info("| {:8d}/{:8d} steps"
               "| {:8.2f} tokens/s"
               "| loss {:7.2f}"
               "| acc: {:3.3f}".format(
@@ -445,9 +445,9 @@ def worker(proc_id, gpu_ranks, args, model):
                                     world_size=args.world_size,
                                     rank=rank)
             model = DistributedDataParallel(model, device_ids=[gpu_id], find_unused_parameters=True)
-            print("Worker %d is training ... " % rank)
+            self.logger.info("Worker %d is training ... " % rank)
         else:
-            print("Worker is training ...")
+            self.logger.info("Worker is training ...")
 
     trainer = str2trainer[args.target](args)
     trainer.train(args, gpu_id, rank, train_loader, model, optimizer, scheduler)

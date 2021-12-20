@@ -213,13 +213,13 @@ def evaluate(args, dataset):
                     break
             else:
                 correct += 1
-                
-    print("Report precision, recall, and f1:")
+
+    args.logger.info("Report precision, recall, and f1:")
     eps = 1e-9
     p = correct / (pred_entities_num + eps)
     r = correct / (gold_entities_num + eps)
     f1 = 2 * p * r / (p + r + eps)
-    print("{:.3f}, {:.3f}, {:.3f}".format(p, r, f1))
+    args.logger.info("{:.3f}, {:.3f}, {:.3f}".format(p, r, f1))
 
     return f1
 
@@ -249,7 +249,7 @@ def main():
 
     with open(args.label2id_path, mode="r", encoding="utf-8") as f:
         l2i = json.load(f)
-        print("Labels: ", l2i)
+        args.logger.info("Labels: ", l2i)
         l2i["[PAD]"] = len(l2i)
         for label in l2i:
             if label.startswith("B"):
@@ -267,6 +267,9 @@ def main():
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
 
+    # Get logger.
+    args.logger = init_logger(args)
+
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
 
@@ -281,8 +284,8 @@ def main():
     batch_size = args.batch_size
     args.train_steps = int(instances_num * args.epochs_num / batch_size) + 1
 
-    print("Batch size: ", batch_size)
-    print("The number of training instances:", instances_num)
+    args.logger.info("Batch size: {}".format(batch_size))
+    args.logger.info("The number of training instances: {}".format(instances_num))
 
     optimizer, scheduler = build_optimizer(args, model)
 
@@ -294,13 +297,13 @@ def main():
         model, optimizer = amp.initialize(model, optimizer, opt_level = args.fp16_opt_level)
 
     if torch.cuda.device_count() > 1:
-        print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
+        args.logger.info("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
     args.model = model
 
     total_loss, f1, best_f1 = 0.0, 0.0, 0.0
 
-    print("Start training.")
+    args.logger.info("Start training.")
 
     for epoch in range(1, args.epochs_num + 1):
         model.train()
@@ -308,7 +311,7 @@ def main():
             loss = train(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch)
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
+                args.logger.info("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
                 total_loss = 0.0
 
         f1 = evaluate(args, read_dataset(args, args.dev_path))
@@ -320,7 +323,7 @@ def main():
 
     # Evaluation phase.
     if args.test_path is not None:
-        print("Test set evaluation.")
+        args.logger.info("Test set evaluation.")
         if torch.cuda.device_count() > 1:
             args.model.module.load_state_dict(torch.load(args.output_model_path))
         else:

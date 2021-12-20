@@ -71,7 +71,7 @@ def read_examples(path):
 def convert_examples_to_dataset(args, examples):
     # Converts a list of examples into a dataset that can be directly given as input to a model.
     dataset = []
-    print("The number of questions in the dataset:", len(examples))
+    args.logger.info("The number of questions in the dataset:{}".format(examples))
     for i in range(len(examples)):
         context = examples[i][0]
         question = examples[i][1]
@@ -337,7 +337,7 @@ def evaluate(args, dataset, examples):
     f1_score = 100.0 * f1 / total_count
     em_score = 100.0 * em / total_count
     avg = (f1_score + em_score) * 0.5
-    print("Avg: {:.4f},F1:{:.4f},EM:{:.4f},Total:{},Skip:{}".format(avg, f1_score, em_score, total_count, skip_count))
+    args.logger.info("Avg: {:.4f},F1:{:.4f},EM:{:.4f},Total:{},Skip:{}".format(avg, f1_score, em_score, total_count, skip_count))
     return avg
 
 
@@ -369,6 +369,9 @@ def main():
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
 
+    # Get logger.
+    args.logger = init_logger(args)
+
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
 
@@ -377,7 +380,7 @@ def main():
 
     # Training phase.
     batch_size = args.batch_size
-    print("Batch size: ", batch_size)
+    args.logger.info("Batch size: {}".format(batch_size))
     trainset, _ = read_dataset(args, args.train_path)
     random.shuffle(trainset)
     instances_num = len(trainset)
@@ -389,7 +392,7 @@ def main():
 
     args.train_steps = int(instances_num * args.epochs_num / batch_size) + 1
 
-    print("The number of training instances:", instances_num)
+    args.logger.info("The number of training instances: {}".format(instances_num))
 
     optimizer, scheduler = build_optimizer(args, model)
 
@@ -401,7 +404,7 @@ def main():
         model, optimizer = amp.initialize(model, optimizer,opt_level=args.fp16_opt_level)
 
     if torch.cuda.device_count() > 1:
-        print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
+        args.logger.info("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
     args.model = model
 
@@ -409,7 +412,7 @@ def main():
     result = 0.0
     best_result = 0.0
 
-    print("Start training.")
+    args.logger.info("Start training.")
 
     for epoch in range(1, args.epochs_num + 1):
         model.train()
@@ -418,7 +421,7 @@ def main():
             loss = train(args, model, optimizer, scheduler, src_batch, seg_batch, start_position_batch, end_position_batch)
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i+1, total_loss / args.report_steps))
+                args.logger.info("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i+1, total_loss / args.report_steps))
                 total_loss = 0.0
 
         result = evaluate(args, *read_dataset(args, args.dev_path))
@@ -428,7 +431,7 @@ def main():
 
     # Evaluation phase.
     if args.test_path is not None:
-        print("Test set evaluation.")
+        args.logger.info("Test set evaluation.")
         if torch.cuda.device_count() > 1:
             args.model.module.load_state_dict(torch.load(args.output_model_path))
         else:

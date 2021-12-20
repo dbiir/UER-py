@@ -71,12 +71,15 @@ def main():
     # GPU options.
     parser.add_argument("--world_size", type=int, default=1, help="Total number of processes (GPUs) for training.")
     parser.add_argument("--gpu_ranks", default=[], nargs='+', type=int, help="List of ranks of each process."
-                        " Each process has a unique integer rank whose value is in the interval [0, world_size), and runs in a single GPU.")
+                                                                             " Each process has a unique integer rank whose value is in the interval [0, world_size), and runs in a single GPU.")
     parser.add_argument("--master_ip", default="tcp://localhost:12345", type=str, help="IP-Port of master for training.")
     parser.add_argument("--backend", choices=["nccl", "gloo"], default="nccl", type=str, help="Distributed backend.")
 
     # Deepspeed options.
     deepspeed_opts(parser)
+
+    # Log options.
+    log_opts(parser)
 
     args = parser.parse_args()
 
@@ -86,6 +89,9 @@ def main():
     # Load hyper-parameters from config file.
     if args.config_path:
         args = load_hyperparam(args)
+
+    # Get logger
+    args.logger = init_logger(args)
 
     ranks_num = len(args.gpu_ranks)
 
@@ -102,7 +108,7 @@ def main():
             assert ranks_num <= torch.cuda.device_count(), "Started processes exceeds the available GPUs."
             args.dist_train = True
             args.ranks_num = ranks_num
-            print("Using distributed mode for training.")
+            args.logger.info("Using distributed mode for training.")
         elif args.world_size == 1 and ranks_num == 1:
             # Single GPU mode.
             assert torch.cuda.is_available(), "No available GPUs."
@@ -110,13 +116,13 @@ def main():
             assert args.gpu_id < torch.cuda.device_count(), "Invalid specified GPU device."
             args.dist_train = False
             args.single_gpu = True
-            print("Using GPU %d for training." % args.gpu_id)
+            args.logger.info("Using GPU %d for training." % args.gpu_id)
         else:
             # CPU mode.
             assert ranks_num == 0, "GPUs are specified, please check the arguments."
             args.dist_train = False
             args.single_gpu = False
-            print("Using CPU mode for training.")
+            args.logger.info("Using CPU mode for training.")
 
     trainer.train_and_validate(args)
 

@@ -136,11 +136,14 @@ def main():
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
 
+    # Get logger.
+    args.logger = init_logger(args)
+
     param_optimizer = list(model.named_parameters())
     no_decay = ['bias', 'gamma', 'beta']
     optimizer_grouped_parameters = [
-                {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
-                {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+        {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
+        {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
     ]
 
     deepspeed.init_distributed()
@@ -156,13 +159,13 @@ def main():
     custom_optimizer, custom_scheduler = build_optimizer(args, model)
 
     model, optimizer, _, scheduler = deepspeed.initialize(
-                                                    model=model,
-                                                    model_parameters=optimizer_grouped_parameters,
-                                                    args=args,
-                                                    optimizer=custom_optimizer,
-                                                    lr_scheduler=custom_scheduler,
-                                                    mpu=None,
-                                                    dist_init_required=False)
+        model=model,
+        model_parameters=optimizer_grouped_parameters,
+        args=args,
+        optimizer=custom_optimizer,
+        lr_scheduler=custom_scheduler,
+        mpu=None,
+        dist_init_required=False)
 
     src = torch.LongTensor([example[0] for example in trainset])
     tgt = torch.LongTensor([example[1] for example in trainset])
@@ -179,9 +182,9 @@ def main():
 
     result_tensor = torch.tensor(result).to(args.device)
     if args.rank == 0:
-        print("Batch size: ", batch_size)
-        print("The number of training instances:", instances_num)
-        print("Start training.")
+        args.logger.info("Batch size: {}".format(batch_size))
+        args.logger.info("The number of training instances: {}".format(instances_num))
+        args.logger.info("Start training.")
 
     for epoch in range(1, args.epochs_num + 1):
         model.train()
@@ -189,7 +192,7 @@ def main():
             loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch, soft_tgt_batch)
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0 and args.rank == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
+                args.logger.info("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
                 total_loss = 0.0
         if args.rank == 0:
             result = evaluate(args, read_dataset(args, args.dev_path, split=False))
@@ -202,7 +205,7 @@ def main():
 
     # Evaluation phase.
     if args.test_path is not None and args.rank == 0:
-        print("Test set evaluation.")
+        args.logger.info("Test set evaluation.")
         model.load_checkpoint(args.output_model_path, str(best_epoch))
         evaluate(args, read_dataset(args, args.test_path, split=False), True)
 
