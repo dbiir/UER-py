@@ -379,13 +379,7 @@ def main():
     batch_size = args.batch_size
     print("Batch size: ", batch_size)
     trainset, _ = read_dataset(args, args.train_path)
-    random.shuffle(trainset)
     instances_num = len(trainset)
-
-    src = torch.LongTensor([sample[0] for sample in trainset])
-    seg = torch.LongTensor([sample[1] for sample in trainset])
-    start_position = torch.LongTensor([sample[2] for sample in trainset])
-    end_position = torch.LongTensor([sample[3] for sample in trainset])
 
     args.train_steps = int(instances_num * args.epochs_num / batch_size) + 1
 
@@ -412,6 +406,12 @@ def main():
     print("Start training.")
 
     for epoch in range(1, args.epochs_num + 1):
+        random.shuffle(trainset)
+        src = torch.LongTensor([sample[0] for sample in trainset])
+        seg = torch.LongTensor([sample[1] for sample in trainset])
+        start_position = torch.LongTensor([sample[2] for sample in trainset])
+        end_position = torch.LongTensor([sample[3] for sample in trainset])
+    
         model.train()
 
         for i, (src_batch, seg_batch, start_position_batch, end_position_batch) in enumerate(batch_loader(batch_size, src, seg, start_position, end_position)):
