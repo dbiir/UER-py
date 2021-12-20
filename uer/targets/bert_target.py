@@ -32,7 +32,7 @@ class BertTarget(MlmTarget):
         # Masked language model (MLM).
         assert type(tgt) == tuple
         tgt_mlm, tgt_nsp = tgt[0], tgt[1]
-        loss_mlm, correct_mlm, denominator = self.mlm(memory_bank, tgt_mlm)
+        loss_mlm, correct_mlm, denominator = self.mlm(memory_bank, tgt_mlm, seg)
 
         # Next sentence prediction (NSP).
         output_nsp = torch.tanh(self.nsp_linear_1(memory_bank[:, 0, :]))
