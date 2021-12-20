@@ -20,6 +20,7 @@ from uer.utils.optimizers import *
 from uer.utils.constants import *
 from uer.utils.vocab import Vocab
 from uer.utils.seed import set_seed
+from uer.utils.logging import init_logger
 from uer.utils.tokenizers import *
 from uer.model_saver import save_model
 from uer.opts import finetune_opts
@@ -243,6 +244,9 @@ def main():
     # Load the hyperparameters of the config file.
     args = load_hyperparam(args)
 
+    # Get logger.
+    args.logger = init_logger(args)
+
     set_seed(args.seed)
 
     args.begin_ids = []
@@ -266,9 +270,6 @@ def main():
 
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
-
-    # Get logger.
-    args.logger = init_logger(args)
 
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
