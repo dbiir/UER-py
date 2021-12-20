@@ -2,6 +2,8 @@ import argparse
 import torch
 import uer.trainer as trainer
 from uer.utils.config import load_hyperparam
+from uer.utils.logging import init_logger
+
 from uer.opts import *
 
 
