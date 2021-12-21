@@ -114,16 +114,6 @@ def main():
             args.adv_method = str2adv[args.adv_type](model)
 
         trainset = dataset[0 : fold_id * instances_num_per_fold] + dataset[(fold_id + 1) * instances_num_per_fold :]
-        random.shuffle(trainset)
-
-        train_src = torch.LongTensor([example[0] for example in trainset])
-        train_tgt = torch.LongTensor([example[1] for example in trainset])
-        train_seg = torch.LongTensor([example[2] for example in trainset])
-
-        if args.soft_targets:
-            train_soft_tgt = torch.FloatTensor([example[3] for example in trainset])
-        else:
-            train_soft_tgt = None
 
         devset = dataset[fold_id * instances_num_per_fold : (fold_id + 1) * instances_num_per_fold]
 
@@ -133,6 +123,17 @@ def main():
         dev_soft_tgt = None
 
         for epoch in range(1, args.epochs_num + 1):
+            random.shuffle(trainset)
+
+            train_src = torch.LongTensor([example[0] for example in trainset])
+            train_tgt = torch.LongTensor([example[1] for example in trainset])
+            train_seg = torch.LongTensor([example[2] for example in trainset])
+
+            if args.soft_targets:
+                train_soft_tgt = torch.FloatTensor([example[3] for example in trainset])
+            else:
+                train_soft_tgt = None
+            
             model.train()
             for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, train_src, train_tgt, train_seg, train_soft_tgt)):
                 loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch, soft_tgt_batch)
