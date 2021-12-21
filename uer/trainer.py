@@ -76,6 +76,7 @@ class Trainer(object):
         self.dist_train = args.dist_train
         self.batch_size = args.batch_size
         self.world_size = args.world_size
+        self.logger = args.logger
 
     def forward_propagation(self, batch, model):
 
@@ -152,15 +153,15 @@ class MlmTrainer(Trainer):
         done_tokens = self.batch_size * self.seq_length * self.report_steps
         if self.dist_train:
             done_tokens *= self.world_size
-        print("| {:8d}/{:8d} steps"
-              "| {:8.2f} tokens/s"
-              "| loss {:7.2f}"
-              "| acc: {:3.3f}".format(
-                  self.current_step,
-                  self.total_steps,
-                  done_tokens / (time.time() - self.start_time),
-                  self.total_loss / self.report_steps,
-                  self.total_correct / self.total_denominator))
+        self.logger.info("| {:8d}/{:8d} steps"
+                         "| {:8.2f} tokens/s"
+                         "| loss {:7.2f}"
+                         "| acc: {:3.3f}".format(
+            self.current_step,
+            self.total_steps,
+            done_tokens / (time.time() - self.start_time),
+            self.total_loss / self.report_steps,
+            self.total_correct / self.total_denominator))
 
         self.total_loss = 0.0
         self.total_correct = 0.0
@@ -199,21 +200,21 @@ class BertTrainer(Trainer):
         if self.dist_train:
             done_tokens *= self.world_size
 
-        print("| {:8d}/{:8d} steps"
-              "| {:8.2f} tokens/s"
-              "| loss {:7.2f}"
-              "| loss_mlm: {:3.3f}"
-              "| loss_sp: {:3.3f}"
-              "| acc_mlm: {:3.3f}"
-              "| acc_sp: {:3.3f}".format(
-                  self.current_step,
-                  self.total_steps,
-                  done_tokens / (time.time() - self.start_time),
-                  self.total_loss / self.report_steps,
-                  self.total_loss_mlm / self.report_steps,
-                  self.total_loss_sp / self.report_steps,
-                  self.total_correct_mlm / self.total_denominator,
-                  self.total_correct_sp / self.total_instances))
+        self.logger.info("| {:8d}/{:8d} steps"
+                         "| {:8.2f} tokens/s"
+                         "| loss {:7.2f}"
+                         "| loss_mlm: {:3.3f}"
+                         "| loss_sp: {:3.3f}"
+                         "| acc_mlm: {:3.3f}"
+                         "| acc_sp: {:3.3f}".format(
+            self.current_step,
+            self.total_steps,
+            done_tokens / (time.time() - self.start_time),
+            self.total_loss / self.report_steps,
+            self.total_loss_mlm / self.report_steps,
+            self.total_loss_sp / self.report_steps,
+            self.total_correct_mlm / self.total_denominator,
+            self.total_correct_sp / self.total_instances))
 
         self.total_loss, self.total_loss_mlm, self.total_loss_sp = 0.0, 0.0, 0.0
         self.total_correct_mlm, self.total_denominator = 0.0, 0.0
@@ -253,21 +254,21 @@ class BilmTrainer(Trainer):
         done_tokens = self.batch_size * self.seq_length * self.report_steps
         if self.dist_train:
             done_tokens *= self.world_size
-        print("| {:8d}/{:8d} steps"
-              "| {:8.2f} tokens/s"
-              "| loss {:7.2f}"
-              "| loss_forward {:3.3f}"
-              "| loss_backward {:3.3f}"
-              "| acc_forward: {:3.3f}"
-              "| acc_backward: {:3.3f}".format(
-                  self.current_step,
-                  self.total_steps,
-                  done_tokens / (time.time() - self.start_time),
-                  self.total_loss / self.report_steps,
-                  self.total_loss_forward / self.report_steps,
-                  self.total_loss_backward / self.report_steps,
-                  self.total_correct_forward / self.total_denominator,
-                  self.total_correct_backward / self.total_denominator))
+        self.logger.info("| {:8d}/{:8d} steps"
+                         "| {:8.2f} tokens/s"
+                         "| loss {:7.2f}"
+                         "| loss_forward {:3.3f}"
+                         "| loss_backward {:3.3f}"
+                         "| acc_forward: {:3.3f}"
+                         "| acc_backward: {:3.3f}".format(
+            self.current_step,
+            self.total_steps,
+            done_tokens / (time.time() - self.start_time),
+            self.total_loss / self.report_steps,
+            self.total_loss_forward / self.report_steps,
+            self.total_loss_backward / self.report_steps,
+            self.total_correct_forward / self.total_denominator,
+            self.total_correct_backward / self.total_denominator))
 
         self.total_loss, self.total_loss_forward, self.total_loss_backward = 0.0, 0.0, 0.0
         self.total_correct_forward, self.total_correct_backward, self.total_denominator = 0.0, 0.0, 0.0
@@ -293,15 +294,15 @@ class ClsTrainer(Trainer):
         done_tokens = self.batch_size * self.seq_length * self.report_steps
         if self.dist_train:
             done_tokens *= self.world_size
-        print("| {:8d}/{:8d} steps"
-              "| {:8.2f} tokens/s"
-              "| loss {:7.2f}"
-              "| acc: {:3.3f}".format(
-                  self.current_step,
-                  self.total_steps,
-                  done_tokens / (time.time() - self.start_time),
-                  self.total_loss / self.report_steps,
-                  self.total_correct / self.total_instances))
+        self.logger.info("| {:8d}/{:8d} steps"
+                         "| {:8.2f} tokens/s"
+                         "| loss {:7.2f}"
+                         "| acc: {:3.3f}".format(
+            self.current_step,
+            self.total_steps,
+            done_tokens / (time.time() - self.start_time),
+            self.total_loss / self.report_steps,
+            self.total_correct / self.total_instances))
 
         self.total_loss = 0.0
         self.total_correct = 0.0
@@ -331,15 +332,15 @@ class Seq2seqTrainer(Trainer):
         if self.dist_train:
             done_tokens *= self.world_size
 
-        print("| {:8d}/{:8d} steps"
-              "| {:8.2f} tokens/s"
-              "| loss {:7.2f}"
-              "| acc: {:3.3f}".format(
-                  self.current_step,
-                  self.total_steps,
-                  done_tokens / (time.time() - self.start_time),
-                  self.total_loss / self.report_steps,
-                  self.total_correct / self.total_denominator))
+        self.logger.info("| {:8d}/{:8d} steps"
+                         "| {:8.2f} tokens/s"
+                         "| loss {:7.2f}"
+                         "| acc: {:3.3f}".format(
+            self.current_step,
+            self.total_steps,
+            done_tokens / (time.time() - self.start_time),
+            self.total_loss / self.report_steps,
+            self.total_correct / self.total_denominator))
 
         self.total_loss = 0.0
         self.total_correct = 0.0
@@ -445,9 +446,9 @@ def worker(proc_id, gpu_ranks, args, model):
                                     world_size=args.world_size,
                                     rank=rank)
             model = DistributedDataParallel(model, device_ids=[gpu_id], find_unused_parameters=True)
-            print("Worker %d is training ... " % rank)
+            args.logger.info("Worker %d is training ... " % rank)
         else:
-            print("Worker is training ...")
+            args.logger.info("Worker is training ...")
 
     trainer = str2trainer[args.target](args)
     trainer.train(args, gpu_id, rank, train_loader, model, optimizer, scheduler)

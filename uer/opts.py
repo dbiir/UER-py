@@ -48,6 +48,15 @@ def optimization_opts(parser):
                         default="linear", help="Scheduler type.")
 
 
+def log_opts(parser):
+    parser.add_argument("--log_path", type=str, default=None,
+                        help="Log file path, default no output file.")
+    parser.add_argument("--log_level", choices=["ERROR", "INFO", "DEBUG", "NOSET"], default="INFO",
+                        help="Console log level. Verbosity: ERROR < INFO < DEBUG < NOSET")
+    parser.add_argument("--log_file_level", choices=["ERROR", "INFO", "DEBUG", "NOSET"], default="INFO",
+                        help="Log file level. Verbosity: ERROR < INFO < DEBUG < NOSET")
+
+
 def training_opts(parser):
     parser.add_argument("--batch_size", type=int, default=32,                                                             
                         help="Batch size.")                                                                               
@@ -61,6 +70,7 @@ def training_opts(parser):
                         help="Specific steps to print prompt.")                                                           
     parser.add_argument("--seed", type=int, default=7,                                                                    
                         help="Random seed.")
+    log_opts(parser)
 
 
 def finetune_opts(parser):

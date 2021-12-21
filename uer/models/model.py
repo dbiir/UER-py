@@ -25,5 +25,5 @@ class Model(nn.Module):
     def forward(self, src, tgt, seg):
         emb = self.embedding(src, seg)
         output = self.encoder(emb, seg)
-        loss_info = self.target(output, tgt)
+        loss_info = self.target(output, tgt, seg)
         return loss_info

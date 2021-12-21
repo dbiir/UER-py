@@ -10,7 +10,7 @@ class BilmTarget(LmTarget):
         args.hidden_size = args.hidden_size // 2
         super(BilmTarget, self).__init__(args, vocab_size)
 
-    def forward(self, memory_bank, tgt):
+    def forward(self, memory_bank, tgt, seg):
         """
         Args:
             memory_bank: [batch_size x seq_length x hidden_size]

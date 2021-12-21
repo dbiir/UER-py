@@ -52,6 +52,9 @@ def main():
     # Build tokenizer.
     args.tokenizer = str2tokenizer[args.tokenizer](args)
 
+    # Get logger.
+    args.logger = get_logger(args)
+
     best_acc = 0
     config = {}
 
@@ -111,9 +114,9 @@ def main():
         if acc > best_acc:
             best_acc = acc
             config = {"learning_rate": learning_rate, "batch_size": batch_size, "epochs_num": epochs_num}
-        print('On configuration: {}.\n'.format(config))
+        args.logger.info('On configuration: {}.\n'.format(config))
 
-    print("Best Acc. is: {:.4f}, on configuration {}.".format(best_acc, config))
+    args.logger.info("Best Acc. is: {:.4f}, on configuration {}.".format(best_acc, config))
 
 if __name__ == "__main__":
     main()

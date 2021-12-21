@@ -35,7 +35,7 @@ class LmTarget(nn.Module):
         loss = self.criterion(output, tgt_lm)
         return loss, correct, denominator
 
-    def forward(self, memory_bank, tgt):
+    def forward(self, memory_bank, tgt, seg):
         """
         Args:
             memory_bank: [batch_size x seq_length x hidden_size]
