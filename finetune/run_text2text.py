@@ -36,11 +36,8 @@ class Text2text(torch.nn.Module):
 
     def forward(self, src, tgt, seg):
         tgt_in, tgt_out, _ = tgt
-        emb = self.embedding(src, seg)
-        memory_bank = self.encoder(emb, seg)
-        decoder_emb = self.target.embedding(tgt_in, None)
-        hidden = self.target.decoder(memory_bank, decoder_emb, (src,))
-        output = self.target.output_layer(hidden)
+        memory_bank = self.encode(src, seg)
+        output = self.decode(src, memory_bank, tgt)
         if tgt_out is None:
             return None, output
         else:
@@ -74,7 +71,7 @@ def read_dataset(args, path):
             if len(tgt_in) > args.tgt_seq_length:
                 tgt_in = tgt_in[: args.tgt_seq_length]
             tgt_out = tgt_in[1:] + [PAD_ID]
-
+            
             while len(src) < args.seq_length:
                 src.append(PAD_ID)
                 seg.append(0)
