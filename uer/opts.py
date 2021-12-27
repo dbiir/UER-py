@@ -58,17 +58,17 @@ def log_opts(parser):
 
 
 def training_opts(parser):
-    parser.add_argument("--batch_size", type=int, default=32,                                                             
-                        help="Batch size.")                                                                               
-    parser.add_argument("--seq_length", type=int, default=128,                                                            
-                        help="Sequence length.")                                                                          
-    parser.add_argument("--dropout", type=float, default=0.1,                                                             
-                        help="Dropout.")                                                                                  
-    parser.add_argument("--epochs_num", type=int, default=3,                                                              
-                        help="Number of epochs.")                                                                         
-    parser.add_argument("--report_steps", type=int, default=100,                                                          
-                        help="Specific steps to print prompt.")                                                           
-    parser.add_argument("--seed", type=int, default=7,                                                                    
+    parser.add_argument("--batch_size", type=int, default=32,
+                        help="Batch size.")
+    parser.add_argument("--seq_length", type=int, default=128,
+                        help="Sequence length.")
+    parser.add_argument("--dropout", type=float, default=0.1,
+                        help="Dropout.")
+    parser.add_argument("--epochs_num", type=int, default=3,
+                        help="Number of epochs.")
+    parser.add_argument("--report_steps", type=int, default=100,
+                        help="Specific steps to print prompt.")
+    parser.add_argument("--seed", type=int, default=7,
                         help="Random seed.")
     log_opts(parser)
 
@@ -120,7 +120,7 @@ def infer_opts(parser):
 
 
 def tokenizer_opts(parser):
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
+    parser.add_argument("--tokenizer", choices=["bert", "bpe", "char", "space", "xlmroberta"], default="bert",
                         help="Specify the tokenizer." 
                              "Original Google BERT uses bert tokenizer."
                              "Char tokenizer segments sentences into characters."
@@ -129,15 +129,19 @@ def tokenizer_opts(parser):
                              )
     parser.add_argument("--vocab_path", default=None, type=str,
                         help="Path of the vocabulary file.")
+    parser.add_argument("--merges_path", default=None, type=str,
+                        help="Path of the merges file.")
     parser.add_argument("--spm_model_path", default=None, type=str,
                         help="Path of the sentence piece model.")
 
 
 def tgt_tokenizer_opts(parser):
-    parser.add_argument("--tgt_tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
+    parser.add_argument("--tgt_tokenizer", choices=["bert", "bpe", "char", "space", "xlmroberta"], default="bert",
                         help="Specify the tokenizer for target side.")
     parser.add_argument("--tgt_vocab_path", default=None, type=str,
                         help="Path of the target vocabulary file.")
+    parser.add_argument("--tgt_merges_path", default=None, type=str,
+                        help="Path of the target merges file.")
     parser.add_argument("--tgt_spm_model_path", default=None, type=str,
                         help="Path of the target sentence piece model.")
 

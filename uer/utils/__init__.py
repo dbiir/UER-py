@@ -5,7 +5,7 @@ from uer.utils.adversarial import *
 
 
 str2tokenizer = {"char": CharTokenizer, "space": SpaceTokenizer, "bert": BertTokenizer,
-                 "xlmroberta": XLMRobertaTokenizer}
+                 "bpe": BPETokenizer, "xlmroberta": XLMRobertaTokenizer}
 str2dataset = {"bert": BertDataset, "lm": LmDataset, "mlm": MlmDataset,
                "bilm": BilmDataset, "albert": AlbertDataset, "seq2seq": Seq2seqDataset,
                "t5": T5Dataset, "gsg": GsgDataset, "bart": BartDataset,
@@ -26,7 +26,7 @@ str2scheduler = {"linear": get_linear_schedule_with_warmup, "cosine": get_cosine
 
 str2adv = {"fgm": FGM, "pgd": PGD}
 
-__all__ = ["CharTokenizer", "SpaceTokenizer", "BertTokenizer", "XLMRobertaTokenizer", "str2tokenizer",
+__all__ = ["CharTokenizer", "SpaceTokenizer", "BertTokenizer", "BPETokenizer", "XLMRobertaTokenizer", "str2tokenizer",
            "BertDataset", "LmDataset", "MlmDataset", "BilmDataset",
            "AlbertDataset", "Seq2seqDataset", "T5Dataset", "GsgDataset",
            "BartDataset", "ClsDataset", "PrefixlmDataset", "str2dataset",
