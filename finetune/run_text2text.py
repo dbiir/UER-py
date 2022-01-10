@@ -34,7 +34,11 @@ class Text2text(torch.nn.Module):
         output = self.target.output_layer(hidden)
         return output
 
-    def forward(self, src, tgt, seg):
+    def forward(self, src, tgt, seg, memory_bank=None, only_use_encoder=False):
+        if only_use_encoder:
+            return self.encode(src, seg)
+        if memory_bank is not None:
+            return self.decode(src, memory_bank, tgt)
         tgt_in, tgt_out, _ = tgt
         memory_bank = self.encode(src, seg)
         output = self.decode(src, memory_bank, tgt)
@@ -146,13 +150,13 @@ def evaluate(args, dataset):
         seg_batch = seg_batch.to(args.device)
 
         with torch.no_grad():
-            memory_bank = args.model.encode(src_batch, seg_batch)
+            memory_bank = args.model(src_batch, None, seg_batch, only_use_encoder=True)
 
         for _ in range(args.tgt_seq_length):
 
             tgt_out_batch = tgt_in_batch
             with torch.no_grad():
-                outputs = args.model.decode(src_batch, memory_bank, (tgt_in_batch, tgt_out_batch, src_batch))
+                outputs = args.model(src_batch, (tgt_in_batch, tgt_out_batch, src_batch), None, memory_bank=memory_bank)
 
             next_token_logits = outputs[:, -1]
             next_tokens = torch.argmax(next_token_logits, dim=1).unsqueeze(1)
