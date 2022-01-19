@@ -1,8 +1,8 @@
 import argparse
 import torch
-import tencentpretrain.trainer as trainer
-from tencentpretrain.utils.config import load_hyperparam
-from tencentpretrain.opts import *
+import uer.trainer as trainer
+from uer.utils.config import load_hyperparam
+from uer.opts import *
 
 
 def main():
