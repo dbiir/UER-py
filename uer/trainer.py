@@ -9,6 +9,7 @@ from uer.model_builder import build_model
 from uer.utils.optimizers import *
 from uer.utils import *
 from uer.utils.vocab import Vocab
+from uer.utils.logging import init_logger
 from uer.utils.seed import set_seed
 
 
@@ -154,14 +155,14 @@ class MlmTrainer(Trainer):
         if self.dist_train:
             done_tokens *= self.world_size
         self.logger.info("| {:8d}/{:8d} steps"
-                         "| {:8.2f} tokens/s"
-                         "| loss {:7.2f}"
-                         "| acc: {:3.3f}".format(
-            self.current_step,
-            self.total_steps,
-            done_tokens / (time.time() - self.start_time),
-            self.total_loss / self.report_steps,
-            self.total_correct / self.total_denominator))
+              "| {:8.2f} tokens/s"
+              "| loss {:7.2f}"
+              "| acc: {:3.3f}".format(
+                  self.current_step,
+                  self.total_steps,
+                  done_tokens / (time.time() - self.start_time),
+                  self.total_loss / self.report_steps,
+                  self.total_correct / self.total_denominator))
 
         self.total_loss = 0.0
         self.total_correct = 0.0
@@ -201,20 +202,20 @@ class BertTrainer(Trainer):
             done_tokens *= self.world_size
 
         self.logger.info("| {:8d}/{:8d} steps"
-                         "| {:8.2f} tokens/s"
-                         "| loss {:7.2f}"
-                         "| loss_mlm: {:3.3f}"
-                         "| loss_sp: {:3.3f}"
-                         "| acc_mlm: {:3.3f}"
-                         "| acc_sp: {:3.3f}".format(
-            self.current_step,
-            self.total_steps,
-            done_tokens / (time.time() - self.start_time),
-            self.total_loss / self.report_steps,
-            self.total_loss_mlm / self.report_steps,
-            self.total_loss_sp / self.report_steps,
-            self.total_correct_mlm / self.total_denominator,
-            self.total_correct_sp / self.total_instances))
+              "| {:8.2f} tokens/s"
+              "| loss {:7.2f}"
+              "| loss_mlm: {:3.3f}"
+              "| loss_sp: {:3.3f}"
+              "| acc_mlm: {:3.3f}"
+              "| acc_sp: {:3.3f}".format(
+                  self.current_step,
+                  self.total_steps,
+                  done_tokens / (time.time() - self.start_time),
+                  self.total_loss / self.report_steps,
+                  self.total_loss_mlm / self.report_steps,
+                  self.total_loss_sp / self.report_steps,
+                  self.total_correct_mlm / self.total_denominator,
+                  self.total_correct_sp / self.total_instances))
 
         self.total_loss, self.total_loss_mlm, self.total_loss_sp = 0.0, 0.0, 0.0
         self.total_correct_mlm, self.total_denominator = 0.0, 0.0
@@ -255,20 +256,20 @@ class BilmTrainer(Trainer):
         if self.dist_train:
             done_tokens *= self.world_size
         self.logger.info("| {:8d}/{:8d} steps"
-                         "| {:8.2f} tokens/s"
-                         "| loss {:7.2f}"
-                         "| loss_forward {:3.3f}"
-                         "| loss_backward {:3.3f}"
-                         "| acc_forward: {:3.3f}"
-                         "| acc_backward: {:3.3f}".format(
-            self.current_step,
-            self.total_steps,
-            done_tokens / (time.time() - self.start_time),
-            self.total_loss / self.report_steps,
-            self.total_loss_forward / self.report_steps,
-            self.total_loss_backward / self.report_steps,
-            self.total_correct_forward / self.total_denominator,
-            self.total_correct_backward / self.total_denominator))
+              "| {:8.2f} tokens/s"
+              "| loss {:7.2f}"
+              "| loss_forward {:3.3f}"
+              "| loss_backward {:3.3f}"
+              "| acc_forward: {:3.3f}"
+              "| acc_backward: {:3.3f}".format(
+                  self.current_step,
+                  self.total_steps,
+                  done_tokens / (time.time() - self.start_time),
+                  self.total_loss / self.report_steps,
+                  self.total_loss_forward / self.report_steps,
+                  self.total_loss_backward / self.report_steps,
+                  self.total_correct_forward / self.total_denominator,
+                  self.total_correct_backward / self.total_denominator))
 
         self.total_loss, self.total_loss_forward, self.total_loss_backward = 0.0, 0.0, 0.0
         self.total_correct_forward, self.total_correct_backward, self.total_denominator = 0.0, 0.0, 0.0
@@ -295,14 +296,14 @@ class ClsTrainer(Trainer):
         if self.dist_train:
             done_tokens *= self.world_size
         self.logger.info("| {:8d}/{:8d} steps"
-                         "| {:8.2f} tokens/s"
-                         "| loss {:7.2f}"
-                         "| acc: {:3.3f}".format(
-            self.current_step,
-            self.total_steps,
-            done_tokens / (time.time() - self.start_time),
-            self.total_loss / self.report_steps,
-            self.total_correct / self.total_instances))
+              "| {:8.2f} tokens/s"
+              "| loss {:7.2f}"
+              "| acc: {:3.3f}".format(
+                  self.current_step,
+                  self.total_steps,
+                  done_tokens / (time.time() - self.start_time),
+                  self.total_loss / self.report_steps,
+                  self.total_correct / self.total_instances))
 
         self.total_loss = 0.0
         self.total_correct = 0.0
@@ -333,14 +334,14 @@ class Seq2seqTrainer(Trainer):
             done_tokens *= self.world_size
 
         self.logger.info("| {:8d}/{:8d} steps"
-                         "| {:8.2f} tokens/s"
-                         "| loss {:7.2f}"
-                         "| acc: {:3.3f}".format(
-            self.current_step,
-            self.total_steps,
-            done_tokens / (time.time() - self.start_time),
-            self.total_loss / self.report_steps,
-            self.total_correct / self.total_denominator))
+              "| {:8.2f} tokens/s"
+              "| loss {:7.2f}"
+              "| acc: {:3.3f}".format(
+                  self.current_step,
+                  self.total_steps,
+                  done_tokens / (time.time() - self.start_time),
+                  self.total_loss / self.report_steps,
+                  self.total_correct / self.total_denominator))
 
         self.total_loss = 0.0
         self.total_correct = 0.0
@@ -377,6 +378,9 @@ def worker(proc_id, gpu_ranks, args, model):
         gpu_ranks: List of ranks of each process.
     """
     set_seed(args.seed)
+
+    # Get logger
+    args.logger = init_logger(args)
 
     if args.deepspeed:
         import deepspeed
