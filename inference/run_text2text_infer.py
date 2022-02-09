@@ -110,12 +110,12 @@ def main():
                 tgt_in_batch[j][-1] = args.tokenizer.vocab.get(CLS_TOKEN)
 
             with torch.no_grad():
-                memory_bank = args.model(src_batch, None, seg_batch, only_use_encoder=True)
+                memory_bank = model(src_batch, None, seg_batch, only_use_encoder=True)
 
             for _ in range(args.tgt_seq_length):
 
                 with torch.no_grad():
-                    outputs = args.model(src_batch, (tgt_in_batch, None, src_batch), None, memory_bank=memory_bank)
+                    outputs = model(src_batch, (tgt_in_batch, None, src_batch), None, memory_bank=memory_bank)
 
                 next_token_logits = outputs[:, -1]
                 next_tokens = torch.argmax(next_token_logits, dim=1).unsqueeze(1)
