@@ -7,11 +7,11 @@ from uer.utils.adversarial import *
 str2tokenizer = {"char": CharTokenizer, "space": SpaceTokenizer, "bert": BertTokenizer,
                  "bpe": BPETokenizer, "xlmroberta": XLMRobertaTokenizer}
 str2dataset = {"bert": BertDataset, "lm": LmDataset, "mlm": MlmDataset,
-               "bilm": BilmDataset, "albert": AlbertDataset, "seq2seq": Seq2seqDataset,
+               "bilm": BilmDataset, "albert": AlbertDataset, "mt": MtDataset,
                "t5": T5Dataset, "gsg": GsgDataset, "bart": BartDataset,
                "cls": ClsDataset, "prefixlm": PrefixlmDataset}
 str2dataloader = {"bert": BertDataLoader, "lm": LmDataLoader, "mlm": MlmDataLoader,
-                  "bilm": BilmDataLoader, "albert": AlbertDataLoader, "seq2seq": Seq2seqDataLoader,
+                  "bilm": BilmDataLoader, "albert": AlbertDataLoader, "mt": MtDataLoader,
                   "t5": T5DataLoader, "gsg": GsgDataLoader, "bart": BartDataLoader,
                   "cls": ClsDataLoader, "prefixlm": PrefixlmDataLoader}
 
@@ -28,10 +28,10 @@ str2adv = {"fgm": FGM, "pgd": PGD}
 
 __all__ = ["CharTokenizer", "SpaceTokenizer", "BertTokenizer", "BPETokenizer", "XLMRobertaTokenizer", "str2tokenizer",
            "BertDataset", "LmDataset", "MlmDataset", "BilmDataset",
-           "AlbertDataset", "Seq2seqDataset", "T5Dataset", "GsgDataset",
+           "AlbertDataset", "MtDataset", "T5Dataset", "GsgDataset",
            "BartDataset", "ClsDataset", "PrefixlmDataset", "str2dataset",
            "BertDataLoader", "LmDataLoader", "MlmDataLoader", "BilmDataLoader",
-           "AlbertDataLoader", "Seq2seqDataLoader", "T5DataLoader", "GsgDataLoader",
+           "AlbertDataLoader", "MtDataLoader", "T5DataLoader", "GsgDataLoader",
            "BartDataLoader", "ClsDataLoader", "PrefixlmDataLoader", "str2dataloader",
            "gelu", "gelu_fast", "relu", "silu", "linear", "str2act",
            "AdamW", "Adafactor", "str2optimizer",

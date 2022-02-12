@@ -7,8 +7,9 @@
   "layers_num": 12,
   "max_seq_length": 514,
   "dropout": 0.1,
+  "data_processor": "mlm",
   "embedding": "word_pos_seg",
   "encoder": "transformer",
   "mask": "fully_visible",
-  "target": "mlm"
+  "target": ["mlm"]
 }

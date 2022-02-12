@@ -17,7 +17,6 @@ class ClsTarget(nn.Module):
         self.softmax = nn.LogSoftmax(dim=-1)
         self.criterion = nn.NLLLoss()
 
-
     def forward(self, memory_bank, tgt, seg):
         """
         Args:

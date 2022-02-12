@@ -11,7 +11,7 @@ import torch.nn as nn
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
-from uer.layers import *
+from uer.embeddings import *
 from uer.encoders import *
 from uer.utils.constants import *
 from uer.utils import *
@@ -181,7 +181,6 @@ def main():
 
     for epoch in range(1, args.epochs_num + 1):
         random.shuffle(packed_dataset_all)
-        
         model.train()
         for i, (dataset_id, src_batch, tgt_batch, seg_batch) in enumerate(packed_dataset_all):
             if hasattr(model, "module"):

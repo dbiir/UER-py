@@ -13,7 +13,7 @@ import torch.nn.functional as F
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
-from uer.layers import *
+from uer.embeddings import *
 from uer.encoders import *
 from uer.utils.config import load_hyperparam
 from uer.utils.optimizers import *
@@ -253,7 +253,7 @@ def main():
 
     with open(args.label2id_path, mode="r", encoding="utf-8") as f:
         l2i = json.load(f)
-        args.logger.info("Labels: ", l2i)
+        args.logger.info("Labels: " + str(l2i))
         l2i["[PAD]"] = len(l2i)
         for label in l2i:
             if label.startswith("B"):

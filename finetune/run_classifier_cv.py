@@ -11,8 +11,6 @@ import numpy as np
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
-from uer.layers import *
-from uer.encoders import *
 from uer.utils.constants import *
 from uer.utils import *
 from uer.utils.optimizers import *
@@ -68,7 +66,7 @@ def main():
     args = load_hyperparam(args)
 
     # Get logger.
-    args.logger = get_logger(args)
+    args.logger = init_logger(args)
 
     set_seed(args.seed)
 
@@ -133,7 +131,7 @@ def main():
                 train_soft_tgt = torch.FloatTensor([example[3] for example in trainset])
             else:
                 train_soft_tgt = None
-            
+
             model.train()
             for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, train_src, train_tgt, train_seg, train_soft_tgt)):
                 loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch, soft_tgt_batch)

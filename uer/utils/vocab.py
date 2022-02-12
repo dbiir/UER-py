@@ -53,7 +53,7 @@ class Vocab(object):
 
                 # tokenizer is only either CharTokenizer or SpaceTokenizer
                 tokens = tokenizer.tokenize(line, use_vocab=False)
-                
+
                 for t in tokens:
                     if t not in w2i:
                         w2i[t], w2c[t] = len(i2w), 1

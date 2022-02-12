@@ -30,6 +30,15 @@ def model_opts(parser):
     parser.add_argument("--has_residual_attention", action="store_true", help="Add residual attention.")
 
 
+def log_opts(parser):
+    parser.add_argument("--log_path", type=str, default=None,
+                        help="Log file path, default no output file.")
+    parser.add_argument("--log_level", choices=["ERROR", "INFO", "DEBUG", "NOSET"], default="INFO",
+                        help="Console log level. Verbosity: ERROR < INFO < DEBUG < NOSET")
+    parser.add_argument("--log_file_level", choices=["ERROR", "INFO", "DEBUG", "NOSET"], default="INFO",
+                        help="Log file level. Verbosity: ERROR < INFO < DEBUG < NOSET")
+
+
 def optimization_opts(parser):
     parser.add_argument("--learning_rate", type=float, default=2e-5,
                         help="Learning rate.")
@@ -46,15 +55,6 @@ def optimization_opts(parser):
     parser.add_argument("--scheduler", choices=["linear", "cosine", "cosine_with_restarts", "polynomial",
                                                 "constant", "constant_with_warmup"],
                         default="linear", help="Scheduler type.")
-
-
-def log_opts(parser):
-    parser.add_argument("--log_path", type=str, default=None,
-                        help="Log file path, default no output file.")
-    parser.add_argument("--log_level", choices=["ERROR", "INFO", "DEBUG", "NOSET"], default="INFO",
-                        help="Console log level. Verbosity: ERROR < INFO < DEBUG < NOSET")
-    parser.add_argument("--log_file_level", choices=["ERROR", "INFO", "DEBUG", "NOSET"], default="INFO",
-                        help="Log file level. Verbosity: ERROR < INFO < DEBUG < NOSET")
 
 
 def training_opts(parser):
@@ -106,7 +106,7 @@ def infer_opts(parser):
                         help="Path of the testset.")
     parser.add_argument("--prediction_path", type=str, required=True,
                         help="Path of the prediction file.")
-    parser.add_argument("--config_path", default="models/bert/base_config.json", type=str,
+    parser.add_argument("--config_path", type=str, required=True,
                         help="Path of the config file.")
 
     # Model options.

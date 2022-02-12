@@ -10,8 +10,6 @@ import torch
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
-from uer.layers import *
-from uer.encoders import *
 from uer.utils.constants import *
 from uer.utils import *
 from uer.utils.optimizers import *
@@ -204,7 +202,7 @@ def main():
         src = torch.LongTensor([example[0] for example in trainset])
         tgt = torch.LongTensor([example[1] for example in trainset])
         seg = torch.LongTensor([example[2] for example in trainset])
-        
+
         model.train()
         for i, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
             loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch)

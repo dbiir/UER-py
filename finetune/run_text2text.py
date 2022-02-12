@@ -1,5 +1,5 @@
 """
-This script provides an example to wrap UER for text-to-text fine-tuning.
+This script provides an example to wrap UER-py for text-to-text fine-tuning.
 """
 import sys
 import os
@@ -153,7 +153,6 @@ def evaluate(args, dataset):
             memory_bank = args.model(src_batch, None, seg_batch, only_use_encoder=True)
 
         for _ in range(args.tgt_seq_length):
-
             tgt_out_batch = tgt_in_batch
             with torch.no_grad():
                 outputs = args.model(src_batch, (tgt_in_batch, tgt_out_batch, src_batch), None, memory_bank=memory_bank)

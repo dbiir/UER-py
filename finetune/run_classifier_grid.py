@@ -104,7 +104,7 @@ def main():
                 soft_tgt = torch.FloatTensor([example[3] for example in trainset])
             else:
                 soft_tgt = None
-        
+
             model.train()
             for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, src, tgt, seg, soft_tgt)):
                 _ = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch, soft_tgt_batch)

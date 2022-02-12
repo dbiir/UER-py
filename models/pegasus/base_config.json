@@ -7,6 +7,7 @@
   "layers_num": 12,
   "max_seq_length": 1024,
   "dropout": 0.1,
+  "data_processor": "gsg",
   "embedding": "word_sinusoidalpos",
   "remove_embedding_layernorm": true,
   "tgt_embedding": "word_sinusoidalpos",
@@ -15,7 +16,7 @@
   "mask": "fully_visible",
   "layernorm_positioning": "pre",
   "decoder": "transformer",
-  "target": "gsg",
+  "target": ["lm"],
   "has_lmtarget_bias": true,
   "tie_weights": true
 }

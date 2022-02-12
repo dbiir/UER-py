@@ -1,5 +1,6 @@
 import logging
 
+
 def init_logger(args):
     log_format = logging.Formatter("[%(asctime)s %(levelname)s] %(message)s")
     logger = logging.getLogger()

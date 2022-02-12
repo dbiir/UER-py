@@ -30,7 +30,6 @@ class MlmTarget(nn.Module):
         self.softmax = nn.LogSoftmax(dim=-1)
 
         self.criterion = nn.NLLLoss()
-        #self.criterion = nn.CrossEntropyLoss()
 
     def mlm(self, memory_bank, tgt_mlm):
         # Masked language modeling (MLM) with full softmax prediction.
