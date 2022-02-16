@@ -205,8 +205,8 @@ UER-py has been used in winning solutions of many NLP competitions. In this sect
 <br/>
 
 ## Contact information
-For communication related to this project, please contact Zhe Zhao (helloworld@ruc.edu.cn; nlpzhezhao@tencent.com) or Yudong Li (liyudong123@hotmail.com) or Cheng Hou (chenghoubupt@bupt.edu.cn) or Xin Zhao (zhaoxinruc@ruc.edu.cn).
+For communication related to this project, please contact Zhe Zhao (helloworld@ruc.edu.cn; nlpzhezhao@tencent.com) or Yudong Li (liyudong123@hotmail.com) or Cheng Hou (chenghoubupt@bupt.edu.cn) or Wenhang Shi (wenhangshi@ruc.edu.cn).
 
 This work is instructed by my enterprise mentors __Qi Ju__, __Xuefeng Yang__, __Haotang Deng__ and school mentors __Tao Liu__, __Xiaoyong Du__.
 
-We also got a lot of help from Weijie Liu, Lusheng Zhang, Jianwei Cui, Xiayu Li, Weiquan Mao, Hui Chen, Jinbin Zhang, Zhiruo Wang, Peng Zhou, Haixiao Liu, and Weijian Wu. 
+We also got a lot of help from Weijie Liu, Lusheng Zhang, Jianwei Cui, Xiayu Li, Weiquan Mao, Xin Zhao, Hui Chen, Jinbin Zhang, Zhiruo Wang, Peng Zhou, Haixiao Liu, and Weijian Wu. 
