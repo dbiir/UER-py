@@ -85,7 +85,7 @@ def main():
 
     args = parser.parse_args()
 
-    if args.target == "cls":
+    if "cls" in args.target:
         assert args.labels_num is not None, "Cls target needs the denotation of the number of labels."
 
     # Load hyper-parameters from config file.

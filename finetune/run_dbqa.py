@@ -50,28 +50,7 @@ def read_dataset(args, path):
     return dataset
 
 
-def evaluate(args, dataset):
-    src = torch.LongTensor([sample[0] for sample in dataset])
-    tgt = torch.LongTensor([sample[1] for sample in dataset])
-    seg = torch.LongTensor([sample[2] for sample in dataset])
-
-    batch_size = args.batch_size
-    instances_num = src.size()[0]
-
-    args.model.eval()
-
-    for i, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
-        src_batch = src_batch.to(args.device)
-        tgt_batch = tgt_batch.to(args.device)
-        seg_batch = seg_batch.to(args.device)
-        with torch.no_grad():
-            loss, logits = args.model(src_batch, tgt_batch, seg_batch)
-        if i == 0:
-            logits_all = logits
-        if i >= 1:
-            logits_all = torch.cat((logits_all, logits), 0)
-
-    # To calculate MRR, the results are grouped by qid.
+def gen_dataset_groupby_qid(dataset, logits_all):
     dataset_groupby_qid, correct_answer_orders, scores = [], [], []
     for i in range(len(dataset)):
         label = dataset[i][1]
@@ -101,9 +80,35 @@ def evaluate(args, dataset):
                 correct_answer_orders.append(current_order)
             current_order += 1
     dataset_groupby_qid.append((qid, correct_answer_orders, scores))
+    return dataset_groupby_qid
+
+
+def evaluate(args, dataset):
+    src = torch.LongTensor([sample[0] for sample in dataset])
+    tgt = torch.LongTensor([sample[1] for sample in dataset])
+    seg = torch.LongTensor([sample[2] for sample in dataset])
+
+    batch_size = args.batch_size
+    instances_num = src.size()[0]
+
+    args.model.eval()
+
+    for i, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
+        src_batch = src_batch.to(args.device)
+        tgt_batch = tgt_batch.to(args.device)
+        seg_batch = seg_batch.to(args.device)
+        with torch.no_grad():
+            loss, logits = args.model(src_batch, tgt_batch, seg_batch)
+        if i == 0:
+            logits_all = logits
+        if i >= 1:
+            logits_all = torch.cat((logits_all, logits), 0)
+
+    # To calculate MRR, the results are grouped by qid.
+    dataset_groupby_qid = gen_dataset_groupby_qid(dataset, logits_all)
 
     reciprocal_rank = []
-    for qid, correct_answer_orders, scores in dataset_groupby_qid:
+    for _, correct_answer_orders, scores in dataset_groupby_qid:
         if len(correct_answer_orders) == 1:
             sorted_scores = sorted(scores, reverse=True)
             for j in range(len(sorted_scores)):

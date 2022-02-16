@@ -11,7 +11,9 @@ uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
 from uer.model_saver import save_model
-from uer.targets import Seq2seqTarget
+from uer.decoders import *
+from uer.targets import *
+from uer.opts import tgt_tokenizer_opts
 from finetune.run_classifier import *
 
 
@@ -20,7 +22,9 @@ class Text2text(torch.nn.Module):
         super(Text2text, self).__init__()
         self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
         self.encoder = str2encoder[args.encoder](args)
-        self.target = Seq2seqTarget(args, len(args.tokenizer.vocab))
+        self.tgt_embedding = str2embedding[args.tgt_embedding](args, len(args.tokenizer.vocab))
+        self.decoder = str2decoder[args.decoder](args)
+        self.target = LmTarget(args, len(args.tokenizer.vocab))
 
     def encode(self, src, seg):
         emb = self.embedding(src, seg)
@@ -29,8 +33,8 @@ class Text2text(torch.nn.Module):
 
     def decode(self, src, memory_bank, tgt):
         tgt_in, tgt_out, _ = tgt
-        decoder_emb = self.target.embedding(tgt_in, None)
-        hidden = self.target.decoder(memory_bank, decoder_emb, (src,))
+        decoder_emb = self.tgt_embedding(tgt_in, None)
+        hidden = self.decoder(memory_bank, decoder_emb, (src,))
         output = self.target.output_layer(hidden)
         return output
 
@@ -45,7 +49,9 @@ class Text2text(torch.nn.Module):
         if tgt_out is None:
             return None, output
         else:
-            loss = self.target(memory_bank, tgt, seg)[0]
+            decoder_emb = self.tgt_embedding(tgt_in, None)
+            hidden = self.decoder(memory_bank, decoder_emb, (seg,))
+            loss = self.target(hidden, tgt)[0]
             return loss, output
 
 def read_dataset(args, path):
