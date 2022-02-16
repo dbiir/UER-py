@@ -22,7 +22,7 @@ jobs:
       - name: Test with pytest
         run: |
               python preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path bert_dataset.pt --processes_num 8 --seq_length 64 --data_processor bert
-              python pretrain.py --dataset_path bert_dataset.pt --vocab_path models/google_zh_vocab.txt --config_path models/bert/base_config.json --output_model_path models/bert_model.bin --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
+              python pretrain.py --dataset_path bert_dataset.pt --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --output_model_path models/bert_model.bin --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
               mv models/bert_model.bin-10 models/bert_model.bin
               python preprocess.py --corpus_path corpora/book_review.txt --vocab_path models/google_zh_vocab.txt --dataset_path roberta_dataset.pt --processes_num 8 --dynamic_masking --seq_length 64 --data_processor mlm
               python pretrain.py --dataset_path roberta_dataset.pt --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --output_model_path models/roberta_model.bin --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2 --data_processor mlm --target mlm
