@@ -184,8 +184,8 @@ class BertTrainer(Trainer):
         src, tgt_mlm, tgt_sp, seg = batch
         tgt = {"mlm": tgt_mlm, "sp": tgt_sp}
         loss_info = model(src, tgt, seg)
-        loss_mlm, correct_mlm, denominator = loss_info[0]
-        loss_sp, correct_sp = loss_info[1]
+        loss_mlm, correct_mlm, denominator = loss_info["mlm"]
+        loss_sp, correct_sp = loss_info["sp"]
         loss = loss_mlm + loss_sp
         self.total_loss += loss.item()
         self.total_loss_mlm += loss_mlm.item()

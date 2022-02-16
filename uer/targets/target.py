@@ -6,7 +6,7 @@ class Target(nn.Module):
     def __init__(self):
         self.target_list = []
         self.target_name_list = []
-        self.loss_info = []
+        self.loss_info = {}
 
     def update(self, target, target_name):
         self.target_list.append(target.forward)
@@ -17,10 +17,10 @@ class Target(nn.Module):
             self.__dict__.update(target.__dict__)
 
     def forward(self, memory_bank, tgt, seg):
-        self.loss_info = []
+        self.loss_info = {}
         for i, target in enumerate(self.target_list):
             if len(self.target_list) > 1:
-                self.loss_info.append(target(memory_bank, tgt[self.target_name_list[i]], seg))
+                self.loss_info[self.target_name_list[i]] = target(memory_bank, tgt[self.target_name_list[i]], seg)
             else:
                 self.loss_info = target(memory_bank, tgt, seg)
 
