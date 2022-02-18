@@ -87,10 +87,10 @@ def main():
             input_model["bert/encoder/layer_" + str(i) + "/output/LayerNorm/beta"]
 
     if args.target == "bert":
-        output_model["target.nsp_linear_1.weight"] = input_model["bert/pooler/dense/kernel"]
-        output_model["target.nsp_linear_1.bias"] = input_model["bert/pooler/dense/bias"]
-        output_model["target.nsp_linear_2.weight"] = input_model["cls/seq_relationship/output_weights"]
-        output_model["target.nsp_linear_2.bias"] = input_model["cls/seq_relationship/output_bias"]
+        output_model["target.sp_linear_1.weight"] = input_model["bert/pooler/dense/kernel"]
+        output_model["target.sp_linear_1.bias"] = input_model["bert/pooler/dense/bias"]
+        output_model["target.sp_linear_2.weight"] = input_model["cls/seq_relationship/output_weights"]
+        output_model["target.sp_linear_2.bias"] = input_model["cls/seq_relationship/output_bias"]
     output_model["target.mlm_linear_1.weight"] = input_model["cls/predictions/transform/dense/kernel"]
     output_model["target.mlm_linear_1.bias"] = input_model["cls/predictions/transform/dense/bias"]
     output_model["target.layer_norm.gamma"] = input_model["cls/predictions/transform/LayerNorm/gamma"]

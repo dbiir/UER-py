@@ -22,6 +22,8 @@ def model_opts(parser):
                         help="Feed forward type, specific to transformer model.")
     parser.add_argument("--remove_transformer_bias", action="store_true",
                         help="Remove bias on transformer layers.")
+    parser.add_argument("--share_embedding", action="store_true",
+                        help="Shared embedding and target embedding parameters.")
     parser.add_argument("--layernorm", choices=["normal", "t5"], default="normal",
                         help="Layernorm type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")

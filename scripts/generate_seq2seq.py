@@ -7,7 +7,7 @@ import torch.nn.functional as F
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, uer_dir)
 
-from uer.layers import *
+from uer.embeddings import *
 from uer.encoders import *
 from uer.targets import *
 from uer.utils.constants import *

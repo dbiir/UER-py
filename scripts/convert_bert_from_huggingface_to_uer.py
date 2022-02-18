@@ -68,10 +68,10 @@ def main():
     convert_bert_transformer_encoder_from_huggingface_to_uer(input_model, output_model, args)
 
     if args.target == "bert":
-        output_model["target.nsp_linear_1.weight"] = input_model["bert.pooler.dense.weight"]
-        output_model["target.nsp_linear_1.bias"] = input_model["bert.pooler.dense.bias"]
-        output_model["target.nsp_linear_2.weight"] = input_model["cls.seq_relationship.weight"]
-        output_model["target.nsp_linear_2.bias"] = input_model["cls.seq_relationship.bias"]
+        output_model["target.sp_linear_1.weight"] = input_model["bert.pooler.dense.weight"]
+        output_model["target.sp_linear_1.bias"] = input_model["bert.pooler.dense.bias"]
+        output_model["target.sp_linear_2.weight"] = input_model["cls.seq_relationship.weight"]
+        output_model["target.sp_linear_2.bias"] = input_model["cls.seq_relationship.bias"]
     output_model["target.mlm_linear_1.weight"] = input_model["cls.predictions.transform.dense.weight"]
     output_model["target.mlm_linear_1.bias"] = input_model["cls.predictions.transform.dense.bias"]
     output_model["target.layer_norm.gamma"] = input_model["cls.predictions.transform.LayerNorm."+args.gamma]
