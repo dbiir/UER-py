@@ -113,7 +113,6 @@ def main():
                 memory_bank = model(src_batch, None, seg_batch, only_use_encoder=True)
 
             for _ in range(args.tgt_seq_length):
-
                 with torch.no_grad():
                     outputs = model(src_batch, (tgt_in_batch, None, src_batch), None, memory_bank=memory_bank)
 

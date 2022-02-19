@@ -13,7 +13,6 @@ sys.path.append(uer_dir)
 from uer.model_saver import save_model
 from uer.decoders import *
 from uer.targets import *
-from uer.opts import tgt_tokenizer_opts
 from finetune.run_classifier import *
 
 

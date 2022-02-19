@@ -306,7 +306,7 @@ def main():
         src = torch.LongTensor([ins[0] for ins in instances])
         tgt = torch.LongTensor([ins[1] for ins in instances])
         seg = torch.LongTensor([ins[2] for ins in instances])
-        
+
         model.train()
         for i, (src_batch, tgt_batch, seg_batch) in enumerate(batch_loader(batch_size, src, tgt, seg)):
             loss = train(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch)

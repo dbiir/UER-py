@@ -2,6 +2,7 @@ import inspect
 from argparse import Namespace
 import torch.nn as nn
 
+
 class DualEncoder(nn.Module):
     """
     Dual Encoder which enables siamese models like SBER and CLIP.
