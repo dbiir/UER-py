@@ -1,15 +1,15 @@
 """
 Modify model's embedding and softmax layers according to the vocabulary.
 """
-import sys
+import argparse
 import os
+import collections
+import sys
 import numpy as np
 import torch
-import argparse
-import collections
 
-bert_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(bert_dir)
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
 
 from uer.utils.vocab import Vocab
 

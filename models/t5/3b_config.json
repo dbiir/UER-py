@@ -7,6 +7,7 @@
   "heads_num": 32,
   "layers_num": 24,
   "dropout": 0.1,
+  "data_processor": "t5",
   "embedding": "word",
   "relative_position_embedding": true,
   "remove_embedding_layernorm": true,
@@ -19,6 +20,6 @@
   "layernorm": "t5",
   "remove_transformer_bias": true,
   "decoder": "transformer",
-  "target": "t5",
+  "target": ["lm"],
   "tie_weights": true
 }

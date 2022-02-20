@@ -7,10 +7,11 @@
   "layers_num": 24,
   "max_seq_length": 512,
   "dropout": 0.0,
+  "data_processor": "albert",
   "embedding": "word_pos_seg",
   "encoder": "transformer",
   "mask": "fully_visible",
   "factorized_embedding_parameterization": true,
   "parameter_sharing": true,
-  "target": "albert"
+  "target": ["mlm", "sp"]
 }

@@ -13,13 +13,14 @@ import torch.nn.functional as F
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
-from uer.layers import *
+from uer.embeddings import *
 from uer.encoders import *
 from uer.utils.config import load_hyperparam
 from uer.utils.optimizers import *
 from uer.utils.constants import *
 from uer.utils.vocab import Vocab
 from uer.utils.seed import set_seed
+from uer.utils.logging import init_logger
 from uer.utils.tokenizers import *
 from uer.model_saver import save_model
 from uer.opts import finetune_opts
@@ -214,12 +215,12 @@ def evaluate(args, dataset):
             else:
                 correct += 1
 
-    print("Report precision, recall, and f1:")
+    args.logger.info("Report precision, recall, and f1:")
     eps = 1e-9
     p = correct / (pred_entities_num + eps)
     r = correct / (gold_entities_num + eps)
     f1 = 2 * p * r / (p + r + eps)
-    print("{:.3f}, {:.3f}, {:.3f}".format(p, r, f1))
+    args.logger.info("{:.3f}, {:.3f}, {:.3f}".format(p, r, f1))
 
     return f1
 
@@ -243,13 +244,16 @@ def main():
     # Load the hyperparameters of the config file.
     args = load_hyperparam(args)
 
+    # Get logger.
+    args.logger = init_logger(args)
+
     set_seed(args.seed)
 
     args.begin_ids = []
 
     with open(args.label2id_path, mode="r", encoding="utf-8") as f:
         l2i = json.load(f)
-        print("Labels: ", l2i)
+        args.logger.info("Labels: " + str(l2i))
         l2i["[PAD]"] = len(l2i)
         for label in l2i:
             if label.startswith("B"):
@@ -272,17 +276,12 @@ def main():
 
     # Training phase.
     instances = read_dataset(args, args.train_path)
-
-    src = torch.LongTensor([ins[0] for ins in instances])
-    tgt = torch.LongTensor([ins[1] for ins in instances])
-    seg = torch.LongTensor([ins[2] for ins in instances])
-
-    instances_num = src.size(0)
+    instances_num = len(instances)
     batch_size = args.batch_size
     args.train_steps = int(instances_num * args.epochs_num / batch_size) + 1
 
-    print("Batch size: ", batch_size)
-    print("The number of training instances:", instances_num)
+    args.logger.info("Batch size: {}".format(batch_size))
+    args.logger.info("The number of training instances: {}".format(instances_num))
 
     optimizer, scheduler = build_optimizer(args, model)
 
@@ -294,21 +293,26 @@ def main():
         model, optimizer = amp.initialize(model, optimizer, opt_level = args.fp16_opt_level)
 
     if torch.cuda.device_count() > 1:
-        print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
+        args.logger.info("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
     args.model = model
 
     total_loss, f1, best_f1 = 0.0, 0.0, 0.0
 
-    print("Start training.")
+    args.logger.info("Start training.")
 
     for epoch in range(1, args.epochs_num + 1):
+        random.shuffle(instances)
+        src = torch.LongTensor([ins[0] for ins in instances])
+        tgt = torch.LongTensor([ins[1] for ins in instances])
+        seg = torch.LongTensor([ins[2] for ins in instances])
+
         model.train()
         for i, (src_batch, tgt_batch, seg_batch) in enumerate(batch_loader(batch_size, src, tgt, seg)):
             loss = train(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch)
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
+                args.logger.info("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
                 total_loss = 0.0
 
         f1 = evaluate(args, read_dataset(args, args.dev_path))
@@ -320,7 +324,7 @@ def main():
 
     # Evaluation phase.
     if args.test_path is not None:
-        print("Test set evaluation.")
+        args.logger.info("Test set evaluation.")
         if torch.cuda.device_count() > 1:
             args.model.module.load_state_dict(torch.load(args.output_model_path))
         else:

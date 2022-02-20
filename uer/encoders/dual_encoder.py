@@ -2,8 +2,10 @@ import inspect
 from argparse import Namespace
 import torch.nn as nn
 
+
 class DualEncoder(nn.Module):
     """
+    Dual Encoder which enables siamese models like SBER and CLIP.
     """
     def __init__(self, args):
         super(DualEncoder, self).__init__()
@@ -24,6 +26,14 @@ class DualEncoder(nn.Module):
             self.encoder_1 = self.encoder_0
 
     def forward(self, emb, seg):
+        """
+        Args:
+            emb: ([batch_size x seq_length x emb_size], [batch_size x seq_length x emb_size])
+            seg: ([batch_size x seq_length], [batch_size x seq_length])
+        Returns:
+            features_0: [batch_size x seq_length x hidden_size]
+            features_1: [batch_size x seq_length x hidden_size]
+        """
         features_0 = self.get_encode_0(emb[0], seg[0])
         features_1 = self.get_encode_1(emb[1], seg[1])
 

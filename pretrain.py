@@ -44,11 +44,13 @@ def main():
     model_opts(parser)
     parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
                         help="Target embedding type.")
-    parser.add_argument("--decoder", choices=["transformer"], default="transformer", help="Decoder type.")
+    parser.add_argument("--decoder", choices=[None, "transformer"], default=None, help="Decoder type.")
     parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
                         help="Pooling type.")
-    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "seq2seq", "t5", "cls", "prefixlm", "gsg", "bart"], default="bert",
+    parser.add_argument("--target", choices=["sp", "lm", "mlm", "bilm", "cls"], default="mlm", nargs='+',
                         help="The training target of the pretraining model.")
+    parser.add_argument("--data_processor", choices=["bert", "lm", "mlm", "bilm", "albert", "mt", "t5", "cls", "prefixlm", "gsg", "bart"], default="bert",
+                        help="The data processor of the pretraining model.")
     parser.add_argument("--tie_weights", action="store_true",
                         help="Tie the word embedding and softmax weights.")
     parser.add_argument("--has_lmtarget_bias", action="store_true",
@@ -78,9 +80,12 @@ def main():
     # Deepspeed options.
     deepspeed_opts(parser)
 
+    # Log options.
+    log_opts(parser)
+
     args = parser.parse_args()
 
-    if args.target == "cls":
+    if "cls" in args.target:
         assert args.labels_num is not None, "Cls target needs the denotation of the number of labels."
 
     # Load hyper-parameters from config file.

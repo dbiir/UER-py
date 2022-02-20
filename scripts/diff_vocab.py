@@ -1,5 +1,3 @@
-import sys
-import os
 import argparse
 
 
@@ -19,7 +17,7 @@ if __name__ == '__main__':
                 vocab_set_1.add(w)
             except:
                 pass
-    
+
     with open(args.vocab_2, mode='r', encoding='utf-8') as f:
         for line in f:
             try:

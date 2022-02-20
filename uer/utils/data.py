@@ -700,9 +700,9 @@ class BilmDataLoader(DataLoader):
                 torch.LongTensor(seg)
 
 
-class Seq2seqDataset(Dataset):
+class MtDataset(Dataset):
     def __init__(self, args, vocab, tokenizer):
-        super(Seq2seqDataset, self).__init__(args, vocab, tokenizer)
+        super(MtDataset, self).__init__(args, vocab, tokenizer)
         self.tgt_seq_length = args.tgt_seq_length
         self.src_vocab, self.src_tokenizer = vocab, tokenizer
         self.tgt_tokenizer = args.tgt_tokenizer
@@ -746,7 +746,7 @@ class Seq2seqDataset(Dataset):
             dataset_writer.close()
 
 
-class Seq2seqDataLoader(DataLoader):
+class MtDataLoader(DataLoader):
     def __iter__(self):
         while True:
             while self._empty():
@@ -920,7 +920,7 @@ class GsgDataset(BertDataset):
         return instances
 
 
-class GsgDataLoader(Seq2seqDataLoader):
+class GsgDataLoader(MtDataLoader):
     pass
 
 

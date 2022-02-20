@@ -7,11 +7,12 @@
   "layers_num": 6,
   "max_seq_length": 1024,
   "dropout": 0.1,
+  "data_processor": "lm",
   "embedding": "word_pos",
   "remove_embedding_layernorm": true,
   "encoder": "transformer",
   "mask": "causal",
   "layernorm_positioning": "pre",
-  "target": "lm",
+  "target": ["lm"],
   "tie_weights": true
 }

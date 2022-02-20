@@ -1,12 +1,10 @@
-import math
 import torch
 import torch.nn as nn
-from uer.layers.layer_norm import LayerNorm
-from uer.utils.act_fun import gelu
 
 
 class ClsTarget(nn.Module):
     """
+    Classification Target
     """
     def __init__(self, args, vocab_size):
         super(ClsTarget, self).__init__()
@@ -19,8 +17,7 @@ class ClsTarget(nn.Module):
         self.softmax = nn.LogSoftmax(dim=-1)
         self.criterion = nn.NLLLoss()
 
-
-    def forward(self, memory_bank, tgt):
+    def forward(self, memory_bank, tgt, seg):
         """
         Args:
             memory_bank: [batch_size x seq_length x hidden_size]

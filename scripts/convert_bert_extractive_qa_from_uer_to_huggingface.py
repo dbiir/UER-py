@@ -7,7 +7,8 @@ import torch
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, uer_dir)
 
-from scripts.convert_bert_from_uer_to_huggingface import convert_bert_transformer_encoder_from_uer_to_huggingface
+from scripts.convert_bert_from_uer_to_huggingface import\
+    convert_bert_transformer_encoder_from_uer_to_huggingface
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("--input_model_path", type=str, default="models/input_model.bin",

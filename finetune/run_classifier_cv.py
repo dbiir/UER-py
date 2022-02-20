@@ -11,8 +11,6 @@ import numpy as np
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
-from uer.layers import *
-from uer.encoders import *
 from uer.utils.constants import *
 from uer.utils import *
 from uer.utils.optimizers import *
@@ -31,10 +29,6 @@ def main():
                         help="Path of the pretrained model.")
     parser.add_argument("--output_model_path", default="models/classifier_model.bin", type=str,
                         help="Path of the output model.")
-    parser.add_argument("--vocab_path", default=None, type=str,
-                        help="Path of the vocabulary file.")
-    parser.add_argument("--spm_model_path", default=None, type=str,
-                        help="Path of the sentence piece model.")
     parser.add_argument("--train_path", type=str, required=True,
                         help="Path of the trainset.")
     parser.add_argument("--config_path", default="models/bert/base_config.json", type=str,
@@ -51,7 +45,7 @@ def main():
     tokenizer_opts(parser)
 
     # Optimization options.
-    optimization_opts(parser) 
+    optimization_opts(parser)
     parser.add_argument("--soft_targets", action='store_true',
                         help="Train model with logits.")
     parser.add_argument("--soft_alpha", type=float, default=0.5,
@@ -70,6 +64,9 @@ def main():
 
     # Load the hyperparameters from the config file.
     args = load_hyperparam(args)
+
+    # Get logger.
+    args.logger = init_logger(args)
 
     set_seed(args.seed)
 
@@ -115,16 +112,6 @@ def main():
             args.adv_method = str2adv[args.adv_type](model)
 
         trainset = dataset[0 : fold_id * instances_num_per_fold] + dataset[(fold_id + 1) * instances_num_per_fold :]
-        random.shuffle(trainset)
-
-        train_src = torch.LongTensor([example[0] for example in trainset])
-        train_tgt = torch.LongTensor([example[1] for example in trainset])
-        train_seg = torch.LongTensor([example[2] for example in trainset])
-
-        if args.soft_targets:
-            train_soft_tgt = torch.FloatTensor([example[3] for example in trainset])
-        else:
-            train_soft_tgt = None
 
         devset = dataset[fold_id * instances_num_per_fold : (fold_id + 1) * instances_num_per_fold]
 
@@ -134,16 +121,27 @@ def main():
         dev_soft_tgt = None
 
         for epoch in range(1, args.epochs_num + 1):
+            random.shuffle(trainset)
+
+            train_src = torch.LongTensor([example[0] for example in trainset])
+            train_tgt = torch.LongTensor([example[1] for example in trainset])
+            train_seg = torch.LongTensor([example[2] for example in trainset])
+
+            if args.soft_targets:
+                train_soft_tgt = torch.FloatTensor([example[3] for example in trainset])
+            else:
+                train_soft_tgt = None
+
             model.train()
             for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, train_src, train_tgt, train_seg, train_soft_tgt)):
                 loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch, soft_tgt_batch)
                 total_loss += loss.item()
                 if (i + 1) % args.report_steps == 0:
-                    print("Fold id: {}, Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(fold_id, epoch, i + 1, total_loss / args.report_steps))
+                    args.logger.info("Fold id: {}, Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(fold_id, epoch, i + 1, total_loss / args.report_steps))
                     total_loss = 0.0
 
         model.eval()
-        for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, dev_src, dev_tgt, dev_seg, dev_soft_tgt)): 
+        for i, (src_batch, tgt_batch, seg_batch, soft_tgt_batch) in enumerate(batch_loader(batch_size, dev_src, dev_tgt, dev_seg, dev_soft_tgt)):
             src_batch = src_batch.to(args.device)
             seg_batch = seg_batch.to(args.device)
             with torch.no_grad():
@@ -169,8 +167,8 @@ def main():
 
     train_features = np.array(train_features)
     np.save(args.train_features_path, train_features)
-    print("Acc. : {:.4f}".format(acc))
-    print("Marco F1 : {:.4f}".format(marco_f1))
+    args.logger.info("Acc. : {:.4f}".format(acc))
+    args.logger.info("Marco F1 : {:.4f}".format(marco_f1))
 
 
 if __name__ == "__main__":

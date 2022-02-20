@@ -7,13 +7,14 @@
   "layers_num": 12,
   "max_seq_length": 1024,
   "dropout": 0.1,
+  "data_processor": "bart",
   "embedding": "word_pos",
   "tgt_embedding": "word_pos",
   "share_embedding": true,
   "encoder": "transformer",
   "mask": "fully_visible",
   "decoder": "transformer",
-  "target": "bart",
+  "target": ["lm"],
   "tie_weights": true,
   "has_lmtarget_bias": true
 }

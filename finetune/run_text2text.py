@@ -1,5 +1,5 @@
 """
-This script provides an example to wrap UER for text-to-text fine-tuning.
+This script provides an example to wrap UER-py for text-to-text fine-tuning.
 """
 import sys
 import os
@@ -11,7 +11,8 @@ uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
 from uer.model_saver import save_model
-from uer.targets import Seq2seqTarget
+from uer.decoders import *
+from uer.targets import *
 from finetune.run_classifier import *
 
 
@@ -20,19 +21,36 @@ class Text2text(torch.nn.Module):
         super(Text2text, self).__init__()
         self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
         self.encoder = str2encoder[args.encoder](args)
-        self.target = Seq2seqTarget(args, len(args.tokenizer.vocab))
+        self.tgt_embedding = str2embedding[args.tgt_embedding](args, len(args.tokenizer.vocab))
+        self.decoder = str2decoder[args.decoder](args)
+        self.target = LmTarget(args, len(args.tokenizer.vocab))
 
-    def forward(self, src, tgt, seg):
-        tgt_in, tgt_out, _ = tgt
+    def encode(self, src, seg):
         emb = self.embedding(src, seg)
         memory_bank = self.encoder(emb, seg)
-        decoder_emb = self.target.embedding(tgt_in, None)
-        hidden = self.target.decoder(memory_bank, decoder_emb, (src,))
+        return memory_bank
+
+    def decode(self, src, memory_bank, tgt):
+        tgt_in, tgt_out, _ = tgt
+        decoder_emb = self.tgt_embedding(tgt_in, None)
+        hidden = self.decoder(memory_bank, decoder_emb, (src,))
         output = self.target.output_layer(hidden)
+        return output
+
+    def forward(self, src, tgt, seg, memory_bank=None, only_use_encoder=False):
+        if only_use_encoder:
+            return self.encode(src, seg)
+        if memory_bank is not None:
+            return self.decode(src, memory_bank, tgt)
+        tgt_in, tgt_out, _ = tgt
+        memory_bank = self.encode(src, seg)
+        output = self.decode(src, memory_bank, tgt)
         if tgt_out is None:
             return None, output
         else:
-            loss = self.target(memory_bank, tgt)[0]
+            decoder_emb = self.tgt_embedding(tgt_in, None)
+            hidden = self.decoder(memory_bank, decoder_emb, (seg,))
+            loss = self.target(hidden, tgt)[0]
             return loss, output
 
 def read_dataset(args, path):
@@ -54,12 +72,15 @@ def read_dataset(args, path):
             src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text) + [SEP_TOKEN])
             tgt_in = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(label) + [SEP_TOKEN])
             PAD_ID = args.tokenizer.convert_tokens_to_ids([PAD_TOKEN])[0]
-            tgt_out = tgt_in[1:] + [PAD_ID]
             seg = [1] * len(src)
 
             if len(src) > args.seq_length:
                 src = src[: args.seq_length]
                 seg = seg[: args.seq_length]
+            if len(tgt_in) > args.tgt_seq_length:
+                tgt_in = tgt_in[: args.tgt_seq_length]
+            tgt_out = tgt_in[1:] + [PAD_ID]
+            
             while len(src) < args.seq_length:
                 src.append(PAD_ID)
                 seg.append(0)
@@ -133,17 +154,17 @@ def evaluate(args, dataset):
 
         seg_batch = seg_batch.to(args.device)
 
-        for _ in range(args.tgt_seq_length):
+        with torch.no_grad():
+            memory_bank = args.model(src_batch, None, seg_batch, only_use_encoder=True)
 
+        for _ in range(args.tgt_seq_length):
             tgt_out_batch = tgt_in_batch
             with torch.no_grad():
-                _, outputs = args.model(src_batch, (tgt_in_batch, tgt_out_batch, src_batch), seg_batch)
+                outputs = args.model(src_batch, (tgt_in_batch, tgt_out_batch, src_batch), None, memory_bank=memory_bank)
 
-            tgt_in_batch = torch.cat([tgt_in_batch, torch.zeros(tgt_in_batch.size()[0],1, dtype = torch.long, device = args.device)], dim=1)
-            for j in range(len(outputs)):
-                next_token_logits = outputs[j][-1]
-                next_token = torch.argmax(next_token_logits)
-                tgt_in_batch[j][-1] = next_token
+            next_token_logits = outputs[:, -1]
+            next_tokens = torch.argmax(next_token_logits, dim=1).unsqueeze(1)
+            tgt_in_batch = torch.cat([tgt_in_batch, next_tokens], dim=1)
 
         for j in range(len(outputs)):
             sentence = " ".join([args.tokenizer.inv_vocab[token_id.item()] for token_id in tgt_in_batch[j][1:]])
@@ -173,7 +194,7 @@ def evaluate(args, dataset):
         if pred == gold:
             correct += 1
 
-    print("Acc. (Correct/Total): {:.4f} ({}/{}) ".format(correct / len(dataset), correct, len(dataset)))
+    args.logger.info("Acc. (Correct/Total): {:.4f} ({}/{}) ".format(correct / len(dataset), correct, len(dataset)))
     return correct / len(dataset)
 
 
@@ -210,24 +231,21 @@ def main():
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
 
+    # Get logger.
+    args.logger = init_logger(args)
+
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
 
     # Training phase.
     trainset = read_dataset(args, args.train_path)
-    random.shuffle(trainset)
     instances_num = len(trainset)
     batch_size = args.batch_size
 
-    src = torch.LongTensor([example[0] for example in trainset])
-    tgt_in = torch.LongTensor([example[1] for example in trainset])
-    tgt_out = torch.LongTensor([example[2] for example in trainset])
-    seg = torch.LongTensor([example[3] for example in trainset])
-
     args.train_steps = int(instances_num * args.epochs_num / batch_size) + 1
 
-    print("Batch size: ", batch_size)
-    print("The number of training instances:", instances_num)
+    args.logger.info("Batch size: {}".format(batch_size))
+    args.logger.info("The number of training instances: {}".format(instances_num))
 
     optimizer, scheduler = build_optimizer(args, model)
 
@@ -240,21 +258,27 @@ def main():
         args.amp = amp
 
     if torch.cuda.device_count() > 1:
-        print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
+        args.logger.info("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
     args.model = model
 
     total_loss, result, best_result = 0.0, 0.0, 0.0
 
-    print("Start training.")
+    args.logger.info("Start training.")
 
     for epoch in range(1, args.epochs_num + 1):
+        random.shuffle(trainset)
+        src = torch.LongTensor([example[0] for example in trainset])
+        tgt_in = torch.LongTensor([example[1] for example in trainset])
+        tgt_out = torch.LongTensor([example[2] for example in trainset])
+        seg = torch.LongTensor([example[3] for example in trainset])
+
         model.train()
         for i, (src_batch, tgt_in_batch, tgt_out_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt_in, tgt_out, seg)):
             loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_in_batch, tgt_out_batch, seg_batch)
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
+                args.logger.info("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
                 total_loss = 0.0
 
         result = evaluate(args, read_dataset(args, args.dev_path))
@@ -264,12 +288,12 @@ def main():
 
     # Evaluation phase.
     if args.test_path is not None:
-        print("Test set evaluation.")
+        args.logger.info("Test set evaluation.")
         if torch.cuda.device_count() > 1:
             args.model.module.load_state_dict(torch.load(args.output_model_path))
         else:
             args.model.load_state_dict(torch.load(args.output_model_path))
-        evaluate(args, read_dataset(args, args.test_path), True)
+        evaluate(args, read_dataset(args, args.test_path))
 
 
 if __name__ == "__main__":

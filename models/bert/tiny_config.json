@@ -7,8 +7,9 @@
   "layers_num": 2,
   "max_seq_length": 512,
   "dropout": 0.1,
+  "data_processor": "bert",
   "embedding": "word_pos_seg",
   "encoder": "transformer",
   "mask": "fully_visible",
-  "target": "bert"
+  "target": ["mlm", "sp"]
 }

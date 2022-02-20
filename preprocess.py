@@ -24,8 +24,8 @@ def main():
     parser.add_argument("--processes_num", type=int, default=1,
                         help="Split the whole dataset into `processes_num` parts, "
                              "and process them with `processes_num` processes.")
-    parser.add_argument("--target", choices=["bert", "lm", "mlm", "bilm", "albert", "seq2seq", "t5", "cls", "prefixlm", "gsg", "bart"], default="bert",
-                        help="The training target of the pretraining model.")
+    parser.add_argument("--data_processor", choices=["bert", "lm", "mlm", "bilm", "albert", "mt", "t5", "cls", "prefixlm", "gsg", "bart"], default="bert",
+                        help="The data processor of the pretraining model.")
     parser.add_argument("--docs_buffer_size", type=int, default=100000,
                         help="The buffer size of documents in memory, specific to targets that require negative sampling.")
     parser.add_argument("--seq_length", type=int, default=128, help="Sequence length of instances.")
@@ -59,11 +59,11 @@ def main():
 
     # Build tokenizer.
     tokenizer = str2tokenizer[args.tokenizer](args)
-    if args.target == "seq2seq":
+    if args.data_processor == "mt":
         args.tgt_tokenizer = str2tokenizer[args.tgt_tokenizer](args, False)
 
     # Build and save dataset.
-    dataset = str2dataset[args.target](args, tokenizer.vocab, tokenizer)
+    dataset = str2dataset[args.data_processor](args, tokenizer.vocab, tokenizer)
     dataset.build_and_save(args.processes_num)
 
 

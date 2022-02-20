@@ -22,12 +22,23 @@ def model_opts(parser):
                         help="Feed forward type, specific to transformer model.")
     parser.add_argument("--remove_transformer_bias", action="store_true",
                         help="Remove bias on transformer layers.")
+    parser.add_argument("--share_embedding", action="store_true",
+                        help="Shared embedding and target embedding parameters.")
     parser.add_argument("--layernorm", choices=["normal", "t5"], default="normal",
                         help="Layernorm type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
     parser.add_argument("--has_residual_attention", action="store_true", help="Add residual attention.")
+
+
+def log_opts(parser):
+    parser.add_argument("--log_path", type=str, default=None,
+                        help="Log file path, default no output file.")
+    parser.add_argument("--log_level", choices=["ERROR", "INFO", "DEBUG", "NOSET"], default="INFO",
+                        help="Console log level. Verbosity: ERROR < INFO < DEBUG < NOSET")
+    parser.add_argument("--log_file_level", choices=["ERROR", "INFO", "DEBUG", "NOSET"], default="INFO",
+                        help="Log file level. Verbosity: ERROR < INFO < DEBUG < NOSET")
 
 
 def optimization_opts(parser):
@@ -49,18 +60,19 @@ def optimization_opts(parser):
 
 
 def training_opts(parser):
-    parser.add_argument("--batch_size", type=int, default=32,                                                             
-                        help="Batch size.")                                                                               
-    parser.add_argument("--seq_length", type=int, default=128,                                                            
-                        help="Sequence length.")                                                                          
-    parser.add_argument("--dropout", type=float, default=0.1,                                                             
-                        help="Dropout.")                                                                                  
-    parser.add_argument("--epochs_num", type=int, default=3,                                                              
-                        help="Number of epochs.")                                                                         
-    parser.add_argument("--report_steps", type=int, default=100,                                                          
-                        help="Specific steps to print prompt.")                                                           
-    parser.add_argument("--seed", type=int, default=7,                                                                    
+    parser.add_argument("--batch_size", type=int, default=32,
+                        help="Batch size.")
+    parser.add_argument("--seq_length", type=int, default=128,
+                        help="Sequence length.")
+    parser.add_argument("--dropout", type=float, default=0.1,
+                        help="Dropout.")
+    parser.add_argument("--epochs_num", type=int, default=3,
+                        help="Number of epochs.")
+    parser.add_argument("--report_steps", type=int, default=100,
+                        help="Specific steps to print prompt.")
+    parser.add_argument("--seed", type=int, default=7,
                         help="Random seed.")
+    log_opts(parser)
 
 
 def finetune_opts(parser):
@@ -96,7 +108,7 @@ def infer_opts(parser):
                         help="Path of the testset.")
     parser.add_argument("--prediction_path", type=str, required=True,
                         help="Path of the prediction file.")
-    parser.add_argument("--config_path", default="models/bert/base_config.json", type=str,
+    parser.add_argument("--config_path", type=str, required=True,
                         help="Path of the config file.")
 
     # Model options.
@@ -110,7 +122,7 @@ def infer_opts(parser):
 
 
 def tokenizer_opts(parser):
-    parser.add_argument("--tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
+    parser.add_argument("--tokenizer", choices=["bert", "bpe", "char", "space", "xlmroberta"], default="bert",
                         help="Specify the tokenizer." 
                              "Original Google BERT uses bert tokenizer."
                              "Char tokenizer segments sentences into characters."
@@ -119,15 +131,19 @@ def tokenizer_opts(parser):
                              )
     parser.add_argument("--vocab_path", default=None, type=str,
                         help="Path of the vocabulary file.")
+    parser.add_argument("--merges_path", default=None, type=str,
+                        help="Path of the merges file.")
     parser.add_argument("--spm_model_path", default=None, type=str,
                         help="Path of the sentence piece model.")
 
 
 def tgt_tokenizer_opts(parser):
-    parser.add_argument("--tgt_tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
+    parser.add_argument("--tgt_tokenizer", choices=["bert", "bpe", "char", "space", "xlmroberta"], default="bert",
                         help="Specify the tokenizer for target side.")
     parser.add_argument("--tgt_vocab_path", default=None, type=str,
                         help="Path of the target vocabulary file.")
+    parser.add_argument("--tgt_merges_path", default=None, type=str,
+                        help="Path of the target merges file.")
     parser.add_argument("--tgt_spm_model_path", default=None, type=str,
                         help="Path of the target sentence piece model.")
 

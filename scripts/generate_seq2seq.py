@@ -1,14 +1,13 @@
 import sys
 import os
+import argparse
 import torch
 import torch.nn.functional as F
-import argparse
-import random
 
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, uer_dir)
 
-from uer.layers import *
+from uer.embeddings import *
 from uer.encoders import *
 from uer.targets import *
 from uer.utils.constants import *
@@ -58,7 +57,8 @@ if __name__ == '__main__':
                         help="Specify the tokenizer for target side.")
     parser.add_argument("--tgt_seq_length", type=int, default=128,
                         help="Sequence length.")
-    parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word",
+    parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"],
+                        default="word",
                         help="Target embedding type.")
     parser.add_argument("--decoder", choices=["transformer"], \
                                               default="transformer", help="Decoder type.")
@@ -101,5 +101,7 @@ if __name__ == '__main__':
             tgt_tensor = torch.cat([tgt_tensor, next_token.view(1, 1)], dim=1)
 
         f.write(line + "\n")
-        generated_sentence = "".join(args.tgt_tokenizer.convert_ids_to_tokens([token_id.item() for token_id in tgt_tensor[0]]))
+        generated_sentence = "".join(
+            args.tgt_tokenizer.convert_ids_to_tokens([token_id.item() for token_id in tgt_tensor[0]])
+        )
         f.write(generated_sentence)

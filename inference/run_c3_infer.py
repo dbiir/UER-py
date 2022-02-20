@@ -80,8 +80,7 @@ def main():
             with torch.no_grad():
                 _, logits = model(src_batch, None, seg_batch)
 
-                pred = torch.argmax(logits, dim=1)
-                pred = pred.cpu().numpy().tolist()
+                pred = (torch.argmax(logits, dim=1)).cpu().numpy().tolist()
                 for j in range(len(pred)):
                     output = {}
                     output["id"] = question_ids[index]

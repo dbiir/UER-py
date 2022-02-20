@@ -1,5 +1,5 @@
 """
-This script provides an example to wrap UER for classification.
+This script provides an example to wrap UER-py for classification.
 """
 import sys
 import os
@@ -12,7 +12,7 @@ import torch.nn as nn
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
-from uer.layers import *
+from uer.embeddings import *
 from uer.encoders import *
 from uer.targets import *
 from uer.utils.vocab import Vocab
@@ -21,6 +21,7 @@ from uer.utils import *
 from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
+from uer.utils.logging import init_logger
 from uer.model_saver import save_model
 from uer.opts import finetune_opts, tokenizer_opts
 from finetune.run_classifier import count_labels_num, build_optimizer
@@ -184,7 +185,7 @@ def train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_bat
 
     seg_a_batch = seg_a_batch.to(args.device)
     seg_b_batch = seg_b_batch.to(args.device)
-    
+
     loss, _ = model((src_a_batch, src_b_batch), tgt_batch, (seg_a_batch, seg_b_batch))
 
     if torch.cuda.device_count() > 1:
@@ -202,7 +203,7 @@ def train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_bat
     return loss
 
 
-def evaluate(args, dataset, print_confusion_matrix=False):
+def evaluate(args, dataset):
     src_a = torch.LongTensor([example[0][0] for example in dataset])
     src_b = torch.LongTensor([example[0][1] for example in dataset])
     tgt = torch.LongTensor([example[1] for example in dataset])
@@ -238,19 +239,18 @@ def evaluate(args, dataset, print_confusion_matrix=False):
             confusion[pred[j], gold[j]] += 1
         correct += torch.sum(pred == gold).item()
 
-    if print_confusion_matrix:
-        print("Confusion matrix:")
-        print(confusion)
-        print("Report precision, recall, and f1:")
+    args.logger.debug("Confusion matrix:")
+    args.logger.debug(confusion)
+    args.logger.debug("Report precision, recall, and f1:")
 
-        eps = 1e-9
-        for i in range(confusion.size()[0]):
-            p = confusion[i, i].item() / (confusion[i, :].sum().item() + eps)
-            r = confusion[i, i].item() / (confusion[:, i].sum().item() + eps)
-            f1 = 2 * p * r / (p + r + eps)
-            print("Label {}: {:.3f}, {:.3f}, {:.3f}".format(i, p, r, f1))
+    eps = 1e-9
+    for i in range(confusion.size()[0]):
+        p = confusion[i, i].item() / (confusion[i, :].sum().item() + eps)
+        r = confusion[i, i].item() / (confusion[:, i].sum().item() + eps)
+        f1 = 2 * p * r / (p + r + eps)
+        args.logger.debug("Label {}: {:.3f}, {:.3f}, {:.3f}".format(i, p, r, f1))
 
-    print("Acc. (Correct/Total): {:.4f} ({}/{}) ".format(correct / len(dataset), correct, len(dataset)))
+    args.logger.info("Acc. (Correct/Total): {:.4f} ({}/{}) ".format(correct / len(dataset), correct, len(dataset)))
     return correct / len(dataset), confusion
 
 
@@ -282,25 +282,21 @@ def main():
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
 
+    # Get logger.
+    args.logger = init_logger(args)
+
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(args.device)
 
     # Training phase.
     trainset = read_dataset(args, args.train_path)
-    random.shuffle(trainset)
     instances_num = len(trainset)
     batch_size = args.batch_size
 
-    src_a = torch.LongTensor([example[0][0] for example in trainset])
-    src_b = torch.LongTensor([example[0][1] for example in trainset])
-    tgt = torch.LongTensor([example[1] for example in trainset])
-    seg_a = torch.LongTensor([example[2][0] for example in trainset])
-    seg_b = torch.LongTensor([example[2][1] for example in trainset])
-
     args.train_steps = int(instances_num * args.epochs_num / batch_size) + 1
 
-    print("Batch size: ", batch_size)
-    print("The number of training instances:", instances_num)
+    args.logger.info("Batch size: {}".format(batch_size))
+    args.logger.info("The number of training instances: {}".format(instances_num))
 
     optimizer, scheduler = build_optimizer(args, model)
 
@@ -313,21 +309,28 @@ def main():
         args.amp = amp
 
     if torch.cuda.device_count() > 1:
-        print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
+        args.logger.info("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
     args.model = model
 
     total_loss, result, best_result = 0.0, 0.0, 0.0
 
-    print("Start training.")
+    args.logger.info("Start training.")
 
     for epoch in range(1, args.epochs_num + 1):
+        random.shuffle(trainset)
+        src_a = torch.LongTensor([example[0][0] for example in trainset])
+        src_b = torch.LongTensor([example[0][1] for example in trainset])
+        tgt = torch.LongTensor([example[1] for example in trainset])
+        seg_a = torch.LongTensor([example[2][0] for example in trainset])
+        seg_b = torch.LongTensor([example[2][1] for example in trainset])
+
         model.train()
         for i, (src_batch, tgt_batch, seg_batch) in enumerate(batch_loader(batch_size, (src_a, src_b), tgt, (seg_a, seg_b))):
             loss = train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch)
             total_loss += loss.item()
             if (i + 1) % args.report_steps == 0:
-                print("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
+                args.logger.info("Epoch id: {}, Training steps: {}, Avg loss: {:.3f}".format(epoch, i + 1, total_loss / args.report_steps))
                 total_loss = 0.0
 
         result = evaluate(args, read_dataset(args, args.dev_path))
@@ -337,12 +340,12 @@ def main():
 
     # Evaluation phase.
     if args.test_path is not None:
-        print("Test set evaluation.")
+        args.logger.info("Test set evaluation.")
         if torch.cuda.device_count() > 1:
             args.model.module.load_state_dict(torch.load(args.output_model_path))
         else:
             args.model.load_state_dict(torch.load(args.output_model_path))
-        evaluate(args, read_dataset(args, args.test_path), True)
+        evaluate(args, read_dataset(args, args.test_path))
 
 
 if __name__ == "__main__":

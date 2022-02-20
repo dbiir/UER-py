@@ -4,6 +4,9 @@ from uer.utils.misc import *
 
 
 class RnnEncoder(nn.Module):
+    """
+    RNN encoder.
+    """
     def __init__(self, args):
         super(RnnEncoder, self).__init__()
 
@@ -38,6 +41,9 @@ class RnnEncoder(nn.Module):
 
 
 class LstmEncoder(RnnEncoder):
+    """
+    LSTM encoder.
+    """
     def __init__(self, args):
         super(LstmEncoder, self).__init__(args)
 
@@ -58,6 +64,9 @@ class LstmEncoder(RnnEncoder):
 
 
 class GruEncoder(RnnEncoder):
+    """
+    GRU encoder.
+    """
     def __init__(self, args):
         super(GruEncoder, self).__init__(args)
 
@@ -70,6 +79,9 @@ class GruEncoder(RnnEncoder):
 
 
 class BirnnEncoder(nn.Module):
+    """
+    Bi-directional RNN encoder.
+    """
     def __init__(self, args):
         super(BirnnEncoder, self).__init__()
 
@@ -112,6 +124,9 @@ class BirnnEncoder(nn.Module):
 
 
 class BilstmEncoder(BirnnEncoder):
+    """
+     Bi-directional LSTM encoder.
+     """
     def __init__(self, args):
         super(BilstmEncoder, self).__init__(args)
 
@@ -133,6 +148,9 @@ class BilstmEncoder(BirnnEncoder):
 
 
 class BigruEncoder(BirnnEncoder):
+    """
+     Bi-directional GRU encoder.
+     """
     def __init__(self, args):
         super(BigruEncoder, self).__init__(args)
 

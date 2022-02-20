@@ -30,7 +30,6 @@ class MlmTarget(nn.Module):
         self.softmax = nn.LogSoftmax(dim=-1)
 
         self.criterion = nn.NLLLoss()
-        #self.criterion = nn.CrossEntropyLoss()
 
     def mlm(self, memory_bank, tgt_mlm):
         # Masked language modeling (MLM) with full softmax prediction.
@@ -53,7 +52,7 @@ class MlmTarget(nn.Module):
         loss_mlm = self.criterion(output_mlm, tgt_mlm)
         return loss_mlm, correct_mlm, denominator
 
-    def forward(self, memory_bank, tgt):
+    def forward(self, memory_bank, tgt, seg):
         """
         Args:
             memory_bank: [batch_size x seq_length x hidden_size]

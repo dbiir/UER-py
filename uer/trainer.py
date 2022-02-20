@@ -6,6 +6,7 @@ from torch.nn.parallel import DistributedDataParallel
 from uer.model_loader import load_model
 from uer.model_saver import save_model
 from uer.model_builder import build_model
+from uer.utils.logging import init_logger
 from uer.utils.optimizers import *
 from uer.utils import *
 from uer.utils.vocab import Vocab
@@ -16,7 +17,7 @@ def train_and_validate(args):
     set_seed(args.seed)
 
     # Load vocabulary.
-    if args.target == "seq2seq":
+    if args.data_processor == "mt":
         args.tgt_tokenizer = str2tokenizer[args.tgt_tokenizer](args, is_src=False)
         args.tgt_vocab = args.tgt_tokenizer.vocab
 
@@ -76,6 +77,7 @@ class Trainer(object):
         self.dist_train = args.dist_train
         self.batch_size = args.batch_size
         self.world_size = args.world_size
+        self.logger = args.logger
 
     def forward_propagation(self, batch, model):
 
@@ -152,7 +154,7 @@ class MlmTrainer(Trainer):
         done_tokens = self.batch_size * self.seq_length * self.report_steps
         if self.dist_train:
             done_tokens *= self.world_size
-        print("| {:8d}/{:8d} steps"
+        self.logger.info("| {:8d}/{:8d} steps"
               "| {:8.2f} tokens/s"
               "| loss {:7.2f}"
               "| acc: {:3.3f}".format(
@@ -180,8 +182,10 @@ class BertTrainer(Trainer):
 
     def forward_propagation(self, batch, model):
         src, tgt_mlm, tgt_sp, seg = batch
-        loss_info = model(src, (tgt_mlm, tgt_sp), seg)
-        loss_mlm, loss_sp, correct_mlm, correct_sp, denominator = loss_info
+        tgt = {"mlm": tgt_mlm, "sp": tgt_sp}
+        loss_info = model(src, tgt, seg)
+        loss_mlm, correct_mlm, denominator = loss_info["mlm"]
+        loss_sp, correct_sp = loss_info["sp"]
         loss = loss_mlm + loss_sp
         self.total_loss += loss.item()
         self.total_loss_mlm += loss_mlm.item()
@@ -199,7 +203,7 @@ class BertTrainer(Trainer):
         if self.dist_train:
             done_tokens *= self.world_size
 
-        print("| {:8d}/{:8d} steps"
+        self.logger.info("| {:8d}/{:8d} steps"
               "| {:8.2f} tokens/s"
               "| loss {:7.2f}"
               "| loss_mlm: {:3.3f}"
@@ -253,7 +257,7 @@ class BilmTrainer(Trainer):
         done_tokens = self.batch_size * self.seq_length * self.report_steps
         if self.dist_train:
             done_tokens *= self.world_size
-        print("| {:8d}/{:8d} steps"
+        self.logger.info("| {:8d}/{:8d} steps"
               "| {:8.2f} tokens/s"
               "| loss {:7.2f}"
               "| loss_forward {:3.3f}"
@@ -293,7 +297,7 @@ class ClsTrainer(Trainer):
         done_tokens = self.batch_size * self.seq_length * self.report_steps
         if self.dist_train:
             done_tokens *= self.world_size
-        print("| {:8d}/{:8d} steps"
+        self.logger.info("| {:8d}/{:8d} steps"
               "| {:8.2f} tokens/s"
               "| loss {:7.2f}"
               "| acc: {:3.3f}".format(
@@ -308,15 +312,16 @@ class ClsTrainer(Trainer):
         self.total_instances = 0.0
 
 
-class Seq2seqTrainer(Trainer):
+class MtTrainer(Trainer):
     def __init__(self, args):
-        super(Seq2seqTrainer, self).__init__(args)
+        super(MtTrainer, self).__init__(args)
         self.total_correct = 0.0
         self.total_denominator = 0.0
 
     def forward_propagation(self, batch, model):
         src, tgt_in, tgt_out, seg = batch
-        loss_info = model(src, (tgt_in, tgt_out, seg), seg)
+        tgt_seg = None
+        loss_info = model(src, tgt_out, seg, tgt_in, tgt_seg)
         loss, correct, denominator = loss_info
         self.total_loss += loss.item()
         self.total_correct += correct.item()
@@ -331,7 +336,7 @@ class Seq2seqTrainer(Trainer):
         if self.dist_train:
             done_tokens *= self.world_size
 
-        print("| {:8d}/{:8d} steps"
+        self.logger.info("| {:8d}/{:8d} steps"
               "| {:8.2f} tokens/s"
               "| loss {:7.2f}"
               "| acc: {:3.3f}".format(
@@ -346,15 +351,15 @@ class Seq2seqTrainer(Trainer):
         self.total_denominator = 0.0
 
 
-class T5Trainer(Seq2seqTrainer):
+class T5Trainer(MtTrainer):
     pass
 
 
-class GsgTrainer(Seq2seqTrainer):
+class GsgTrainer(MtTrainer):
     pass
 
 
-class BartTrainer(Seq2seqTrainer):
+class BartTrainer(MtTrainer):
     pass
 
 
@@ -364,7 +369,7 @@ class PrefixlmTrainer(MlmTrainer):
 
 str2trainer = {"bert": BertTrainer, "mlm": MlmTrainer, "lm": LmTrainer,
                "albert": AlbertTrainer, "bilm": BilmTrainer, "cls": ClsTrainer,
-               "seq2seq": Seq2seqTrainer, "t5": T5Trainer, "gsg": GsgTrainer,
+               "mt": MtTrainer, "t5": T5Trainer, "gsg": GsgTrainer,
                "bart": BartTrainer, "prefixlm": PrefixlmTrainer}
 
 
@@ -376,6 +381,9 @@ def worker(proc_id, gpu_ranks, args, model):
         gpu_ranks: List of ranks of each process.
     """
     set_seed(args.seed)
+
+    # Get logger
+    args.logger = init_logger(args)
 
     if args.deepspeed:
         import deepspeed
@@ -393,9 +401,9 @@ def worker(proc_id, gpu_ranks, args, model):
         gpu_id = None
 
     if args.dist_train:
-        train_loader = str2dataloader[args.target](args, args.dataset_path, args.batch_size, rank, args.world_size, True)
+        train_loader = str2dataloader[args.data_processor](args, args.dataset_path, args.batch_size, rank, args.world_size, True)
     else:
-        train_loader = str2dataloader[args.target](args, args.dataset_path, args.batch_size, 0, 1, True)
+        train_loader = str2dataloader[args.data_processor](args, args.dataset_path, args.batch_size, 0, 1, True)
 
     # Build optimizer.
     param_optimizer = list(model.named_parameters())
@@ -417,25 +425,12 @@ def worker(proc_id, gpu_ranks, args, model):
         custom_scheduler = str2scheduler[args.scheduler](custom_optimizer, args.total_steps*args.warmup, args.total_steps)
 
     if args.deepspeed:
-        optimizer = None
-        scheduler = None
-
-        # IF User NOT defined optimezer in deepspeed config,
-        # Then use Self Defined Optimizer
-        if "optimizer" not in args.deepspeed_config_param:
-            optimizer = custom_optimizer
-            if args.local_rank == 0:
-                print("Use Custum Optimizer", optimizer)
-        if "scheduler" not in args.deepspeed_config_param:
-            scheduler = custom_scheduler
-            if args.local_rank == 0:
-                print("Use Custom LR Schedule", scheduler)
         model, optimizer, _, scheduler = deepspeed.initialize(
                                                     model=model,
                                                     model_parameters=optimizer_grouped_parameters,
                                                     args=args,
-                                                    optimizer=optimizer,
-                                                    lr_scheduler=scheduler,
+                                                    optimizer=custom_optimizer,
+                                                    lr_scheduler=custom_scheduler,
                                                     mpu=None,
                                                     dist_init_required=False)
     else:
@@ -458,9 +453,9 @@ def worker(proc_id, gpu_ranks, args, model):
                                     world_size=args.world_size,
                                     rank=rank)
             model = DistributedDataParallel(model, device_ids=[gpu_id], find_unused_parameters=True)
-            print("Worker %d is training ... " % rank)
+            args.logger.info("Worker %d is training ... " % rank)
         else:
-            print("Worker is training ...")
+            args.logger.info("Worker is training ...")
 
-    trainer = str2trainer[args.target](args)
+    trainer = str2trainer[args.data_processor](args)
     trainer.train(args, gpu_id, rank, train_loader, model, optimizer, scheduler)

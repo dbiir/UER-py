@@ -4,5 +4,11 @@
   "layers_num": 9,
   "kernel_size": 4,
   "block_size": 2,
-  "dropout": 0.1
+  "max_seq_length": 1024,
+  "dropout": 0.1,
+  "data_processor": "lm",
+  "embedding": "word",
+  "remove_embedding_layernorm": true,
+  "encoder": "gatedcnn",
+  "target": ["lm"]
 }
