@@ -3,8 +3,8 @@ import collections
 import torch
 
 
-def convert_bert_transformer_encoder_from_huggingface_to_uer(input_model, output_model, args):
-    for i in range(args.layers_num):
+def convert_bert_transformer_encoder_from_huggingface_to_uer(input_model, output_model, layers_num):
+    for i in range(layers_num):
         output_model["encoder.transformer." + str(i) + ".self_attn.linear_layers.0.weight"] = \
             input_model["bert.encoder.layer." + str(i) + ".attention.self.query.weight"]
         output_model["encoder.transformer." + str(i) + ".self_attn.linear_layers.0.bias"] = \
@@ -22,9 +22,9 @@ def convert_bert_transformer_encoder_from_huggingface_to_uer(input_model, output
         output_model["encoder.transformer." + str(i) + ".self_attn.final_linear.bias"] = \
             input_model["bert.encoder.layer." + str(i) + ".attention.output.dense.bias"]
         output_model["encoder.transformer." + str(i) + ".layer_norm_1.gamma"] = \
-            input_model["bert.encoder.layer." + str(i) + ".attention.output.LayerNorm."+args.gamma]
+            input_model["bert.encoder.layer." + str(i) + ".attention.output.LayerNorm.weight"]
         output_model["encoder.transformer." + str(i) + ".layer_norm_1.beta"] = \
-            input_model["bert.encoder.layer." + str(i) + ".attention.output.LayerNorm."+args.beta]
+            input_model["bert.encoder.layer." + str(i) + ".attention.output.LayerNorm.bias"]
         output_model["encoder.transformer." + str(i) + ".feed_forward.linear_1.weight"] = \
             input_model["bert.encoder.layer." + str(i) + ".intermediate.dense.weight"]
         output_model["encoder.transformer." + str(i) + ".feed_forward.linear_1.bias"] = \
@@ -34,9 +34,9 @@ def convert_bert_transformer_encoder_from_huggingface_to_uer(input_model, output
         output_model["encoder.transformer." + str(i) + ".feed_forward.linear_2.bias"] = \
             input_model["bert.encoder.layer." + str(i) + ".output.dense.bias"]
         output_model["encoder.transformer." + str(i) + ".layer_norm_2.gamma"] = \
-            input_model["bert.encoder.layer." + str(i) + ".output.LayerNorm."+args.gamma]
+            input_model["bert.encoder.layer." + str(i) + ".output.LayerNorm.weight"]
         output_model["encoder.transformer." + str(i) + ".layer_norm_2.beta"] = \
-            input_model["bert.encoder.layer." + str(i) + ".output.LayerNorm."+args.beta]
+            input_model["bert.encoder.layer." + str(i) + ".output.LayerNorm.bias"]
 
 
 def main():
@@ -46,7 +46,7 @@ def main():
     parser.add_argument("--output_model_path", type=str, default="models/output_model.bin",
                         help=".")
     parser.add_argument("--layers_num", type=int, default=12, help=".")
-    parser.add_argument("--target", choices=["bert", "mlm"], default="bert",
+    parser.add_argument("--type", choices=["bert", "mlm"], default="bert",
                         help="The training target of the pretraining model.")
 
     args = parser.parse_args()
@@ -54,28 +54,26 @@ def main():
     input_model = torch.load(args.input_model_path, map_location="cpu")
 
     output_model = collections.OrderedDict()
-    args.gamma, args.beta = "weight", "bias"
-    if "bert.embeddings.LayerNorm.gamma" in input_model:
-        args.gamma, args.beta = "gamma", "beta"
+
     output_model["embedding.word_embedding.weight"] = input_model["bert.embeddings.word_embeddings.weight"]
     output_model["embedding.position_embedding.weight"] = input_model["bert.embeddings.position_embeddings.weight"]
     output_model["embedding.segment_embedding.weight"] = \
         torch.cat((torch.Tensor([[0]*input_model["bert.embeddings.token_type_embeddings.weight"].size()[1]]),
                    input_model["bert.embeddings.token_type_embeddings.weight"]), dim=0)
-    output_model["embedding.layer_norm.gamma"] = input_model["bert.embeddings.LayerNorm."+args.gamma]
-    output_model["embedding.layer_norm.beta"] = input_model["bert.embeddings.LayerNorm."+args.beta]
+    output_model["embedding.layer_norm.gamma"] = input_model["bert.embeddings.LayerNorm.weight"]
+    output_model["embedding.layer_norm.beta"] = input_model["bert.embeddings.LayerNorm.bias"]
 
-    convert_bert_transformer_encoder_from_huggingface_to_uer(input_model, output_model, args)
+    convert_bert_transformer_encoder_from_huggingface_to_uer(input_model, output_model, args.layers_num)
 
-    if args.target == "bert":
+    if args.type == "bert":
         output_model["target.sp_linear_1.weight"] = input_model["bert.pooler.dense.weight"]
         output_model["target.sp_linear_1.bias"] = input_model["bert.pooler.dense.bias"]
         output_model["target.sp_linear_2.weight"] = input_model["cls.seq_relationship.weight"]
         output_model["target.sp_linear_2.bias"] = input_model["cls.seq_relationship.bias"]
     output_model["target.mlm_linear_1.weight"] = input_model["cls.predictions.transform.dense.weight"]
     output_model["target.mlm_linear_1.bias"] = input_model["cls.predictions.transform.dense.bias"]
-    output_model["target.layer_norm.gamma"] = input_model["cls.predictions.transform.LayerNorm."+args.gamma]
-    output_model["target.layer_norm.beta"] = input_model["cls.predictions.transform.LayerNorm."+args.beta]
+    output_model["target.layer_norm.gamma"] = input_model["cls.predictions.transform.LayerNorm.weight"]
+    output_model["target.layer_norm.beta"] = input_model["cls.predictions.transform.LayerNorm.bias"]
     output_model["target.mlm_linear_2.weight"] = input_model["cls.predictions.decoder.weight"]
     output_model["target.mlm_linear_2.bias"] = input_model["cls.predictions.bias"]
 
