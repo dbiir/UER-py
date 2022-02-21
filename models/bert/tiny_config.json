@@ -11,5 +11,6 @@
   "embedding": "word_pos_seg",
   "encoder": "transformer",
   "mask": "fully_visible",
-  "target": ["mlm", "sp"]
+  "target": ["mlm", "sp"],
+  "tie_weights": true
 }
