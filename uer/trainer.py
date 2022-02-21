@@ -10,6 +10,7 @@ from uer.utils.logging import init_logger
 from uer.utils.optimizers import *
 from uer.utils import *
 from uer.utils.vocab import Vocab
+from uer.utils.logging import init_logger
 from uer.utils.seed import set_seed
 
 
