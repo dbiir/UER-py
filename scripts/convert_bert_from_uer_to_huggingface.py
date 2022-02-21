@@ -46,7 +46,7 @@ def main():
     parser.add_argument("--output_model_path", type=str, default="models/output_model.bin",
                         help=".")
     parser.add_argument("--layers_num", type=int, default=12, help=".")
-    parser.add_argument("--target", choices=["bert", "mlm"], default="bert",
+    parser.add_argument("--type", choices=["bert", "mlm"], default="bert",
                         help="The training target of the pretraining model.")
 
     args = parser.parse_args()
@@ -63,7 +63,7 @@ def main():
 
     convert_bert_transformer_encoder_from_uer_to_huggingface(input_model, output_model, args.layers_num)
 
-    if args.target == "bert":
+    if args.type == "bert":
         output_model["bert.pooler.dense.weight"] = input_model["target.sp_linear_1.weight"]
         output_model["bert.pooler.dense.bias"] = input_model["target.sp_linear_1.bias"]
         output_model["cls.seq_relationship.weight"] = input_model["target.sp_linear_2.weight"]
