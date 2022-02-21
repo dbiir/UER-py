@@ -53,7 +53,7 @@ def main():
     args.tokenizer = str2tokenizer[args.tokenizer](args)
 
     # Get logger.
-    args.logger = get_logger(args)
+    args.logger = init_logger(args)
 
     best_acc = 0
     config = {}
