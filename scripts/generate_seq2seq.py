@@ -7,7 +7,7 @@ import torch.nn.functional as F
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, uer_dir)
 
-from uer.layers import *
+from uer.embeddings import *
 from uer.encoders import *
 from uer.targets import *
 from uer.utils.constants import *
@@ -23,13 +23,15 @@ class GenerateSeq2seq(torch.nn.Module):
         super(GenerateSeq2seq, self).__init__()
         self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
         self.encoder = str2encoder[args.encoder](args)
-        self.target = str2target[args.target](args, len(args.tgt_tokenizer.vocab))
+        self.tgt_embedding = str2embedding[args.tgt_embedding](args, len(args.tgt_tokenizer.vocab))
+        self.decoder = str2decoder[args.decoder](args)
+        self.target = LmTarget(args, len(args.tgt_tokenizer.vocab))
 
     def forward(self, src, seg, tgt):
         emb = self.embedding(src, seg)
         memory_bank = self.encoder(emb, seg)
-        emb = self.target.embedding(tgt, None)
-        hidden = self.target.decoder(memory_bank, emb, (src,))
+        emb = self.tgt_embedding(tgt, None)
+        hidden = self.decoder(memory_bank, emb, (src,))
         output = self.target.output_layer(hidden)
         return output
 
@@ -39,8 +41,8 @@ if __name__ == '__main__':
 
     infer_opts(parser)
 
-    parser.add_argument("--target", choices=["seq2seq", "t5"], default="t5",
-                        help="The training target of the pretraining model.")
+    parser.add_argument("--use_tgt_tokenizer", action="store_true",
+                        help="Use tgt tokenizer for machine translation task.")
     parser.add_argument("--share_relative_position_embedding", action="store_true",
                         help="Add bias on output_layer for lm target.")
     parser.add_argument("--has_lmtarget_bias", action="store_true",
@@ -70,7 +72,7 @@ if __name__ == '__main__':
 
     args.tokenizer = str2tokenizer[args.tokenizer](args)
 
-    if args.target == "seq2seq":
+    if args.machine_translation:
         args.vocab_path = args.tgt_vocab_path
         args.tgt_tokenizer = str2tokenizer[args.tgt_tokenizer](args)
         args.tgt_vocab = args.tgt_tokenizer.vocab
