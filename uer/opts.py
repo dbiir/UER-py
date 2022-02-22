@@ -5,12 +5,11 @@ def model_opts(parser):
                         help="Max sequence length for word embedding.")
     parser.add_argument("--relative_position_embedding", action="store_true",
                         help="Use relative position embedding.")
-    parser.add_argument("--relative_attention_buckets_num", type=int, default=32,
-                        help="Buckets num of relative position embedding.")
+    parser.add_argument("--share_embedding", action="store_true",
+                        help="Shared embedding and target embedding parameters.")
     parser.add_argument("--remove_embedding_layernorm", action="store_true",
                         help="Remove layernorm on embedding.")
-    parser.add_argument("--remove_attention_scale", action="store_true",
-                        help="Remove attention scale.")
+    parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
     parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", "birnn",
                                               "bilstm", "bigru", "gatedcnn", "dual"],
                         default="transformer", help="Encoder type.")
@@ -20,14 +19,15 @@ def model_opts(parser):
                         help="Layernorm positioning.")
     parser.add_argument("--feed_forward", choices=["dense", "gated"], default="dense",
                         help="Feed forward type, specific to transformer model.")
+    parser.add_argument("--relative_attention_buckets_num", type=int, default=32,
+                        help="Buckets num of relative position embedding.")
+    parser.add_argument("--remove_attention_scale", action="store_true",
+                        help="Remove attention scale.")
     parser.add_argument("--remove_transformer_bias", action="store_true",
                         help="Remove bias on transformer layers.")
-    parser.add_argument("--share_embedding", action="store_true",
-                        help="Shared embedding and target embedding parameters.")
     parser.add_argument("--layernorm", choices=["normal", "t5"], default="normal",
                         help="Layernorm type.")
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
-    parser.add_argument("--factorized_embedding_parameterization", action="store_true", help="Factorized embedding parameterization.")
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
     parser.add_argument("--has_residual_attention", action="store_true", help="Add residual attention.")
 
