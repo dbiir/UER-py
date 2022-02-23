@@ -41,8 +41,6 @@ if __name__ == '__main__':
 
     infer_opts(parser)
 
-    parser.add_argument("--use_tgt_tokenizer", action="store_true",
-                        help="Use tgt tokenizer for machine translation task.")
     parser.add_argument("--share_relative_position_embedding", action="store_true",
                         help="Add bias on output_layer for lm target.")
     parser.add_argument("--has_lmtarget_bias", action="store_true",
@@ -55,7 +53,7 @@ if __name__ == '__main__':
     parser.add_argument("--tgt_vocab_path", type=str,
                         help="Path of the vocabulary file.")
     tokenizer_opts(parser)
-    parser.add_argument("--tgt_tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
+    parser.add_argument("--tgt_tokenizer", choices=[None, "bert", "char", "space", "xlmroberta"], default=None,
                         help="Specify the tokenizer for target side.")
     parser.add_argument("--tgt_seq_length", type=int, default=128,
                         help="Sequence length.")
@@ -72,12 +70,12 @@ if __name__ == '__main__':
 
     args.tokenizer = str2tokenizer[args.tokenizer](args)
 
-    if args.machine_translation:
+    if args.tgt_tokenizer == None:
+        args.tgt_tokenizer = args.tokenizer
+    else:
         args.vocab_path = args.tgt_vocab_path
         args.tgt_tokenizer = str2tokenizer[args.tgt_tokenizer](args)
         args.tgt_vocab = args.tgt_tokenizer.vocab
-    else:
-        args.tgt_tokenizer = args.tokenizer
 
     model = GenerateSeq2seq(args)
     model = load_model(model, args.load_model_path)
