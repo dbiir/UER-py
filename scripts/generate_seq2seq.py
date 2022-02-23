@@ -23,13 +23,15 @@ class GenerateSeq2seq(torch.nn.Module):
         super(GenerateSeq2seq, self).__init__()
         self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
         self.encoder = str2encoder[args.encoder](args)
-        self.target = str2target[args.target](args, len(args.tgt_tokenizer.vocab))
+        self.tgt_embedding = str2embedding[args.tgt_embedding](args, len(args.tgt_tokenizer.vocab))
+        self.decoder = str2decoder[args.decoder](args)
+        self.target = LmTarget(args, len(args.tgt_tokenizer.vocab))
 
     def forward(self, src, seg, tgt):
         emb = self.embedding(src, seg)
         memory_bank = self.encoder(emb, seg)
-        emb = self.target.embedding(tgt, None)
-        hidden = self.target.decoder(memory_bank, emb, (src,))
+        emb = self.tgt_embedding(tgt, None)
+        hidden = self.decoder(memory_bank, emb, (src,))
         output = self.target.output_layer(hidden)
         return output
 
@@ -39,8 +41,6 @@ if __name__ == '__main__':
 
     infer_opts(parser)
 
-    parser.add_argument("--target", choices=["seq2seq", "t5"], default="t5",
-                        help="The training target of the pretraining model.")
     parser.add_argument("--share_relative_position_embedding", action="store_true",
                         help="Add bias on output_layer for lm target.")
     parser.add_argument("--has_lmtarget_bias", action="store_true",
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     parser.add_argument("--tgt_vocab_path", type=str,
                         help="Path of the vocabulary file.")
     tokenizer_opts(parser)
-    parser.add_argument("--tgt_tokenizer", choices=["bert", "char", "space", "xlmroberta"], default="bert",
+    parser.add_argument("--tgt_tokenizer", choices=[None, "bert", "char", "space", "xlmroberta"], default=None,
                         help="Specify the tokenizer for target side.")
     parser.add_argument("--tgt_seq_length", type=int, default=128,
                         help="Sequence length.")
@@ -70,12 +70,12 @@ if __name__ == '__main__':
 
     args.tokenizer = str2tokenizer[args.tokenizer](args)
 
-    if args.target == "seq2seq":
+    if args.tgt_tokenizer == None:
+        args.tgt_tokenizer = args.tokenizer
+    else:
         args.vocab_path = args.tgt_vocab_path
         args.tgt_tokenizer = str2tokenizer[args.tgt_tokenizer](args)
         args.tgt_vocab = args.tgt_tokenizer.vocab
-    else:
-        args.tgt_tokenizer = args.tokenizer
 
     model = GenerateSeq2seq(args)
     model = load_model(model, args.load_model_path)
