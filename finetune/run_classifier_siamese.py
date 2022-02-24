@@ -1,5 +1,5 @@
 """
-This script provides an example to wrap UER-py for classification.
+This script provides an example to wrap UER-py for classification with siamese network.
 """
 import sys
 import os

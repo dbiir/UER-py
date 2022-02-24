@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     infer_opts(parser)
 
-    parser.add_argument("--target", choices=["lm"], default="lm",
+    parser.add_argument("--target", choices=["lm"], default="lm", nargs='+',
                         help="The training target of the pretraining model.")
     parser.add_argument("--has_lmtarget_bias", action="store_true",
                         help="Add bias on output_layer for lm target.")

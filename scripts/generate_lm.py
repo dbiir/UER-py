@@ -26,7 +26,7 @@ class GenerateLm(torch.nn.Module):
         super(GenerateLm, self).__init__()
         self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
         self.encoder = str2encoder[args.encoder](args)
-        self.target = str2target[args.target](args, len(args.tokenizer.vocab))
+        self.target = str2target[args.target[0]](args, len(args.tokenizer.vocab))
 
     def forward(self, src, seg):
         emb = self.embedding(src, seg)
@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
     infer_opts(parser)
 
-    parser.add_argument("--target", choices=["lm"], default="lm",
+    parser.add_argument("--target", choices=["lm"], default="lm", nargs='+',
                         help="The training target of the pretraining model.")
     parser.add_argument("--has_lmtarget_bias", action="store_true",
                         help="Add bias on output_layer for lm target.")

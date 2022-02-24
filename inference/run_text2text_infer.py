@@ -1,5 +1,5 @@
 """
-This script provides an example to wrap UER for text-to-text inference.
+This script provides an example to wrap UER-py for text-to-text inference.
 """
 import sys
 import os
