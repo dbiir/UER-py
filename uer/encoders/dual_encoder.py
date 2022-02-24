@@ -9,18 +9,17 @@ class DualEncoder(nn.Module):
     """
     def __init__(self, args):
         super(DualEncoder, self).__init__()
-        import uer.encoders
-        str2encoder = {name: obj for name, obj in inspect.getmembers(uer.encoders)}
+        from uer.encoders import str2encoder
 
         stream_0_args = vars(args)
         stream_0_args.update(args.stream_0)
         stream_0_args = Namespace(**stream_0_args)
-        self.encoder_0 = str2encoder[args.encoder.capitalize() + "Encoder"](stream_0_args)
+        self.encoder_0 = str2encoder[stream_0_args.encoder](stream_0_args)
 
         stream_1_args = vars(args)
         stream_1_args.update(args.stream_1)
         stream_1_args = Namespace(**stream_1_args)
-        self.encoder_1 = str2encoder[args.encoder.capitalize() + "Encoder"](stream_1_args)
+        self.encoder_1 = str2encoder[stream_1_args.encoder](stream_1_args)
 
         if args.tie_weights:
             self.encoder_1 = self.encoder_0
