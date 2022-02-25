@@ -11,11 +11,9 @@ import numpy as np
 uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
-from uer.utils.vocab import Vocab
 from uer.utils.constants import *
 from uer.utils import * 
 from uer.utils.config import load_hyperparam
-from uer.utils.seed import set_seed
 from uer.model_loader import load_model
 from uer.opts import *
 from finetune.run_classifier import Classifier
@@ -100,7 +98,7 @@ def main():
             model = torch.nn.DataParallel(model)
 
         model.eval()
-        for i, (src_batch, seg_batch) in enumerate(batch_loader(batch_size, src, seg)):
+        for _, (src_batch, seg_batch) in enumerate(batch_loader(batch_size, src, seg)):
             src_batch = src_batch.to(device)
             seg_batch = seg_batch.to(device)
             with torch.no_grad():

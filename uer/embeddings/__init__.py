@@ -10,4 +10,3 @@ str2embedding = {"word": WordEmbedding, "word_pos": WordPosEmbedding, "word_pos_
 
 __all__ = ["WordEmbedding", "WordPosEmbedding", "WordPosSegEmbedding", "WordSinusoidalposEmbedding",
            "DualEmbedding", "str2embedding"]
-

@@ -129,7 +129,7 @@ def main():
         if args.output_prob:
             f.write("\t" + "prob")
         f.write("\n")
-        for i, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
+        for _, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
             src_batch = src_batch.to(device)
             tgt_batch = tgt_batch.to(device)
             seg_batch = seg_batch.to(device)
