@@ -49,7 +49,7 @@ def main():
                         help="Pooling type.")
     parser.add_argument("--target", choices=["sp", "lm", "mlm", "bilm", "cls"], default="mlm", nargs='+',
                         help="The training target of the pretraining model.")
-    parser.add_argument("--data_processor", choices=["bert", "lm", "mlm", "bilm", "albert", "mt", "t5", "cls", "prefixlm", "gsg", "bart"], default="bert",
+    parser.add_argument("--data_processor", choices=["bert", "lm", "mlm", "bilm", "albert", "mt", "t5", "cls", "prefixlm", "gsg", "bart", "cls_mlm"], default="bert",
                         help="The data processor of the pretraining model.")
     parser.add_argument("--tie_weights", action="store_true",
                         help="Tie the word embedding and softmax weights.")

@@ -9,11 +9,11 @@ str2tokenizer = {"char": CharTokenizer, "space": SpaceTokenizer, "bert": BertTok
 str2dataset = {"bert": BertDataset, "lm": LmDataset, "mlm": MlmDataset,
                "bilm": BilmDataset, "albert": AlbertDataset, "mt": MtDataset,
                "t5": T5Dataset, "gsg": GsgDataset, "bart": BartDataset,
-               "cls": ClsDataset, "prefixlm": PrefixlmDataset}
+               "cls": ClsDataset, "prefixlm": PrefixlmDataset, "cls_mlm": ClsMlmDataset}
 str2dataloader = {"bert": BertDataLoader, "lm": LmDataLoader, "mlm": MlmDataLoader,
                   "bilm": BilmDataLoader, "albert": AlbertDataLoader, "mt": MtDataLoader,
                   "t5": T5DataLoader, "gsg": GsgDataLoader, "bart": BartDataLoader,
-                  "cls": ClsDataLoader, "prefixlm": PrefixlmDataLoader}
+                  "cls": ClsDataLoader, "prefixlm": PrefixlmDataLoader, "cls_mlm": ClsMlmDataLoader}
 
 str2act = {"gelu": gelu, "gelu_fast": gelu_fast, "relu": relu, "silu": silu, "linear": linear}
 
@@ -29,10 +29,10 @@ str2adv = {"fgm": FGM, "pgd": PGD}
 __all__ = ["CharTokenizer", "SpaceTokenizer", "BertTokenizer", "BPETokenizer", "XLMRobertaTokenizer", "str2tokenizer",
            "BertDataset", "LmDataset", "MlmDataset", "BilmDataset",
            "AlbertDataset", "MtDataset", "T5Dataset", "GsgDataset",
-           "BartDataset", "ClsDataset", "PrefixlmDataset", "str2dataset",
+           "BartDataset", "ClsDataset", "PrefixlmDataset", "ClsMlmDataset", "str2dataset",
            "BertDataLoader", "LmDataLoader", "MlmDataLoader", "BilmDataLoader",
            "AlbertDataLoader", "MtDataLoader", "T5DataLoader", "GsgDataLoader",
-           "BartDataLoader", "ClsDataLoader", "PrefixlmDataLoader", "str2dataloader",
+           "BartDataLoader", "ClsDataLoader", "PrefixlmDataLoader", "ClsMlmDataLoader", "str2dataloader",
            "gelu", "gelu_fast", "relu", "silu", "linear", "str2act",
            "AdamW", "Adafactor", "str2optimizer",
            "get_linear_schedule_with_warmup", "get_cosine_schedule_with_warmup",
