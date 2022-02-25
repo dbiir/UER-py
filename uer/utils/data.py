@@ -1184,3 +1184,104 @@ class PrefixlmDataLoader(DataLoader):
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt), \
                 torch.LongTensor(seg)
+
+
+class ClsMlmDataset(Dataset):
+    def worker(self, proc_id, start, end):
+        print("Worker %d is building dataset ... " % proc_id)
+        set_seed(self.seed)
+        dataset_writer = open("dataset-tmp-" + str(proc_id) + ".pt", "wb")
+        pos = 0
+        with open(self.corpus_path, mode="r", encoding="utf-8") as f:
+            while pos < start:
+                f.readline()
+                pos += 1
+            while True:
+                line = f.readline()
+                pos += 1
+
+                line = line.strip().split('\t')
+                if len(line) == 2:
+                    label = int(line[0])
+                    text = line[1]
+                    src = [self.vocab.get(CLS_TOKEN)] + self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(text)) + [self.vocab.get(SEP_TOKEN)]
+                    tgt_cls = label
+                    seg = [1] * len(src)
+                elif len(line) == 3:  # For sentence pair input.
+                    label = int(line[0])
+                    text_a, text_b = line[1], line[2]
+
+                    src_a = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(text_a))
+                    src_a = [self.vocab.get(CLS_TOKEN)] + src_a + [self.vocab.get(SEP_TOKEN)]
+                    src_b = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(text_b))
+                    src_b = src_b + [self.vocab.get(SEP_TOKEN)]
+
+                    src = src_a + src_b
+                    tgt_cls = label
+                    seg = [1] * len(src_a) + [2] * len(src_b)
+
+                if len(src) >= self.seq_length:
+                    src = src[:self.seq_length]
+                    seg = seg[:self.seq_length]
+                else:
+                    while len(src) != self.seq_length:
+                        src.append(self.vocab.get(PAD_TOKEN))
+                        seg.append(0)
+
+                if not self.dynamic_masking:
+                    src, tgt_mlm = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                    instance = (src, tgt_mlm, tgt_cls, seg)
+                else:
+                    instance = (src, tgt_cls, seg)
+
+                pickle.dump(instance, dataset_writer)
+
+                if pos >= end:
+                    break
+
+        dataset_writer.close()
+
+
+class ClsMlmDataLoader(DataLoader):
+    def __iter__(self):
+        while True:
+            while self._empty():
+                self._fill_buf()
+            if self.start + self.batch_size >= self.end:
+                instances = self.buffer[self.start:]
+            else:
+                instances = self.buffer[self.start: self.start + self.batch_size]
+
+            self.start += self.batch_size
+
+            src = []
+            tgt_mlm = []
+            tgt_cls = []
+            seg = []
+
+            masked_words_num = 0
+
+            for ins in instances:
+                tgt_cls.append(ins[-2])
+                seg.append(ins[-1])
+                if len(ins) == 4:
+                    src.append(ins[0])
+                    masked_words_num += len(ins[1])
+                    tgt_mlm.append([0] * len(ins[0]))
+                    for mask in ins[1]:
+                        tgt_mlm[-1][mask[0]] = mask[1]
+                else:
+                    src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                    src.append(src_single)
+                    masked_words_num += len(tgt_single)
+                    tgt_mlm.append([0] * len(ins[0]))
+                    for mask in tgt_single:
+                        tgt_mlm[-1][mask[0]] = mask[1]
+
+            if masked_words_num == 0:
+                continue
+
+            yield torch.LongTensor(src), \
+                torch.LongTensor(tgt_mlm), \
+                torch.LongTensor(tgt_cls), \
+                torch.LongTensor(seg)

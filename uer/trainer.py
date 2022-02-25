@@ -351,6 +351,61 @@ class MtTrainer(Trainer):
         self.total_denominator = 0.0
 
 
+class ClsMlmTrainer(Trainer):
+    def __init__(self, args):
+        super(ClsMlmTrainer, self).__init__(args)
+        self.total_loss_cls = 0.0
+        self.total_correct_cls = 0.0
+        self.total_instances = 0.0
+
+        self.total_loss_mlm = 0.0
+        self.total_correct_mlm = 0.0
+        self.total_denominator = 0.0
+
+    def forward_propagation(self, batch, model):
+        src, tgt_mlm, tgt_cls, seg = batch
+        tgt = {"mlm": tgt_mlm, "cls": tgt_cls}
+        loss_info = model(src, tgt, seg)
+        loss_mlm, correct_mlm, denominator = loss_info["mlm"]
+        loss_cls, correct_cls = loss_info["cls"]
+        loss = loss_mlm + loss_cls
+        self.total_loss += loss.item()
+        self.total_loss_mlm += loss_mlm.item()
+        self.total_loss_cls += loss_cls.item()
+        self.total_correct_mlm += correct_mlm.item()
+        self.total_correct_cls += correct_cls.item()
+        self.total_denominator += denominator.item()
+        self.total_instances += src.size(0)
+        loss = loss / self.accumulation_steps
+
+        return loss
+
+    def report_and_reset_stats(self):
+        done_tokens = self.batch_size * self.seq_length * self.report_steps
+        if self.dist_train:
+            done_tokens *= self.world_size
+
+        self.logger.info("| {:8d}/{:8d} steps"
+              "| {:8.2f} tokens/s"
+              "| loss {:7.2f}"
+              "| loss_mlm: {:3.3f}"
+              "| loss_cls: {:3.3f}"
+              "| acc_mlm: {:3.3f}"
+              "| acc_cls: {:3.3f}".format(
+                  self.current_step,
+                  self.total_steps,
+                  done_tokens / (time.time() - self.start_time),
+                  self.total_loss / self.report_steps,
+                  self.total_loss_mlm / self.report_steps,
+                  self.total_loss_cls / self.report_steps,
+                  self.total_correct_mlm / self.total_denominator,
+                  self.total_correct_cls / self.total_instances))
+
+        self.total_loss, self.total_loss_mlm, self.total_loss_cls = 0.0, 0.0, 0.0
+        self.total_correct_mlm, self.total_denominator = 0.0, 0.0
+        self.total_correct_cls, self.total_instances = 0.0, 0.0
+
+
 class T5Trainer(MtTrainer):
     pass
 
@@ -370,7 +425,7 @@ class PrefixlmTrainer(MlmTrainer):
 str2trainer = {"bert": BertTrainer, "mlm": MlmTrainer, "lm": LmTrainer,
                "albert": AlbertTrainer, "bilm": BilmTrainer, "cls": ClsTrainer,
                "mt": MtTrainer, "t5": T5Trainer, "gsg": GsgTrainer,
-               "bart": BartTrainer, "prefixlm": PrefixlmTrainer}
+               "bart": BartTrainer, "prefixlm": PrefixlmTrainer, "cls_mlm": ClsMlmTrainer}
 
 
 def worker(proc_id, gpu_ranks, args, model):
