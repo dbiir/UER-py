@@ -1,4 +1,3 @@
-import torch
 import torch.nn as nn
 
 from uer.layers.layer_norm import LayerNorm

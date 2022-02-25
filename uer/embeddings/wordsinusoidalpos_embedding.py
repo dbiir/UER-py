@@ -23,7 +23,7 @@ class WordSinusoidalposEmbedding(nn.Module):
         div_term = torch.exp(
             (
                 torch.arange(0, args.emb_size, 2, dtype=torch.float)
-                *- (math.log(10000.0) / args.emb_size)
+                * -(math.log(10000.0) / args.emb_size)
             )
         )
         pe[:, 0::2] = torch.sin(position.float() * div_term)

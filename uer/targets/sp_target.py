@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from uer.targets import *
 
 
 class SpTarget(nn.Module):
