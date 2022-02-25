@@ -1,0 +1,10 @@
+{
+    "chnsenticorp_char": {
+        "template": "[TEXT_A],我[ANS]满意",
+        "answer_words": {"0": "不","1":"很"}
+    },
+    "chnsenticorp_word": {
+        "template": "[TEXT_A],我[ANS]",
+        "answer_words": {"0": "不满意","1":"很满意"}
+    }
+}
