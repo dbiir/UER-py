@@ -7,7 +7,7 @@
 
 <img src="logo.jpg" width="390" hegiht="390" align=left />
 
-Pre-training has become an essential part for NLP tasks. UER-py (Universal Encoder Representations) is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of existing pre-training models, and provides interfaces for users to further extend upon. With UER-py, we build a model zoo which contains pre-trained models of different properties (for example, models based on different corpora, encoders, and targets). **See the Wiki for [Full Documentation](https://github.com/dbiir/UER-py/wiki)**.
+Pre-training has become an essential part for NLP tasks. UER-py (Universal Encoder Representations) is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of existing pre-training models, and provides interfaces for users to further extend upon. With UER-py, we build a model zoo which contains pre-trained models of different properties (e.g. models based on different encoders and targets). **See the Wiki for [Full Documentation](https://github.com/dbiir/UER-py/wiki)**.
 
 
 <br/>
@@ -31,7 +31,7 @@ Table of Contents
 UER-py has the following features:
 - __Reproducibility__ UER-py has been tested on many datasets and should match the performances of the original pre-training model implementations such as BERT, GPT-2, ELMo, and T5.
 - __Model modularity__ UER-py is divided into the following components: embedding, encoder, target embedding (optional), decoder (optional), and target. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules to construct pre-training models with as few restrictions as possible.
-- __Model training__ UER-py supports CPU mode, single GPU mode, distributed training mode, and gigantic model training with DeepSpeed
+- __Model training__ UER-py supports CPU mode, single GPU mode, distributed training mode, and gigantic model training with DeepSpeed.
 - __Model zoo__ With the help of UER-py, we pre-train and release models of different properties. Proper selection of pre-trained models is important to the performances of downstream tasks.
 - __SOTA results__ UER-py supports comprehensive downstream tasks (e.g. classification and machine reading comprehension) and provides winning solutions of many NLP competitions.
 - __Abundant functions__ UER-py provides abundant functions related with pre-training, such as feature extractor and text generation.
@@ -84,7 +84,7 @@ Label and instance are separated by \t . The first row is a list of column names
 
 We use Google's Chinese vocabulary file *models/google_zh_vocab.txt*, which contains 21128 Chinese characters.
 
-We firstly pre-process the book review corpus. In the pre-processing stage, the corpus needs to be processed into the format required by the specified pre-training model. (*--data_processor*):
+We firstly pre-process the book review corpus. In the pre-processing stage, the corpus needs to be processed into the format required by the specified pre-training model (*--data_processor*):
 ```
 python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path models/google_zh_vocab.txt \
                       --dataset_path dataset.pt --processes_num 8 --data_processor bert
@@ -105,7 +105,7 @@ mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
 Notice that the model trained by *pretrain.py* is attacted with the suffix which records the training step (*--total_steps*). We could remove the suffix for ease of use.
 
-Then we fine-tune the pre-trained model on downstream classification dataset. We use embedding and encoder layers of [*book_review_model.bin*](https://share.weiyun.com/xOFsYxZA), which is the output of *pretrain.py*:
+Then we fine-tune the pre-trained model on downstream classification dataset. We use embedding and encoder layers of [*book_review_model.bin*](https://share.weiyun.com/wDzMu0Rb), which is the output of *pretrain.py*:
 ```
 python3 finetune/run_classifier.py --pretrained_model_path models/book_review_model.bin \
                                    --vocab_path models/google_zh_vocab.txt \
@@ -115,7 +115,7 @@ python3 finetune/run_classifier.py --pretrained_model_path models/book_review_mo
                                    --test_path datasets/douban_book_review/test.tsv \
                                    --epochs_num 3 --batch_size 32
 ``` 
-The default path of the fine-tuned classifier model is *models/finetuned_model.bin* . It is noticeable that the actual batch size of pre-training is *--batch_size* times *--world_size* ; The actual batch size of classification is *--batch_size* . 
+The default path of the fine-tuned classifier model is *models/finetuned_model.bin* . It is noticeable that the actual batch size of pre-training is *--batch_size* times *--world_size* ; The actual batch size of downstream task (e.g. classification) is *--batch_size* . 
 Then we do inference with the fine-tuned model. 
 ```
 python3 inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin \
@@ -142,7 +142,7 @@ We collected a range of :arrow_right: [__downstream datasets__](https://github.c
 <br/>
 
 ## Modelzoo
-With the help of UER, we pre-trained models of different properties (for example, models based on different corpora, encoders, and targets). Detailed introduction of pre-trained models and their download links can be found in :arrow_right: [__modelzoo__](https://github.com/dbiir/UER-py/wiki/Modelzoo) :arrow_left: . All pre-trained models can be loaded by UER directly. More pre-trained models will be released in the future.
+With the help of UER, we pre-trained models of different properties (e.g. models based on different corpora, encoders, and targets). Detailed introduction of pre-trained models and their download links can be found in :arrow_right: [__modelzoo__](https://github.com/dbiir/UER-py/wiki/Modelzoo) :arrow_left: . All pre-trained models can be loaded by UER directly. More pre-trained models will be released in the future.
 
 <br/>
 
