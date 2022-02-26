@@ -1,4 +1,5 @@
-from uer.utils.data import *
+from uer.utils.dataset import *
+from uer.utils.dataloader import *
 from uer.utils.act_fun import *
 from uer.utils.optimizers import *
 from uer.utils.adversarial import *
@@ -10,10 +11,10 @@ str2dataset = {"bert": BertDataset, "lm": LmDataset, "mlm": MlmDataset,
                "bilm": BilmDataset, "albert": AlbertDataset, "mt": MtDataset,
                "t5": T5Dataset, "gsg": GsgDataset, "bart": BartDataset,
                "cls": ClsDataset, "prefixlm": PrefixlmDataset, "cls_mlm": ClsMlmDataset}
-str2dataloader = {"bert": BertDataLoader, "lm": LmDataLoader, "mlm": MlmDataLoader,
-                  "bilm": BilmDataLoader, "albert": AlbertDataLoader, "mt": MtDataLoader,
-                  "t5": T5DataLoader, "gsg": GsgDataLoader, "bart": BartDataLoader,
-                  "cls": ClsDataLoader, "prefixlm": PrefixlmDataLoader, "cls_mlm": ClsMlmDataLoader}
+str2dataloader = {"bert": BertDataloader, "lm": LmDataloader, "mlm": MlmDataloader,
+                  "bilm": BilmDataloader, "albert": AlbertDataloader, "mt": MtDataloader,
+                  "t5": T5Dataloader, "gsg": GsgDataloader, "bart": BartDataloader,
+                  "cls": ClsDataloader, "prefixlm": PrefixlmDataloader, "cls_mlm": ClsMlmDataloader}
 
 str2act = {"gelu": gelu, "gelu_fast": gelu_fast, "relu": relu, "silu": silu, "linear": linear}
 
@@ -30,9 +31,9 @@ __all__ = ["CharTokenizer", "SpaceTokenizer", "BertTokenizer", "BPETokenizer", "
            "BertDataset", "LmDataset", "MlmDataset", "BilmDataset",
            "AlbertDataset", "MtDataset", "T5Dataset", "GsgDataset",
            "BartDataset", "ClsDataset", "PrefixlmDataset", "ClsMlmDataset", "str2dataset",
-           "BertDataLoader", "LmDataLoader", "MlmDataLoader", "BilmDataLoader",
-           "AlbertDataLoader", "MtDataLoader", "T5DataLoader", "GsgDataLoader",
-           "BartDataLoader", "ClsDataLoader", "PrefixlmDataLoader", "ClsMlmDataLoader", "str2dataloader",
+           "BertDataloader", "LmDataloader", "MlmDataloader", "BilmDataloader",
+           "AlbertDataloader", "MtDataloader", "T5Dataloader", "GsgDataloader",
+           "BartDataloader", "ClsDataloader", "PrefixlmDataloader", "ClsMlmDataloader", "str2dataloader",
            "gelu", "gelu_fast", "relu", "silu", "linear", "str2act",
            "AdamW", "Adafactor", "str2optimizer",
            "get_linear_schedule_with_warmup", "get_cosine_schedule_with_warmup",
