@@ -35,4 +35,3 @@ if __name__ == '__main__':
     vocab = Vocab()
     vocab.build(args.corpus_path, tokenizer, args.workers_num, args.min_count)
     vocab.save(args.output_path)
- 
