@@ -9,6 +9,7 @@ sys.path.insert(0, uer_dir)
 
 from uer.embeddings import *
 from uer.encoders import *
+from uer.decoders import *
 from uer.targets import *
 from uer.utils.constants import *
 from uer.utils import *
