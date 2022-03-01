@@ -72,9 +72,6 @@ def main():
 
     infer_opts(parser)
 
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
-                        help="Pooling type.")
-
     tokenizer_opts(parser)
 
     parser.add_argument("--output_logits", action="store_true", help="Write logits to output file.")

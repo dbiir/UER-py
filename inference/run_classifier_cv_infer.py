@@ -39,8 +39,6 @@ def main():
 
     # Model options.
     model_opts(parser)
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
-                        help="Pooling type.")
 
     # Inference options.
     parser.add_argument("--batch_size", type=int, default=64,

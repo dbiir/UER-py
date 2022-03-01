@@ -25,9 +25,6 @@ def main():
 
     infer_opts(parser)
 
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
-                        help="Pooling type.")
-
     parser.add_argument("--labels_num", type=int, required=True,
                         help="Number of prediction labels.")
 
