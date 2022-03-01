@@ -261,8 +261,6 @@ def main():
 
     tokenizer_opts(parser)
 
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
-                        help="Pooling type.")
     args = parser.parse_args()
 
     # Load the hyperparameters from the config file.

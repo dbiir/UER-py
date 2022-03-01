@@ -205,13 +205,6 @@ def main():
 
     tokenizer_opts(parser)
 
-    parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
-                        help="Target embedding type.")
-    parser.add_argument("--decoder", choices=["transformer"], default="transformer", help="Decoder type.")
-    parser.add_argument("--tie_weights", action="store_true",
-                        help="Tie the word embedding and softmax weights.")
-    parser.add_argument("--has_lmtarget_bias", action="store_true",
-                        help="Add bias on output_layer for lm target.")
     parser.add_argument("--tgt_seq_length", type=int, default=32,
                         help="Output sequence length.")
 

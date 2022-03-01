@@ -162,8 +162,6 @@ def main():
 
     tokenizer_opts(parser)
 
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
-                        help="Pooling type.")
     parser.add_argument("--temperature", type=float, default=0.05)
     parser.add_argument("--eval_steps", type=int, default=200, help="Evaluate frequency.")
 

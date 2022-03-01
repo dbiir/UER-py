@@ -98,8 +98,6 @@ def main():
 
     # Model options.
     model_opts(parser)
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
-                        help="Pooling type.")
 
     # Tokenizer options.
     tokenizer_opts(parser)

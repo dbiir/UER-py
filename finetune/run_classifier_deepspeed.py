@@ -105,8 +105,6 @@ def main():
 
     parser.add_argument("--world_size", type=int, default=1,
                         help="Total number of processes (GPUs) for training.")
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
-                        help="Pooling type.")
 
     tokenizer_opts(parser)
 
