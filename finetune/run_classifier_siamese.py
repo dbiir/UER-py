@@ -90,7 +90,7 @@ class SiameseClassifier(nn.Module):
 def load_or_initialize_parameters(args, model):
     if args.pretrained_model_path is not None:
         # Initialize with pretrained model.
-        state_dict = torch.load(args.pretrained_model_path)
+        state_dict = torch.load(args.pretrained_model_path, map_location="cpu")
         load_siamese_weights = False
         for key in state_dict.keys():
             if key.find("embedding_0") != -1:
