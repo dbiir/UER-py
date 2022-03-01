@@ -24,6 +24,10 @@ class Text2text(torch.nn.Module):
         self.tgt_embedding = str2embedding[args.tgt_embedding](args, len(args.tokenizer.vocab))
         self.decoder = str2decoder[args.decoder](args)
         self.target = LmTarget(args, len(args.tokenizer.vocab))
+        if args.tie_weights:
+            self.target.output_layer.weight = self.embedding.word_embedding.weight
+        if args.share_embedding:
+            self.tgt_embedding.word_embedding.weight = self.embedding.word_embedding.weight
 
     def encode(self, src, seg):
         emb = self.embedding(src, seg)
@@ -50,7 +54,7 @@ class Text2text(torch.nn.Module):
         else:
             decoder_emb = self.tgt_embedding(tgt_in, None)
             hidden = self.decoder(memory_bank, decoder_emb, (seg,))
-            loss = self.target(hidden, tgt)[0]
+            loss = self.target(hidden, tgt_out, seg)[0]
             return loss, output
 
 def read_dataset(args, path):
