@@ -66,7 +66,7 @@ class MultiHeadedAttention(nn.Module):
         scores = scores + mask.type_as(scores)
         prev_attn_out = None
         if has_residual_attention:
-            if prev_attn != None:
+            if prev_attn is not None:
                 scores += prev_attn
             prev_attn_out = scores
         probs = nn.Softmax(dim=-1)(scores)
