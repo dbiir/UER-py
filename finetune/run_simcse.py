@@ -194,8 +194,8 @@ def main():
 
     args.train_steps = int(instances_num * args.epochs_num / batch_size) + 1
 
-    args.logger.info("Batch size: ", batch_size)
-    args.logger.info("The number of training instances:", instances_num)
+    args.logger.info("Batch size: {}".format(batch_size))
+    args.logger.info("The number of training instances: {}".format(instances_num))
 
     optimizer, scheduler = build_optimizer(args, model)
 
