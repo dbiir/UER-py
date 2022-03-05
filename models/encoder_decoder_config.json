@@ -10,7 +10,6 @@
   "data_processor": "mt",
   "embedding": "word_sinusoidalpos",
   "tgt_embedding": "word_sinusoidalpos",
-  "share_embedding": true,
   "encoder": "transformer",
   "mask": "fully_visible",
   "decoder": "transformer",
