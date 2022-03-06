@@ -285,9 +285,9 @@ def main():
     if args.test_path is not None:
         args.logger.info("Test set evaluation.")
         if torch.cuda.device_count() > 1:
-            args.model.module.load_state_dict(torch.load(args.output_model_path))
+            args.model.module.load_state_dict(torch.load(args.output_model_path),strict = False)
         else:
-            args.model.load_state_dict(torch.load(args.output_model_path))
+            args.model.load_state_dict(torch.load(args.output_model_path),strict = False)
         evaluate(args, read_dataset(args, args.test_path))
 
 
