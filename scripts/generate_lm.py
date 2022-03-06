@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    args.target = 'lm'
+    args.target = "lm"
     args.batch_size = 1
 
     args = load_hyperparam(args)
