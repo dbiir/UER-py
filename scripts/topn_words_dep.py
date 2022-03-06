@@ -36,8 +36,6 @@ if __name__ == '__main__':
 
     parser.add_argument("--load_model_path", default=None, type=str,
                         help="Path of the input model.")
-    parser.add_argument("--vocab_path", default=None, type=str,
-                        help="Path of the vocabulary file.")
     parser.add_argument("--cand_vocab_path", default=None, type=str,
                         help="Path of the candidate vocabulary file.")
     parser.add_argument("--test_path", type=str, required=True,
