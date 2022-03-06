@@ -80,7 +80,7 @@ class ClozeTest(torch.nn.Module):
         super(ClozeTest, self).__init__()
         self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
         self.encoder = str2encoder[args.encoder](args)
-        self.target = str2target[args.target](args, len(args.tokenizer.vocab))
+        self.target = str2target[args.target[0]](args, len(args.tokenizer.vocab))
         self.act = str2act[args.hidden_act]
 
     def forward(self, src, seg):
@@ -97,9 +97,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     infer_opts(parser)
-
-    parser.add_argument("--target", choices=["bert", "mlm", "albert"], default="bert",
-                        help="The training target of the pretraining model.")
 
     tokenizer_opts(parser)
 
