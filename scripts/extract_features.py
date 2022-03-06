@@ -133,8 +133,6 @@ if __name__ == '__main__':
 
     infer_opts(parser)
 
-    parser.add_argument("--pooling", choices=["first", "last", "max", "mean"], \
-                                              default="first", help="Pooling Type.")
     parser.add_argument("--whitening_size", type=int, default=None, help="Output vector size after whitening.")
 
     tokenizer_opts(parser)
