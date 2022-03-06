@@ -44,25 +44,17 @@ if __name__ == '__main__':
 
     parser.add_argument("--share_relative_position_embedding", action="store_true",
                         help="Add bias on output_layer for lm target.")
-    parser.add_argument("--has_lmtarget_bias", action="store_true",
-                        help="Add bias on output_layer for lm target.")
-    parser.add_argument("--tie_weights", action="store_true",
-                        help="Tie the word embedding and softmax weights.")
     parser.add_argument("--top_k", type=int, default=70)
     parser.add_argument("--top_p", type=float, default=0)
     parser.add_argument("--temperature", type=float, default=1.0)
     parser.add_argument("--tgt_vocab_path", type=str,
                         help="Path of the vocabulary file.")
     tokenizer_opts(parser)
-    parser.add_argument("--tgt_tokenizer", choices=[None, "bert", "char", "space", "xlmroberta"], default=None,
+    parser.add_argument("--tgt_tokenizer", choices=[None, "bert", "char", "space", "xlmroberta"], default='bert',
                         help="Specify the tokenizer for target side.")
     parser.add_argument("--tgt_seq_length", type=int, default=128,
                         help="Sequence length.")
-    parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"],
-                        default="word",
-                        help="Target embedding type.")
-    parser.add_argument("--decoder", choices=["transformer"], \
-                                              default="transformer", help="Decoder type.")
+
     args = parser.parse_args()
 
     args.batch_size = 1
