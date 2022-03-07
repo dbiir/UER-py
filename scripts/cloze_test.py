@@ -98,15 +98,14 @@ if __name__ == '__main__':
 
     infer_opts(parser)
 
-    parser.add_argument("--target", choices=["bert", "mlm", "albert"], default="bert",
-                        help="The training target of the pretraining model.")
-
     tokenizer_opts(parser)
 
     parser.add_argument("--topn", type=int, default=10,
                         help="Print top n nearest neighbours.")
     
     args = parser.parse_args()
+
+    args.target = "mlm"
 
     # Load the hyperparameters from the config file.
     args = load_hyperparam(args)

@@ -95,13 +95,13 @@ def main():
         answer_position[int(args.tokenizer.vocab[answer])] = 1
     args.answer_position = torch.LongTensor(answer_position)
 
+    args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # Build classification model and load parameters.
     model = ClozeTest(args)
     model = load_model(model, args.load_model_path)
 
     # For simplicity, we use DataParallel wrapper to use multiple GPUs.
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
+    model = model.to(args.device)
     if torch.cuda.device_count() > 1:
         print("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
@@ -127,9 +127,9 @@ def main():
             f.write("\t" + "prob")
         f.write("\n")
         for _, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
-            src_batch = src_batch.to(device)
-            tgt_batch = tgt_batch.to(device)
-            seg_batch = seg_batch.to(device)
+            src_batch = src_batch.to(args.device)
+            tgt_batch = tgt_batch.to(args.device)
+            seg_batch = seg_batch.to(args.device)
             with torch.no_grad():
                 _, pred, logits = model(src_batch, tgt_batch, seg_batch)
 
@@ -139,7 +139,7 @@ def main():
             prob = prob.cpu().numpy().tolist()
             
             for j in range(len(pred)):
-                f.write(str(args.answer_word_dict_inv[args.tokenizer.inv_vocab[int(pred[j])]]))
+                f.write(str(pred[j]))
                 if args.output_logits:
                     f.write("\t" + " ".join([str(v) for v in logits[j]]))
                 if args.output_prob:
