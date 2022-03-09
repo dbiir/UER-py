@@ -22,6 +22,7 @@ from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.utils.logging import init_logger
+from tencentpretrain.utils.misc import pooling
 from uer.model_saver import save_model
 from uer.opts import finetune_opts, tokenizer_opts
 from finetune.run_classifier import count_labels_num, build_optimizer
@@ -49,8 +50,8 @@ class SiameseClassifier(nn.Module):
         output = self.encoder(emb, seg)
         # Target.
         features_0, features_1 = output
-        features_0 = self.pooling(features_0, seg[0], self.pooling_type)
-        features_1 = self.pooling(features_1, seg[1], self.pooling_type)
+        features_0 = pooling(features_0, seg[0], self.pooling_type)
+        features_1 = pooling(features_1, seg[1], self.pooling_type)
 
         vectors_concat = []
 
@@ -71,20 +72,6 @@ class SiameseClassifier(nn.Module):
             return loss, logits
         else:
             return None, logits
-
-    def pooling(self, memory_bank, seg, pooling_type):
-        seg = torch.unsqueeze(seg, dim=-1).type(torch.float)
-        memory_bank = memory_bank * seg
-        if pooling_type == "mean":
-            features = torch.sum(memory_bank, dim=1)
-            features = torch.div(features, torch.sum(seg, dim=1))
-        elif pooling_type == "last":
-            features = memory_bank[torch.arange(memory_bank.shape[0]), torch.squeeze(torch.sum(seg, dim=1).type(torch.int64) - 1), :]
-        elif pooling_type == "max":
-            features = torch.max(memory_bank + (seg - 1) * sys.maxsize, dim=1)[0]
-        else:
-            features = memory_bank[:, 0, :]
-        return features
 
 
 def load_or_initialize_parameters(args, model):

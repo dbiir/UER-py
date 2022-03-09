@@ -20,6 +20,7 @@ from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.utils.logging import init_logger
+from uer.utils.misc import pooling
 from uer.model_saver import save_model
 from uer.opts import finetune_opts, tokenizer_opts, adv_opts
 
@@ -30,7 +31,7 @@ class Classifier(nn.Module):
         self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
         self.encoder = str2encoder[args.encoder](args)
         self.labels_num = args.labels_num
-        self.pooling = args.pooling
+        self.pooling_type = args.pooling
         self.soft_targets = args.soft_targets
         self.soft_alpha = args.soft_alpha
         self.output_layer_1 = nn.Linear(args.hidden_size, args.hidden_size)
@@ -48,14 +49,7 @@ class Classifier(nn.Module):
         # Encoder.
         output = self.encoder(emb, seg)
         # Target.
-        if self.pooling == "mean":
-            output = torch.mean(output, dim=1)
-        elif self.pooling == "max":
-            output = torch.max(output, dim=1)[0]
-        elif self.pooling == "last":
-            output = output[:, -1, :]
-        else:
-            output = output[:, 0, :]
+        output = pooling(output, seg, self.pooling_type)
         output = torch.tanh(self.output_layer_1(output))
         logits = self.output_layer_2(output)
         if tgt is not None:

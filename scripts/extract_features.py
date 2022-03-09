@@ -17,6 +17,7 @@ from uer.targets import *
 from uer.utils.constants import *
 from uer.utils import *
 from uer.utils.config import load_hyperparam
+from uer.utils.misc import pooling
 from uer.model_loader import load_model
 from uer.opts import infer_opts, tokenizer_opts
 
@@ -59,23 +60,12 @@ class FeatureExtractor(torch.nn.Module):
         super(FeatureExtractor, self).__init__()
         self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
         self.encoder = str2encoder[args.encoder](args)
-        self.pooling = args.pooling
+        self.pooling_type = args.pooling
 
     def forward(self, src, seg):
         emb = self.embedding(src, seg)
         output = self.encoder(emb, seg)
-        seg = torch.unsqueeze(seg, dim=-1).type(torch.float)
-        output = output * seg
-
-        if self.pooling == "mean":
-            output = torch.sum(output, dim=1)
-            output = torch.div(output, torch.sum(seg, dim=1))
-        elif self.pooling == "max":
-            output = torch.max(output + (seg - 1) * sys.maxsize, dim=1)[0]
-        elif self.pooling == "last":
-            output = output[torch.arange(output.shape[0]), torch.squeeze(torch.sum(seg, dim=1).type(torch.int64) - 1), :]
-        else:
-            output = output[:, 0, :]
+        output = pooling(output, seg, self.pooling_type)
 
         return output        
 
