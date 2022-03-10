@@ -22,15 +22,15 @@ from uer.model_loader import load_model
 from uer.opts import infer_opts, tokenizer_opts
 
 
-def batch_loader(batch_size, src, seg):                                                                                             
-    instances_num = src.size(0)                                                                                                     
-    for i in range(instances_num // batch_size):                                                                                    
-        src_batch = src[i * batch_size : (i + 1) * batch_size]                                                                            
-        seg_batch = seg[i * batch_size : (i + 1) * batch_size]                                                                            
-        yield src_batch, seg_batch                                                                                                  
-    if instances_num > instances_num // batch_size * batch_size:                                                                    
-        src_batch = src[instances_num // batch_size * batch_size:]                                                                      
-        seg_batch = seg[instances_num // batch_size * batch_size:]                                                                      
+def batch_loader(batch_size, src, seg):
+    instances_num = src.size(0)
+    for i in range(instances_num // batch_size):
+        src_batch = src[i * batch_size : (i + 1) * batch_size]
+        seg_batch = seg[i * batch_size : (i + 1) * batch_size]
+        yield src_batch, seg_batch
+    if instances_num > instances_num // batch_size * batch_size:
+        src_batch = src[instances_num // batch_size * batch_size:]
+        seg_batch = seg[instances_num // batch_size * batch_size:]
         yield src_batch, seg_batch
 
 
