@@ -20,9 +20,6 @@ def main():
 
     finetune_opts(parser)
 
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
-                        help="Pooling type.")
-
     tokenizer_opts(parser)
 
     parser.add_argument("--soft_targets", action='store_true',

@@ -19,6 +19,7 @@ from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.utils.logging import init_logger
+from uer.utils.misc import pooling
 from uer.model_saver import save_model
 from uer.opts import *
 from finetune.run_classifier import count_labels_num, batch_loader, build_optimizer, load_or_initialize_parameters, train_model, read_dataset, evaluate
@@ -29,7 +30,7 @@ class MultitaskClassifier(nn.Module):
         super(MultitaskClassifier, self).__init__()
         self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
         self.encoder = str2encoder[args.encoder](args)
-        self.pooling = args.pooling
+        self.pooling_type = args.pooling
         self.output_layers_1 = nn.ModuleList([nn.Linear(args.hidden_size, args.hidden_size) for _ in args.labels_num_list])
         self.output_layers_2 = nn.ModuleList([nn.Linear(args.hidden_size, labels_num) for labels_num in args.labels_num_list])
 
@@ -47,14 +48,7 @@ class MultitaskClassifier(nn.Module):
         # Encoder.
         output = self.encoder(emb, seg)
         # Target.
-        if self.pooling == "mean":
-            output = torch.mean(output, dim=1)
-        elif self.pooling == "max":
-            output = torch.max(output, dim=1)[0]
-        elif self.pooling == "last":
-            output = output[:, -1, :]
-        else:
-            output = output[:, 0, :]
+        output = pooling(output, seg, self.pooling_type)
         output = torch.tanh(self.output_layers_1[self.dataset_id](output))
         logits = self.output_layers_2[self.dataset_id](output)
         if tgt is not None:
@@ -98,8 +92,6 @@ def main():
 
     # Model options.
     model_opts(parser)
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
-                        help="Pooling type.")
 
     # Tokenizer options.
     tokenizer_opts(parser)

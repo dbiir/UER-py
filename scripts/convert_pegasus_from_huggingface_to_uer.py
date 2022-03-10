@@ -24,9 +24,9 @@ input_model = torch.load(args.input_model_path, map_location="cpu")
 output_model = collections.OrderedDict()
 
 output_model["embedding.pe"] = input_model["model.encoder.embed_positions.weight"].unsqueeze(1)
-output_model["target.embedding.pe"] = input_model["model.decoder.embed_positions.weight"].unsqueeze(1)
+output_model["tgt_embedding.pe"] = input_model["model.decoder.embed_positions.weight"].unsqueeze(1)
 output_model["embedding.word_embedding.weight"] = input_model["model.encoder.embed_tokens.weight"]
-output_model["target.embedding.word_embedding.weight"] = input_model["model.decoder.embed_tokens.weight"]
+output_model["tgt_embedding.word_embedding.weight"] = input_model["model.decoder.embed_tokens.weight"]
 output_model["target.output_layer.weight"] = input_model["lm_head.weight"]
 output_model["target.output_layer.bias"] = input_model["final_logits_bias"].squeeze(0)
 
@@ -34,7 +34,7 @@ convert_encoder_decoder_transformer_from_huggingface_to_uer(input_model, output_
 
 output_model["encoder.layer_norm.gamma"] = input_model["model.encoder.layer_norm.weight"]
 output_model["encoder.layer_norm.beta"] = input_model["model.encoder.layer_norm.bias"]
-output_model["target.decoder.layer_norm.gamma"] = input_model["model.decoder.layer_norm.weight"]
-output_model["target.decoder.layer_norm.beta"] = input_model["model.decoder.layer_norm.bias"]
+output_model["decoder.layer_norm.gamma"] = input_model["model.decoder.layer_norm.weight"]
+output_model["decoder.layer_norm.beta"] = input_model["model.decoder.layer_norm.bias"]
 
 torch.save(output_model, args.output_model_path)

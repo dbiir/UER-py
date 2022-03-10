@@ -162,8 +162,6 @@ def main():
 
     tokenizer_opts(parser)
 
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
-                        help="Pooling type.")
     parser.add_argument("--temperature", type=float, default=0.05)
     parser.add_argument("--eval_steps", type=int, default=200, help="Evaluate frequency.")
 
@@ -196,8 +194,8 @@ def main():
 
     args.train_steps = int(instances_num * args.epochs_num / batch_size) + 1
 
-    args.logger.info("Batch size: ", batch_size)
-    args.logger.info("The number of training instances:", instances_num)
+    args.logger.info("Batch size: {}".format(batch_size))
+    args.logger.info("The number of training instances: {}".format(instances_num))
 
     optimizer, scheduler = build_optimizer(args, model)
 

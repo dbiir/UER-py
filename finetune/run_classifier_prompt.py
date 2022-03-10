@@ -23,6 +23,8 @@ class ClozeTest(nn.Module):
         self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
         self.encoder = str2encoder[args.encoder](args)
         self.target = MlmTarget(args, len(args.tokenizer.vocab))
+        if args.tie_weights:
+            self.target.mlm_linear_2.weight = self.embedding.word_embedding.weight
         self.answer_position = args.answer_position
         self.device = args.device
 
@@ -283,9 +285,9 @@ def main():
     if args.test_path is not None:
         args.logger.info("Test set evaluation.")
         if torch.cuda.device_count() > 1:
-            args.model.module.load_state_dict(torch.load(args.output_model_path))
+            args.model.module.load_state_dict(torch.load(args.output_model_path), strict=False)
         else:
-            args.model.load_state_dict(torch.load(args.output_model_path))
+            args.model.load_state_dict(torch.load(args.output_model_path), strict=False)
         evaluate(args, read_dataset(args, args.test_path))
 
 

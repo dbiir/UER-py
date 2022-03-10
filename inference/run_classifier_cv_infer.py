@@ -26,10 +26,6 @@ def main():
     # Path options.
     parser.add_argument("--load_model_path", default=None, type=str,
                         help="Path of the classfier model.")
-    parser.add_argument("--vocab_path", default=None, type=str,
-                        help="Path of the vocabulary file.")
-    parser.add_argument("--spm_model_path", default=None, type=str,
-                        help="Path of the sentence piece model.")
     parser.add_argument("--test_path", type=str,
                         help="Path of the testset.")
     parser.add_argument("--test_features_path", default=None, type=str,
@@ -39,8 +35,6 @@ def main():
 
     # Model options.
     model_opts(parser)
-    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
-                        help="Pooling type.")
 
     # Inference options.
     parser.add_argument("--batch_size", type=int, default=64,

@@ -24,6 +24,10 @@ class Text2text(torch.nn.Module):
         self.tgt_embedding = str2embedding[args.tgt_embedding](args, len(args.tokenizer.vocab))
         self.decoder = str2decoder[args.decoder](args)
         self.target = LmTarget(args, len(args.tokenizer.vocab))
+        if args.tie_weights:
+            self.target.output_layer.weight = self.embedding.word_embedding.weight
+        if args.share_embedding:
+            self.tgt_embedding.word_embedding.weight = self.embedding.word_embedding.weight
 
     def encode(self, src, seg):
         emb = self.embedding(src, seg)
@@ -50,7 +54,7 @@ class Text2text(torch.nn.Module):
         else:
             decoder_emb = self.tgt_embedding(tgt_in, None)
             hidden = self.decoder(memory_bank, decoder_emb, (seg,))
-            loss = self.target(hidden, tgt)[0]
+            loss = self.target(hidden, tgt_out, seg)[0]
             return loss, output
 
 def read_dataset(args, path):
@@ -205,13 +209,6 @@ def main():
 
     tokenizer_opts(parser)
 
-    parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
-                        help="Target embedding type.")
-    parser.add_argument("--decoder", choices=["transformer"], default="transformer", help="Decoder type.")
-    parser.add_argument("--tie_weights", action="store_true",
-                        help="Tie the word embedding and softmax weights.")
-    parser.add_argument("--has_lmtarget_bias", action="store_true",
-                        help="Add bias on output_layer for lm target.")
     parser.add_argument("--tgt_seq_length", type=int, default=32,
                         help="Output sequence length.")
 

@@ -1,6 +1,8 @@
 def model_opts(parser):
     parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos", "dual"], default="word_pos_seg",
                         help="Emebdding type.")
+    parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
+                        help="Target embedding type.")
     parser.add_argument("--max_seq_length", type=int, default=512,
                         help="Max sequence length for word embedding.")
     parser.add_argument("--relative_position_embedding", action="store_true",
@@ -13,6 +15,7 @@ def model_opts(parser):
     parser.add_argument("--encoder", choices=["transformer", "rnn", "lstm", "gru", "birnn",
                                               "bilstm", "bigru", "gatedcnn", "dual"],
                         default="transformer", help="Encoder type.")
+    parser.add_argument("--decoder", choices=[None, "transformer"], default=None, help="Decoder type.")
     parser.add_argument("--mask", choices=["fully_visible", "causal", "causal_with_prefix"], default="fully_visible",
                         help="Mask type.")
     parser.add_argument("--layernorm_positioning", choices=["pre", "post"], default="post",
@@ -30,6 +33,14 @@ def model_opts(parser):
     parser.add_argument("--bidirectional", action="store_true", help="Specific to recurrent model.")
     parser.add_argument("--parameter_sharing", action="store_true", help="Parameter sharing.")
     parser.add_argument("--has_residual_attention", action="store_true", help="Add residual attention.")
+    parser.add_argument("--has_lmtarget_bias", action="store_true",
+                        help="Add bias on output_layer for lm target.")
+    parser.add_argument("--target", choices=["sp", "lm", "mlm", "bilm", "cls"], default="mlm", nargs='+',
+                        help="The training target of the pretraining model.")
+    parser.add_argument("--tie_weights", action="store_true",
+                        help="Tie the word embedding and softmax weights.")
+    parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
+                        help="Pooling type.")
 
 
 def log_opts(parser):
