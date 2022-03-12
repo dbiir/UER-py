@@ -22,7 +22,7 @@ from uer.utils.optimizers import *
 from uer.utils.config import load_hyperparam
 from uer.utils.seed import set_seed
 from uer.utils.logging import init_logger
-from tencentpretrain.utils.misc import pooling
+from uer.utils.misc import pooling
 from uer.model_saver import save_model
 from uer.opts import finetune_opts, tokenizer_opts
 from finetune.run_classifier import count_labels_num, build_optimizer
