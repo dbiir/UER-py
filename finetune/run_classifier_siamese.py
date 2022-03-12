@@ -31,10 +31,10 @@ from finetune.run_classifier import count_labels_num, build_optimizer
 class SiameseClassifier(nn.Module):
     def __init__(self, args):
         super(SiameseClassifier, self).__init__()
-        self.embedding = DualEmbedding(args, None)
+        self.embedding = DualEmbedding(args, len(args.tokenizer.vocab))
         self.encoder = DualEncoder(args)
 
-        self.classifier = nn.Linear(4 * args.hidden_size, args.labels_num)
+        self.classifier = nn.Linear(4 * args.stream_0["hidden_size"], args.labels_num)
         self.pooling_type = args.pooling
 
     def forward(self, src, tgt, seg):

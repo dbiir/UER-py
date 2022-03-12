@@ -1,5 +1,6 @@
 from argparse import Namespace
 import torch.nn as nn
+import copy
 
 
 class DualEncoder(nn.Module):
@@ -10,12 +11,12 @@ class DualEncoder(nn.Module):
         super(DualEncoder, self).__init__()
         from uer.encoders import str2encoder
 
-        stream_0_args = vars(args)
+        stream_0_args = copy.deepcopy(vars(args))
         stream_0_args.update(args.stream_0)
         stream_0_args = Namespace(**stream_0_args)
         self.encoder_0 = str2encoder[stream_0_args.encoder](stream_0_args)
 
-        stream_1_args = vars(args)
+        stream_1_args = copy.deepcopy(vars(args))
         stream_1_args.update(args.stream_1)
         stream_1_args = Namespace(**stream_1_args)
         self.encoder_1 = str2encoder[stream_1_args.encoder](stream_1_args)

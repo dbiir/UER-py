@@ -1,23 +1,24 @@
 from argparse import Namespace
 import torch.nn as nn
+import copy
 
 
 class DualEmbedding(nn.Module):
     """
     """
-    def __init__(self, args, vocab_size=None):
+    def __init__(self, args, vocab_size):
         super(DualEmbedding, self).__init__()
         from uer.embeddings import str2embedding
 
-        stream_0_args = vars(args)
+        stream_0_args = copy.deepcopy(vars(args))
         stream_0_args.update(args.stream_0)
         stream_0_args = Namespace(**stream_0_args)
-        self.embedding_0 = str2embedding[args.embedding](stream_0_args, args.vocab_size)
+        self.embedding_0 = str2embedding[stream_0_args.embedding](stream_0_args, vocab_size)
 
-        stream_1_args = vars(args)
+        stream_1_args = copy.deepcopy(vars(args))
         stream_1_args.update(args.stream_1)
         stream_1_args = Namespace(**stream_1_args)
-        self.embedding_1 = str2embedding[args.embedding](stream_1_args, args.vocab_size)
+        self.embedding_1 = str2embedding[stream_1_args.embedding](stream_1_args, vocab_size)
 
         self.dropout = nn.Dropout(args.dropout)
 
