@@ -10,10 +10,10 @@ def read_labels(dataset_path):
         columns, labels = {}, []
         for line_id, line in enumerate(f):
             if line_id == 0:
-                for i, column_name in enumerate(line.strip().split("\t")):
+                for i, column_name in enumerate(line.rstrip("\r\n").split("\t")):
                     columns[column_name] = i
                 continue
-            line = line[:-1].split("\t")
+            line = line.rstrip("\r\n").split("\t")
             labels.append(int(line[columns["label"]]))
         return labels
 

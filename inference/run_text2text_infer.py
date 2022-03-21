@@ -25,10 +25,10 @@ def read_dataset(args, path):
     with open(path, mode="r", encoding="utf-8") as f:
         for line_id, line in enumerate(f):
             if line_id == 0:
-                for i, column_name in enumerate(line.strip().split("\t")):
+                for i, column_name in enumerate(line.rstrip("\r\n").split("\t")):
                     columns[column_name] = i
                 continue
-            line = line[:-1].split('\t')
+            line = line.rstrip("\r\n").split('\t')
 
             if len(columns) == 2:
                 text = line[columns['text_a']] + SEP_TOKEN + line[columns['text_b']]
