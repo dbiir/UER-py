@@ -52,6 +52,7 @@ class ClozeTest(nn.Module):
 
 def read_dataset(args, path):
     dataset, columns = [], {}
+    count, ignore_count = 0, 0
     with open(path, mode="r", encoding="utf-8") as f:
         for line_id, line in enumerate(f):
             if line_id == 0:
@@ -95,16 +96,25 @@ def read_dataset(args, path):
                         src += prompt_token
             src += [args.tokenizer.vocab.get(SEP_TOKEN)]
             seg = [1] * len(src)
+
+            if len(src) > args.seq_length:
+                src = src[: args.seq_length]
+                seg = seg[: args.seq_length]
+
             PAD_ID = args.tokenizer.convert_tokens_to_ids([PAD_TOKEN])[0]
             while len(src) < args.seq_length:
                 src.append(PAD_ID)
                 seg.append(0)
             tgt = [0] * len(src)
+            # Ignore the sentence which the answer is not in a sequence
+            if mask_position >= args.seq_length:
+                ignore_count += 1
+                continue
             tgt[mask_position] = tgt_token_id
+            count += 1
             dataset.append((src, tgt, seg))
-
+        args.logger.info(f"read dataset, count:{count}, ignore_count:{ignore_count}")
     return dataset
-
 
 def train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_batch):
     model.zero_grad()
