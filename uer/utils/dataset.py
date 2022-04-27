@@ -815,6 +815,8 @@ class ClsMlmDataset(Dataset):
                     tgt_cls = label
                     seg_pos = [len(src_a)] + [len(src_b)]
                 else:
+                    if pos >= end:
+                        break
                     continue
 
                 if len(src) >= self.seq_length:
