@@ -691,15 +691,16 @@ class ClsDataset(Dataset):
                     src = [self.vocab.get(t) for t in self.tokenizer.tokenize(text)]
                     src = [self.vocab.get(CLS_TOKEN)] + src
                     tgt = label
-                    seg = [1] * len(src)
+                    # seg = [1] * len(src)
+                    seg_pos = [len(src)]
                     if len(src) >= self.seq_length:
-                        src = src[:self.seq_length]
-                        seg = seg[:self.seq_length]
+                        pad_num = 0
+                        src = (src[:self.seq_length], pad_num)
+                        seg_pos = [self.seq_length]
                     else:
-                        while len(src) != self.seq_length:
-                            src.append(self.vocab.get(PAD_TOKEN))
-                            seg.append(0)
-                    pickle.dump((src, tgt, seg), dataset_writer)
+                        pad_num = self.seq_length - len(src)
+                        src = (src, pad_num)
+                    pickle.dump((src, tgt, seg_pos), dataset_writer)
                 elif len(line) == 3:  # For sentence pair input.
                     label = int(line[0])
                     text_a, text_b = line[1], line[2]
@@ -711,16 +712,20 @@ class ClsDataset(Dataset):
 
                     src = src_a + src_b
                     tgt = label
-                    seg = [1] * len(src_a) + [2] * len(src_b)
+                    seg_pos = [len(src_a)] + [len(src_b)]
 
                     if len(src) >= self.seq_length:
-                        src = src[:self.seq_length]
-                        seg = seg[:self.seq_length]
+                        pad_num = 0
+                        src = (src[:self.seq_length], pad_num)
+                        if len(src_a) >= self.seq_length:
+                            seg_pos = [self.seq_length]
+                        else:
+                            seg_pos = [len(src_a)] + [self.seq_length - len(src_a)]
                     else:
-                        while len(src) != self.seq_length:
-                            src.append(self.vocab.get(PAD_TOKEN))
-                            seg.append(0)
-                    pickle.dump((src, tgt, seg), dataset_writer)
+                        pad_num = self.seq_length - len(src)
+                        src = (src, pad_num)
+                    pickle.dump((src, tgt, seg_pos), dataset_writer)
+
                 else:
                     pass
 
@@ -797,7 +802,9 @@ class ClsMlmDataset(Dataset):
                     text = line[1]
                     src = [self.vocab.get(CLS_TOKEN)] + self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(text)) + [self.vocab.get(SEP_TOKEN)]
                     tgt_cls = label
-                    seg = [1] * len(src)
+                    seg_pos = [len(src)]
+
+
                 elif len(line) == 3:  # For sentence pair input.
                     label = int(line[0])
                     text_a, text_b = line[1], line[2]
@@ -809,22 +816,31 @@ class ClsMlmDataset(Dataset):
 
                     src = src_a + src_b
                     tgt_cls = label
-                    seg = [1] * len(src_a) + [2] * len(src_b)
+                    seg_pos = [len(src_a)] + [len(src_b)]
 
                 if len(src) >= self.seq_length:
-                    src = src[:self.seq_length]
-                    seg = seg[:self.seq_length]
+                    pad_num = 0
+                    src = (src[:self.seq_length], pad_num)
+                    if len(seg_pos) == 1:
+                        seg_pos = [self.seq_length]
+                    else:
+                        if len(src_a) >= self.seq_length:
+                            seg_pos = [self.seq_length]
+                        else:
+                            seg_pos = [len(src_a)] + [self.seq_length - len(src_a)]
                 else:
-                    while len(src) != self.seq_length:
-                        src.append(self.vocab.get(PAD_TOKEN))
-                        seg.append(0)
+                    pad_num = self.seq_length - len(src)
+                    src = (src, pad_num)
 
                 if not self.dynamic_masking:
-                    src, tgt_mlm = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
-                    instance = (src, tgt_mlm, tgt_cls, seg)
+                    src_single, pad_num = src
+                    src_single, tgt_mlm = mask_seq(src_single, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                    src = (src_single, pad_num)
+                    instance = (src, tgt_mlm, tgt_cls, seg_pos)
                 else:
-                    instance = (src, tgt_cls, seg)
+                    instance = (src, tgt_cls, seg_pos)
 
+            
                 pickle.dump(instance, dataset_writer)
 
                 if pos >= end:
