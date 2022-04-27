@@ -691,7 +691,6 @@ class ClsDataset(Dataset):
                     src = [self.vocab.get(t) for t in self.tokenizer.tokenize(text)]
                     src = [self.vocab.get(CLS_TOKEN)] + src
                     tgt = label
-                    # seg = [1] * len(src)
                     seg_pos = [len(src)]
                     if len(src) >= self.seq_length:
                         pad_num = 0
@@ -803,8 +802,6 @@ class ClsMlmDataset(Dataset):
                     src = [self.vocab.get(CLS_TOKEN)] + self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(text)) + [self.vocab.get(SEP_TOKEN)]
                     tgt_cls = label
                     seg_pos = [len(src)]
-
-
                 elif len(line) == 3:  # For sentence pair input.
                     label = int(line[0])
                     text_a, text_b = line[1], line[2]
@@ -840,7 +837,6 @@ class ClsMlmDataset(Dataset):
                 else:
                     instance = (src, tgt_cls, seg_pos)
 
-            
                 pickle.dump(instance, dataset_writer)
 
                 if pos >= end:

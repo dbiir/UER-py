@@ -382,12 +382,12 @@ class ClsDataloader(Dataloader):
 
             for ins in instances:
                 src_single, pad_num = ins[0]
-                seg_single = ins[2]
+                seg_pos_single = ins[2]
 
-                if len(seg_single) == 1:
-                    seg_single = [1] * seg_single[0]
-                elif len(seg_single) == 2:
-                    seg_single = [1] * seg_single[0] + [2] * seg_single[1]
+                if len(seg_pos_single) == 1:
+                    seg_single = [1] * seg_pos_single[0]
+                elif len(seg_pos_single) == 2:
+                    seg_single = [1] * seg_pos_single[0] + [2] * seg_pos_single[1]
                 
                 for _ in range(pad_num):
                     src_single.append(self.vocab.get(PAD_TOKEN))
@@ -401,7 +401,7 @@ class ClsDataloader(Dataloader):
                 torch.LongTensor(tgt), \
                 torch.LongTensor(seg)
 
-            
+
 class PrefixlmDataloader(Dataloader):
     def __iter__(self):
         while True:
@@ -449,13 +449,13 @@ class ClsMlmDataloader(Dataloader):
 
             for ins in instances:
                 src_single, pad_num = ins[0]
-                seg_single = ins[-1]
+                seg_pos_single = ins[-1]
                 tgt_cls.append(ins[-2])
 
-                if len(seg_single) == 1:
-                    seg_single = [1] * seg_single[0]
-                elif len(seg_single) == 2:
-                    seg_single = [1] * seg_single[0] + [2] * seg_single[1]
+                if len(seg_pos_single) == 1:
+                    seg_single = [1] * seg_pos_single[0]
+                elif len(seg_pos_single) == 2:
+                    seg_single = [1] * seg_pos_single[0] + [2] * seg_pos_single[1]
                 
                 for _ in range(pad_num):
                     src_single.append(self.vocab.get(PAD_TOKEN))
