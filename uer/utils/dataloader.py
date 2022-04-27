@@ -381,15 +381,27 @@ class ClsDataloader(Dataloader):
             seg = []
 
             for ins in instances:
-                src.append(ins[0])
+                src_single, pad_num = ins[0]
+                seg_single = ins[2]
+
+                if len(seg_single) == 1:
+                    seg_single = [1] * seg_single[0]
+                elif len(seg_single) == 2:
+                    seg_single = [1] * seg_single[0] + [2] * seg_single[1]
+                
+                for _ in range(pad_num):
+                    src_single.append(self.vocab.get(PAD_TOKEN))
+                    seg_single.append(0)
+                
+                src.append(src_single)
                 tgt.append(ins[1])
-                seg.append(ins[2])
+                seg.append(seg_single)
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt), \
                 torch.LongTensor(seg)
 
-
+            
 class PrefixlmDataloader(Dataloader):
     def __iter__(self):
         while True:
@@ -436,19 +448,31 @@ class ClsMlmDataloader(Dataloader):
             masked_words_num = 0
 
             for ins in instances:
+                src_single, pad_num = ins[0]
+                seg_single = ins[-1]
                 tgt_cls.append(ins[-2])
-                seg.append(ins[-1])
-                if len(ins) == 4:
-                    src.append(ins[0])
+
+                if len(seg_single) == 1:
+                    seg_single = [1] * seg_single[0]
+                elif len(seg_single) == 2:
+                    seg_single = [1] * seg_single[0] + [2] * seg_single[1]
+                
+                for _ in range(pad_num):
+                    src_single.append(self.vocab.get(PAD_TOKEN))
+                    seg_single.append(0)
+                seg.append(seg_single)
+
+                if len(ins) == 4 :
+                    src.append(src_single)
                     masked_words_num += len(ins[1])
-                    tgt_mlm.append([0] * len(ins[0]))
+                    tgt_mlm.append([0] * len(src_single))
                     for mask in ins[1]:
                         tgt_mlm[-1][mask[0]] = mask[1]
                 else:
-                    src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                    src_single, tgt_single = mask_seq(src_single, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
                     src.append(src_single)
                     masked_words_num += len(tgt_single)
-                    tgt_mlm.append([0] * len(ins[0]))
+                    tgt_mlm.append([0] * len(src_single))
                     for mask in tgt_single:
                         tgt_mlm[-1][mask[0]] = mask[1]
 
@@ -459,4 +483,3 @@ class ClsMlmDataloader(Dataloader):
                 torch.LongTensor(tgt_mlm), \
                 torch.LongTensor(tgt_cls), \
                 torch.LongTensor(seg)
-
