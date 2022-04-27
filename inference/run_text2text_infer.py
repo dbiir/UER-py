@@ -30,8 +30,8 @@ def read_dataset(args, path):
                 continue
             line = line.rstrip("\r\n").split('\t')
 
-            if len(columns) == 2:
-                text = line[columns['text_a']] + SEP_TOKEN + line[columns['text_b']]
+            if "text_b" in columns:
+                text = line[columns["text_a"]] + SEP_TOKEN + line[columns["text_b"]]
             else:
                 text = line[columns["text_a"]]
 
