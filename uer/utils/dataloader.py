@@ -166,12 +166,12 @@ class LmDataloader(Dataloader):
             seg = []
 
             for ins in instances:
-                src.append(ins[0][:-1])
-                tgt.append(ins[0][1:])
-                if ins[1] == len(ins[0]):
-                    seg.append([1] * (ins[1] - 1))
-                else:
-                    seg.append([1] * ins[1] + [0] * (len(ins[0]) - 1 - ins[1]))
+                src_single, pad_num = ins[0]
+                for _ in range(pad_num):
+                    src_single.append(self.vocab.get(PAD_TOKEN))
+                src.append(src_single[:-1])
+                tgt.append(src_single[1:])
+                seg.append([1] * ins[1] + [0] * (len(src_single) - 1 - ins[1]))
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt), \
