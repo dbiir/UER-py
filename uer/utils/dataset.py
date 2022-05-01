@@ -442,13 +442,14 @@ class LmDataset(Dataset):
                 for i in range(instances_num):
                     src = document[i * (self.seq_length + 1): (i + 1) * (self.seq_length + 1)]
                     seg_pos = self.seq_length
+                    src = (src, 0)
                     pickle.dump((src, seg_pos), dataset_writer)
 
                 src = document[instances_num * (self.seq_length + 1):]
                 if len(src) > 0:
                     seg_pos = len(src)
-                    while len(src) != self.seq_length + 1:
-                        src.append(self.vocab.get(PAD_TOKEN))
+                    pad_num = self.seq_length + 1 - len(src)
+                    src = (src, pad_num)
                     pickle.dump((src, seg_pos), dataset_writer)
 
                 if pos >= end:
