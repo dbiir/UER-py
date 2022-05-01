@@ -205,13 +205,16 @@ class BertDataset(Dataset):
                     src.append(self.vocab.get(SEP_TOKEN))
                     seg_pos.append(len(src))
 
-                    while len(src) != self.seq_length:
-                        src.append(self.vocab.get(PAD_TOKEN))
-
+                    pad_num = 0
+                    if len(src) != self.seq_length:
+                        pad_num = self.seq_length - len(src)
+                    
                     if not self.dynamic_masking:
                         src, tgt_mlm = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                        src = (src, pad_num)
                         instance = (src, tgt_mlm, is_random_next, seg_pos)
                     else:
+                        src = (src, pad_num)
                         instance = (src, is_random_next, seg_pos)
 
                     instances.append(instance)
@@ -290,8 +293,10 @@ class MlmDataset(Dataset):
 
             if not self.dynamic_masking:
                 src, tgt = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                src = (src, 0)
                 instance = (src, tgt, seg_pos)
             else:
+                src = (src, 0)
                 instance = (src, seg_pos)
 
             instances.append(instance)
@@ -299,13 +304,15 @@ class MlmDataset(Dataset):
         src = all_documents[instances_num * self.seq_length:]
         seg_pos = [len(src)]
 
-        while len(src) != self.seq_length:
-            src.append(self.vocab.get(PAD_TOKEN))
+        if len(src) != self.seq_length:
+            pad_num = self.seq_length - len(src)
 
         if not self.dynamic_masking:
             src, tgt = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+            src = (src, pad_num)
             instance = (src, tgt, seg_pos)
         else:
+            src = (src, pad_num)
             instance = (src, seg_pos)
 
         instances.append(instance)
@@ -442,13 +449,14 @@ class LmDataset(Dataset):
                 for i in range(instances_num):
                     src = document[i * (self.seq_length + 1): (i + 1) * (self.seq_length + 1)]
                     seg_pos = self.seq_length
+                    src = (src, 0)
                     pickle.dump((src, seg_pos), dataset_writer)
 
                 src = document[instances_num * (self.seq_length + 1):]
                 if len(src) > 0:
                     seg_pos = len(src)
-                    while len(src) != self.seq_length + 1:
-                        src.append(self.vocab.get(PAD_TOKEN))
+                    pad_num = self.seq_length - len(src) + 1
+                    src = (src, pad_num)
                     pickle.dump((src, seg_pos), dataset_writer)
 
                 if pos >= end:
