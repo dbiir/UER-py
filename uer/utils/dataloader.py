@@ -72,23 +72,27 @@ class BertDataloader(Dataloader):
             masked_words_num = 0
 
             for ins in instances:
+                src_single, pad_num = ins[0]
+                for _ in range(pad_num):
+                    src_single.append(self.vocab.get(PAD_TOKEN))
+
                 if len(ins) == 4:
-                    src.append(ins[0])
+                    src.append(src_single)
                     masked_words_num += len(ins[1])
-                    tgt_mlm.append([0] * len(ins[0]))
+                    tgt_mlm.append([0] * len(src_single))
                     for mask in ins[1]:
                         tgt_mlm[-1][mask[0]] = mask[1]
                     is_next.append(ins[2])
-                    seg.append([1] * ins[3][0] + [2] * (ins[3][1] - ins[3][0]) + [0] * (len(ins[0]) - ins[3][1]))
+                    seg.append([1] * ins[3][0] + [2] * (ins[3][1] - ins[3][0]) + [0] * pad_num)
                 else:
-                    src_single, tgt_mlm_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                    src_single, tgt_mlm_single = mask_seq(src_single, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
                     masked_words_num += len(tgt_mlm_single)
                     src.append(src_single)
-                    tgt_mlm.append([0] * len(ins[0]))
+                    tgt_mlm.append([0] * len(src_single))
                     for mask in tgt_mlm_single:
                         tgt_mlm[-1][mask[0]] = mask[1]
                     is_next.append(ins[1])
-                    seg.append([1] * ins[2][0] + [2] * (ins[2][1] - ins[2][0]) + [0] * (len(ins[0]) - ins[2][1]))
+                    seg.append([1] * ins[2][0] + [2] * (ins[2][1] - ins[2][0]) + [0] * pad_num)
 
             if masked_words_num == 0:
                 continue
@@ -118,21 +122,25 @@ class MlmDataloader(Dataloader):
             masked_words_num = 0
 
             for ins in instances:
+                src_single, pad_num = ins[0]
+                for _ in range(pad_num):
+                    src_single.append(self.vocab.get(PAD_TOKEN))
+
                 if len(ins) == 3:
-                    src.append(ins[0])
+                    src.append(src_single)
                     masked_words_num += len(ins[1])
-                    tgt.append([0] * len(ins[0]))
+                    tgt.append([0] * len(src_single))
                     for mask in ins[1]:
                         tgt[-1][mask[0]] = mask[1]
-                    seg.append([1] * ins[2][0] + [0] * (len(ins[0]) - ins[2][0]))
+                    seg.append([1] * ins[2][0] + [0] * pad_num)
                 else:
-                    src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                    src_single, tgt_single = mask_seq(src_single, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
                     masked_words_num += len(tgt_single)
                     src.append(src_single)
-                    tgt.append([0] * len(ins[0]))
+                    tgt.append([0] * len(src_single))
                     for mask in tgt_single:
                         tgt[-1][mask[0]] = mask[1]
-                    seg.append([1] * ins[1][0] + [0] * (len(ins[0]) - ins[1][0]))
+                    seg.append([1] * ins[1][0] + [0] * pad_num)
 
             if masked_words_num == 0:
                 continue
