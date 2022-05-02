@@ -412,7 +412,7 @@ class AlbertDataset(Dataset):
                     seg_pos.append(len(src))
 
                     pad_num = 0
-                    if len(src) != self.length:
+                    if len(src) != self.seq_length:
                         pad_num = self.seq_length - len(src)
 
                     if not self.dynamic_masking:
