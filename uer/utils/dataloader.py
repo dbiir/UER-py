@@ -264,13 +264,16 @@ class T5Dataloader(Dataloader):
             tgt_seq_length = 0
 
             for _, ins in enumerate(instances):
+                src_single, pad_num = ins[0]
+                for _ in range(pad_num):
+                    src_single.append(self.vocab.get(PAD_TOKEN))
+
                 if len(ins) == 3:
-                    src_single = ins[0]
                     tgt_single = ins[1]
-                    seg.append([1] * ins[2][0] + [0] * (len(ins[0]) - ins[2][0]))
+                    seg.append([1] * ins[2][0] + [0] * pad_num)
                 else:
-                    src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
-                    seg.append([1] * ins[1][0] + [0] * (len(ins[0]) - ins[1][0]))
+                    src_single, tgt_single = mask_seq(src_single, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                    seg.append([1] * ins[1][0] + [0] * pad_num)
 
                 MASK_ID = self.vocab.get(MASK_TOKEN)
                 SENTINEL_ID = self.vocab.get(SENTINEL_TOKEN)
