@@ -13,6 +13,6 @@
   "encoder": "transformer",
   "mask": "causal",
   "layernorm_positioning": "pre",
-  "target": ["lm"],
+  "target": "lm",
   "tie_weights": true
 }
