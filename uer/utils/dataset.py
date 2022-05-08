@@ -544,10 +544,12 @@ class MtDataset(Dataset):
 
                 src, tgt = src[:self.seq_length], tgt[:self.tgt_seq_length + 1]
                 seg_pos = [len(src)]
-                while len(src) != self.seq_length:
-                    src.append(self.vocab.get(PAD_TOKEN))
-                while len(tgt) != self.tgt_seq_length + 1:
-                    tgt.append(self.vocab.get(PAD_TOKEN))
+
+                pad_num = self.seq_length - len(src)
+                src = (src, pad_num)
+                pad_num = self.tgt_seq_length + 1 - len(tgt)
+                tgt = (tgt, pad_num)
+
                 pickle.dump((src, tgt, seg_pos), dataset_writer)
 
                 if pos >= end:
@@ -573,10 +575,10 @@ class GsgDataset(BertDataset):
         src = [self.vocab.get(CLS_TOKEN)] + src + [self.vocab.get(SEP_TOKEN)]
         tgt = [self.vocab.get(CLS_TOKEN)] + tgt + [self.vocab.get(SEP_TOKEN)]
         seg_pos = [len(src)]
-        while len(src) != self.seq_length:
-            src.append(self.vocab.get(PAD_TOKEN))
-        while len(tgt) != self.tgt_seq_length:
-            tgt.append(self.vocab.get(PAD_TOKEN))
+        pad_num = self.seq_length - len(src)
+        src = (src, pad_num)
+        pad_num = self.tgt_seq_length - len(tgt)
+        tgt = (tgt, pad_num)
         instance = (src, tgt, seg_pos)
         return instance
 
@@ -631,9 +633,12 @@ class BartDataset(BertDataset):
         src = [self.vocab.get(CLS_TOKEN)] + src + [self.vocab.get(SEP_TOKEN)]
         tgt = [self.vocab.get(CLS_TOKEN)] + tgt + [self.vocab.get(SEP_TOKEN)]
         seg_pos = len(src)
-        while len(src) != self.seq_length:
-            src.append(self.vocab.get(PAD_TOKEN))
-            tgt.append(self.vocab.get(PAD_TOKEN))
+
+        pad_num = self.seq_length - len(src)
+
+        src = (src, pad_num)
+        tgt = (tgt, pad_num)
+
         instance = (src, tgt, seg_pos)
 
         return instance
