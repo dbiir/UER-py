@@ -233,10 +233,17 @@ class MtDataloader(Dataloader):
             seg = []
 
             for ins in instances:
-                src.append(ins[0])
-                tgt_in.append(ins[1][:-1])
-                tgt_out.append(ins[1][1:])
-                seg.append([1] * ins[2][0] + [0] * (len(ins[0]) - ins[2][0]))
+                src_single, pad_num = ins[0]
+                for _ in range(pad_num):
+                    src_single.append(self.vocab.get(PAD_TOKEN))
+                tgt_single, pad_num = ins[1]
+                for _ in range(pad_num):
+                    tgt_single.append(self.vocab.get(PAD_TOKEN))
+
+                src.append(src_single)
+                tgt_in.append(tgt_single[:-1])
+                tgt_out.append(tgt_single[1:])
+                seg.append([1] * ins[2][0] + [0] * (len(src_single) - ins[2][0]))
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt_in), \
@@ -345,10 +352,17 @@ class BartDataloader(Dataloader):
             seg = []
 
             for _, ins in enumerate(instances):
-                src_single, tgt_single = mask_seq(ins[0], self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                src_single, pad_num = ins[0]
+                for _ in range(pad_num):
+                    src_single.append(self.vocab.get(PAD_TOKEN))
+                tgt_single, pad_num = ins[1]
+                for _ in range(pad_num):
+                    tgt_single.append(self.vocab.get(PAD_TOKEN))
+
+                src_single, _ = mask_seq(src_single, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
                 seg_pos = ins[2]
-                tgt_in.append(ins[1][:-1])
-                tgt_out.append(ins[1][1:])
+                tgt_in.append(tgt_single[:-1])
+                tgt_out.append(tgt_single[1:])
 
                 MASK_ID = self.vocab.get(MASK_TOKEN)
 
@@ -365,7 +379,7 @@ class BartDataloader(Dataloader):
                 while len(src_with_span_mask) < len(src_single):
                     src_with_span_mask.append(self.vocab.get(PAD_TOKEN))
 
-                seg.append(([1] * seg_pos + [0] * (len(ins[0]) - seg_pos)))
+                seg.append([1] * seg_pos + [0] * (len(src_single) - seg_pos))
                 src.append(src_with_span_mask)
 
 
