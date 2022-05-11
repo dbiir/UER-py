@@ -46,10 +46,10 @@ def model_opts(parser):
 def log_opts(parser):
     parser.add_argument("--log_path", type=str, default=None,
                         help="Log file path, default no output file.")
-    parser.add_argument("--log_level", choices=["ERROR", "INFO", "DEBUG", "NOSET"], default="INFO",
-                        help="Console log level. Verbosity: ERROR < INFO < DEBUG < NOSET")
-    parser.add_argument("--log_file_level", choices=["ERROR", "INFO", "DEBUG", "NOSET"], default="INFO",
-                        help="Log file level. Verbosity: ERROR < INFO < DEBUG < NOSET")
+    parser.add_argument("--log_level", choices=["ERROR", "INFO", "DEBUG", "NOTSET"], default="INFO",
+                        help="Console log level. Verbosity: ERROR < INFO < DEBUG < NOTSET")
+    parser.add_argument("--log_file_level", choices=["ERROR", "INFO", "DEBUG", "NOTSET"], default="INFO",
+                        help="Log file level. Verbosity: ERROR < INFO < DEBUG < NOTSET")
 
 
 def optimization_opts(parser):
