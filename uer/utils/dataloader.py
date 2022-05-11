@@ -204,10 +204,16 @@ class BilmDataloader(Dataloader):
             seg = []
 
             for ins in instances:
-                src.append(ins[0])
-                tgt_forward.append(ins[1])
-                tgt_backward.append(ins[2])
-                seg.append(ins[3])
+                src_single, pad_num = ins[0]
+                tgt_forward_single, tgt_backward_single = ins[1], ins[2]
+                for _ in range(pad_num):
+                    src_single.append(self.vocab.get(PAD_TOKEN))
+                    tgt_forward_single.append(self.vocab.get(PAD_TOKEN))
+                    tgt_backward_single.append(self.vocab.get(PAD_TOKEN))
+                src.append(src_single)
+                tgt_forward.append(tgt_forward_single)
+                tgt_backward.append(tgt_backward_single)
+                seg.append([1] * ins[3][0] + [0] * (len(src_single) - ins[3][0]))
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt_forward), \
@@ -444,9 +450,14 @@ class PrefixlmDataloader(Dataloader):
             seg = []
 
             for ins in instances:
-                src.append(ins[0])
-                tgt.append(ins[1])
-                seg.append([1] * ins[2][0] + [2] * (ins[2][1] - ins[2][0]) + [0] * (len(ins[0]) - ins[2][1]))
+                src_single, pad_num = ins[0]
+                tgt_single = ins[1]
+                for _ in range(pad_num):
+                    src_single.append(self.vocab.get(PAD_TOKEN))
+                    tgt_single.append(self.vocab.get(PAD_TOKEN))
+                src.append(src_single)
+                tgt.append(tgt_single)
+                seg.append([1] * ins[2][0] + [2] * (ins[2][1] - ins[2][0]) + [0] * (len(src_single) - ins[2][1]))
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt), \
