@@ -488,21 +488,19 @@ class BilmDataset(Dataset):
                     src = document[i * self.seq_length: (i + 1) * self.seq_length]
                     tgt_forward = src[1:] + [self.vocab.get(SEP_TOKEN)]
                     tgt_backward = [self.vocab.get(CLS_TOKEN)] + src[:-1]
-                    seg = [1] * len(src)
-                    pickle.dump((src, tgt_forward, tgt_backward, seg), dataset_writer)
+                    seg_pos = [self.seq_length]
+                    src = (src,0)
+                    pickle.dump((src, tgt_forward, tgt_backward, seg_pos), dataset_writer)
 
                 src = document[instances_num * self.seq_length:]
                 if len(src) < 1:
                     continue
                 tgt_forward = src[1:] + [self.vocab.get(SEP_TOKEN)]
                 tgt_backward = [self.vocab.get(CLS_TOKEN)] + src[:-1]
-                seg = [1] * len(src)
-                while len(src) != self.seq_length:
-                    src.append(self.vocab.get(PAD_TOKEN))
-                    tgt_forward.append(self.vocab.get(PAD_TOKEN))
-                    tgt_backward.append(self.vocab.get(PAD_TOKEN))
-                    seg.append(0)
-                pickle.dump((src, tgt_forward, tgt_backward, seg), dataset_writer)
+                seg_pos = [len(src)]
+                pad_num = self.seq_length - len(src)
+                src = (src, pad_num)
+                pickle.dump((src, tgt_forward, tgt_backward, seg_pos), dataset_writer)
 
                 if pos >= end:
                     break
@@ -782,9 +780,8 @@ class PrefixlmDataset(Dataset):
                 tgt = [0] * (seg_pos[0] - 1) + tgt + [self.vocab.get(PAD_TOKEN)]
                 seg_pos.append(len(src))
                 src, tgt = src[:self.seq_length], tgt[:self.seq_length]
-                while len(src) != self.seq_length:
-                    src.append(self.vocab.get(PAD_TOKEN))
-                    tgt.append(self.vocab.get(PAD_TOKEN))
+                pad_num = self.seq_length - len(src)
+                src = (src, pad_num)
                 if seg_pos[1] > self.seq_length:
                     seg_pos[1] = self.seq_length
 
