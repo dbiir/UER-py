@@ -179,7 +179,7 @@ class LmDataloader(Dataloader):
                     src_single.append(self.vocab.get(PAD_TOKEN))
                 src.append(src_single[:-1])
                 tgt.append(src_single[1:])
-                seg.append([1] * ins[1] + [0] * (len(src_single) - 1 - ins[1]))
+                seg.append([1] * ins[1][0] + [0] * (len(src_single) - 1 - ins[1][0]))
 
             yield torch.LongTensor(src), \
                 torch.LongTensor(tgt), \
@@ -366,7 +366,7 @@ class BartDataloader(Dataloader):
                     tgt_single.append(self.vocab.get(PAD_TOKEN))
 
                 src_single, _ = mask_seq(src_single, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
-                seg_pos = ins[2]
+                seg_pos = ins[2][0]
                 tgt_in.append(tgt_single[:-1])
                 tgt_out.append(tgt_single[1:])
 
