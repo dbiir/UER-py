@@ -450,13 +450,13 @@ class LmDataset(Dataset):
                 instances_num = len(document) // (self.seq_length + 1)
                 for i in range(instances_num):
                     src = document[i * (self.seq_length + 1): (i + 1) * (self.seq_length + 1)]
-                    seg_pos = self.seq_length
+                    seg_pos = [self.seq_length]
                     src = (src, 0)
                     pickle.dump((src, seg_pos), dataset_writer)
 
                 src = document[instances_num * (self.seq_length + 1):]
                 if len(src) > 0:
-                    seg_pos = len(src)
+                    seg_pos = [len(src)]
                     pad_num = self.seq_length + 1 - len(src)
                     src = (src, pad_num)
                     pickle.dump((src, seg_pos), dataset_writer)
@@ -489,7 +489,7 @@ class BilmDataset(Dataset):
                     tgt_forward = src[1:] + [self.vocab.get(SEP_TOKEN)]
                     tgt_backward = [self.vocab.get(CLS_TOKEN)] + src[:-1]
                     seg_pos = [self.seq_length]
-                    src = (src,0)
+                    src = (src, 0)
                     pickle.dump((src, tgt_forward, tgt_backward, seg_pos), dataset_writer)
 
                 src = document[instances_num * self.seq_length:]
@@ -630,7 +630,7 @@ class BartDataset(BertDataset):
     def create_single_instance(self, src, tgt):
         src = [self.vocab.get(CLS_TOKEN)] + src + [self.vocab.get(SEP_TOKEN)]
         tgt = [self.vocab.get(CLS_TOKEN)] + tgt + [self.vocab.get(SEP_TOKEN)]
-        seg_pos = len(src)
+        seg_pos = [len(src)]
 
         pad_num = self.seq_length - len(src)
 
