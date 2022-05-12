@@ -245,16 +245,16 @@ def evaluate(args, dataset):
         correct += torch.sum(pred == gold).item()
 
 
-    args.logger.debug("Confusion matrix:")
-    args.logger.debug(confusion)
-    args.logger.debug("Report precision, recall, and f1:")
+    args.logger.info("Confusion matrix:")
+    args.logger.info(confusion)
+    args.logger.info("Report precision, recall, and f1:")
 
     eps = 1e-9
     for i in range(confusion.size()[0]):
         p = confusion[i, i].item() / (confusion[i, :].sum().item() + eps)
         r = confusion[i, i].item() / (confusion[:, i].sum().item() + eps)
         f1 = 2 * p * r / (p + r + eps)
-        args.logger.debug("Label {}: {:.3f}, {:.3f}, {:.3f}".format(i, p, r, f1))
+        args.logger.info("Label {}: {:.3f}, {:.3f}, {:.3f}".format(i, p, r, f1))
 
     args.logger.info("Acc. (Correct/Total): {:.4f} ({}/{}) ".format(correct / len(dataset), correct, len(dataset)))
     return correct / len(dataset), confusion
