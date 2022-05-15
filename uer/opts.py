@@ -159,8 +159,8 @@ def tgt_tokenizer_opts(parser):
                         help="Path of the target merges file.")
     parser.add_argument("--tgt_spm_model_path", default=None, type=str,
                         help="Path of the target sentence piece model.")
-    parser.add_argument("--do_lower_case", action="store_false",
-                        help="Whether to lower case the input")
+    parser.add_argument("--tgt_do_lower_case", action="store_false",
+                        help="Whether to lower case the target input")
 
 
 def deepspeed_opts(parser):
