@@ -251,10 +251,10 @@ def get_pairs(word):
 class BertTokenizer(Tokenizer):
     """Runs end-to-end tokenziation."""
 
-    def __init__(self, args, is_src=True, do_lower_case=True):
+    def __init__(self, args, is_src=True):
         super().__init__(args, is_src)
         if not args.spm_model_path:
-            self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case)
+            self.basic_tokenizer = BasicTokenizer(do_lower_case=args.do_lower_case)
             self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab, unk_token=UNK_TOKEN)
 
     def tokenize(self, text):
