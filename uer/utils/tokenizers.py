@@ -368,12 +368,15 @@ class XLMRobertaTokenizer(Tokenizer):
 class BasicTokenizer(object):
     """Runs basic tokenization (punctuation splitting, lower casing, etc.)."""
 
-    def __init__(self, do_lower_case=True):
+    def __init__(self, do_lower_case):
         """Constructs a BasicTokenizer.
         Args:
             do_lower_case: Whether to lower case the input.
         """
-        self.do_lower_case = do_lower_case
+        if do_lower_case == "true":
+            self.do_lower_case = True
+        else:
+            self.do_lower_case = False
 
     def tokenize(self, text):
         """Tokenizes a piece of text."""

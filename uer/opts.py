@@ -146,7 +146,7 @@ def tokenizer_opts(parser):
                         help="Path of the merges file.")
     parser.add_argument("--spm_model_path", default=None, type=str,
                         help="Path of the sentence piece model.")
-    parser.add_argument("--do_lower_case", choices=[True, False], default=True,
+    parser.add_argument("--do_lower_case", choices=["true", "false"], default="true",
                         help="Whether to lower case the input")
 
 
@@ -159,7 +159,7 @@ def tgt_tokenizer_opts(parser):
                         help="Path of the target merges file.")
     parser.add_argument("--tgt_spm_model_path", default=None, type=str,
                         help="Path of the target sentence piece model.")
-    parser.add_argument("--tgt_do_lower_case", choices=[True, False], default=True,
+    parser.add_argument("--tgt_do_lower_case", choices=["true", "false"], default="true",
                         help="Whether to lower case the target input")
 
 
