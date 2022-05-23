@@ -35,7 +35,7 @@ def read_dataset(args, path, split):
                 soft_tgt = [float(value) for value in line[columns["logits"]].split(" ")]
             if "text_b" not in columns:  # Sentence classification.
                 text_a = line[columns["text_a"]]
-                src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a))
+                src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a) + [SEP_TOKEN])
                 seg = [1] * len(src)
             else:  # Sentence-pair classification.
                 text_a, text_b = line[columns["text_a"]], line[columns["text_b"]]
