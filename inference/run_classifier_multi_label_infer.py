@@ -31,7 +31,10 @@ def main():
                         help="Number of prediction labels.")
 
     tokenizer_opts(parser)
-   
+
+    parser.add_argument("--output_logits", action="store_true", help="Write logits to output file.")
+    parser.add_argument("--output_prob", action="store_true", help="Write probabilities to output file.")
+       
     args = parser.parse_args()
 
     # Load the hyperparameters from the config file.
@@ -65,7 +68,12 @@ def main():
     model.eval()
 
     with open(args.prediction_path, mode="w", encoding="utf-8") as f:
-        f.write("label\n")
+        f.write("label")
+        if args.output_logits:
+            f.write("\t" + "logits")
+        if args.output_prob:
+            f.write("\t" + "prob")
+        f.write("\n")
         for i, (src_batch, seg_batch) in enumerate(batch_loader(batch_size, src, seg)):
             src_batch = src_batch.to(device)
             seg_batch = seg_batch.to(device)
@@ -74,13 +82,19 @@ def main():
             
             probs_batch = nn.Sigmoid()(logits)
             probs_batch = probs_batch.cpu().numpy().tolist()
-            
-            for prob in probs_batch:
+            logits = logits.cpu().numpy().tolist()
+
+            for i,prob in enumerate(probs_batch):
                 label = list()
                 for j in range(len(prob)):
                     if prob[j] > 0.5:
                          label.append(str(j))
-                f.write(",".join(label) + "\n")
+                f.write(",".join(label))
+                if args.output_logits:
+                    f.write("\t" + " ".join([str(v) for v in logits[i]]))
+                if args.output_prob:
+                    f.write("\t" + " ".join([str(v) for v in prob]))                
+                f.write("\n")
 
 
 if __name__ == "__main__":
