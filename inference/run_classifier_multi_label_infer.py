@@ -80,20 +80,20 @@ def main():
             with torch.no_grad():
                 _, logits = model(src_batch, None, seg_batch)
             
-            probs_batch = nn.Sigmoid()(logits)
-            probs_batch = probs_batch.cpu().numpy().tolist()
+            prob = nn.Sigmoid()(logits)
+            prob = prob.cpu().numpy().tolist()
             logits = logits.cpu().numpy().tolist()
 
-            for i,prob in enumerate(probs_batch):
+            for i, p in enumerate(prob):
                 label = list()
-                for j in range(len(prob)):
-                    if prob[j] > 0.5:
-                         label.append(str(j))
+                for j in range(len(p)):
+                    if p[j] > 0.5:
+                        label.append(str(j))
                 f.write(",".join(label))
                 if args.output_logits:
                     f.write("\t" + " ".join([str(v) for v in logits[i]]))
                 if args.output_prob:
-                    f.write("\t" + " ".join([str(v) for v in prob]))                
+                    f.write("\t" + " ".join([str(v) for v in p]))                
                 f.write("\n")
 
 
