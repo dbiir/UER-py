@@ -1,5 +1,5 @@
 """
-  This script provides an example to wrap TencentPretrain for multi-label classification inference.
+  This script provides an example to wrap UER-py for multi-label classification inference.
 """
 import sys
 import os
@@ -8,15 +8,15 @@ import argparse
 import collections
 import torch.nn as nn
 
-tencentpretrain_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(tencentpretrain_dir)
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
 
-from tencentpretrain.utils.constants import *
-from tencentpretrain.utils import *
-from tencentpretrain.utils.config import load_hyperparam
-from tencentpretrain.utils.seed import set_seed
-from tencentpretrain.model_loader import load_model
-from tencentpretrain.opts import infer_opts, tokenizer_opts
+from uer.utils.constants import *
+from uer.utils import *
+from uer.utils.config import load_hyperparam
+from uer.utils.seed import set_seed
+from uer.model_loader import load_model
+from uer.opts import infer_opts, tokenizer_opts
 from finetune.run_classifier_multi_label import MultilabelClassifier
 from inference.run_classifier_infer import read_dataset
 from inference.run_classifier_infer import batch_loader
