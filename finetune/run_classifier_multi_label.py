@@ -1,5 +1,5 @@
 """
-This script provides an example to wrap TencentPretrain for  multi-label classification.
+This script provides an example to wrap UER-py for multi-label classification.
 """
 import sys
 import os
@@ -11,21 +11,21 @@ import time
 import datetime
 import json
 
-tencentpretrain_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(tencentpretrain_dir)
+uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(uer_dir)
 
-from tencentpretrain.embeddings import *
-from tencentpretrain.encoders import *
-from tencentpretrain.utils.vocab import Vocab
-from tencentpretrain.utils.constants import *
-from tencentpretrain.utils import *
-from tencentpretrain.utils.optimizers import *
-from tencentpretrain.utils.config import load_hyperparam
-from tencentpretrain.utils.seed import set_seed
-from tencentpretrain.utils.logging import init_logger
-from tencentpretrain.utils.misc import pooling
-from tencentpretrain.model_saver import save_model
-from tencentpretrain.opts import finetune_opts, tokenizer_opts, adv_opts
+from uer.embeddings import *
+from uer.encoders import *
+from uer.utils.vocab import Vocab
+from uer.utils.constants import *
+from uer.utils import *
+from uer.utils.optimizers import *
+from uer.utils.config import load_hyperparam
+from uer.utils.seed import set_seed
+from uer.utils.logging import init_logger
+from uer.utils.misc import pooling
+from uer.model_saver import save_model
+from uer.opts import finetune_opts, tokenizer_opts, adv_opts
 from finetune.run_classifier import load_or_initialize_parameters, build_optimizer, batch_loader
 
 
