@@ -18,6 +18,8 @@ class TransformerDecoder(nn.Module):
         self.transformer_decoder = nn.ModuleList(
             [TransformerDecoderLayer(args) for _ in range(self.layers_num)]
         )
+        self.deepspeed_checkpoint_activations = args.deepspeed_checkpoint_activations
+        self.deepspeed_checkpoint_layers_num = args.deepspeed_checkpoint_layers_num
 
         has_bias = bool(1 - args.remove_transformer_bias)
 
@@ -62,8 +64,24 @@ class TransformerDecoder(nn.Module):
         else:
             self_position_bias = None
 
-        for i in range(self.layers_num):
-            hidden = self.transformer_decoder[i](hidden, memory_bank, mask_decoder, mask_encoder, self_position_bias, None)
+        if self.deepspeed_checkpoint_activations:
+            from deepspeed import checkpointing
+
+            def custom(start, end):
+                def custom_forward(*inputs):
+                    x_, memory_bank_, self_position_bias_ = inputs
+                    for index in range(start, end):
+                        x_ = self.transformer_decoder[index](x_, memory_bank_, mask_decoder, mask_encoder, self_position_bias_, None)
+                    return x_
+
+                return custom_forward
+            l = 0
+            while l < self.layers_num:
+                hidden = checkpointing.checkpoint(custom(l, l + self.deepspeed_checkpoint_layers_num), hidden, memory_bank, self_position_bias)
+                l += self.deepspeed_checkpoint_layers_num
+        else:
+            for i in range(self.layers_num):
+                hidden = self.transformer_decoder[i](hidden, memory_bank, mask_decoder, mask_encoder, self_position_bias, None)
 
         if self.layernorm_positioning == "pre":
             return self.layer_norm(hidden)
