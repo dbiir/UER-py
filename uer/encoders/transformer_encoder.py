@@ -17,8 +17,11 @@ class TransformerEncoder(nn.Module):
         self.layernorm_positioning = args.layernorm_positioning
         self.relative_position_embedding = args.relative_position_embedding
         self.has_residual_attention = args.has_residual_attention
-        self.deepspeed_checkpoint_activations = args.deepspeed_checkpoint_activations
-        self.deepspeed_checkpoint_layers_num = args.deepspeed_checkpoint_layers_num
+        if "deepspeed_checkpoint_activations" in args:
+            self.deepspeed_checkpoint_activations = args.deepspeed_checkpoint_activations
+            self.deepspeed_checkpoint_layers_num = args.deepspeed_checkpoint_layers_num
+        else:
+            self.deepspeed_checkpoint_activations = False
 
         has_bias = bool(1 - args.remove_transformer_bias)
 
