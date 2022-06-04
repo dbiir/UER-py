@@ -80,7 +80,7 @@ class ClozeTest(torch.nn.Module):
         super(ClozeTest, self).__init__()
         self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
         self.encoder = str2encoder[args.encoder](args)
-        self.target = str2target[args.target](args, len(args.tokenizer.vocab))
+        self.target = MlmTarget(args, len(args.tokenizer.vocab))
         self.act = str2act[args.hidden_act]
 
     def forward(self, src, seg):
