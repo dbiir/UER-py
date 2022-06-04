@@ -1,6 +1,7 @@
 import torch
 import sys
 
+
 def count_lines(file_path):
     lines_num = 0
     with open(file_path, 'rb') as f:
