@@ -18,8 +18,11 @@ class TransformerDecoder(nn.Module):
         self.transformer_decoder = nn.ModuleList(
             [TransformerDecoderLayer(args) for _ in range(self.layers_num)]
         )
-        self.deepspeed_checkpoint_activations = args.deepspeed_checkpoint_activations
-        self.deepspeed_checkpoint_layers_num = args.deepspeed_checkpoint_layers_num
+        if "deepspeed_checkpoint_activations" in args:
+            self.deepspeed_checkpoint_activations = args.deepspeed_checkpoint_activations
+            self.deepspeed_checkpoint_layers_num = args.deepspeed_checkpoint_layers_num
+        else:
+            self.deepspeed_checkpoint_activations = False
 
         has_bias = bool(1 - args.remove_transformer_bias)
 
