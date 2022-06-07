@@ -40,7 +40,7 @@ class Regression(nn.Module):
         output = torch.tanh(self.output_layer_1(output))
         logits = self.output_layer_2(output)
         if tgt is not None:
-            loss = nn.MSELoss()(logits, tgt)
+            loss = nn.MSELoss()(logits.view(-1), tgt.view(-1))
             return loss, logits
         else:
             return None, logits

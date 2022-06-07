@@ -65,7 +65,7 @@ def main():
             logits = logits.cpu().numpy().tolist()
 
             for j in range(len(logits)):
-                f.write(str(logits[j]))
+                f.write(str(logits[j][0]))
                 f.write("\n")
 
 
