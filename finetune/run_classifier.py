@@ -90,10 +90,10 @@ def load_or_initialize_parameters(args, model):
 
 def build_optimizer(args, model):
     param_optimizer = list(model.named_parameters())
-    no_decay = ['bias', 'gamma', 'beta']
+    no_decay = ["bias", "gamma", "beta"]
     optimizer_grouped_parameters = [
-        {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
-        {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+        {"params": [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], "weight_decay": 0.01},
+        {"params": [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], "weight_decay": 0.0}
     ]
     if args.optimizer in ["adamw"]:
         optimizer = str2optimizer[args.optimizer](optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
@@ -243,7 +243,6 @@ def evaluate(args, dataset):
         for j in range(pred.size()[0]):
             confusion[pred[j], gold[j]] += 1
         correct += torch.sum(pred == gold).item()
-
 
     args.logger.info("Confusion matrix:")
     args.logger.info(confusion)
