@@ -140,7 +140,7 @@ def train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_bat
 
 
 def process_prompt_template(args):
-    with open(args.prompt_path, "r",encoding="utf-8") as f_json:
+    with open(args.prompt_path, "r", encoding="utf-8") as f_json:
         temp_dict = json.load(f_json)
         template_str = temp_dict[args.prompt_id]["template"]
         template_list = re.split(r"(\[TEXT_B\]|\[TEXT_A\]|\[ANS\])", template_str)
@@ -191,7 +191,6 @@ def evaluate(args, dataset):
             confusion[labels[int(pred[j])], labels[int(gold[j])]] += 1
         correct += torch.sum(pred == gold).item()
 
-
     args.logger.debug("Confusion matrix:")
     args.logger.debug(confusion)
     args.logger.debug("Report precision, recall, and f1:")
@@ -233,7 +232,7 @@ def main():
     args.answer_position = torch.LongTensor(answer_position)
     # Build classification model.
     model = ClozeTest(args)
-    
+
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
 

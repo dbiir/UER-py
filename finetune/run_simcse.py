@@ -239,7 +239,7 @@ def main():
             features_0, features_1 = model((src_a_batch, src_b_batch), (seg_a_batch, seg_b_batch))
 
             similarity_matrix = similarity(features_0, features_1, args.temperature)
-            tgt_batch = torch.arange(similarity_matrix.size(0), device = similarity_matrix.device, dtype=torch.long)
+            tgt_batch = torch.arange(similarity_matrix.size(0), device=similarity_matrix.device, dtype=torch.long)
             loss = nn.CrossEntropyLoss()(similarity_matrix, tgt_batch)
 
             if args.fp16:

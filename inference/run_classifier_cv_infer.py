@@ -12,7 +12,7 @@ uer_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(uer_dir)
 
 from uer.utils.constants import *
-from uer.utils import * 
+from uer.utils import *
 from uer.utils.config import load_hyperparam
 from uer.model_loader import load_model
 from uer.opts import *

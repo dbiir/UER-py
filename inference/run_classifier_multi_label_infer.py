@@ -34,7 +34,7 @@ def main():
 
     parser.add_argument("--output_logits", action="store_true", help="Write logits to output file.")
     parser.add_argument("--output_prob", action="store_true", help="Write probabilities to output file.")
-       
+
     args = parser.parse_args()
 
     # Load the hyperparameters from the config file.
@@ -79,7 +79,7 @@ def main():
             seg_batch = seg_batch.to(device)
             with torch.no_grad():
                 _, logits = model(src_batch, None, seg_batch)
-            
+
             prob = nn.Sigmoid()(logits)
             prob = prob.cpu().numpy().tolist()
             logits = logits.cpu().numpy().tolist()
@@ -93,7 +93,7 @@ def main():
                 if args.output_logits:
                     f.write("\t" + " ".join([str(v) for v in logits[i]]))
                 if args.output_prob:
-                    f.write("\t" + " ".join([str(v) for v in p]))                
+                    f.write("\t" + " ".join([str(v) for v in p]))
                 f.write("\n")
 
 

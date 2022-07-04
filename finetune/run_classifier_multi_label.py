@@ -53,7 +53,7 @@ class MultilabelClassifier(nn.Module):
         # Target.
         output = pooling(output, seg, self.pooling_type)
         output = torch.tanh(self.output_layer_1(output))
-        logits = self.output_layer_2(output)        
+        logits = self.output_layer_2(output)
         if tgt is not None:
             probs_batch = nn.Sigmoid()(logits)
             loss = nn.BCELoss()(probs_batch, tgt)
@@ -87,7 +87,7 @@ def read_dataset(args, path):
             line = line.rstrip("\r\n").split("\t")
             tgt = [0] * args.labels_num
             for idx in [int(_) for _ in line[columns["label"]].split(",")]:
-                 tgt[idx] = 1                    
+                tgt[idx] = 1
             if "text_b" not in columns:  # Sentence classification.
                 text_a = line[columns["text_a"]]
                 src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a) + [SEP_TOKEN])
@@ -170,7 +170,7 @@ def evaluate(args, dataset):
     correct = 0
 
     args.model.eval()
-    
+
     for i, (src_batch, tgt_batch, seg_batch, _) in enumerate(batch_loader(batch_size, src, tgt, seg)):
         src_batch = src_batch.to(args.device)
         tgt_batch = tgt_batch.to(args.device)
@@ -183,7 +183,7 @@ def evaluate(args, dataset):
 
         for k in range(len(predict_label_batch)):
             correct += predict_label_batch[k].equal(gold[k]) 
-        
+
     args.logger.info("Acc. (Correct/Total): {:.4f} ({}/{}) ".format(correct / len(dataset), correct, len(dataset)))
     return correct / len(dataset)
 
@@ -194,7 +194,7 @@ def main():
     finetune_opts(parser)
 
     tokenizer_opts(parser)
-    
+
     adv_opts(parser)
 
     args = parser.parse_args()
@@ -202,7 +202,7 @@ def main():
     # Load the hyperparameters from the config file.
     args = load_hyperparam(args)
     # Count the number of labels.
-    args.labels_num = count_labels_num(args.train_path) 
+    args.labels_num = count_labels_num(args.train_path)
 
     # Build tokenizer.
     args.tokenizer = str2tokenizer[args.tokenizer](args)

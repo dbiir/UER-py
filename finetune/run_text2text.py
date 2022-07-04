@@ -57,6 +57,7 @@ class Text2text(torch.nn.Module):
             loss = self.target(hidden, tgt_out, seg)[0]
             return loss, output
 
+
 def read_dataset(args, path):
     dataset, columns = [], {}
     with open(path, mode="r", encoding="utf-8") as f:
@@ -65,7 +66,7 @@ def read_dataset(args, path):
                 for i, column_name in enumerate(line.rstrip("\r\n").split("\t")):
                     columns[column_name] = i
                 continue
-            line = line.rstrip("\r\n").split('\t')
+            line = line.rstrip("\r\n").split("\t")
 
             if "text_b" in columns:
                 text = line[columns["text_a"]] + SEP_TOKEN + line[columns["text_b"]]
@@ -84,7 +85,7 @@ def read_dataset(args, path):
             if len(tgt_in) > args.tgt_seq_length:
                 tgt_in = tgt_in[: args.tgt_seq_length]
             tgt_out = tgt_in[1:] + [PAD_ID]
-            
+
             while len(src) < args.seq_length:
                 src.append(PAD_ID)
                 seg.append(0)
@@ -152,7 +153,7 @@ def evaluate(args, dataset):
     for i, (src_batch, tgt_in_batch, tgt_out_batch, seg_batch, _) in enumerate(batch_loader(args.batch_size, src, tgt_in, tgt_out, seg)):
 
         src_batch = src_batch.to(args.device)
-        tgt_in_batch = torch.zeros(tgt_in_batch.size()[0],1, dtype = torch.long, device = args.device)
+        tgt_in_batch = torch.zeros(tgt_in_batch.size()[0], 1, dtype=torch.long, device=args.device)
         for j in range(tgt_in_batch.size()[0]):
             tgt_in_batch[j][-1] = args.tokenizer.vocab.get(CLS_TOKEN)
 
@@ -189,8 +190,8 @@ def evaluate(args, dataset):
         tgt_token = " ".join([args.tokenizer.inv_vocab[token_id] for token_id in tgt[:-2]])
         generated_sentences[i] = generated_sentences[i].split(SEP_TOKEN)[0]
 
-        pred = "".join(generated_sentences[i].split(' '))
-        gold = "".join(tgt_token.split(SEP_TOKEN)[0].split(' '))
+        pred = "".join(generated_sentences[i].split(" "))
+        gold = "".join(tgt_token.split(SEP_TOKEN)[0].split(" "))
 
         if pred in labels.keys():
             confusion_matrix[labels[pred], labels[gold]] += 1

@@ -137,7 +137,7 @@ def main():
             prob = nn.Softmax(dim=1)(logits)
             logits = logits.cpu().numpy().tolist()
             prob = prob.cpu().numpy().tolist()
-            
+
             for j in range(len(pred)):
                 f.write(str(pred[j]))
                 if args.output_logits:
