@@ -21,7 +21,7 @@ def flip(x, dim):
 
 
 def pooling(memory_bank, seg, pooling_type):
-    seg = torch.unsqueeze(seg, dim=-1).type(torch.float)
+    seg = torch.unsqueeze(seg, dim=-1).type_as(memory_bank)
     memory_bank = memory_bank * seg
     if pooling_type == "mean":
         features = torch.sum(memory_bank, dim=1)
