@@ -10,6 +10,11 @@
 Pre-training has become an essential part for NLP tasks. UER-py (Universal Encoder Representations) is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of existing pre-training models, and provides interfaces for users to further extend upon. With UER-py, we build a model zoo which contains pre-trained models of different properties. **See the Wiki for [Full Documentation](https://github.com/dbiir/UER-py/wiki)**.
 
 
+\
+
+**News:** Our refactored new version supports multi-modal pre-training and large language models like LLaMA, see [TencentPretrain](https://github.com/Tencent/TencentPretrain).
+
+
 <br/>
 
 Table of Contents
