@@ -12,7 +12,8 @@ Pre-training has become an essential part for NLP tasks. UER-py (Universal Encod
 <br/>
 <br/>
 
-**News:** Our refactored new version supports multi-modal pre-training and large language models like LLaMA, see [TencentPretrain](https://github.com/Tencent/TencentPretrain).
+
+**🚀 News (2023.4.8)** Our refactored new version supports multi-modal pre-training, large language models like LLaMA, Low-rand Adaption training and Deepspeed Zero-3 offload, see [TencentPretrain](https://github.com/Tencent/TencentPretrain). We also release Chinese ChatLLaMA models, see [ChatLLaMA](https://github.com/ydli-ai/Chinese-ChatLLaMA).
 
 
 <br/>
