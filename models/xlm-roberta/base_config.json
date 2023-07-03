@@ -8,7 +8,7 @@
   "max_seq_length": 514,
   "dropout": 0.1,
   "data_processor": "mlm",
-  "embedding": "word_pos_seg",
+  "embedding": ["word", "pos", "seg"],
   "encoder": "transformer",
   "mask": "fully_visible",
   "target": ["mlm"]

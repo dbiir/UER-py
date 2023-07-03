@@ -1,0 +1,19 @@
+{
+  "emb_size": 512,
+  "feedforward_size": 2048,
+  "hidden_size": 512,
+  "hidden_act": "relu",
+  "heads_num": 8,
+  "layers_num": 6,
+  "decoder_layers_num": 6,
+  "max_seq_length": 512,
+  "dropout": 0.1,
+  "data_processor": "mt",
+  "embedding": ["word", "sinusoidalpos"],
+  "tgt_embedding": ["word", "sinusoidalpos"],
+  "encoder": "transformer",
+  "decoder": "transformer",
+  "mask": "fully_visible",
+  "target": ["lm"],
+  "tie_weights": true
+}

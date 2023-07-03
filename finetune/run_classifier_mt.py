@@ -28,7 +28,10 @@ from finetune.run_classifier import count_labels_num, batch_loader, build_optimi
 class MultitaskClassifier(nn.Module):
     def __init__(self, args):
         super(MultitaskClassifier, self).__init__()
-        self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
+        self.embedding = Embedding(args)
+        for embedding_name in args.embedding:
+            tmp_emb = str2embedding[embedding_name](args, len(args.tokenizer.vocab))
+            self.embedding.update(tmp_emb, embedding_name)
         self.encoder = str2encoder[args.encoder](args)
         self.pooling_type = args.pooling
         self.output_layers_1 = nn.ModuleList([nn.Linear(args.hidden_size, args.hidden_size) for _ in args.labels_num_list])

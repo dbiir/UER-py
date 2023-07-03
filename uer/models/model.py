@@ -20,9 +20,11 @@ class Model(nn.Module):
         self.target = target
 
         if "mlm" in args.target and args.tie_weights:
-            self.target.mlm_linear_2.weight = self.embedding.word_embedding.weight
-        elif "lm" in args.target and args.tie_weights:
-            self.target.output_layer.weight = self.embedding.word_embedding.weight
+            self.target.mlm.linear_2.weight = self.embedding.word.embedding.weight
+        elif "lm" in args.target and args.tie_weights and "word" in self.embedding.embedding_name_list:
+            self.target.lm.output_layer.weight = self.embedding.word.embedding.weight
+        elif "lm" in args.target and args.tie_weights and "word" in self.tgt_embedding.embedding_name_list:
+            self.target.lm.output_layer.weight = self.tgt_embedding.word.embedding.weight
 
         if self.decoder is not None and args.share_embedding:
             self.tgt_embedding.word_embedding.weight = self.embedding.word_embedding.weight

@@ -8,7 +8,7 @@
   "max_seq_length": 1024,
   "dropout": 0.1,
   "data_processor": "lm",
-  "embedding": "word_pos",
+  "embedding": ["word", "pos"],
   "remove_embedding_layernorm": true,
   "encoder": "transformer",
   "mask": "causal",
