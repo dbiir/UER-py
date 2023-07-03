@@ -37,7 +37,7 @@ Table of Contents
 UER-py has the following features:
 - __Reproducibility__ UER-py has been tested on many datasets and should match the performances of the original pre-training model implementations such as BERT, GPT-2, ELMo, and T5.
 - __Model modularity__ UER-py is divided into the following components: embedding, encoder, target embedding (optional), decoder (optional), and target. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules to construct pre-training models with as few restrictions as possible.
-- __Model training__ UER-py supports CPU mode, single GPU mode, distributed training mode, and gigantic model training with DeepSpeed.
+- __Model training__ UER-py supports CPU mode, single GPU mode and distributed training mode.
 - __Model zoo__ With the help of UER-py, we pre-train and release models of different properties. Proper selection of pre-trained models is important to the performances of downstream tasks.
 - __SOTA results__ UER-py supports comprehensive downstream tasks (e.g. classification and machine reading comprehension) and provides winning solutions of many NLP competitions.
 - __Abundant functions__ UER-py provides abundant functions related with pre-training, such as feature extractor and text generation.
@@ -58,7 +58,6 @@ UER-py has the following features:
 * For developing a stacking model you will need LightGBM and [BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
 * For the pre-training with whole word masking you will need word segmentation tool such as [jieba](https://github.com/fxsjy/jieba)
 * For the use of CRF in sequence labeling downstream task you will need [pytorch-crf](https://github.com/kmkurn/pytorch-crf)
-* For the gigantic model training you will need [DeepSpeed](https://github.com/microsoft/DeepSpeed)
 
 
 <br/>

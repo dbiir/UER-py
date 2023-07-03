@@ -163,18 +163,6 @@ def tgt_tokenizer_opts(parser):
                         help="Whether to lower case the target input")
 
 
-def deepspeed_opts(parser):
-    parser.add_argument("--deepspeed", action="store_true",
-                        help=".")
-    parser.add_argument("--deepspeed_config", default="models/deepspeed_config.json", type=str,
-                        help=".")
-    parser.add_argument("--deepspeed_checkpoint_activations", action='store_true',
-                        help="Checkpoint activation to allow for training with larger models, sequences, and batch sizes.")
-    parser.add_argument("--deepspeed_checkpoint_layers_num", type=int, default=1,
-                        help="chunk size (number of layers) for checkpointing.")
-    parser.add_argument("--local_rank", type=int, required=False)
-
-
 def adv_opts(parser):
     parser.add_argument("--use_adv", action="store_true",
                         help=".")
