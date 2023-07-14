@@ -27,7 +27,7 @@ class Model(nn.Module):
             self.target.output_layer.weight = self.tgt_embedding.word.embedding.weight
 
         if self.decoder is not None and args.share_embedding:
-            self.tgt_embedding.word_embedding.weight = self.embedding.word_embedding.weight
+            self.tgt_embedding.word.embedding.weight = self.embedding.word.embedding.weight
 
     def forward(self, src, tgt, seg, tgt_in=None, tgt_seg=None):
         emb = self.embedding(src, seg)
