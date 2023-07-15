@@ -19,16 +19,16 @@ input_model = torch.load(args.input_model_path)
 output_model = collections.OrderedDict()
 
 output_model["shared.weight"] = \
-    input_model["embedding.word_embedding.weight"]
+    input_model["embedding.word.embedding.weight"]
 
 output_model["encoder.block.0.layer.0.SelfAttention.relative_attention_bias.weight"] = \
     input_model["encoder.relative_pos_emb.relative_attention_bias.weight"]
 output_model["decoder.block.0.layer.0.SelfAttention.relative_attention_bias.weight"] = \
     input_model["decoder.self_pos_emb.relative_attention_bias.weight"]
 output_model["encoder.embed_tokens.weight"] = \
-    input_model["embedding.word_embedding.weight"]
+    input_model["embedding.word.embedding.weight"]
 output_model["decoder.embed_tokens.weight"] = \
-    input_model["tgt_embedding.word_embedding.weight"]
+    input_model["tgt_embedding.word.embedding.weight"]
 output_model["lm_head.weight"] = \
     input_model["target.output_layer.weight"]
 

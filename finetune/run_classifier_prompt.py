@@ -27,7 +27,7 @@ class ClozeTest(nn.Module):
         self.encoder = str2encoder[args.encoder](args)
         self.target = MlmTarget(args, len(args.tokenizer.vocab))
         if args.tie_weights:
-            self.target.mlm_linear_2.weight = self.embedding.word_embedding.weight
+            self.target.mlm_linear_2.weight = self.embedding.word.embedding.weight
         self.answer_position = args.answer_position
         self.device = args.device
 

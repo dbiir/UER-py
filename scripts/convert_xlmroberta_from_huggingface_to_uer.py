@@ -18,11 +18,11 @@ output_model = collections.OrderedDict()
 emb_size = \
     input_model["roberta.embeddings.word_embeddings.weight"].shape[1]
 
-output_model["embedding.word_embedding.weight"] = \
+output_model["embedding.word.embedding.weight"] = \
     input_model["roberta.embeddings.word_embeddings.weight"]
-output_model["embedding.position_embedding.weight"] = \
+output_model["embedding.pos.embedding.weight"] = \
     torch.cat((input_model["roberta.embeddings.position_embeddings.weight"][2:], torch.zeros(2, emb_size)), 0)
-output_model["embedding.segment_embedding.weight"] = \
+output_model["embedding.seg.embedding.weight"] = \
     torch.cat((torch.Tensor(torch.zeros(2, emb_size)), input_model["roberta.embeddings.token_type_embeddings.weight"]), dim=0)
 output_model["embedding.layer_norm.gamma"] = \
     input_model["roberta.embeddings.LayerNorm.weight"]

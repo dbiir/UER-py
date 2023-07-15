@@ -41,11 +41,11 @@ def main():
 
     output_model = collections.OrderedDict()
 
-    output_model["embedding.word_embedding.weight"] = input_model["bert/embeddings/word_embeddings"]
+    output_model["embedding.word.embedding.weight"] = input_model["bert/embeddings/word_embeddings"]
     output_model["encoder.linear.weight"] = input_model["bert/encoder/embedding_hidden_mapping_in/kernel"]
     output_model["encoder.linear.bias"] = input_model["bert/encoder/embedding_hidden_mapping_in/bias"]
-    output_model["embedding.position_embedding.weight"] = input_model["bert/embeddings/position_embeddings"][:512]
-    output_model["embedding.segment_embedding.weight"] = input_model["bert/embeddings/token_type_embeddings"]
+    output_model["embedding.pos.embedding.weight"] = input_model["bert/embeddings/position_embeddings"][:512]
+    output_model["embedding.seg.embedding.weight"] = input_model["bert/embeddings/token_type_embeddings"]
     output_model["embedding.layer_norm.gamma"] = input_model["bert/embeddings/LayerNorm/gamma"]
     output_model["embedding.layer_norm.beta"] = input_model["bert/embeddings/LayerNorm/beta"]
 

@@ -24,9 +24,9 @@ input_model = torch.load(args.input_model_path)
 
 output_model = collections.OrderedDict()
 
-output_model["bert.embeddings.word_embeddings.weight"] = input_model["embedding.word_embedding.weight"]
-output_model["bert.embeddings.position_embeddings.weight"] = input_model["embedding.position_embedding.weight"]
-output_model["bert.embeddings.token_type_embeddings.weight"] = input_model["embedding.segment_embedding.weight"][1:, :]
+output_model["bert.embeddings.word_embeddings.weight"] = input_model["embedding.word.embedding.weight"]
+output_model["bert.embeddings.position_embeddings.weight"] = input_model["embedding.pos.embedding.weight"]
+output_model["bert.embeddings.token_type_embeddings.weight"] = input_model["embedding.seg.embedding.weight"][1:, :]
 output_model["bert.embeddings.LayerNorm.weight"] = input_model["embedding.layer_norm.gamma"]
 output_model["bert.embeddings.LayerNorm.bias"] = input_model["embedding.layer_norm.beta"]
 

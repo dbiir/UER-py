@@ -17,7 +17,7 @@ from uer.utils.vocab import Vocab
 def adapter(old_model, old_vocab, new_vocab):
     new_model = collections.OrderedDict()
 
-    embedding_key = "embedding.word_embedding.weight"
+    embedding_key = "embedding.word.embedding.weight"
     softmax_key = "target.mlm_linear_2.weight"
     softmax_bias_key = "target.mlm_linear_2.bias"
 

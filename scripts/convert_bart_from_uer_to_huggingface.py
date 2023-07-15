@@ -109,15 +109,15 @@ def main():
 
     output_model = collections.OrderedDict()
 
-    emb_size = input_model["embedding.word_embedding.weight"].shape[1]
-    output_model["model.shared.weight"] = input_model["embedding.word_embedding.weight"]
+    emb_size = input_model["embedding.word.embedding.weight"].shape[1]
+    output_model["model.shared.weight"] = input_model["embedding.word.embedding.weight"]
 
-    output_model["model.encoder.embed_positions.weight"] = torch.cat((torch.zeros(2, emb_size), input_model["embedding.position_embedding.weight"]), 0)
-    output_model["model.decoder.embed_positions.weight"] = torch.cat((torch.zeros(2, emb_size), input_model["tgt_embedding.position_embedding.weight"]), 0)
-    output_model["model.encoder.embed_tokens.weight"] = input_model["embedding.word_embedding.weight"]
-    output_model["model.decoder.embed_tokens.weight"] = input_model["tgt_embedding.word_embedding.weight"]
-    output_model["lm_head.weight"] = input_model["target.output_layer.weight"]
-    output_model["final_logits_bias"] = input_model["target.output_layer.bias"].unsqueeze(0)
+    output_model["model.encoder.embed_positions.weight"] = torch.cat((torch.zeros(2, emb_size), input_model["embedding.pos.embedding.weight"]), 0)
+    output_model["model.decoder.embed_positions.weight"] = torch.cat((torch.zeros(2, emb_size), input_model["tgt_embedding.pos.embedding.weight"]), 0)
+    output_model["model.encoder.embed_tokens.weight"] = input_model["embedding.word.embedding.weight"]
+    output_model["model.decoder.embed_tokens.weight"] = input_model["tgt_embedding.word.embedding.weight"]
+    output_model["lm_head.weight"] = input_model["target.lm.output_layer.weight"]
+    output_model["final_logits_bias"] = input_model["target.lm.output_layer.bias"].unsqueeze(0)
 
     convert_encoder_decoder_transformer_from_uer_to_huggingface(input_model, output_model, args.layers_num)
 

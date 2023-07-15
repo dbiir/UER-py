@@ -55,11 +55,11 @@ def main():
     output_model = collections.OrderedDict()
 
     for i in range(2):
-        output_model["embedding.embedding_" + str(i) + ".word_embedding.weight"] = \
+        output_model["embedding.embedding_" + str(i) + ".word.embedding.weight"] = \
             input_model["embeddings.word_embeddings.weight"]
-        output_model["embedding.embedding_" + str(i) + ".position_embedding.weight"] = \
+        output_model["embedding.embedding_" + str(i) + ".pos.embedding.weight"] = \
             input_model["embeddings.position_embeddings.weight"]
-        output_model["embedding.embedding_" + str(i) + ".segment_embedding.weight"] = \
+        output_model["embedding.embedding_" + str(i) + ".seg.embedding.weight"] = \
             torch.cat((torch.Tensor([[0]*input_model["embeddings.token_type_embeddings.weight"].size()[1]]),
                        input_model["embeddings.token_type_embeddings.weight"]), dim=0)
         output_model["embedding.embedding_" + str(i) + ".layer_norm.gamma"] = \
