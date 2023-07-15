@@ -15,11 +15,11 @@ input_model = torch.load(args.input_model_path, map_location="cpu")
 
 output_model = collections.OrderedDict()
 
-output_model["embedding.word_embedding.weight"] = \
+output_model["embedding.word.embedding.weight"] = \
     input_model["albert.embeddings.word_embeddings.weight"]
-output_model["embedding.position_embedding.weight"] = \
+output_model["embedding.pos.embedding.weight"] = \
     input_model["albert.embeddings.position_embeddings.weight"]
-output_model["embedding.segment_embedding.weight"] = \
+output_model["embedding.seg.embedding.weight"] = \
     torch.cat((torch.Tensor([[0]*input_model["albert.embeddings.token_type_embeddings.weight"].size()[1]]),
                input_model["albert.embeddings.token_type_embeddings.weight"]), dim=0)
 output_model["embedding.layer_norm.gamma"] = \

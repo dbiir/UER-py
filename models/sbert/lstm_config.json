@@ -5,7 +5,7 @@
     "hidden_size": 512,
     "layers_num": 2,
     "dropout": 0.1,
-    "embedding": "word",
+    "embedding": ["word"],
     "encoder": "lstm"
   },
 
@@ -15,7 +15,7 @@
     "hidden_size": 512,
     "layers_num": 2,
     "dropout": 0.1,
-    "embedding": "word",
+    "embedding": ["word"],
     "encoder": "lstm"
   },
 

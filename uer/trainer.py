@@ -48,9 +48,7 @@ def train_and_validate(args):
                 if "gamma" not in n and "beta" not in n:
                     p.data.normal_(0, 0.02)
 
-    if args.deepspeed:
-        worker(args.local_rank, None, args, model)
-    elif args.dist_train:
+    if args.dist_train:
         # Multiprocessing distributed mode.
         mp.spawn(worker, nprocs=args.ranks_num, args=(args.gpu_ranks, args, model), daemon=False)
     elif args.single_gpu:
@@ -101,35 +99,25 @@ class Trainer(object):
 
             loss = self.forward_propagation(batch, model)
 
-            if args.deepspeed:
-                model.backward(loss)
+            if args.fp16:
+                with args.amp.scale_loss(loss, optimizer) as scaled_loss:
+                    scaled_loss.backward()
             else:
-                if args.fp16:
-                    with args.amp.scale_loss(loss, optimizer) as scaled_loss:
-                        scaled_loss.backward()
-                else:
-                    loss.backward()
+                loss.backward()
 
             if self.current_step % self.accumulation_steps == 0:
-                if args.deepspeed:
-                    model.step()
-                else:
-                    optimizer.step()
-                    scheduler.step()
-                    model.zero_grad()
+                optimizer.step()
+                scheduler.step()
+                model.zero_grad()
 
             if self.current_step % self.report_steps == 0 and \
                     (not self.dist_train or (self.dist_train and rank == 0)):
                 self.report_and_reset_stats()
                 self.start_time = time.time()
-
-            if args.deepspeed:
-                if self.current_step % self.save_checkpoint_steps == 0:
-                    model.save_checkpoint(self.output_model_path, str(self.current_step))
-            else:
-                if self.current_step % self.save_checkpoint_steps == 0 and \
-                        (not self.dist_train or (self.dist_train and rank == 0)):
-                    save_model(model, self.output_model_path + "-" + str(self.current_step))
+           
+            if self.current_step % self.save_checkpoint_steps == 0 and \
+                    (not self.dist_train or (self.dist_train and rank == 0)):
+                save_model(model, self.output_model_path + "-" + str(self.current_step))
 
             self.current_step += 1
 
@@ -440,12 +428,7 @@ def worker(proc_id, gpu_ranks, args, model):
     # Get logger
     args.logger = init_logger(args)
 
-    if args.deepspeed:
-        import deepspeed
-        deepspeed.init_distributed(dist_backend=args.backend)
-        rank = dist.get_rank()
-        gpu_id = proc_id
-    elif args.dist_train:
+    if args.dist_train:
         rank = gpu_ranks[proc_id]
         gpu_id = proc_id
     elif args.single_gpu:
@@ -479,38 +462,28 @@ def worker(proc_id, gpu_ranks, args, model):
     else:
         custom_scheduler = str2scheduler[args.scheduler](custom_optimizer, args.total_steps*args.warmup, args.total_steps)
 
-    if args.deepspeed:
-        model, optimizer, _, scheduler = deepspeed.initialize(
-                                                    model=model,
-                                                    model_parameters=optimizer_grouped_parameters,
-                                                    args=args,
-                                                    optimizer=custom_optimizer,
-                                                    lr_scheduler=custom_scheduler,
-                                                    mpu=None,
-                                                    dist_init_required=False)
-    else:
-        if gpu_id is not None:
-            model.cuda(gpu_id)
-        optimizer = custom_optimizer
-        scheduler = custom_scheduler
-        if args.fp16:
-            try:
-                from apex import amp
-            except ImportError:
-                raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-            model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
-            args.amp = amp
+    if gpu_id is not None:
+        model.cuda(gpu_id)
+    optimizer = custom_optimizer
+    scheduler = custom_scheduler
+    if args.fp16:
+        try:
+            from apex import amp
+        except ImportError:
+            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
+        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
+        args.amp = amp
 
-        if args.dist_train:
-            # Initialize multiprocessing distributed training environment.
-            dist.init_process_group(backend=args.backend,
-                                    init_method=args.master_ip,
-                                    world_size=args.world_size,
-                                    rank=rank)
-            model = DistributedDataParallel(model, device_ids=[gpu_id], find_unused_parameters=True)
-            args.logger.info("Worker %d is training ... " % rank)
-        else:
-            args.logger.info("Worker is training ...")
+    if args.dist_train:
+        # Initialize multiprocessing distributed training environment.
+        dist.init_process_group(backend=args.backend,
+                                init_method=args.master_ip,
+                                world_size=args.world_size,
+                                rank=rank)
+        model = DistributedDataParallel(model, device_ids=[gpu_id], find_unused_parameters=True)
+        args.logger.info("Worker %d is training ... " % rank)
+    else:
+        args.logger.info("Worker is training ...")
 
     trainer = str2trainer[args.data_processor](args)
     trainer.train(args, gpu_id, rank, train_loader, model, optimizer, scheduler)

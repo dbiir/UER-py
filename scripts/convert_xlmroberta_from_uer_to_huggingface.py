@@ -16,14 +16,14 @@ input_model = torch.load(args.input_model_path)
 
 output_model = collections.OrderedDict()
 emb_size = \
-    input_model["embedding.word_embedding.weight"].shape[1]
+    input_model["embedding.word.embedding.weight"].shape[1]
 
 output_model["roberta.embeddings.word_embeddings.weight"] = \
-    input_model["embedding.word_embedding.weight"]
+    input_model["embedding.word.embedding.weight"]
 output_model["roberta.embeddings.position_embeddings.weight"] = \
-    torch.cat((torch.zeros(2, emb_size), input_model["embedding.position_embedding.weight"][:-2]),0)
+    torch.cat((torch.zeros(2, emb_size), input_model["embedding.pos.embedding.weight"][:-2]),0)
 output_model["roberta.embeddings.token_type_embeddings.weight"] = \
-    input_model["embedding.segment_embedding.weight"][2:, :]
+    input_model["embedding.seg.embedding.weight"][2:, :]
 output_model["roberta.embeddings.LayerNorm.weight"] = \
     input_model["embedding.layer_norm.gamma"]
 output_model["roberta.embeddings.LayerNorm.bias"] = \

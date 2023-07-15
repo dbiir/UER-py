@@ -109,12 +109,12 @@ def main():
 
     output_model = collections.OrderedDict()
 
-    output_model["embedding.position_embedding.weight"] = input_model["model.encoder.embed_positions.weight"][2:]
-    output_model["tgt_embedding.position_embedding.weight"] = input_model["model.decoder.embed_positions.weight"][2:]
-    output_model["embedding.word_embedding.weight"] = input_model["model.encoder.embed_tokens.weight"]
-    output_model["tgt_embedding.word_embedding.weight"] = input_model["model.decoder.embed_tokens.weight"]
-    output_model["target.output_layer.weight"] = input_model["lm_head.weight"]
-    output_model["target.output_layer.bias"] = input_model["final_logits_bias"].squeeze(0)
+    output_model["embedding.pos.embedding.weight"] = input_model["model.encoder.embed_positions.weight"][2:]
+    output_model["tgt_embedding.pos.embedding.weight"] = input_model["model.decoder.embed_positions.weight"][2:]
+    output_model["embedding.word.embedding.weight"] = input_model["model.encoder.embed_tokens.weight"]
+    output_model["tgt_embedding.word.embedding.weight"] = input_model["model.decoder.embed_tokens.weight"]
+    output_model["target.lm.output_layer.weight"] = input_model["lm_head.weight"]
+    output_model["target.lm.output_layer.bias"] = input_model["final_logits_bias"].squeeze(0)
 
     convert_encoder_decoder_transformer_from_huggingface_to_uer(input_model, output_model, args.layers_num)
 

@@ -18,9 +18,9 @@ input_model = torch.load(args.input_model_path, map_location="cpu")
 
 output_model = collections.OrderedDict()
 
-output_model["embedding.word_embedding.weight"] = \
+output_model["embedding.word.embedding.weight"] = \
     input_model["encoder.embed_tokens.weight"]
-output_model["tgt_embedding.word_embedding.weight"] = \
+output_model["tgt_embedding.word.embedding.weight"] = \
     input_model["decoder.embed_tokens.weight"]
 
 output_model["encoder.relative_pos_emb.relative_attention_bias.weight"] = \

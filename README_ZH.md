@@ -30,7 +30,7 @@
 UER-py有如下几方面优势:
 - __可复现__ UER-py已在许多数据集上进行了测试，与原始预训练模型实现（例如BERT、GPT-2、ELMo、T5）的表现相匹配
 - __模块化__ UER-py使用解耦的模块化设计框架。框架分成Embedding、Encoder、Target等多个部分。各个部分之间有着清晰的接口并且每个部分包括了丰富的模块。可以对不同模块进行组合，构建出性质不同的预训练模型
-- __模型训练__ UER-py支持CPU、单机单GPU、单机多GPU、多机多GPU训练模式，并支持使用DeepSpeed优化库进行超大模型训练
+- __模型训练__ UER-py支持CPU、单机单GPU、单机多GPU、多机多GPU训练模式
 - __模型仓库__ 我们维护并持续发布预训练模型。用户可以根据具体任务的要求，从中选择合适的预训练模型使用
 - __SOTA结果__ UER-py支持全面的下游任务，包括文本分类、文本对分类、序列标注、阅读理解等，并提供了多个竞赛获胜解决方案
 - __预训练相关功能__ UER-py提供了丰富的预训练相关的功能和优化，包括特征抽取、近义词检索、预训练模型转换、模型集成、文本生成等
@@ -51,7 +51,6 @@ UER-py有如下几方面优势:
 * 如果使用模型集成stacking，需要安装LightGBM和[BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
 * 如果使用全词遮罩（whole word masking）预训练，需要安装分词工具，例如[jieba](https://github.com/fxsjy/jieba)
 * 如果在序列标注下游任务中使用CRF，需要安装[pytorch-crf](https://github.com/kmkurn/pytorch-crf)
-* 如果使用超大模型，需要安装[DeepSpeed](https://github.com/microsoft/DeepSpeed)
 
 
 <br/>

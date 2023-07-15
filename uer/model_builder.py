@@ -14,17 +14,29 @@ def build_model(args):
     We could select suitable one for downstream tasks.
     """
 
-    embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
+    embedding = Embedding(args)
+    for embedding_name in args.embedding:
+        tmp_emb = str2embedding[embedding_name](args, len(args.tokenizer.vocab))
+        embedding.update(tmp_emb, embedding_name)
+
     encoder = str2encoder[args.encoder](args)
+
     if args.decoder is not None:
         if args.data_processor == "mt":
-            tgt_embedding = str2embedding[args.tgt_embedding](args, len(args.tgt_tokenizer.vocab))
+            tgt_vocab_size = len(args.tgt_tokenizer.vocab)
         else:
-            tgt_embedding = str2embedding[args.tgt_embedding](args, len(args.tokenizer.vocab))
+            tgt_vocab_size = len(args.tokenizer.vocab)
+
+        tgt_embedding = Embedding(args)
+        for embedding_name in args.tgt_embedding:
+            tmp_emb = str2embedding[embedding_name](args, tgt_vocab_size)
+            tgt_embedding.update(tmp_emb, embedding_name)
+
         decoder = str2decoder[args.decoder](args)
     else:
         tgt_embedding = None
         decoder = None
+
     target = Target()
     for target_name in args.target:
         if args.data_processor == "mt":

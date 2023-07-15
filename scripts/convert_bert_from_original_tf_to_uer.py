@@ -46,9 +46,9 @@ def main():
         input_model[key] = torch.Tensor(torch_tensor)
 
     output_model = collections.OrderedDict()
-    output_model["embedding.word_embedding.weight"] = input_model["bert/embeddings/word_embeddings"]
-    output_model["embedding.position_embedding.weight"] = input_model["bert/embeddings/position_embeddings"][:512]
-    output_model["embedding.segment_embedding.weight"] = input_model["bert/embeddings/token_type_embeddings"]
+    output_model["embedding.word.embedding.weight"] = input_model["bert/embeddings/word_embeddings"]
+    output_model["embedding.pos.embedding.weight"] = input_model["bert/embeddings/position_embeddings"][:512]
+    output_model["embedding.seg.embedding.weight"] = input_model["bert/embeddings/token_type_embeddings"]
     output_model["embedding.layer_norm.gamma"] = input_model["bert/embeddings/LayerNorm/gamma"]
     output_model["embedding.layer_norm.beta"] = input_model["bert/embeddings/LayerNorm/beta"]
 

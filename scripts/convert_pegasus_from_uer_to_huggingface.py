@@ -23,11 +23,11 @@ input_model = torch.load(args.input_model_path)
 
 output_model = collections.OrderedDict()
 
-output_model["model.shared.weight"] = input_model["embedding.word_embedding.weight"]
-output_model["model.encoder.embed_positions.weight"] = input_model["embedding.pe"].squeeze(1)
-output_model["model.decoder.embed_positions.weight"] = input_model["tgt_embedding.pe"].squeeze(1)
-output_model["model.encoder.embed_tokens.weight"] = input_model["embedding.word_embedding.weight"]
-output_model["model.decoder.embed_tokens.weight"] = input_model["tgt_embedding.word_embedding.weight"]
+output_model["model.shared.weight"] = input_model["embedding.word.embedding.weight"]
+output_model["model.encoder.embed_positions.weight"] = input_model["embedding.sinusoidalpos.pe"].squeeze(1)
+output_model["model.decoder.embed_positions.weight"] = input_model["tgt_embedding.sinusoidalpos.pe"].squeeze(1)
+output_model["model.encoder.embed_tokens.weight"] = input_model["embedding.word.embedding.weight"]
+output_model["model.decoder.embed_tokens.weight"] = input_model["tgt_embedding.word.embedding.weight"]
 output_model["lm_head.weight"] = input_model["target.output_layer.weight"]
 output_model["final_logits_bias"] = input_model["target.output_layer.bias"].unsqueeze(0)
 

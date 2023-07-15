@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6.13]
+        python-version: [3.7.13]
 
     steps:
       - uses: actions/checkout@v2
@@ -40,7 +40,7 @@ jobs:
               python pretrain.py --dataset_path cls_dataset.pt --vocab_path models/google_zh_vocab.txt --config_path models/bert/mini_config.json --output_model_path models/cls_model.bin --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2 --labels_num 2 --data_processor cls --target cls
               mv models/cls_model.bin-10 models/cls_model.bin
               python preprocess.py --corpus_path corpora/parallel_corpus_en_zh.txt --vocab_path models/google_uncased_en_vocab.txt --tgt_vocab_path models/google_zh_vocab.txt --dataset_path mt_dataset.pt --processes_num 8 --seq_length 64 --tgt_seq_length 64 --data_processor mt
-              python pretrain.py --dataset_path mt_dataset.pt --vocab_path models/google_uncased_en_vocab.txt --tgt_vocab_path models/google_zh_vocab.txt --config_path models/encoder_decoder_config.json --output_model_path models/mt_model.bin --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
+              python pretrain.py --dataset_path mt_dataset.pt --vocab_path models/google_uncased_en_vocab.txt --tgt_vocab_path models/google_zh_vocab.txt --config_path models/transformer/base_config.json --output_model_path models/mt_model.bin --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2
               mv models/mt_model.bin-10 models/mt_model.bin
               python preprocess.py --corpus_path corpora/CLUECorpusSmall_5000_lines_bert.txt --vocab_path models/google_zh_vocab.txt --dataset_path pegasus_dataset.pt --processes_num 8 --seq_length 128 --tgt_seq_length 128 --dup_factor 1 --sentence_selection_strategy random --data_processor gsg
               python pretrain.py --dataset_path pegasus_dataset.pt --vocab_path models/google_zh_vocab.txt --config_path models/pegasus/base_config.json --output_model_path models/pegasus_model.bin --total_steps 10 --save_checkpoint_steps 10 --report_steps 2 --batch_size 2

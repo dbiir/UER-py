@@ -16,11 +16,11 @@ input_model = torch.load(args.input_model_path)
 output_model = collections.OrderedDict()
 
 output_model["albert.embeddings.word_embeddings.weight"] = \
-    input_model["embedding.word_embedding.weight"]
+    input_model["embedding.word.embedding.weight"]
 output_model["albert.embeddings.position_embeddings.weight"] = \
-    input_model["embedding.position_embedding.weight"]
+    input_model["embedding.pos.embedding.weight"]
 output_model["albert.embeddings.token_type_embeddings.weight"] = \
-    input_model["embedding.segment_embedding.weight"][1:, :]
+    input_model["embedding.seg.embedding.weight"][1:, :]
 output_model["albert.embeddings.LayerNorm.weight"] = \
     input_model["embedding.layer_norm.gamma"]
 output_model["albert.embeddings.LayerNorm.bias"] = \

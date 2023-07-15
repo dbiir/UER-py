@@ -19,15 +19,21 @@ from finetune.run_classifier import *
 class Text2text(torch.nn.Module):
     def __init__(self, args):
         super(Text2text, self).__init__()
-        self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
+        self.embedding = Embedding(args)
+        for embedding_name in args.embedding:
+            tmp_emb = str2embedding[embedding_name](args, len(args.tokenizer.vocab))
+            self.embedding.update(tmp_emb, embedding_name)
         self.encoder = str2encoder[args.encoder](args)
-        self.tgt_embedding = str2embedding[args.tgt_embedding](args, len(args.tokenizer.vocab))
+        self.tgt_embedding = Embedding(args)
+        for embedding_name in args.tgt_embedding:
+            tmp_emb = str2embedding[embedding_name](args, len(args.tokenizer.vocab))
+            self.tgt_embedding.update(tmp_emb, embedding_name)
         self.decoder = str2decoder[args.decoder](args)
         self.target = LmTarget(args, len(args.tokenizer.vocab))
         if args.tie_weights:
-            self.target.output_layer.weight = self.embedding.word_embedding.weight
+            self.target.output_layer.weight = self.embedding.word.embedding.weight
         if args.share_embedding:
-            self.tgt_embedding.word_embedding.weight = self.embedding.word_embedding.weight
+            self.tgt_embedding.word.embedding.weight = self.embedding.word.embedding.weight
 
     def encode(self, src, seg):
         emb = self.embedding(src, seg)

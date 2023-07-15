@@ -22,9 +22,15 @@ from scripts.generate_lm import top_k_top_p_filtering
 class GenerateSeq2seq(torch.nn.Module):
     def __init__(self, args):
         super(GenerateSeq2seq, self).__init__()
-        self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
+        self.embedding = Embedding(args)
+        for embedding_name in args.embedding:
+            tmp_emb = str2embedding[embedding_name](args, len(args.tokenizer.vocab))
+            self.embedding.update(tmp_emb, embedding_name)
         self.encoder = str2encoder[args.encoder](args)
-        self.tgt_embedding = str2embedding[args.tgt_embedding](args, len(args.tgt_tokenizer.vocab))
+        self.tgt_embedding = Embedding(args)
+        for embedding_name in args.tgt_embedding:
+            tmp_emb = str2embedding[embedding_name](args, len(args.tokenizer.vocab))
+            self.tgt_embedding.update(tmp_emb, embedding_name)
         self.decoder = str2decoder[args.decoder](args)
         self.target = LmTarget(args, len(args.tgt_tokenizer.vocab))
 
