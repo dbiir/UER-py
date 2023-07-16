@@ -19,6 +19,7 @@ class MultiHeadedAttention(nn.Module):
         self.linear_layers = nn.ModuleList(
             [nn.Linear(hidden_size, self.inner_hidden_size, bias=has_bias) for _ in range(3)]
         )
+
         self.dropout = nn.Dropout(dropout)
         self.final_linear = nn.Linear(self.inner_hidden_size, hidden_size, bias=has_bias)
 
@@ -55,6 +56,7 @@ class MultiHeadedAttention(nn.Module):
                              transpose(1, 2) \
                              for l, x in zip(self.linear_layers, (query, key, value))
                             ]
+        
         scores = torch.matmul(query, key.transpose(-2, -1))
         if position_bias is not None:
             scores = scores + position_bias

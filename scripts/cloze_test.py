@@ -89,9 +89,9 @@ class ClozeTest(torch.nn.Module):
     def forward(self, src, seg):
         emb = self.embedding(src, seg)
         output = self.encoder(emb, seg)
-        output = self.act(self.target.mlm_linear_1(output))
+        output = self.act(self.target.linear_1(output))
         output = self.target.layer_norm(output)
-        output = self.target.mlm_linear_2(output)
+        output = self.target.linear_2(output)
         prob = torch.nn.Softmax(dim=-1)(output)
         return prob
 

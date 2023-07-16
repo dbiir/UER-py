@@ -27,14 +27,14 @@ class ClozeTest(nn.Module):
         self.encoder = str2encoder[args.encoder](args)
         self.target = MlmTarget(args, len(args.tokenizer.vocab))
         if args.tie_weights:
-            self.target.mlm_linear_2.weight = self.embedding.word.embedding.weight
+            self.target.linear_2.weight = self.embedding.word.embedding.weight
         self.answer_position = args.answer_position
         self.device = args.device
 
     def forward(self, src, tgt, seg):
         emb = self.embedding(src, seg)
         memory_bank = self.encoder(emb, seg)
-        output_mlm = self.target.act(self.target.mlm_linear_1(memory_bank))
+        output_mlm = self.target.act(self.target.linear_1(memory_bank))
         output_mlm = self.target.layer_norm(output_mlm)
         tgt_mlm = tgt.contiguous().view(-1)
         if self.target.factorized_embedding_parameterization:
@@ -44,7 +44,7 @@ class ClozeTest(nn.Module):
         output_mlm = output_mlm[tgt_mlm > 0, :]
         tgt_mlm = tgt_mlm[tgt_mlm > 0]
         self.answer_position = self.answer_position.to(self.device).view(-1)
-        logits = self.target.mlm_linear_2(output_mlm)
+        logits = self.target.linear_2(output_mlm)
         logits = logits * self.answer_position
         prob = self.target.softmax(logits)
         loss = self.target.criterion(prob, tgt_mlm)
