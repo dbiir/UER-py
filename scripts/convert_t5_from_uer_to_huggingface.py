@@ -30,7 +30,7 @@ output_model["encoder.embed_tokens.weight"] = \
 output_model["decoder.embed_tokens.weight"] = \
     input_model["tgt_embedding.word.embedding.weight"]
 output_model["lm_head.weight"] = \
-    input_model["target.output_layer.weight"]
+    input_model["target.lm.output_layer.weight"]
 
 for i in range(args.layers_num):
     output_model["encoder.block." + str(i) + ".layer.0.SelfAttention.q.weight"] = \

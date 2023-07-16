@@ -27,7 +27,7 @@ output_model["encoder.relative_pos_emb.relative_attention_bias.weight"] = \
     input_model["encoder.block.0.layer.0.SelfAttention.relative_attention_bias.weight"]
 output_model["decoder.self_pos_emb.relative_attention_bias.weight"] = \
     input_model["decoder.block.0.layer.0.SelfAttention.relative_attention_bias.weight"]
-output_model["target.output_layer.weight"] = \
+output_model["target.lm.output_layer.weight"] = \
     input_model["lm_head.weight"]
 
 for i in range(args.layers_num):

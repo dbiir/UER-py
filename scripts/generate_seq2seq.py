@@ -32,14 +32,15 @@ class GenerateSeq2seq(torch.nn.Module):
             tmp_emb = str2embedding[embedding_name](args, len(args.tokenizer.vocab))
             self.tgt_embedding.update(tmp_emb, embedding_name)
         self.decoder = str2decoder[args.decoder](args)
-        self.target = LmTarget(args, len(args.tgt_tokenizer.vocab))
+        self.target = Target()
+        self.target.update(LmTarget(args, len(args.tokenizer.vocab)), "lm")
 
     def forward(self, src, seg, tgt):
         emb = self.embedding(src, seg)
         memory_bank = self.encoder(emb, seg)
         emb = self.tgt_embedding(tgt, None)
         hidden = self.decoder(memory_bank, emb, (src,))
-        output = self.target.output_layer(hidden)
+        output = self.target.lm.output_layer(hidden)
         return output
 
 

@@ -64,14 +64,14 @@ output_model["encoder.transformer.feed_forward.linear_2.weight"] = \
 output_model["encoder.transformer.feed_forward.linear_2.bias"] = \
     input_model["albert.encoder.albert_layer_groups.0.albert_layers.0.ffn_output.bias"]
 
-output_model["target.sp_linear_1.weight"] = input_model["albert.pooler.weight"]
-output_model["target.sp_linear_1.bias"] = input_model["albert.pooler.bias"]
-output_model["target.sp_linear_2.weight"] = input_model["sop_classifier.classifier.weight"]
-output_model["target.sp_linear_2.bias"] = input_model["sop_classifier.classifier.bias"]
-output_model["target.mlm_linear_1.weight"] = input_model["predictions.dense.weight"]
-output_model["target.mlm_linear_1.bias"] = input_model["predictions.dense.bias"]
-output_model["target.mlm_linear_2.weight"] = input_model["predictions.decoder.weight"]
-output_model["target.mlm_linear_2.bias"] = input_model["predictions.bias"]
+output_model["target.sp.linear_1.weight"] = input_model["albert.pooler.weight"]
+output_model["target.sp.linear_1.bias"] = input_model["albert.pooler.bias"]
+output_model["target.sp.linear_2.weight"] = input_model["sop_classifier.classifier.weight"]
+output_model["target.sp.linear_2.bias"] = input_model["sop_classifier.classifier.bias"]
+output_model["target.mlm.linear_1.weight"] = input_model["predictions.dense.weight"]
+output_model["target.mlm.linear_1.bias"] = input_model["predictions.dense.bias"]
+output_model["target.mlm.linear_2.weight"] = input_model["predictions.decoder.weight"]
+output_model["target.mlm.linear_2.bias"] = input_model["predictions.bias"]
 output_model["target.layer_norm.gamma"] = input_model["predictions.LayerNorm.weight"]
 output_model["target.layer_norm.beta"] = input_model["predictions.LayerNorm.bias"]
 
