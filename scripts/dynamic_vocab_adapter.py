@@ -18,8 +18,8 @@ def adapter(old_model, old_vocab, new_vocab):
     new_model = collections.OrderedDict()
 
     embedding_key = "embedding.word.embedding.weight"
-    softmax_key = "target.mlm_linear_2.weight"
-    softmax_bias_key = "target.mlm_linear_2.bias"
+    softmax_key = "target.mlm.linear_2.weight"
+    softmax_bias_key = "target.mlm.linear_2.bias"
 
     # Fit in parameters that would not be modified.
     tensor_name = []

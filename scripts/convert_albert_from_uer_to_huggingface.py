@@ -61,16 +61,16 @@ output_model["albert.encoder.albert_layer_groups.0.albert_layers.0.ffn_output.we
 output_model["albert.encoder.albert_layer_groups.0.albert_layers.0.ffn_output.bias"] = \
     input_model["encoder.transformer.feed_forward.linear_2.bias"]
 
-output_model["albert.pooler.weight"] = input_model["target.sp_linear_1.weight"]
-output_model["albert.pooler.bias"] = input_model["target.sp_linear_1.bias"]
-output_model["sop_classifier.classifier.weight"] = input_model["target.sp_linear_2.weight"]
-output_model["sop_classifier.classifier.bias"] = input_model["target.sp_linear_2.bias"]
-output_model["predictions.dense.weight"] = input_model["target.mlm_linear_1.weight"]
-output_model["predictions.dense.bias"] = input_model["target.mlm_linear_1.bias"]
+output_model["albert.pooler.weight"] = input_model["target.sp.linear_1.weight"]
+output_model["albert.pooler.bias"] = input_model["target.sp.linear_1.bias"]
+output_model["sop_classifier.classifier.weight"] = input_model["target.sp.linear_2.weight"]
+output_model["sop_classifier.classifier.bias"] = input_model["target.sp.linear_2.bias"]
+output_model["predictions.dense.weight"] = input_model["target.mlm.linear_1.weight"]
+output_model["predictions.dense.bias"] = input_model["target.mlm.linear_1.bias"]
 output_model["predictions.LayerNorm.weight"] = input_model["target.layer_norm.gamma"]
 output_model["predictions.LayerNorm.bias"] = input_model["target.layer_norm.beta"]
-output_model["predictions.decoder.weight"] = input_model["target.mlm_linear_2.weight"]
-output_model["predictions.decoder.bias"] = input_model["target.mlm_linear_2.bias"]
-output_model["predictions.bias"] = input_model["target.mlm_linear_2.bias"]
+output_model["predictions.decoder.weight"] = input_model["target.mlm.linear_2.weight"]
+output_model["predictions.decoder.bias"] = input_model["target.mlm.linear_2.bias"]
+output_model["predictions.bias"] = input_model["target.mlm.linear_2.bias"]
 
 torch.save(output_model, args.output_model_path)

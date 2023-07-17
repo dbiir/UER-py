@@ -64,16 +64,16 @@ def main():
     convert_bert_transformer_encoder_from_uer_to_huggingface(input_model, output_model, args.layers_num)
 
     if args.type == "bert":
-        output_model["bert.pooler.dense.weight"] = input_model["target.sp_linear_1.weight"]
-        output_model["bert.pooler.dense.bias"] = input_model["target.sp_linear_1.bias"]
-        output_model["cls.seq_relationship.weight"] = input_model["target.sp_linear_2.weight"]
-        output_model["cls.seq_relationship.bias"] = input_model["target.sp_linear_2.bias"]
-    output_model["cls.predictions.transform.dense.weight"] = input_model["target.mlm_linear_1.weight"]
-    output_model["cls.predictions.transform.dense.bias"] = input_model["target.mlm_linear_1.bias"]
+        output_model["bert.pooler.dense.weight"] = input_model["target.sp.linear_1.weight"]
+        output_model["bert.pooler.dense.bias"] = input_model["target.sp.linear_1.bias"]
+        output_model["cls.seq_relationship.weight"] = input_model["target.sp.linear_2.weight"]
+        output_model["cls.seq_relationship.bias"] = input_model["target.sp.linear_2.bias"]
+    output_model["cls.predictions.transform.dense.weight"] = input_model["target.mlm.linear_1.weight"]
+    output_model["cls.predictions.transform.dense.bias"] = input_model["target.mlm.linear_1.bias"]
     output_model["cls.predictions.transform.LayerNorm.weight"] = input_model["target.layer_norm.gamma"]
     output_model["cls.predictions.transform.LayerNorm.bias"] = input_model["target.layer_norm.beta"]
-    output_model["cls.predictions.decoder.weight"] = input_model["target.mlm_linear_2.weight"]
-    output_model["cls.predictions.bias"] = input_model["target.mlm_linear_2.bias"]
+    output_model["cls.predictions.decoder.weight"] = input_model["target.mlm.linear_2.weight"]
+    output_model["cls.predictions.bias"] = input_model["target.mlm.linear_2.bias"]
 
     torch.save(output_model, args.output_model_path)
 

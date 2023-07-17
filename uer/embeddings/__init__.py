@@ -6,7 +6,6 @@ from uer.embeddings.seg_embedding import SegEmbedding
 from uer.embeddings.sinusoidalpos_embedding import SinusoidalposEmbedding
 
 
-
 str2embedding = {"word": WordEmbedding, "pos": PosEmbedding, "seg": SegEmbedding,
                  "sinusoidalpos": SinusoidalposEmbedding, "dual": DualEmbedding,}
 

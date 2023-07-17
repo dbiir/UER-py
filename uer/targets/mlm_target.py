@@ -19,13 +19,13 @@ class MlmTarget(nn.Module):
         self.act = str2act[args.hidden_act]
 
         if self.factorized_embedding_parameterization:
-            self.mlm_linear_1 = nn.Linear(args.hidden_size, args.emb_size)
+            self.linear_1 = nn.Linear(args.hidden_size, args.emb_size)
             self.layer_norm = LayerNorm(args.emb_size)
-            self.mlm_linear_2 = nn.Linear(args.emb_size, self.vocab_size)
+            self.linear_2 = nn.Linear(args.emb_size, self.vocab_size)
         else:
-            self.mlm_linear_1 = nn.Linear(args.hidden_size, args.hidden_size)
+            self.linear_1 = nn.Linear(args.hidden_size, args.hidden_size)
             self.layer_norm = LayerNorm(args.hidden_size)
-            self.mlm_linear_2 = nn.Linear(args.hidden_size, self.vocab_size)
+            self.linear_2 = nn.Linear(args.hidden_size, self.vocab_size)
 
         self.softmax = nn.LogSoftmax(dim=-1)
 
@@ -33,7 +33,7 @@ class MlmTarget(nn.Module):
 
     def mlm(self, memory_bank, tgt_mlm):
         # Masked language modeling (MLM) with full softmax prediction.
-        output_mlm = self.act(self.mlm_linear_1(memory_bank))
+        output_mlm = self.act(self.linear_1(memory_bank))
         output_mlm = self.layer_norm(output_mlm)
         if self.factorized_embedding_parameterization:
             output_mlm = output_mlm.contiguous().view(-1, self.emb_size)
@@ -42,7 +42,7 @@ class MlmTarget(nn.Module):
         tgt_mlm = tgt_mlm.contiguous().view(-1)
         output_mlm = output_mlm[tgt_mlm > 0, :]
         tgt_mlm = tgt_mlm[tgt_mlm > 0]
-        output_mlm = self.mlm_linear_2(output_mlm)
+        output_mlm = self.linear_2(output_mlm)
         output_mlm = self.softmax(output_mlm)
         denominator = torch.tensor(output_mlm.size(0) + 1e-6)
         if output_mlm.size(0) == 0:

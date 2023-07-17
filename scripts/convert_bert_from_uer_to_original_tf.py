@@ -80,15 +80,15 @@ def main():
             input_model["encoder.transformer." + str(i) + ".layer_norm_2.beta"]
     
     if args.type == "bert":
-        output_model["bert/pooler/dense/kernel"] = input_model["target.sp_linear_1.weight"]
-        output_model["bert/pooler/dense/bias"] = input_model["target.sp_linear_1.bias"]
-        output_model["cls/seq_relationship/output_weights"] = input_model["target.sp_linear_2.weight"]
-        output_model["cls/seq_relationship/output_bias"] = input_model["target.sp_linear_2.bias"]
-    output_model["cls/predictions/transform/dense/kernel"] = input_model["target.mlm_linear_1.weight"]
-    output_model["cls/predictions/transform/dense/bias"] = input_model["target.mlm_linear_1.bias"]
+        output_model["bert/pooler/dense/kernel"] = input_model["target.sp.linear_1.weight"]
+        output_model["bert/pooler/dense/bias"] = input_model["target.sp.linear_1.bias"]
+        output_model["cls/seq_relationship/output_weights"] = input_model["target.sp.linear_2.weight"]
+        output_model["cls/seq_relationship/output_bias"] = input_model["target.sp.linear_2.bias"]
+    output_model["cls/predictions/transform/dense/kernel"] = input_model["target.mlm.linear_1.weight"]
+    output_model["cls/predictions/transform/dense/bias"] = input_model["target.mlm.linear_1.bias"]
     output_model["cls/predictions/transform/LayerNorm/gamma"] = input_model["target.layer_norm.gamma"]
     output_model["cls/predictions/transform/LayerNorm/beta"] = input_model["target.layer_norm.beta"]
-    output_model["cls/predictions/output_bias"] = input_model["target.mlm_linear_2.bias"]
+    output_model["cls/predictions/output_bias"] = input_model["target.mlm.linear_2.bias"]
 
     tf_vars = []
 

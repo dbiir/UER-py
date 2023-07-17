@@ -64,18 +64,18 @@ for i in range(args.layers_num):
         input_model["encoder.transformer." + str(i) + ".layer_norm_2.beta"]
 
 output_model["lm_head.dense.weight"] = \
-    input_model["target.mlm_linear_1.weight"]
+    input_model["target.mlm.linear_1.weight"]
 output_model["lm_head.dense.bias"] = \
-    input_model["target.mlm_linear_1.bias"]
+    input_model["target.mlm.linear_1.bias"]
 output_model["lm_head.layer_norm.weight"] = \
     input_model["target.layer_norm.gamma"]
 output_model["lm_head.layer_norm.bias"] = \
     input_model["target.layer_norm.beta"]
 output_model["lm_head.decoder.weight"] = \
-    input_model["target.mlm_linear_2.weight"]
+    input_model["target.mlm.linear_2.weight"]
 output_model["lm_head.decoder.bias"] = \
-    input_model["target.mlm_linear_2.bias"]
+    input_model["target.mlm.linear_2.bias"]
 output_model["lm_head.bias"] = \
-    input_model["target.mlm_linear_2.bias"]
+    input_model["target.mlm.linear_2.bias"]
 
 torch.save(output_model, args.output_model_path)

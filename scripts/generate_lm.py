@@ -29,12 +29,13 @@ class GenerateLm(torch.nn.Module):
             tmp_emb = str2embedding[embedding_name](args, len(args.tokenizer.vocab))
             self.embedding.update(tmp_emb, embedding_name)
         self.encoder = str2encoder[args.encoder](args)
-        self.target = LmTarget(args, len(args.tokenizer.vocab))
+        self.target = Target()
+        self.target.update(LmTarget(args, len(args.tokenizer.vocab)), "lm")
 
     def forward(self, src, seg):
         emb = self.embedding(src, seg)
         output = self.encoder(emb, seg)
-        output = self.target.output_layer(output)
+        output = self.target.lm.output_layer(output)
         return output
 
 

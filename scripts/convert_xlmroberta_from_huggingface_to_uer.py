@@ -63,17 +63,17 @@ for i in range(args.layers_num):
     output_model["encoder.transformer." + str(i) + ".layer_norm_2.beta"] = \
         input_model["roberta.encoder.layer." + str(i) + ".output.LayerNorm.bias"]
 
-output_model["target.mlm_linear_1.weight"] = \
+output_model["target.mlm.linear_1.weight"] = \
     input_model["lm_head.dense.weight"]
-output_model["target.mlm_linear_1.bias"] = \
+output_model["target.mlm.linear_1.bias"] = \
     input_model["lm_head.dense.bias"]
 output_model["target.layer_norm.gamma"] = \
     input_model["lm_head.layer_norm.weight"]
 output_model["target.layer_norm.beta"] = \
     input_model["lm_head.layer_norm.bias"]
-output_model["target.mlm_linear_2.weight"] = \
+output_model["target.mlm.linear_2.weight"] = \
     input_model["lm_head.decoder.weight"]
-output_model["target.mlm_linear_2.bias"] = \
+output_model["target.mlm.linear_2.bias"] = \
     input_model["lm_head.bias"]
 
 torch.save(output_model, args.output_model_path)
