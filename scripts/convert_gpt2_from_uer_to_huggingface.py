@@ -61,6 +61,6 @@ for i in range(args.layers_num):
 
 output_model["transformer.ln_f.weight"] = input_model["encoder.layer_norm.gamma"]
 output_model["transformer.ln_f.bias"] = input_model["encoder.layer_norm.beta"]
-output_model["lm_head.weight"] = input_model["embedding.word.embedding.weight"]
+output_model["lm_head.weight"] = input_model["target.lm.output_layer.weight"]
 
 torch.save(output_model, args.output_model_path)

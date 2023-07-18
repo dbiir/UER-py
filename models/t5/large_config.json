@@ -5,6 +5,7 @@
   "hidden_act": "relu",
   "heads_num": 16,
   "layers_num": 24,
+  "decoder_layers_num": 24,
   "dropout": 0.1,
   "data_processor": "t5",
   "embedding": ["word"],

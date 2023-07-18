@@ -307,8 +307,7 @@ class MtTrainer(Trainer):
         self.total_denominator = 0.0
 
     def forward_propagation(self, batch, model):
-        src, tgt_in, tgt_out, seg = batch
-        tgt_seg = None
+        src, tgt_out, seg, tgt_in, tgt_seg = batch
         loss_info = model(src, tgt_out, seg, tgt_in, tgt_seg)
         loss, correct, denominator = loss_info
         self.total_loss += loss.item()
