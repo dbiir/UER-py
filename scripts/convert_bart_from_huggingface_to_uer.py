@@ -3,7 +3,7 @@ import collections
 import torch
 
 
-def convert_encoder_decoder_transformer_from_huggingface_to_uer(input_model, output_model, layers_num):
+def convert_encoder_decoder_transformer_from_huggingface_to_uer(input_model, output_model, layers_num, decoder_layers_num):
     for i in range(layers_num):
         output_model["encoder.transformer." + str(i) + ".self_attn.linear_layers.0.weight"] = \
             input_model["model.encoder.layers." + str(i) + ".self_attn.q_proj.weight"]
@@ -38,6 +38,7 @@ def convert_encoder_decoder_transformer_from_huggingface_to_uer(input_model, out
         output_model["encoder.transformer." + str(i) + ".layer_norm_2.beta"] = \
             input_model["model.encoder.layers." + str(i) + ".final_layer_norm.bias"]
 
+    for i in range(decoder_layers_num):
         output_model["decoder.transformer_decoder." + str(i) + ".self_attn.linear_layers.0.weight"] = \
             input_model["model.decoder.layers." + str(i) + ".self_attn.q_proj.weight"]
         output_model["decoder.transformer_decoder." + str(i) + ".self_attn.linear_layers.0.bias"] = \
@@ -93,7 +94,6 @@ def convert_encoder_decoder_transformer_from_huggingface_to_uer(input_model, out
         output_model["decoder.transformer_decoder." + str(i) + ".layer_norm_3.beta"] = \
             input_model["model.decoder.layers." + str(i) + ".final_layer_norm.bias"]
 
-
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--input_model_path", type=str, default="models/input_model.bin",
@@ -101,6 +101,7 @@ def main():
     parser.add_argument("--output_model_path", type=str, default="models/output_model.bin",
                         help=".")
     parser.add_argument("--layers_num", type=int, default=6, help=".")
+    parser.add_argument("--decoder_layers_num", type=int, default=6, help=".")
 
 
     args = parser.parse_args()
@@ -116,7 +117,7 @@ def main():
     output_model["target.lm.output_layer.weight"] = input_model["lm_head.weight"]
     output_model["target.lm.output_layer.bias"] = input_model["final_logits_bias"].squeeze(0)
 
-    convert_encoder_decoder_transformer_from_huggingface_to_uer(input_model, output_model, args.layers_num)
+    convert_encoder_decoder_transformer_from_huggingface_to_uer(input_model, output_model, args.layers_num, args.decoder_layers_num)
 
     output_model["embedding.layer_norm.gamma"] = input_model["model.encoder.layernorm_embedding.weight"]
     output_model["embedding.layer_norm.beta"] = input_model["model.encoder.layernorm_embedding.bias"]

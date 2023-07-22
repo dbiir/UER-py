@@ -5,6 +5,7 @@
   "hidden_act": "gelu",
   "heads_num": 16,
   "layers_num": 12,
+  "decoder_layers_num": 12,
   "max_seq_length": 1024,
   "dropout": 0.1,
   "data_processor": "bart",

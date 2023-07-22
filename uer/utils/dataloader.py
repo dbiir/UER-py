@@ -273,6 +273,7 @@ class T5Dataloader(Dataloader):
             tgt_in = []
             tgt_out = []
             seg = []
+            tgt_seg = []
 
             tgt_seq_length = 0
 
@@ -315,6 +316,8 @@ class T5Dataloader(Dataloader):
                 tgt_in_single.append(SENTINEL_ID)
                 tgt_in_single.append(self.vocab.get(SEP_TOKEN))
 
+                tgt_seg_single = [1] * len(tgt_in_single)
+
                 while len(src_with_sentinel) < len(src_single):
                     src_with_sentinel.append(PAD_ID)
 
@@ -323,17 +326,20 @@ class T5Dataloader(Dataloader):
 
                 src.append(src_with_sentinel)
                 tgt_in.append(tgt_in_single)
+                tgt_seg.append(tgt_seg_single)
                 tgt_out.append(tgt_in[-1][1:] + [PAD_ID])
 
             for i in range(len(tgt_in)):
                 while len(tgt_in[i]) != tgt_seq_length:
                     tgt_in[i].append(PAD_ID)
                     tgt_out[i].append(PAD_ID)
+                    tgt_seg[i].append(0)
 
             yield torch.LongTensor(src), \
-                torch.LongTensor(tgt_in), \
                 torch.LongTensor(tgt_out), \
-                torch.LongTensor(seg)
+                torch.LongTensor(seg), \
+                torch.LongTensor(tgt_in), \
+                torch.LongTensor(tgt_seg)
 
 
 class GsgDataloader(MtDataloader):
