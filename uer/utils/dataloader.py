@@ -237,6 +237,7 @@ class MtDataloader(Dataloader):
             tgt_in = []
             tgt_out = []
             seg = []
+            tgt_seg = []
 
             for ins in instances:
                 src_single, pad_num = ins[0]
@@ -250,11 +251,14 @@ class MtDataloader(Dataloader):
                 tgt_in.append(tgt_single[:-1])
                 tgt_out.append(tgt_single[1:])
                 seg.append([1] * ins[2][0] + [0] * (len(src_single) - ins[2][0]))
+                pad_num = max(ins[1][1] - 1, 0)  # left shifted, pad_num >= 0
+                tgt_seg.append([1] * (len(tgt_in[-1]) - pad_num) + [0] * pad_num)
 
             yield torch.LongTensor(src), \
-                torch.LongTensor(tgt_in), \
                 torch.LongTensor(tgt_out), \
-                torch.LongTensor(seg)
+                torch.LongTensor(seg), \
+                torch.LongTensor(tgt_in), \
+                torch.LongTensor(tgt_seg)
 
 
 class T5Dataloader(Dataloader):
@@ -362,6 +366,7 @@ class BartDataloader(Dataloader):
             tgt_in = []
             tgt_out = []
             seg = []
+            tgt_seg = []
 
             for _, ins in enumerate(instances):
                 src_single, pad_num = ins[0]
@@ -371,10 +376,14 @@ class BartDataloader(Dataloader):
                 for _ in range(pad_num):
                     tgt_single.append(self.vocab.get(PAD_TOKEN))
 
-                src_single, _ = mask_seq(src_single, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                src_single, _ = mask_seq(src_single, self.tokenizer, self.whole_word_masking, self.span_masking,
+                                         self.span_geo_prob, self.span_max_length)
                 seg_pos = ins[2][0]
                 tgt_in.append(tgt_single[:-1])
                 tgt_out.append(tgt_single[1:])
+                pad_num = max(ins[1][1] - 1, 0)  # left shifted, pad_num >= 0
+                tgt_seg.append([1] * (len(tgt_in[-1]) - pad_num) + [0] * pad_num)
+
 
                 MASK_ID = self.vocab.get(MASK_TOKEN)
 
@@ -396,9 +405,10 @@ class BartDataloader(Dataloader):
 
 
             yield torch.LongTensor(src), \
-                torch.LongTensor(tgt_in), \
                 torch.LongTensor(tgt_out), \
-                torch.LongTensor(seg)
+                torch.LongTensor(seg), \
+                torch.LongTensor(tgt_in), \
+                torch.LongTensor(tgt_seg)
 
 
 class ClsDataloader(Dataloader):
