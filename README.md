@@ -13,7 +13,7 @@ Pre-training has become an essential part for NLP tasks. UER-py (Universal Encod
 <br/>
 
 
-**🚀 News (2023.4.8)** Our refactored new version supports multi-modal pre-training, large language models like LLaMA, Low-rand Adaption training and Deepspeed Zero-3 offload, see [TencentPretrain](https://github.com/Tencent/TencentPretrain). We also release Chinese ChatLLaMA models, see [ChatLLaMA](https://github.com/ydli-ai/Chinese-ChatLLaMA).
+**🚀** We have open-sourced the [TencentPretrain](https://github.com/Tencent/TencentPretrain), a refactored new version of UER-py. TencentPretrain supports multi-modal models and enables training of large models. If you are interested in text models of medium size (with parameter sizes of less than one billion), we recommend continuing to use the UER-py project.
 
 
 <br/>
@@ -97,7 +97,7 @@ python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path mo
 Notice that *six>=1.12.0* is required.
 
 
-Pre-processing is time-consuming. Using multiple processes can largely accelerate the pre-processing speed (*--processes_num*). BERT tokenizer is used in default (*--tokenizer bert*). After pre-processing, the raw text is converted to *dataset.pt*, which is the input of *pretrain.py*. Then we download Google's pre-trained Chinese BERT model [*google_zh_model.bin*](https://share.weiyun.com/A1C49VPb) (in UER format and the original model is from [here](https://github.com/google-research/bert)), and put it in *models* folder. We load the pre-trained Chinese BERT model and further pre-train it on book review corpus. Pre-training model is usually composed of embedding, encoder, and target layers. To build a pre-training model, we should provide related information. Configuration file (*--config_path*) specifies the modules and hyper-parameters used by pre-training models. More details can be found in *models/bert/base_config.json*. Suppose we have a machine with 8 GPUs:
+Pre-processing is time-consuming. Using multiple processes can largely accelerate the pre-processing speed (*--processes_num*). BERT tokenizer is used in default (*--tokenizer bert*). After pre-processing, the raw text is converted to *dataset.pt*, which is the input of *pretrain.py*. Then we download Google's pre-trained Chinese BERT model [*google_zh_model.bin*](https://share.weiyun.com/FR4rPxc4) (in UER format and the original model is from [here](https://github.com/google-research/bert)), and put it in *models* folder. We load the pre-trained Chinese BERT model and further pre-train it on book review corpus. Pre-training model is usually composed of embedding, encoder, and target layers. To build a pre-training model, we should provide related information. Configuration file (*--config_path*) specifies the modules and hyper-parameters used by pre-training models. More details can be found in *models/bert/base_config.json*. Suppose we have a machine with 8 GPUs:
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
                     --pretrained_model_path models/google_zh_model.bin \
@@ -110,14 +110,14 @@ mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
 Notice that the model trained by *pretrain.py* is attacted with the suffix which records the training step (*--total_steps*). We could remove the suffix for ease of use.
 
-Then we fine-tune the pre-trained model on downstream classification dataset. We use embedding and encoder layers of [*book_review_model.bin*](https://share.weiyun.com/wDzMu0Rb), which is the output of *pretrain.py*:
+Then we fine-tune the pre-trained model on downstream classification dataset. We use embedding and encoder layers of book_review_model.bin, which is the output of *pretrain.py*:
 ```
 python3 finetune/run_classifier.py --pretrained_model_path models/book_review_model.bin \
                                    --vocab_path models/google_zh_vocab.txt \
                                    --config_path models/bert/base_config.json \
-                                   --train_path datasets/douban_book_review/train.tsv \
-                                   --dev_path datasets/douban_book_review/dev.tsv \
-                                   --test_path datasets/douban_book_review/test.tsv \
+                                   --train_path datasets/book_review/train.tsv \
+                                   --dev_path datasets/book_review/dev.tsv \
+                                   --test_path datasets/book_review/test.tsv \
                                    --epochs_num 3 --batch_size 32
 ``` 
 The default path of the fine-tuned classifier model is *models/finetuned_model.bin* . It is noticeable that the actual batch size of pre-training is *--batch_size* times *--world_size* ; The actual batch size of downstream task (e.g. classification) is *--batch_size* . 
@@ -126,8 +126,8 @@ Then we do inference with the fine-tuned model.
 python3 inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin \
                                           --vocab_path models/google_zh_vocab.txt \
                                           --config_path models/bert/base_config.json \
-                                          --test_path datasets/douban_book_review/test_nolabel.tsv \
-                                          --prediction_path datasets/douban_book_review/prediction.tsv \
+                                          --test_path datasets/book_review/test_nolabel.tsv \
+                                          --prediction_path datasets/book_review/prediction.tsv \
                                           --labels_num 2
 ```
 *--test_path* specifies the path of the file to be predicted. The file should contain text_a column.
