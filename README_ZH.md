@@ -10,6 +10,9 @@
 预训练已经成为自然语言处理任务的重要组成部分，为大量自然语言处理任务带来了显著提升。UER-py（Universal Encoder Representations）是一个用于对通用语料进行预训练并对下游任务进行微调的工具包。UER-py遵循模块化的设计原则。通过模块的组合，用户能迅速精准的复现已有的预训练模型，并利用已有的接口进一步开发更多的预训练模型。通过UER-py，我们建立了一个模型仓库，其中包含不同性质的预训练模型（例如基于不同编码器和目标任务）。用户可以根据具体任务的要求，从中选择合适的预训练模型使用。**[完整文档](https://github.com/dbiir/UER-py/wiki/主页)请参见本项目Wiki**。
 
 
+**🚀** 我们在UER-py基础上开发了[TencentPretrain](https://github.com/Tencent/TencentPretrain)。TencentPretrain支持多模态模型和大模型训练。如果只关注中等规模的文本模型（参数量小于十亿），建议继续使用UER-py项目。
+
+
 <br>
 
 目录
@@ -90,7 +93,7 @@ python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path mo
 ```
 注意我们需要安装 *six>=1.12.0*。
 
-预处理非常耗时，使用多个进程可以大大加快预处理速度（*--processes_num*）。默认的分词器为 *--tokenizer bert* 。原始文本在预处理之后被转换为*pretrain.py*可以接收的输入，*dataset.pt*。然后下载Google中文预训练模型[*google_zh_model.bin*](https://share.weiyun.com/DHhfYBOH)（此文件为UER支持的格式，原始模型来自于[这里](https://github.com/google-research/bert)），并将其放在 *models* 文件夹中。接着加载Google中文预训练模型，在书评语料上对其进行增量预训练。预训练模型通常由词向量层，编码层和目标任务层组成。因此要构建预训练模型，我们应该给出这些信息，比如编码层使用什么类型的Encoder模块。这里我们通过配置文件（*--config_path*）指定模型使用的模块类型和超参数等信息。具体可见*models/bert/base_config.json*。假设我们有一台带有8个GPU的机器：
+预处理非常耗时，使用多个进程可以大大加快预处理速度（*--processes_num*）。默认的分词器为 *--tokenizer bert* 。原始文本在预处理之后被转换为*pretrain.py*可以接收的输入，*dataset.pt*。然后下载Google中文预训练模型[*google_zh_model.bin*](https://share.weiyun.com/FR4rPxc4)（此文件为UER支持的格式，原始模型来自于[这里](https://github.com/google-research/bert)），并将其放在 *models* 文件夹中。接着加载Google中文预训练模型，在书评语料上对其进行增量预训练。预训练模型通常由词向量层，编码层和目标任务层组成。因此要构建预训练模型，我们应该给出这些信息，比如编码层使用什么类型的Encoder模块。这里我们通过配置文件（*--config_path*）指定模型使用的模块类型和超参数等信息。具体可见*models/bert/base_config.json*。假设我们有一台带有8个GPU的机器：
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
                     --pretrained_model_path models/google_zh_model.bin \
@@ -103,14 +106,14 @@ mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
 请注意，*pretrain.py*输出的模型会带有记录训练步数的后缀（*--total_steps*），这里我们可以删除后缀以方便使用。
 
-然后，我们在下游分类数据集上微调预训练模型，我们使用 *pretrain.py* 的输出[*book_review_model.bin*](https://share.weiyun.com/wDzMu0Rb)（加载词向量层和编码层参数）：
+然后，我们在下游分类数据集上微调预训练模型，我们使用 *pretrain.py* 的输出book_review_model.bin（加载词向量层和编码层参数）：
 ```
 python3 finetune/run_classifier.py --pretrained_model_path models/book_review_model.bin \
                                    --vocab_path models/google_zh_vocab.txt \
                                    --config_path models/bert/base_config.json \
-                                   --train_path datasets/douban_book_review/train.tsv \
-                                   --dev_path datasets/douban_book_review/dev.tsv \
-                                   --test_path datasets/douban_book_review/test.tsv \
+                                   --train_path datasets/book_review/train.tsv \
+                                   --dev_path datasets/book_review/dev.tsv \
+                                   --test_path datasets/book_review/test.tsv \
                                    --epochs_num 3 --batch_size 32
 ``` 
 
@@ -119,8 +122,8 @@ python3 finetune/run_classifier.py --pretrained_model_path models/book_review_mo
 python3 inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin \
                                           --vocab_path models/google_zh_vocab.txt \
                                           --config_path models/bert/base_config.json \
-                                          --test_path datasets/douban_book_review/test_nolabel.tsv \
-                                          --prediction_path datasets/douban_book_review/prediction.tsv \
+                                          --test_path datasets/book_review/test_nolabel.tsv \
+                                          --prediction_path datasets/book_review/prediction.tsv \
                                           --labels_num 2
 ```
 *--test_path* 指定需要预测的文件，文件需要包括text_a列；
