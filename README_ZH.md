@@ -10,10 +10,14 @@
 预训练已经成为自然语言处理任务的重要组成部分，为大量自然语言处理任务带来了显著提升。UER-py（Universal Encoder Representations）是一个用于对通用语料进行预训练并对下游任务进行微调的工具包。UER-py遵循模块化的设计原则。通过模块的组合，用户能迅速精准的复现已有的预训练模型，并利用已有的接口进一步开发更多的预训练模型。通过UER-py，我们建立了一个模型仓库，其中包含不同性质的预训练模型（例如基于不同编码器和目标任务）。用户可以根据具体任务的要求，从中选择合适的预训练模型使用。**[完整文档](https://github.com/dbiir/UER-py/wiki/主页)请参见本项目Wiki**。
 
 
+<br>
+
+
 **🚀** 我们在UER-py基础上开发了[TencentPretrain](https://github.com/Tencent/TencentPretrain)。TencentPretrain支持多模态模型和大模型训练。如果只关注中等规模的文本模型（参数量小于十亿），建议继续使用UER-py项目。
 
 
 <br>
+
 
 目录
 =================
