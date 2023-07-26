@@ -63,7 +63,7 @@ UER-py has the following features:
 <br/>
 
 ## Quickstart
-This section uses several commonly-used examples to demonstrate how to use UER-py. More details are discussed in Instructions section. We firstly use BERT model on Douban book review classification dataset. We pre-train model on book review corpus and then fine-tune it on book review classification dataset. There are three input files: book review corpus, book review classification dataset, and vocabulary. All files are encoded in UTF-8 and included in this project.
+This section uses several commonly-used examples to demonstrate how to use UER-py. More details are discussed in Instructions section. We firstly use BERT (a text pre-training model) on book review sentiment classification dataset. We pre-train model on book review corpus and then fine-tune it on book review sentiment classification dataset. There are three input files: book review corpus, book review sentiment classification dataset, and vocabulary. All files are encoded in UTF-8 and included in this project.
 
 The format of the corpus for BERT is as follows (one sentence per line and documents are delimited by empty lines)：
 ```
