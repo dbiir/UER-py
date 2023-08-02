@@ -18,18 +18,17 @@
 
 <br>
 
-
 目录
 =================
   * [项目特色](#项目特色)
   * [依赖环境](#依赖环境)
   * [快速上手](#快速上手)
-  * [数据集](#数据集)
+  * [预训练数据](#预训练数据)
+  * [下游任务数据集](#下游任务数据集)
   * [预训练模型仓库](#预训练模型仓库)
   * [使用说明](#使用说明)
   * [竞赛解决方案](#竞赛解决方案)
   * [引用](#引用)
-
 
 <br/>
 
@@ -140,8 +139,13 @@ python3 inference/run_classifier_infer.py --load_model_path models/finetuned_mod
 
 <br/>
 
-## 数据集
-我们收集了一系列 :arrow_right: [__下游任务数据集__](https://github.com/dbiir/UER-py/wiki/下游任务数据集) :arrow_left: 并将其转换为UER可以直接加载的格式。
+## 预训练数据
+我们提供了链接，指向一系列其他项目开源的 :arrow_right: [__预训练数据__](https://github.com/dbiir/UER-py/wiki/预训练数据) :arrow_left: 。
+
+<br/>
+
+## 下游任务数据集
+我们提供了链接，指向一系列其他项目开源的 :arrow_right: [__下游任务数据集__](https://github.com/dbiir/UER-py/wiki/下游任务数据集) :arrow_left: 。UER可以直接加载这些数据集。
 
 <br/>
 
