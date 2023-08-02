@@ -23,7 +23,8 @@ Table of Contents
   * [Features](#features)
   * [Requirements](#requirements)
   * [Quickstart](#quickstart)
-  * [Datasets](#datasets)
+  * [Pre-training data](#pre-training-data)
+  * [Downstream datasets](#downstream-datasets)
   * [Modelzoo](#modelzoo)
   * [Instructions](#instructions)
   * [Competition solutions](#competition-solutions)
@@ -145,7 +146,7 @@ This section provides links to a range of :arrow_right: [__pre-training data__](
 
 <br/>
 
-## Datasets
+## Downstream datasets
 This section provides links to a range of :arrow_right: [__downstream datasets__](https://github.com/dbiir/UER-py/wiki/Downstream-datasets) :arrow_left: (in other open source projects). UER can load these datasets directly.
 
 <br/>
