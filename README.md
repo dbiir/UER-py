@@ -138,11 +138,15 @@ We need to explicitly specify the number of labels by *--labels_num*. Douban boo
 
 The above content provides basic ways of using UER-py to pre-process, pre-train, fine-tune, and do inference. More use cases can be found in complete :arrow_right: [__quickstart__](https://github.com/dbiir/UER-py/wiki/Quickstart) :arrow_left: . The complete quickstart contains abundant use cases, covering most of the pre-training related application scenarios. It is recommended that users read the complete quickstart in order to use the project reasonably.
 
+<br/>
+
+## Pre-training data
+This section provides links to a range of :arrow_right: [__pre-training data__](https://github.com/dbiir/UER-py/wiki/Pretraining-data) :arrow_left: (in other open source projects).
 
 <br/>
 
 ## Datasets
-We collected a range of :arrow_right: [__downstream datasets__](https://github.com/dbiir/UER-py/wiki/Datasets) :arrow_left: and converted them into the format that UER can load directly.
+This section provides links to a range of :arrow_right: [__downstream datasets__](https://github.com/dbiir/UER-py/wiki/Downstream-datasets) :arrow_left: (in other open source projects). UER can load these datasets directly.
 
 <br/>
 
