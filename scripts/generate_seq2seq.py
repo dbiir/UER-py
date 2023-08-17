@@ -29,11 +29,11 @@ class GenerateSeq2seq(torch.nn.Module):
         self.encoder = str2encoder[args.encoder](args)
         self.tgt_embedding = Embedding(args)
         for embedding_name in args.tgt_embedding:
-            tmp_emb = str2embedding[embedding_name](args, len(args.tokenizer.vocab))
+            tmp_emb = str2embedding[embedding_name](args, len(args.tgt_tokenizer.vocab))
             self.tgt_embedding.update(tmp_emb, embedding_name)
         self.decoder = str2decoder[args.decoder](args)
         self.target = Target()
-        self.target.update(LmTarget(args, len(args.tokenizer.vocab)), "lm")
+        self.target.update(LmTarget(args, len(args.tgt_tokenizer.vocab)), "lm")
 
     def forward(self, src, seg, tgt):
         emb = self.embedding(src, seg)
