@@ -28,8 +28,9 @@
     "encoder": "transformer",
     "mask": "fully_visible"
   },
-
-  "embedding": "dual",
+  
+  "dropout": 0.1,
+  "embedding": ["dual"],
   "encoder": "dual",
   "pooling": "first",
   "tie_weights": true
