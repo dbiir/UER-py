@@ -29,7 +29,7 @@
     "mask": "fully_visible"
   },
 
-  "embedding": "dual",
+  "embedding": ["dual"],
   "encoder": "dual",
   "pooling": "first",
   "tie_weights": true
