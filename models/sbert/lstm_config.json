@@ -19,7 +19,8 @@
     "encoder": "lstm"
   },
 
-  "embedding": "dual",
+  "dropout": 0.1,
+  "embedding": ["dual"],
   "encoder": "dual",
   "pooling": "mean",
   "tie_weights": true
