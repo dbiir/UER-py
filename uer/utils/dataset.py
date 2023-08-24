@@ -553,7 +553,7 @@ class MtDataset(Dataset):
                 if pos >= end:
                     break
 
-            dataset_writer.close()
+        dataset_writer.close()
 
 
 class T5Dataset(MlmDataset):
