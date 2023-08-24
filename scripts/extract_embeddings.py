@@ -40,7 +40,7 @@ if __name__ == '__main__':
         vocab.load(args.vocab_path)
 
     pretrained_model = torch.load(args.load_model_path)
-    embedding = pretrained_model["embedding.word_embedding.weight"]
+    embedding = pretrained_model["embedding.word.embedding.weight"]
 
     with open(args.word_embedding_path, mode="w", encoding="utf-8") as f:
         head = str(list(embedding.size())[0]) + " " + str(list(embedding.size())[1]) + "\n"
