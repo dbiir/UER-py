@@ -39,7 +39,7 @@ if __name__ == '__main__':
         vocab.load(args.vocab_path)
 
     pretrained_model = torch.load(args.load_model_path)
-    embedding = pretrained_model["embedding.word_embedding.weight"]
+    embedding = pretrained_model["embedding.word.embedding.weight"]
 
     with open(args.test_path, mode="r", encoding="utf-8") as f:
         for line in f:
