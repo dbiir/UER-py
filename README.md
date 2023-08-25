@@ -142,12 +142,12 @@ The above content provides basic ways of using UER-py to pre-process, pre-train,
 <br/>
 
 ## Pre-training data
-This section provides links to a range of :arrow_right: [__pre-training data__](https://github.com/dbiir/UER-py/wiki/Pretraining-data) :arrow_left: (in other open source projects).
+This section provides links to a range of :arrow_right: [__pre-training data__](https://github.com/dbiir/UER-py/wiki/Pretraining-data) :arrow_left: .
 
 <br/>
 
 ## Downstream datasets
-This section provides links to a range of :arrow_right: [__downstream datasets__](https://github.com/dbiir/UER-py/wiki/Downstream-datasets) :arrow_left: (in other open source projects). UER can load these datasets directly.
+This section provides links to a range of :arrow_right: [__downstream datasets__](https://github.com/dbiir/UER-py/wiki/Downstream-datasets) :arrow_left: . UER can load these datasets directly.
 
 <br/>
 
