@@ -140,12 +140,12 @@ python3 inference/run_classifier_infer.py --load_model_path models/finetuned_mod
 <br/>
 
 ## 预训练数据
-我们提供了链接，指向一系列其他项目开源的 :arrow_right: [__预训练数据__](https://github.com/dbiir/UER-py/wiki/预训练数据) :arrow_left: 。
+我们提供了链接，指向一系列开源的 :arrow_right: [__预训练数据__](https://github.com/dbiir/UER-py/wiki/预训练数据) :arrow_left: 。
 
 <br/>
 
 ## 下游任务数据集
-我们提供了链接，指向一系列其他项目开源的 :arrow_right: [__下游任务数据集__](https://github.com/dbiir/UER-py/wiki/下游任务数据集) :arrow_left: 。UER可以直接加载这些数据集。
+我们提供了链接，指向一系列开源的 :arrow_right: [__下游任务数据集__](https://github.com/dbiir/UER-py/wiki/下游任务数据集) :arrow_left: 。UER可以直接加载这些数据集。
 
 <br/>
 
