@@ -202,14 +202,6 @@ def main():
 
     optimizer, scheduler = build_optimizer(args, model)
 
-    if args.fp16:
-        try:
-            from apex import amp
-        except ImportError:
-            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
-        args.amp = amp
-
     if torch.cuda.device_count() > 1:
         args.logger.info("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
@@ -245,11 +237,7 @@ def main():
             tgt_batch = torch.arange(similarity_matrix.size(0), device=similarity_matrix.device, dtype=torch.long)
             loss = nn.CrossEntropyLoss()(similarity_matrix, tgt_batch)
 
-            if args.fp16:
-                with args.amp.scale_loss(loss, optimizer) as scaled_loss:
-                    scaled_loss.backward()
-            else:
-                loss.backward()
+            loss.backward()
 
             optimizer.step()
             scheduler.step()
