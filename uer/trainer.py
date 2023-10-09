@@ -99,11 +99,7 @@ class Trainer(object):
 
             loss = self.forward_propagation(batch, model)
 
-            if args.fp16:
-                with args.amp.scale_loss(loss, optimizer) as scaled_loss:
-                    scaled_loss.backward()
-            else:
-                loss.backward()
+            loss.backward()
 
             if self.current_step % self.accumulation_steps == 0:
                 optimizer.step()
@@ -458,6 +454,8 @@ def worker(proc_id, gpu_ranks, args, model):
         custom_scheduler = str2scheduler[args.scheduler](custom_optimizer)
     elif args.scheduler in ["constant_with_warmup"]:
         custom_scheduler = str2scheduler[args.scheduler](custom_optimizer, args.total_steps*args.warmup)
+    elif args.scheduler in ["tri_stage"]:
+        custom_scheduler = str2scheduler[args.scheduler](custom_optimizer, args.total_steps*args.warmup, args.total_steps*args.lr_decay, args.total_steps)
     else:
         custom_scheduler = str2scheduler[args.scheduler](custom_optimizer, args.total_steps*args.warmup, args.total_steps)
 
@@ -465,13 +463,6 @@ def worker(proc_id, gpu_ranks, args, model):
         model.cuda(gpu_id)
     optimizer = custom_optimizer
     scheduler = custom_scheduler
-    if args.fp16:
-        try:
-            from apex import amp
-        except ImportError:
-            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
-        args.amp = amp
 
     if args.dist_train:
         # Initialize multiprocessing distributed training environment.
