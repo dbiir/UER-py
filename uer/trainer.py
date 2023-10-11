@@ -53,7 +53,7 @@ def train_and_validate(args):
         mp.spawn(worker, nprocs=args.ranks_num, args=(args.gpu_ranks, args, model), daemon=False)
     elif args.single_gpu:
         # Single GPU mode.
-        worker(args.gpu_id, None, args, model)
+        worker(args.local_rank, None, args, model)
     else:
         # CPU mode.
         worker(None, None, args, model)
@@ -85,7 +85,7 @@ class Trainer(object):
 
         raise NotImplementedError
 
-    def train(self, args, gpu_id, rank, loader, model, optimizer, scheduler):
+    def train(self, args, local_rank, global_rank, loader, model, optimizer, scheduler):
         model.train()
         loader_iter = iter(loader)
         while True:
@@ -93,9 +93,9 @@ class Trainer(object):
                 break
             batch = list(next(loader_iter))
             self.seq_length = batch[0].size(1)
-            if gpu_id is not None:
+            if local_rank is not None:
                 for i in range(len(batch)):
-                    batch[i] = batch[i].cuda(gpu_id)
+                    batch[i] = batch[i].cuda(local_rank)
 
             loss = self.forward_propagation(batch, model)
 
@@ -107,12 +107,12 @@ class Trainer(object):
                 model.zero_grad()
 
             if self.current_step % self.report_steps == 0 and \
-                    (not self.dist_train or (self.dist_train and rank == 0)):
+                    (not self.dist_train or (self.dist_train and global_rank == 0)):
                 self.report_and_reset_stats()
                 self.start_time = time.time()
            
             if self.current_step % self.save_checkpoint_steps == 0 and \
-                    (not self.dist_train or (self.dist_train and rank == 0)):
+                    (not self.dist_train or (self.dist_train and global_rank == 0)):
                 save_model(model, self.output_model_path + "-" + str(self.current_step))
 
             self.current_step += 1
@@ -411,11 +411,11 @@ str2trainer = {"bert": BertTrainer, "mlm": MlmTrainer, "lm": LmTrainer,
                "bart": BartTrainer, "prefixlm": PrefixlmTrainer, "cls_mlm": ClsMlmTrainer}
 
 
-def worker(proc_id, gpu_ranks, args, model):
+def worker(local_rank, gpu_ranks, args, model):
     """
     Args:
-        proc_id: The id of GPU for single GPU mode;
-                 The id of process (and GPU) for multiprocessing distributed mode.
+        local_rank: The id of GPU for single GPU mode;
+                    The id of process (and GPU) for multiprocessing distributed mode.
         gpu_ranks: List of ranks of each process.
     """
     set_seed(args.seed)
@@ -424,19 +424,11 @@ def worker(proc_id, gpu_ranks, args, model):
     args.logger = init_logger(args)
 
     if args.dist_train:
-        rank = gpu_ranks[proc_id]
-        gpu_id = proc_id
+        global_rank = gpu_ranks[local_rank]
     elif args.single_gpu:
-        rank = None
-        gpu_id = proc_id
+        global_rank = None
     else:
-        rank = None
-        gpu_id = None
-
-    if args.dist_train:
-        train_loader = str2dataloader[args.data_processor](args, args.dataset_path, args.batch_size, rank, args.world_size, True)
-    else:
-        train_loader = str2dataloader[args.data_processor](args, args.dataset_path, args.batch_size, 0, 1, True)
+        global_rank = None
 
     # Build optimizer.
     param_optimizer = list(model.named_parameters())
@@ -459,8 +451,8 @@ def worker(proc_id, gpu_ranks, args, model):
     else:
         custom_scheduler = str2scheduler[args.scheduler](custom_optimizer, args.total_steps*args.warmup, args.total_steps)
 
-    if gpu_id is not None:
-        model.cuda(gpu_id)
+    if local_rank is not None:
+        model.cuda(local_rank)
     optimizer = custom_optimizer
     scheduler = custom_scheduler
 
@@ -469,11 +461,17 @@ def worker(proc_id, gpu_ranks, args, model):
         dist.init_process_group(backend=args.backend,
                                 init_method=args.master_ip,
                                 world_size=args.world_size,
-                                rank=rank)
-        model = DistributedDataParallel(model, device_ids=[gpu_id], find_unused_parameters=True)
-        args.logger.info("Worker %d is training ... " % rank)
+                                rank=global_rank)
+        model = DistributedDataParallel(model, device_ids=[local_rank], find_unused_parameters=True)
+        args.logger.info("Worker %d is training ... " % global_rank)
     else:
         args.logger.info("Worker is training ...")
 
+    if args.dist_train:
+        train_loader = str2dataloader[args.data_processor](args, args.dataset_path, args.batch_size, global_rank, args.world_size, local_rank, True)
+    else:
+        train_loader = str2dataloader[args.data_processor](args, args.dataset_path, args.batch_size, 0, 1, local_rank, True)
+
+
     trainer = str2trainer[args.data_processor](args)
-    trainer.train(args, gpu_id, rank, train_loader, model, optimizer, scheduler)
+    trainer.train(args, local_rank, global_rank, train_loader, model, optimizer, scheduler)

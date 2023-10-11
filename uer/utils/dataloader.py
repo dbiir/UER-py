@@ -6,14 +6,14 @@ from uer.utils.constants import *
 from uer.utils.tokenizers import *
 from uer.utils.mask import mask_seq
 
-
 class Dataloader(object):
-    def __init__(self, args, dataset_path, batch_size, proc_id, proc_num, shuffle=False):
+    def __init__(self, args, dataset_path, batch_size, rank, world_size, gpu_id, shuffle=False):
         self.tokenizer = args.tokenizer
         self.batch_size = batch_size
         self.instances_buffer_size = args.instances_buffer_size
-        self.proc_id = proc_id
-        self.proc_num = proc_num
+        self.rank = rank
+        self.world_size = world_size
+        self.gpu_id = gpu_id
         self.shuffle = shuffle
         self.dataset_reader = open(dataset_path, "rb")
         self.read_count = 0
@@ -32,7 +32,7 @@ class Dataloader(object):
             while True:
                 instance = pickle.load(self.dataset_reader)
                 self.read_count += 1
-                if (self.read_count - 1) % self.proc_num == self.proc_id:
+                if (self.read_count - 1) % self.world_size == self.rank:
                     self.buffer.append(instance)
                     if len(self.buffer) >= self.instances_buffer_size:
                         break

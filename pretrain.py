@@ -91,11 +91,11 @@ def main():
     elif args.world_size == 1 and ranks_num == 1:
         # Single GPU mode.
         assert torch.cuda.is_available(), "No available GPUs."
-        args.gpu_id = args.gpu_ranks[0]
-        assert args.gpu_id < torch.cuda.device_count(), "Invalid specified GPU device."
+        args.local_rank = args.gpu_ranks[0]
+        assert args.local_rank < torch.cuda.device_count(), "Invalid specified GPU device."
         args.dist_train = False
         args.single_gpu = True
-        print("Using GPU %d for training." % args.gpu_id)
+        print("Using GPU %d for training." % args.local_rank)
     else:
         # CPU mode.
         assert ranks_num == 0, "GPUs are specified, please check the arguments."
