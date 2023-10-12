@@ -126,11 +126,7 @@ def train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_bat
     if torch.cuda.device_count() > 1:
         loss = torch.mean(loss)
 
-    if args.fp16:
-        with args.amp.scale_loss(loss, optimizer) as scaled_loss:
-            scaled_loss.backward()
-    else:
-        loss.backward()
+    loss.backward()
 
     if args.use_adv and args.adv_type == "fgm":
         args.adv_method.attack(epsilon=args.fgm_epsilon)
@@ -233,14 +229,6 @@ def main():
     args.logger.info("Batch size: {}".format(batch_size))
     args.logger.info("The number of training instances: {}".format(instances_num))
     optimizer, scheduler = build_optimizer(args, model)
-    
-    if args.fp16:
-        try:
-            from apex import amp
-        except ImportError:
-            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
-        args.amp = amp
 
     if torch.cuda.device_count() > 1:
         args.logger.info("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))
@@ -253,8 +241,7 @@ def main():
     total_loss, result, best_result = 0.0, 0.0, 0.0
 
     args.logger.info("Start training.")
-  
-    
+
     for epoch in range(1, args.epochs_num + 1):
         random.shuffle(trainset)
         src = torch.LongTensor([example[0] for example in trainset])

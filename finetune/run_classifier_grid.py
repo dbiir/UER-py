@@ -74,13 +74,7 @@ def main():
         model = model.to(args.device)
         load_or_initialize_parameters(args, model)
         optimizer, scheduler = build_optimizer(args, model)
-        if args.fp16:
-            try:
-                from apex import amp
-            except ImportError:
-                raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-            model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
-            args.amp = amp
+
         if torch.cuda.device_count() > 1:
             model = torch.nn.DataParallel(model)
         args.model = model
