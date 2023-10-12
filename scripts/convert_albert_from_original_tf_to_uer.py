@@ -41,11 +41,11 @@ def main():
 
     output_model = collections.OrderedDict()
 
-    output_model["embedding.word_embedding.weight"] = input_model["bert/embeddings/word_embeddings"]
+    output_model["embedding.word.embedding.weight"] = input_model["bert/embeddings/word_embeddings"]
     output_model["encoder.linear.weight"] = input_model["bert/encoder/embedding_hidden_mapping_in/kernel"]
     output_model["encoder.linear.bias"] = input_model["bert/encoder/embedding_hidden_mapping_in/bias"]
-    output_model["embedding.position_embedding.weight"] = input_model["bert/embeddings/position_embeddings"][:512]
-    output_model["embedding.segment_embedding.weight"] = input_model["bert/embeddings/token_type_embeddings"]
+    output_model["embedding.pos.embedding.weight"] = input_model["bert/embeddings/position_embeddings"][:512]
+    output_model["embedding.seg.embedding.weight"] = input_model["bert/embeddings/token_type_embeddings"]
     output_model["embedding.layer_norm.gamma"] = input_model["bert/embeddings/LayerNorm/gamma"]
     output_model["embedding.layer_norm.beta"] = input_model["bert/embeddings/LayerNorm/beta"]
 
@@ -82,16 +82,16 @@ def main():
     output_model["encoder.transformer.layer_norm_2.beta"] = \
         input_model["bert/encoder/transformer/group_0/inner_group_0/LayerNorm_1/beta"]
 
-    output_model["target.sp_linear_1.weight"] = input_model["bert/pooler/dense/kernel"]
-    output_model["target.sp_linear_1.bias"] = input_model["bert/pooler/dense/bias"]
-    output_model["target.sp_linear_2.weight"] = input_model["cls/seq_relationship/output_weights"]
-    output_model["target.sp_linear_2.bias"] = input_model["cls/seq_relationship/output_bias"]
-    output_model["target.mlm_linear_1.weight"] = input_model["cls/predictions/transform/dense/kernel"]
-    output_model["target.mlm_linear_1.bias"] = input_model["cls/predictions/transform/dense/bias"]
-    output_model["target.layer_norm.gamma"] = input_model["cls/predictions/transform/LayerNorm/gamma"]
-    output_model["target.layer_norm.beta"] = input_model["cls/predictions/transform/LayerNorm/beta"]
-    output_model["target.mlm_linear_2.weight"] = input_model["bert/embeddings/word_embeddings"]
-    output_model["target.mlm_linear_2.bias"] = input_model["cls/predictions/output_bias"]
+    output_model["target.sp.linear_1.weight"] = input_model["bert/pooler/dense/kernel"]
+    output_model["target.sp.linear_1.bias"] = input_model["bert/pooler/dense/bias"]
+    output_model["target.sp.linear_2.weight"] = input_model["cls/seq_relationship/output_weights"]
+    output_model["target.sp.linear_2.bias"] = input_model["cls/seq_relationship/output_bias"]
+    output_model["target.mlm.linear_1.weight"] = input_model["cls/predictions/transform/dense/kernel"]
+    output_model["target.mlm.linear_1.bias"] = input_model["cls/predictions/transform/dense/bias"]
+    output_model["target.mlm.layer_norm.gamma"] = input_model["cls/predictions/transform/LayerNorm/gamma"]
+    output_model["target.mlm.layer_norm.beta"] = input_model["cls/predictions/transform/LayerNorm/beta"]
+    output_model["target.mlm.linear_2.weight"] = input_model["bert/embeddings/word_embeddings"]
+    output_model["target.mlm.linear_2.bias"] = input_model["cls/predictions/output_bias"]
 
     torch.save(output_model, args.output_model_path)
 

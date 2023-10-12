@@ -1,0 +1,12 @@
+{
+  "emb_size": 512,
+  "hidden_size": 1536,
+  "layers_num": 2,
+  "dropout": 0.1,
+  "max_seq_length": 1024,
+  "data_processor": "bilm",
+  "embedding": ["word"],
+  "remove_embedding_layernorm": true,
+  "encoder": "bilstm",
+  "target": ["bilm"]
+}

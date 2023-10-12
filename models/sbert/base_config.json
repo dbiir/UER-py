@@ -9,7 +9,7 @@
     "layers_num": 12,
     "max_seq_length": 512,
     "dropout": 0.1,
-    "embedding": "word_pos_seg",
+    "embedding": ["word", "pos", "seg"],
     "encoder": "transformer",
     "mask": "fully_visible"
   },
@@ -24,12 +24,13 @@
     "layers_num": 12,
     "max_seq_length": 512,
     "dropout": 0.1,
-    "embedding": "word_pos_seg",
+    "embedding": ["word", "pos", "seg"],
     "encoder": "transformer",
     "mask": "fully_visible"
   },
 
-  "embedding": "dual",
+  "dropout": 0.1,
+  "embedding": ["dual"],
   "encoder": "dual",
   "pooling": "first",
   "tie_weights": true

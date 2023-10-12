@@ -111,7 +111,7 @@ def main():
                     index += 1
         results_final.extend(postprocess_chid_predictions(results))
 
-    with open(args.prediction_path, 'w') as f:
+    with open(args.prediction_path, "w") as f:
         json.dump({tag: pred for tag, pred in results_final}, f, indent=2)
 
 

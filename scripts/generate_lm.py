@@ -24,14 +24,18 @@ from uer.opts import infer_opts, tokenizer_opts
 class GenerateLm(torch.nn.Module):
     def __init__(self, args):
         super(GenerateLm, self).__init__()
-        self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
+        self.embedding = Embedding(args)
+        for embedding_name in args.embedding:
+            tmp_emb = str2embedding[embedding_name](args, len(args.tokenizer.vocab))
+            self.embedding.update(tmp_emb, embedding_name)
         self.encoder = str2encoder[args.encoder](args)
-        self.target = str2target[args.target](args, len(args.tokenizer.vocab))
+        self.target = Target()
+        self.target.update(LmTarget(args, len(args.tokenizer.vocab)), "lm")
 
     def forward(self, src, seg):
         emb = self.embedding(src, seg)
         output = self.encoder(emb, seg)
-        output = self.target.output_layer(output)
+        output = self.target.lm.output_layer(output)
         return output
 
 
@@ -79,6 +83,9 @@ if __name__ == '__main__':
 
     model = GenerateLm(args)
     model = load_model(model, args.load_model_path)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+
     model.eval()
 
     with open(args.test_path, mode="r", encoding="utf-8") as f:
@@ -89,7 +96,7 @@ if __name__ == '__main__':
         if len(src) > args.seq_length:
             src = src[:args.seq_length]
             seg = seg[:args.seq_length]
-    src_tensor, seg_tensor = torch.LongTensor([src]), torch.LongTensor([seg])
+    src_tensor, seg_tensor = torch.LongTensor([src]).to(device), torch.LongTensor([seg]).to(device)
 
     with open(args.prediction_path, mode="w", encoding="utf-8") as f:
         for i in range(args.seq_length - beginning_length):
@@ -99,10 +106,13 @@ if __name__ == '__main__':
             next_token = torch.multinomial(F.softmax(filtered_logits, dim=-1), num_samples=1)
 
             src_tensor = torch.cat([src_tensor, next_token.view(1, 1)], dim=1)
-            seg_tensor = torch.cat([seg_tensor, torch.tensor([[1]])], dim=1)
+            seg_tensor = torch.cat([seg_tensor, torch.tensor([[1]]).to(device)], dim=1)
 
         f.write(line + "\n")
-        generated_sentence = "".join(
-            args.tokenizer.convert_ids_to_tokens([token_id.item() for token_id in src_tensor[0]])
-        )
+        tokens = [token_id.item() for token_id in src_tensor[0]]
+        if args.tokenizer.sp_model is not None:
+            generated_sentence = args.tokenizer.sp_model.decode(tokens)
+        else:
+            generated_sentence = "".join(args.tokenizer.convert_ids_to_tokens(tokens))
+
         f.write(generated_sentence)

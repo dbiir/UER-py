@@ -55,25 +55,13 @@ def main():
 
     output_model = collections.OrderedDict()
 
-    output_model["bert.embeddings.word_embeddings.weight"] = input_model["embedding.word_embedding.weight"]
-    output_model["bert.embeddings.position_embeddings.weight"] = input_model["embedding.position_embedding.weight"]
-    output_model["bert.embeddings.token_type_embeddings.weight"] = input_model["embedding.segment_embedding.weight"][1:, :]
+    output_model["bert.embeddings.word_embeddings.weight"] = input_model["embedding.word.embedding.weight"]
+    output_model["bert.embeddings.position_embeddings.weight"] = input_model["embedding.pos.embedding.weight"]
+    output_model["bert.embeddings.token_type_embeddings.weight"] = input_model["embedding.seg.embedding.weight"][1:, :]
     output_model["bert.embeddings.LayerNorm.weight"] = input_model["embedding.layer_norm.gamma"]
     output_model["bert.embeddings.LayerNorm.bias"] = input_model["embedding.layer_norm.beta"]
 
     convert_bert_transformer_encoder_from_uer_to_huggingface(input_model, output_model, args.layers_num)
-
-    if args.type == "bert":
-        output_model["bert.pooler.dense.weight"] = input_model["target.nsp_linear_1.weight"]
-        output_model["bert.pooler.dense.bias"] = input_model["target.nsp_linear_1.bias"]
-        output_model["cls.seq_relationship.weight"] = input_model["target.nsp_linear_2.weight"]
-        output_model["cls.seq_relationship.bias"] = input_model["target.nsp_linear_2.bias"]
-    output_model["cls.predictions.transform.dense.weight"] = input_model["target.mlm_linear_1.weight"]
-    output_model["cls.predictions.transform.dense.bias"] = input_model["target.mlm_linear_1.bias"]
-    output_model["cls.predictions.transform.LayerNorm.weight"] = input_model["target.layer_norm.gamma"]
-    output_model["cls.predictions.transform.LayerNorm.bias"] = input_model["target.layer_norm.beta"]
-    output_model["cls.predictions.decoder.weight"] = input_model["target.mlm_linear_2.weight"]
-    output_model["cls.predictions.bias"] = input_model["target.mlm_linear_2.bias"]
 
     torch.save(output_model, args.output_model_path)
 

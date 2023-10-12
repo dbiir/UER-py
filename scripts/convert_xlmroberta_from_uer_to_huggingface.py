@@ -16,14 +16,14 @@ input_model = torch.load(args.input_model_path)
 
 output_model = collections.OrderedDict()
 emb_size = \
-    input_model["embedding.word_embedding.weight"].shape[1]
+    input_model["embedding.word.embedding.weight"].shape[1]
 
 output_model["roberta.embeddings.word_embeddings.weight"] = \
-    input_model["embedding.word_embedding.weight"]
+    input_model["embedding.word.embedding.weight"]
 output_model["roberta.embeddings.position_embeddings.weight"] = \
-    torch.cat((torch.zeros(2, emb_size), input_model["embedding.position_embedding.weight"][:-2]),0)
+    torch.cat((torch.zeros(2, emb_size), input_model["embedding.pos.embedding.weight"][:-2]),0)
 output_model["roberta.embeddings.token_type_embeddings.weight"] = \
-    input_model["embedding.segment_embedding.weight"][2:, :]
+    input_model["embedding.seg.embedding.weight"][2:, :]
 output_model["roberta.embeddings.LayerNorm.weight"] = \
     input_model["embedding.layer_norm.gamma"]
 output_model["roberta.embeddings.LayerNorm.bias"] = \
@@ -64,18 +64,18 @@ for i in range(args.layers_num):
         input_model["encoder.transformer." + str(i) + ".layer_norm_2.beta"]
 
 output_model["lm_head.dense.weight"] = \
-    input_model["target.mlm_linear_1.weight"]
+    input_model["target.mlm.linear_1.weight"]
 output_model["lm_head.dense.bias"] = \
-    input_model["target.mlm_linear_1.bias"]
+    input_model["target.mlm.linear_1.bias"]
 output_model["lm_head.layer_norm.weight"] = \
     input_model["target.layer_norm.gamma"]
 output_model["lm_head.layer_norm.bias"] = \
     input_model["target.layer_norm.beta"]
 output_model["lm_head.decoder.weight"] = \
-    input_model["target.mlm_linear_2.weight"]
+    input_model["target.mlm.linear_2.weight"]
 output_model["lm_head.decoder.bias"] = \
-    input_model["target.mlm_linear_2.bias"]
+    input_model["target.mlm.linear_2.bias"]
 output_model["lm_head.bias"] = \
-    input_model["target.mlm_linear_2.bias"]
+    input_model["target.mlm.linear_2.bias"]
 
 torch.save(output_model, args.output_model_path)

@@ -28,7 +28,10 @@ from uer.opts import finetune_opts, tokenizer_opts, adv_opts
 class Classifier(nn.Module):
     def __init__(self, args):
         super(Classifier, self).__init__()
-        self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
+        self.embedding = Embedding(args)
+        for embedding_name in args.embedding:
+            tmp_emb = str2embedding[embedding_name](args, len(args.tokenizer.vocab))
+            self.embedding.update(tmp_emb, embedding_name)
         self.encoder = str2encoder[args.encoder](args)
         self.labels_num = args.labels_num
         self.pooling_type = args.pooling
@@ -68,10 +71,10 @@ def count_labels_num(path):
     with open(path, mode="r", encoding="utf-8") as f:
         for line_id, line in enumerate(f):
             if line_id == 0:
-                for i, column_name in enumerate(line.strip().split("\t")):
+                for i, column_name in enumerate(line.rstrip("\r\n").split("\t")):
                     columns[column_name] = i
                 continue
-            line = line.strip().split("\t")
+            line = line.rstrip("\r\n").split("\t")
             label = int(line[columns["label"]])
             labels_set.add(label)
     return len(labels_set)
@@ -90,10 +93,10 @@ def load_or_initialize_parameters(args, model):
 
 def build_optimizer(args, model):
     param_optimizer = list(model.named_parameters())
-    no_decay = ['bias', 'gamma', 'beta']
+    no_decay = ["bias", "gamma", "beta"]
     optimizer_grouped_parameters = [
-        {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
-        {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+        {"params": [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], "weight_decay": 0.01},
+        {"params": [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], "weight_decay": 0.0},
     ]
     if args.optimizer in ["adamw"]:
         optimizer = str2optimizer[args.optimizer](optimizer_grouped_parameters, lr=args.learning_rate, correct_bias=False)
@@ -136,16 +139,16 @@ def read_dataset(args, path):
     with open(path, mode="r", encoding="utf-8") as f:
         for line_id, line in enumerate(f):
             if line_id == 0:
-                for i, column_name in enumerate(line.strip().split("\t")):
+                for i, column_name in enumerate(line.rstrip("\r\n").split("\t")):
                     columns[column_name] = i
                 continue
-            line = line[:-1].split("\t")
+            line = line.rstrip("\r\n").split("\t")
             tgt = int(line[columns["label"]])
             if args.soft_targets and "logits" in columns.keys():
                 soft_tgt = [float(value) for value in line[columns["logits"]].split(" ")]
             if "text_b" not in columns:  # Sentence classification.
                 text_a = line[columns["text_a"]]
-                src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a))
+                src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a) + [SEP_TOKEN])
                 seg = [1] * len(src)
             else:  # Sentence-pair classification.
                 text_a, text_b = line[columns["text_a"]], line[columns["text_b"]]
@@ -182,11 +185,7 @@ def train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_bat
     if torch.cuda.device_count() > 1:
         loss = torch.mean(loss)
 
-    if args.fp16:
-        with args.amp.scale_loss(loss, optimizer) as scaled_loss:
-            scaled_loss.backward()
-    else:
-        loss.backward()
+    loss.backward()
 
     if args.use_adv and args.adv_type == "fgm":
         args.adv_method.attack(epsilon=args.fgm_epsilon)
@@ -244,17 +243,16 @@ def evaluate(args, dataset):
             confusion[pred[j], gold[j]] += 1
         correct += torch.sum(pred == gold).item()
 
-
-    args.logger.debug("Confusion matrix:")
-    args.logger.debug(confusion)
-    args.logger.debug("Report precision, recall, and f1:")
+    args.logger.info("Confusion matrix:")
+    args.logger.info(confusion)
+    args.logger.info("Report precision, recall, and f1:")
 
     eps = 1e-9
     for i in range(confusion.size()[0]):
         p = confusion[i, i].item() / (confusion[i, :].sum().item() + eps)
         r = confusion[i, i].item() / (confusion[:, i].sum().item() + eps)
         f1 = 2 * p * r / (p + r + eps)
-        args.logger.debug("Label {}: {:.3f}, {:.3f}, {:.3f}".format(i, p, r, f1))
+        args.logger.info("Label {}: {:.3f}, {:.3f}, {:.3f}".format(i, p, r, f1))
 
     args.logger.info("Acc. (Correct/Total): {:.4f} ({}/{}) ".format(correct / len(dataset), correct, len(dataset)))
     return correct / len(dataset), confusion
@@ -307,14 +305,6 @@ def main():
     args.logger.info("Batch size: {}".format(batch_size))
     args.logger.info("The number of training instances: {}".format(instances_num))
     optimizer, scheduler = build_optimizer(args, model)
-
-    if args.fp16:
-        try:
-            from apex import amp
-        except ImportError:
-            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
-        args.amp = amp
 
     if torch.cuda.device_count() > 1:
         args.logger.info("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))

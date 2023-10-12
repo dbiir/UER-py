@@ -1,0 +1,12 @@
+{
+  "emb_size": 512,
+  "hidden_size": 512,
+  "layers_num": 2,
+  "max_seq_length": 1024,
+  "dropout": 0.1,
+  "data_processor": "lm",
+  "embedding": ["word"],
+  "remove_embedding_layernorm": true,
+  "encoder": "lstm",
+  "target": ["lm"]
+}

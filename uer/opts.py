@@ -1,7 +1,7 @@
 def model_opts(parser):
-    parser.add_argument("--embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos", "dual"], default="word_pos_seg",
-                        help="Emebdding type.")
-    parser.add_argument("--tgt_embedding", choices=["word", "word_pos", "word_pos_seg", "word_sinusoidalpos"], default="word_pos_seg",
+    parser.add_argument("--embedding", choices=["word", "pos", "seg", "sinusoidalpos", "dual"], default="word", nargs='+',
+                        help="Embedding type.")
+    parser.add_argument("--tgt_embedding", choices=["word", "pos", "seg", "sinusoidalpos", "dual"], default="word", nargs='+',
                         help="Target embedding type.")
     parser.add_argument("--max_seq_length", type=int, default=512,
                         help="Max sequence length for word embedding.")
@@ -41,15 +41,17 @@ def model_opts(parser):
                         help="Tie the word embedding and softmax weights.")
     parser.add_argument("--pooling", choices=["mean", "max", "first", "last"], default="first",
                         help="Pooling type.")
+    parser.add_argument("--prefix_lm_loss", action="store_true",
+                        help="Only compute output loss when SFT.")
 
 
 def log_opts(parser):
     parser.add_argument("--log_path", type=str, default=None,
                         help="Log file path, default no output file.")
-    parser.add_argument("--log_level", choices=["ERROR", "INFO", "DEBUG", "NOSET"], default="INFO",
-                        help="Console log level. Verbosity: ERROR < INFO < DEBUG < NOSET")
-    parser.add_argument("--log_file_level", choices=["ERROR", "INFO", "DEBUG", "NOSET"], default="INFO",
-                        help="Log file level. Verbosity: ERROR < INFO < DEBUG < NOSET")
+    parser.add_argument("--log_level", choices=["ERROR", "INFO", "DEBUG", "NOTSET"], default="INFO",
+                        help="Console log level. Verbosity: ERROR < INFO < DEBUG < NOTSET")
+    parser.add_argument("--log_file_level", choices=["ERROR", "INFO", "DEBUG", "NOTSET"], default="INFO",
+                        help="Log file level. Verbosity: ERROR < INFO < DEBUG < NOTSET")
 
 
 def optimization_opts(parser):
@@ -57,16 +59,13 @@ def optimization_opts(parser):
                         help="Learning rate.")
     parser.add_argument("--warmup", type=float, default=0.1,
                         help="Warm up value.")
-    parser.add_argument("--fp16", action='store_true',
-                        help="Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit.")
-    parser.add_argument("--fp16_opt_level", choices=["O0", "O1", "O2", "O3" ], default='O1',
-                        help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
-                             "See details at https://nvidia.github.io/apex/amp.html")
+    parser.add_argument("--lr_decay", type=float, default=0.5,
+                        help="Learning rate decay value.")
     parser.add_argument("--optimizer", choices=["adamw", "adafactor"],
                         default="adamw",
                         help="Optimizer type.")
     parser.add_argument("--scheduler", choices=["linear", "cosine", "cosine_with_restarts", "polynomial",
-                                                "constant", "constant_with_warmup"],
+                                                "constant", "constant_with_warmup", "inverse_sqrt", "tri_stage"],
                         default="linear", help="Scheduler type.")
 
 
@@ -146,6 +145,8 @@ def tokenizer_opts(parser):
                         help="Path of the merges file.")
     parser.add_argument("--spm_model_path", default=None, type=str,
                         help="Path of the sentence piece model.")
+    parser.add_argument("--do_lower_case", choices=["true", "false"], default="true",
+                        help="Whether to lower case the input")
 
 
 def tgt_tokenizer_opts(parser):
@@ -157,14 +158,8 @@ def tgt_tokenizer_opts(parser):
                         help="Path of the target merges file.")
     parser.add_argument("--tgt_spm_model_path", default=None, type=str,
                         help="Path of the target sentence piece model.")
-
-
-def deepspeed_opts(parser):
-    parser.add_argument("--deepspeed", action="store_true",
-                        help=".")
-    parser.add_argument("--deepspeed_config", default="models/deepspeed_config.json", type=str,
-                        help=".")
-    parser.add_argument("--local_rank", type=int, required=False)
+    parser.add_argument("--tgt_do_lower_case", choices=["true", "false"], default="true",
+                        help="Whether to lower case the target input")
 
 
 def adv_opts(parser):

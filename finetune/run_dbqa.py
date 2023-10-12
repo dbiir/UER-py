@@ -26,10 +26,10 @@ def read_dataset(args, path):
     with open(path, mode="r", encoding="utf-8") as f:
         for line_id, line in enumerate(f):
             if line_id == 0:
-                for i, column_name in enumerate(line.strip().split("\t")):
+                for i, column_name in enumerate(line.rstrip("\r\n").split("\t")):
                     columns[column_name] = i
                 continue
-            line = line.strip().split("\t")
+            line = line.rstrip("\r\n").split("\t")
             qid = int(line[columns["qid"]])
             tgt = int(line[columns["label"]])
             text_a, text_b = line[columns["text_a"]], line[columns["text_b"]]
@@ -178,14 +178,6 @@ def main():
     args.logger.info("The number of training instances: {}".format(instances_num))
 
     optimizer, scheduler = build_optimizer(args, model)
-
-    if args.fp16:
-        try:
-            from apex import amp
-        except ImportError:
-            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer,opt_level = args.fp16_opt_level)
-        args.amp = amp
 
     if torch.cuda.device_count() > 1:
         args.logger.info("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))

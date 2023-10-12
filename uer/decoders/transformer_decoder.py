@@ -10,9 +10,10 @@ class TransformerDecoder(nn.Module):
     """
     BERT encoder exploits 12 or 24 transformer layers to extract features.
     """
+
     def __init__(self, args):
         super(TransformerDecoder, self).__init__()
-        self.layers_num = args.layers_num
+        self.layers_num = args.decoder_layers_num
         self.layernorm_positioning = args.layernorm_positioning
         self.relative_position_embedding = args.relative_position_embedding
         self.transformer_decoder = nn.ModuleList(

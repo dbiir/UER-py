@@ -1,12 +1,13 @@
+from uer.embeddings.embedding import Embedding
 from uer.embeddings.dual_embedding import DualEmbedding
 from uer.embeddings.word_embedding import WordEmbedding
-from uer.embeddings.wordpos_embedding import WordPosEmbedding
-from uer.embeddings.wordposseg_embedding import WordPosSegEmbedding
-from uer.embeddings.wordsinusoidalpos_embedding import WordSinusoidalposEmbedding
+from uer.embeddings.pos_embedding import PosEmbedding
+from uer.embeddings.seg_embedding import SegEmbedding
+from uer.embeddings.sinusoidalpos_embedding import SinusoidalposEmbedding
 
 
-str2embedding = {"word": WordEmbedding, "word_pos": WordPosEmbedding, "word_pos_seg": WordPosSegEmbedding,
-                 "word_sinusoidalpos": WordSinusoidalposEmbedding, "dual": DualEmbedding}
+str2embedding = {"word": WordEmbedding, "pos": PosEmbedding, "seg": SegEmbedding,
+                 "sinusoidalpos": SinusoidalposEmbedding, "dual": DualEmbedding,}
 
-__all__ = ["WordEmbedding", "WordPosEmbedding", "WordPosSegEmbedding", "WordSinusoidalposEmbedding",
+__all__ = ["Embedding", "WordEmbedding", "PosEmbedding", "SegEmbedding", "SinusoidalposEmbedding",
            "DualEmbedding", "str2embedding"]

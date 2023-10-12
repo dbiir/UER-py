@@ -86,6 +86,67 @@ def get_linear_schedule_with_warmup(optimizer, num_warmup_steps, num_training_st
     return LambdaLR(optimizer, lr_lambda, last_epoch)
 
 
+def get_tri_stage_schedule(optimizer, num_warmup_steps, num_decay_steps, num_training_steps, init_lr_scale=0.01, final_lr_scale=0.05, last_epoch=-1):
+    """
+    Create a schedule with a learning rate that have three stages: a warmup stage, a hold stage and a decay stage.
+    Implement the learning rate scheduler in https://arxiv.org/pdf/1904.08779.pdf
+
+        - warmup stage, starting from `lr` * `init_lr_scale`, linearly
+          increased to `lr` in `warmup_steps` iterations
+        - hold stage, after `warmup_steps`, keep the LR as `lr` for `hold_steps`
+          iterations
+        - decay stage, after hold stage, decay LR exponetially to
+          `lr` * `final_lr_scale` in `decay_steps`;
+          after that LR is keep as `final_lr_scale` * `lr`
+
+    During warmup::
+      init_lr = arg.init_lr_scale * arg.lr
+      lrs = torch.linspace(init_lr, arg.lr, arg.warmup_steps)
+      lr = lrs[update_num]
+    During hold::
+      lr = arg.lr
+    During decay::
+      decay_factor = - math.log(arg.final_lr_scale) / arg.decay_steps
+      lr = arg.lr * exp(- (update_num - warmup_steps - decay_steps) * decay_factor)
+    After that::
+      lr = arg.lr * arg.final_lr_scale
+
+    Args:
+        optimizer (:class:`~torch.optim.Optimizer`):
+            The optimizer for which to schedule the learning rate.
+        num_warmup_steps (:obj:`int`):
+            The number of steps for the warmup phase.
+        num_decay_steps (:obj:`int`):
+            The number of steps for the decay phase.
+        num_training_steps (:obj:`int`):
+            The total number of training steps.
+        decay_scale (:obj:`float`):
+
+        last_epoch (:obj:`int`, `optional`, defaults to -1):
+            The index of the last epoch when resuming training.
+    Return:
+        :obj:`torch.optim.lr_scheduler.LambdaLR` with the appropriate schedule.
+    """
+    lr_hold = optimizer.defaults["lr"]
+    lr_int = lr_hold * init_lr_scale
+    lr_end = lr_hold * final_lr_scale
+
+    def lr_lambda(current_step: int):
+        warmup_rate = (lr_hold - lr_int) / num_warmup_steps
+        decay_factor = -math.log(final_lr_scale) / max(num_decay_steps, 1)
+
+        if current_step < num_warmup_steps:
+            return (lr_int + current_step * warmup_rate) / lr_hold
+        elif current_step >= num_warmup_steps and current_step < num_training_steps - num_decay_steps:
+            return 1
+        elif current_step <= num_training_steps:
+            return math.exp(-decay_factor * (current_step - num_training_steps + num_decay_steps))
+        else:
+            return lr_end / lr_hold
+
+    return LambdaLR(optimizer, lr_lambda, last_epoch)
+
+
 def get_cosine_schedule_with_warmup(
     optimizer: Optimizer, num_warmup_steps: int, num_training_steps: int, num_cycles: float = 0.5, last_epoch: int = -1
 ):
@@ -192,6 +253,51 @@ def get_polynomial_decay_schedule_with_warmup(
             pct_remaining = 1 - (current_step - num_warmup_steps) / decay_steps
             decay = lr_range * pct_remaining ** power + lr_end
             return decay / lr_init  # as LambdaLR multiplies by lr_init
+
+    return LambdaLR(optimizer, lr_lambda, last_epoch)
+
+
+def get_inverse_square_root_schedule_with_warmup(
+    optimizer, num_warmup_steps, num_training_steps, warmup_init_lr=0.0, last_epoch=-1
+):
+    """
+    Create a schedule with a learning rate that Decay the LR based on the inverse square root of the update number.
+    After a warmup period during which it increases linearly from 0 to the initial lr set in the optimizer.
+    Args:
+        optimizer (:class:`~torch.optim.Optimizer`):
+            The optimizer for which to schedule the learning rate.
+        num_warmup_steps (:obj:`int`):
+            The number of steps for the warmup phase.
+        num_training_steps (:obj:`int`):
+            The total number of training steps.
+        warmup_init_lr (:obj:`float`, `optional`, defaults to 0):
+            The initial LR for warmup.
+        last_epoch (:obj:`int`, `optional`, defaults to -1):
+            The index of the last epoch when resuming training.
+    
+    During warmup::
+      lrs = torch.linspace(arg.warmup_init_lr, arg.lr, arg.warmup_updates)
+      lr = lrs[update_num]
+    After warmup::
+      decay_factor = arg.lr * sqrt(arg.warmup_updates)
+      lr = decay_factor / sqrt(update_num)
+
+    Return:
+        :obj:`torch.optim.lr_scheduler.LambdaLR` with the appropriate schedule.
+    """
+
+    lr = optimizer.defaults["lr"]
+    assert lr > warmup_init_lr, f"lr ({lr}) must be be bigger than initial lr ({warmup_init_lr})"
+
+    def lr_lambda(current_step: int):
+        if current_step < num_warmup_steps:
+            lr_step = (lr - warmup_init_lr) / num_warmup_steps
+            return (warmup_init_lr + current_step * lr_step) / lr
+        elif current_step > num_training_steps:
+            return 1e-7 / lr  # as LambdaLR multiplies by lr_init
+        else:
+            decay_factor = lr * num_warmup_steps**0.5
+            return (decay_factor * current_step**-0.5) / lr
 
     return LambdaLR(optimizer, lr_lambda, last_epoch)
 

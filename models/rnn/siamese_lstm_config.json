@@ -1,0 +1,27 @@
+{
+  "stream_0": {
+    "vocab_size": 21128,
+    "emb_size": 512,
+    "hidden_size": 512,
+    "layers_num": 2,
+    "dropout": 0.1,
+    "embedding": ["word"],
+    "encoder": "lstm"
+  },
+
+  "stream_1": {
+    "vocab_size": 21128,
+    "emb_size": 512,
+    "hidden_size": 512,
+    "layers_num": 2,
+    "dropout": 0.1,
+    "embedding": ["word"],
+    "encoder": "lstm"
+  },
+
+  "dropout": 0.1,
+  "embedding":["dual"],
+  "encoder": "dual",
+  "pooling": "mean",
+  "tie_weights": true
+}

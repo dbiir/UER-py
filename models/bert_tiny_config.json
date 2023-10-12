@@ -1,1 +1,0 @@
-{"emb_size": 384, "feedforward_size": 1536, "hidden_size": 384, "hidden_act": "gelu", "heads_num": 6, "layers_num": 3, "dropout": 0.1}

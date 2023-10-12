@@ -78,17 +78,20 @@ def read_dataset(args, path):
 class ClozeTest(torch.nn.Module):
     def __init__(self, args):
         super(ClozeTest, self).__init__()
-        self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
+        self.embedding = Embedding(args)
+        for embedding_name in args.embedding:
+            tmp_emb = str2embedding[embedding_name](args, len(args.tokenizer.vocab))
+            self.embedding.update(tmp_emb, embedding_name)
         self.encoder = str2encoder[args.encoder](args)
-        self.target = str2target[args.target](args, len(args.tokenizer.vocab))
+        self.target = MlmTarget(args, len(args.tokenizer.vocab))
         self.act = str2act[args.hidden_act]
 
     def forward(self, src, seg):
         emb = self.embedding(src, seg)
         output = self.encoder(emb, seg)
-        output = self.act(self.target.mlm_linear_1(output))
+        output = self.act(self.target.linear_1(output))
         output = self.target.layer_norm(output)
-        output = self.target.mlm_linear_2(output)
+        output = self.target.linear_2(output)
         prob = torch.nn.Softmax(dim=-1)(output)
         return prob
 

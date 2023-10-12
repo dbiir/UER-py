@@ -15,7 +15,6 @@ class RelativePositionEmbedding(nn.Module):
         self.max_distance = max_distance
         self.relative_attention_bias = nn.Embedding(self.num_buckets, heads_num)
 
-
     def forward(self, encoder_hidden, decoder_hidden):
         """
         Compute binned relative position bias
@@ -25,7 +24,7 @@ class RelativePositionEmbedding(nn.Module):
         Returns:
             position_bias: [1 x heads_num x seq_length x seq_length]
         """
-        query_length =  encoder_hidden.size()[1]
+        query_length = encoder_hidden.size()[1]
         key_length = decoder_hidden.size()[1]
 
         context_position = torch.arange(query_length, dtype=torch.long)[:, None]
@@ -41,7 +40,6 @@ class RelativePositionEmbedding(nn.Module):
         values = self.relative_attention_bias(relative_position_bucket)  # shape (query_length, key_length, num_heads)
         values = values.permute([2, 0, 1]).unsqueeze(0)  # shape (1, num_heads, query_length, key_length)
         return values
-
 
     def relative_position_bucket(self, relative_position, bidirectional, num_buckets, max_distance):
         """

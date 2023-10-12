@@ -9,6 +9,12 @@
 
 Pre-training has become an essential part for NLP tasks. UER-py (Universal Encoder Representations) is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of existing pre-training models, and provides interfaces for users to further extend upon. With UER-py, we build a model zoo which contains pre-trained models of different properties. **See the Wiki for [Full Documentation](https://github.com/dbiir/UER-py/wiki)**.
 
+<br/>
+<br/>
+
+
+**🚀** We have open-sourced the [TencentPretrain](https://github.com/Tencent/TencentPretrain), a refactored new version of UER-py. TencentPretrain supports multi-modal models and enables training of large models. If you are interested in text models of medium size (with parameter sizes of less than one billion), we recommend continuing to use the UER-py project.
+
 
 <br/>
 
@@ -17,7 +23,8 @@ Table of Contents
   * [Features](#features)
   * [Requirements](#requirements)
   * [Quickstart](#quickstart)
-  * [Datasets](#datasets)
+  * [Pre-training data](#pre-training-data)
+  * [Downstream datasets](#downstream-datasets)
   * [Modelzoo](#modelzoo)
   * [Instructions](#instructions)
   * [Competition solutions](#competition-solutions)
@@ -31,7 +38,7 @@ Table of Contents
 UER-py has the following features:
 - __Reproducibility__ UER-py has been tested on many datasets and should match the performances of the original pre-training model implementations such as BERT, GPT-2, ELMo, and T5.
 - __Model modularity__ UER-py is divided into the following components: embedding, encoder, target embedding (optional), decoder (optional), and target. Ample modules are implemented in each component. Clear and robust interface allows users to combine modules to construct pre-training models with as few restrictions as possible.
-- __Model training__ UER-py supports CPU mode, single GPU mode, distributed training mode, and gigantic model training with DeepSpeed.
+- __Model training__ UER-py supports CPU mode, single GPU mode and distributed training mode.
 - __Model zoo__ With the help of UER-py, we pre-train and release models of different properties. Proper selection of pre-trained models is important to the performances of downstream tasks.
 - __SOTA results__ UER-py supports comprehensive downstream tasks (e.g. classification and machine reading comprehension) and provides winning solutions of many NLP competitions.
 - __Abundant functions__ UER-py provides abundant functions related with pre-training, such as feature extractor and text generation.
@@ -52,13 +59,12 @@ UER-py has the following features:
 * For developing a stacking model you will need LightGBM and [BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
 * For the pre-training with whole word masking you will need word segmentation tool such as [jieba](https://github.com/fxsjy/jieba)
 * For the use of CRF in sequence labeling downstream task you will need [pytorch-crf](https://github.com/kmkurn/pytorch-crf)
-* For the gigantic model training you will need [DeepSpeed](https://github.com/microsoft/DeepSpeed)
 
 
 <br/>
 
 ## Quickstart
-This section uses several commonly-used examples to demonstrate how to use UER-py. More details are discussed in Instructions section. We firstly use BERT model on Douban book review classification dataset. We pre-train model on book review corpus and then fine-tune it on book review classification dataset. There are three input files: book review corpus, book review classification dataset, and vocabulary. All files are encoded in UTF-8 and included in this project.
+This section uses several commonly-used examples to demonstrate how to use UER-py. More details are discussed in Instructions section. We firstly use BERT (a text pre-training model) on book review sentiment classification dataset. We pre-train model on book review corpus and then fine-tune it on book review sentiment classification dataset. There are three input files: book review corpus, book review sentiment classification dataset, and vocabulary. All files are encoded in UTF-8 and included in this project.
 
 The format of the corpus for BERT is as follows (one sentence per line and documents are delimited by empty lines)：
 ```
@@ -92,7 +98,7 @@ python3 preprocess.py --corpus_path corpora/book_review_bert.txt --vocab_path mo
 Notice that *six>=1.12.0* is required.
 
 
-Pre-processing is time-consuming. Using multiple processes can largely accelerate the pre-processing speed (*--processes_num*). BERT tokenizer is used in default (*--tokenizer bert*). After pre-processing, the raw text is converted to *dataset.pt*, which is the input of *pretrain.py*. Then we download Google's pre-trained Chinese BERT model [*google_zh_model.bin*](https://share.weiyun.com/A1C49VPb) (in UER format and the original model is from [here](https://github.com/google-research/bert)), and put it in *models* folder. We load the pre-trained Chinese BERT model and further pre-train it on book review corpus. Pre-training model is usually composed of embedding, encoder, and target layers. To build a pre-training model, we should provide related information. Configuration file (*--config_path*) specifies the modules and hyper-parameters used by pre-training models. More details can be found in *models/bert/base_config.json*. Suppose we have a machine with 8 GPUs:
+Pre-processing is time-consuming. Using multiple processes can largely accelerate the pre-processing speed (*--processes_num*). BERT tokenizer is used in default (*--tokenizer bert*). After pre-processing, the raw text is converted to *dataset.pt*, which is the input of *pretrain.py*. Then we download Google's pre-trained Chinese BERT model [*google_zh_model.bin*](https://share.weiyun.com/FR4rPxc4) (in UER format and the original model is from [here](https://github.com/google-research/bert)), and put it in *models* folder. We load the pre-trained Chinese BERT model and further pre-train it on book review corpus. Pre-training model is usually composed of embedding, encoder, and target layers. To build a pre-training model, we should provide related information. Configuration file (*--config_path*) specifies the modules and hyper-parameters used by pre-training models. More details can be found in *models/bert/base_config.json*. Suppose we have a machine with 8 GPUs:
 ```
 python3 pretrain.py --dataset_path dataset.pt --vocab_path models/google_zh_vocab.txt \
                     --pretrained_model_path models/google_zh_model.bin \
@@ -105,14 +111,14 @@ mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
 Notice that the model trained by *pretrain.py* is attacted with the suffix which records the training step (*--total_steps*). We could remove the suffix for ease of use.
 
-Then we fine-tune the pre-trained model on downstream classification dataset. We use embedding and encoder layers of [*book_review_model.bin*](https://share.weiyun.com/wDzMu0Rb), which is the output of *pretrain.py*:
+Then we fine-tune the pre-trained model on downstream classification dataset. We use embedding and encoder layers of book_review_model.bin, which is the output of *pretrain.py*:
 ```
 python3 finetune/run_classifier.py --pretrained_model_path models/book_review_model.bin \
                                    --vocab_path models/google_zh_vocab.txt \
                                    --config_path models/bert/base_config.json \
-                                   --train_path datasets/douban_book_review/train.tsv \
-                                   --dev_path datasets/douban_book_review/dev.tsv \
-                                   --test_path datasets/douban_book_review/test.tsv \
+                                   --train_path datasets/book_review/train.tsv \
+                                   --dev_path datasets/book_review/dev.tsv \
+                                   --test_path datasets/book_review/test.tsv \
                                    --epochs_num 3 --batch_size 32
 ``` 
 The default path of the fine-tuned classifier model is *models/finetuned_model.bin* . It is noticeable that the actual batch size of pre-training is *--batch_size* times *--world_size* ; The actual batch size of downstream task (e.g. classification) is *--batch_size* . 
@@ -121,8 +127,8 @@ Then we do inference with the fine-tuned model.
 python3 inference/run_classifier_infer.py --load_model_path models/finetuned_model.bin \
                                           --vocab_path models/google_zh_vocab.txt \
                                           --config_path models/bert/base_config.json \
-                                          --test_path datasets/douban_book_review/test_nolabel.tsv \
-                                          --prediction_path datasets/douban_book_review/prediction.tsv \
+                                          --test_path datasets/book_review/test_nolabel.tsv \
+                                          --prediction_path datasets/book_review/prediction.tsv \
                                           --labels_num 2
 ```
 *--test_path* specifies the path of the file to be predicted. The file should contain text_a column.
@@ -133,11 +139,15 @@ We need to explicitly specify the number of labels by *--labels_num*. Douban boo
 
 The above content provides basic ways of using UER-py to pre-process, pre-train, fine-tune, and do inference. More use cases can be found in complete :arrow_right: [__quickstart__](https://github.com/dbiir/UER-py/wiki/Quickstart) :arrow_left: . The complete quickstart contains abundant use cases, covering most of the pre-training related application scenarios. It is recommended that users read the complete quickstart in order to use the project reasonably.
 
+<br/>
+
+## Pre-training data
+This section provides links to a range of :arrow_right: [__pre-training data__](https://github.com/dbiir/UER-py/wiki/Pretraining-data) :arrow_left: .
 
 <br/>
 
-## Datasets
-We collected a range of :arrow_right: [__downstream datasets__](https://github.com/dbiir/UER-py/wiki/Datasets) :arrow_left: and converted them into the format that UER can load directly.
+## Downstream datasets
+This section provides links to a range of :arrow_right: [__downstream datasets__](https://github.com/dbiir/UER-py/wiki/Downstream-datasets) :arrow_left: . UER can load these datasets directly.
 
 <br/>
 

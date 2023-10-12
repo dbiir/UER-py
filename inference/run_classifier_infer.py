@@ -37,14 +37,14 @@ def read_dataset(args, path):
     with open(path, mode="r", encoding="utf-8") as f:
         for line_id, line in enumerate(f):
             if line_id == 0:
-                line = line.strip().split("\t")
+                line = line.rstrip("\r\n").split("\t")
                 for i, column_name in enumerate(line):
                     columns[column_name] = i
                 continue
-            line = line.strip().split("\t")
+            line = line.rstrip("\r\n").split("\t")
             if "text_b" not in columns:  # Sentence classification.
                 text_a = line[columns["text_a"]]
-                src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a))
+                src = args.tokenizer.convert_tokens_to_ids([CLS_TOKEN] + args.tokenizer.tokenize(text_a) + [SEP_TOKEN])
                 seg = [1] * len(src)
             else:  # Sentence pair classification.
                 text_a, text_b = line[columns["text_a"]], line[columns["text_b"]]
@@ -52,7 +52,7 @@ def read_dataset(args, path):
                 src_b = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(text_b) + [SEP_TOKEN])
                 src = src_a + src_b
                 seg = [1] * len(src_a) + [2] * len(src_b)
-            
+
             if len(src) > args.seq_length:
                 src = src[: args.seq_length]
                 seg = seg[: args.seq_length]
@@ -77,7 +77,7 @@ def main():
 
     parser.add_argument("--output_logits", action="store_true", help="Write logits to output file.")
     parser.add_argument("--output_prob", action="store_true", help="Write probabilities to output file.")
-    
+
     args = parser.parse_args()
 
     # Load the hyperparameters from the config file.
@@ -122,13 +122,13 @@ def main():
             seg_batch = seg_batch.to(device)
             with torch.no_grad():
                 _, logits = model(src_batch, None, seg_batch)
-            
+
             pred = torch.argmax(logits, dim=1)
             pred = pred.cpu().numpy().tolist()
             prob = nn.Softmax(dim=1)(logits)
             logits = logits.cpu().numpy().tolist()
             prob = prob.cpu().numpy().tolist()
-            
+
             for j in range(len(pred)):
                 f.write(str(pred[j]))
                 if args.output_logits:

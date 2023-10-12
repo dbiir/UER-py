@@ -1,6 +1,5 @@
+import math
 import torch.nn as nn
-
-from uer.layers.layer_norm import LayerNorm
 
 
 class WordEmbedding(nn.Module):
@@ -9,11 +8,12 @@ class WordEmbedding(nn.Module):
 
     def __init__(self, args, vocab_size):
         super(WordEmbedding, self).__init__()
-        self.remove_embedding_layernorm = args.remove_embedding_layernorm
-        self.dropout = nn.Dropout(args.dropout)
-        self.word_embedding = nn.Embedding(vocab_size, args.emb_size)
-        if not self.remove_embedding_layernorm:
-            self.layer_norm = LayerNorm(args.emb_size)
+        self.embedding = nn.Embedding(vocab_size, args.emb_size)
+        self.emb_size = args.emb_size
+        self.sinusoidalpos = False
+        if "sinusoidalpos" in args.embedding:
+            self.sinusoidalpos = True
+
 
     def forward(self, src, _):
         """
@@ -23,8 +23,10 @@ class WordEmbedding(nn.Module):
         Returns:
             emb: [batch_size x seq_length x hidden_size]
         """
-        emb = self.word_embedding(src)
-        if not self.remove_embedding_layernorm:
-            emb = self.layer_norm(emb)
-        emb = self.dropout(emb)
-        return emb
+
+        emb = self.embedding(src)
+
+        if self.sinusoidalpos:
+            return emb * math.sqrt(self.emb_size)
+        else:
+            return emb

@@ -17,9 +17,9 @@ input_model = torch.load(args.input_model_path)
 output_model = collections.OrderedDict()
 
 
-output_model["transformer.wte.weight"] = input_model["embedding.word_embedding.weight"]
-output_model["transformer.wpe.weight"] = input_model["embedding.position_embedding.weight"]
-max_position = input_model["embedding.position_embedding.weight"].shape[0]
+output_model["transformer.wte.weight"] = input_model["embedding.word.embedding.weight"]
+output_model["transformer.wpe.weight"] = input_model["embedding.pos.embedding.weight"]
+max_position = input_model["embedding.pos.embedding.weight"].shape[0]
 
 for i in range(args.layers_num):
     output_model["transformer.h." + str(i) + ".attn.bias"] = \
@@ -61,6 +61,6 @@ for i in range(args.layers_num):
 
 output_model["transformer.ln_f.weight"] = input_model["encoder.layer_norm.gamma"]
 output_model["transformer.ln_f.bias"] = input_model["encoder.layer_norm.beta"]
-output_model["lm_head.weight"] = input_model["embedding.word_embedding.weight"]
+output_model["lm_head.weight"] = input_model["target.lm.output_layer.weight"]
 
 torch.save(output_model, args.output_model_path)

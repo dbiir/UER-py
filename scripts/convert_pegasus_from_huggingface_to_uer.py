@@ -16,6 +16,7 @@ parser.add_argument("--input_model_path", type=str, default="models/input_model.
 parser.add_argument("--output_model_path", type=str, default="models/output_model.bin",
                     help=".")
 parser.add_argument("--layers_num", type=int, default=6, help=".")
+parser.add_argument("--decoder_layers_num", type=int, default=6, help=".")
 
 args = parser.parse_args()
 
@@ -23,14 +24,14 @@ input_model = torch.load(args.input_model_path, map_location="cpu")
 
 output_model = collections.OrderedDict()
 
-output_model["embedding.pe"] = input_model["model.encoder.embed_positions.weight"].unsqueeze(1)
-output_model["tgt_embedding.pe"] = input_model["model.decoder.embed_positions.weight"].unsqueeze(1)
-output_model["embedding.word_embedding.weight"] = input_model["model.encoder.embed_tokens.weight"]
-output_model["tgt_embedding.word_embedding.weight"] = input_model["model.decoder.embed_tokens.weight"]
-output_model["target.output_layer.weight"] = input_model["lm_head.weight"]
-output_model["target.output_layer.bias"] = input_model["final_logits_bias"].squeeze(0)
+output_model["embedding.sinusoidalpos.pe"] = input_model["model.encoder.embed_positions.weight"].unsqueeze(1)
+output_model["tgt_embedding.sinusoidalpos.pe"] = input_model["model.decoder.embed_positions.weight"].unsqueeze(1)
+output_model["embedding.word.embedding.weight"] = input_model["model.encoder.embed_tokens.weight"]
+output_model["tgt_embedding.word.embedding.weight"] = input_model["model.decoder.embed_tokens.weight"]
+output_model["target.lm.output_layer.weight"] = input_model["lm_head.weight"]
+output_model["target.lm.output_layer.bias"] = input_model["final_logits_bias"].squeeze(0)
 
-convert_encoder_decoder_transformer_from_huggingface_to_uer(input_model, output_model, args.layers_num)
+convert_encoder_decoder_transformer_from_huggingface_to_uer(input_model, output_model, args.layers_num, args.decoder_layers_num)
 
 output_model["encoder.layer_norm.gamma"] = input_model["model.encoder.layer_norm.weight"]
 output_model["encoder.layer_norm.beta"] = input_model["model.encoder.layer_norm.bias"]

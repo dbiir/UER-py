@@ -55,7 +55,7 @@ def main():
     best_acc = 0
     config = {}
 
-    #Build dataset
+    # Build dataset
     trainset = read_dataset(args, args.train_path)
     instances_num = len(trainset)
 
@@ -74,13 +74,7 @@ def main():
         model = model.to(args.device)
         load_or_initialize_parameters(args, model)
         optimizer, scheduler = build_optimizer(args, model)
-        if args.fp16:
-            try:
-                from apex import amp
-            except ImportError:
-                raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-            model, optimizer = amp.initialize(model, optimizer, opt_level = args.fp16_opt_level)
-            args.amp = amp
+
         if torch.cuda.device_count() > 1:
             model = torch.nn.DataParallel(model)
         args.model = model
@@ -92,7 +86,7 @@ def main():
 
         total_loss, _, _ = 0., 0., 0.
 
-        for _ in range(1, args.epochs_num+1):
+        for _ in range(1, args.epochs_num + 1):
             random.shuffle(trainset)
             src = torch.LongTensor([example[0] for example in trainset])
             tgt = torch.LongTensor([example[1] for example in trainset])
@@ -111,9 +105,10 @@ def main():
         if acc > best_acc:
             best_acc = acc
             config = {"learning_rate": learning_rate, "batch_size": batch_size, "epochs_num": epochs_num}
-        args.logger.info('On configuration: {}.\n'.format(config))
+        args.logger.info("On configuration: {}.\n".format(config))
 
     args.logger.info("Best Acc. is: {:.4f}, on configuration {}.".format(best_acc, config))
+
 
 if __name__ == "__main__":
     main()

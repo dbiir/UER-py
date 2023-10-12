@@ -20,18 +20,21 @@ from uer.targets import *
 class ClozeTest(nn.Module):
     def __init__(self, args):
         super(ClozeTest, self).__init__()
-        self.embedding = str2embedding[args.embedding](args, len(args.tokenizer.vocab))
+        self.embedding = Embedding(args)
+        for embedding_name in args.embedding:
+            tmp_emb = str2embedding[embedding_name](args, len(args.tokenizer.vocab))
+            self.embedding.update(tmp_emb, embedding_name)
         self.encoder = str2encoder[args.encoder](args)
         self.target = MlmTarget(args, len(args.tokenizer.vocab))
         if args.tie_weights:
-            self.target.mlm_linear_2.weight = self.embedding.word_embedding.weight
+            self.target.linear_2.weight = self.embedding.word.embedding.weight
         self.answer_position = args.answer_position
         self.device = args.device
 
     def forward(self, src, tgt, seg):
         emb = self.embedding(src, seg)
         memory_bank = self.encoder(emb, seg)
-        output_mlm = self.target.act(self.target.mlm_linear_1(memory_bank))
+        output_mlm = self.target.act(self.target.linear_1(memory_bank))
         output_mlm = self.target.layer_norm(output_mlm)
         tgt_mlm = tgt.contiguous().view(-1)
         if self.target.factorized_embedding_parameterization:
@@ -41,7 +44,7 @@ class ClozeTest(nn.Module):
         output_mlm = output_mlm[tgt_mlm > 0, :]
         tgt_mlm = tgt_mlm[tgt_mlm > 0]
         self.answer_position = self.answer_position.to(self.device).view(-1)
-        logits = self.target.mlm_linear_2(output_mlm)
+        logits = self.target.linear_2(output_mlm)
         logits = logits * self.answer_position
         prob = self.target.softmax(logits)
         loss = self.target.criterion(prob, tgt_mlm)
@@ -52,13 +55,14 @@ class ClozeTest(nn.Module):
 
 def read_dataset(args, path):
     dataset, columns = [], {}
+    count, ignore_count = 0, 0
     with open(path, mode="r", encoding="utf-8") as f:
         for line_id, line in enumerate(f):
             if line_id == 0:
-                for i, column_name in enumerate(line.strip().split("\t")):
+                for i, column_name in enumerate(line.rstrip("\r\n").split("\t")):
                     columns[column_name] = i
                 continue
-            line = line[:-1].split("\t")
+            line = line.rstrip("\r\n").split("\t")
             mask_position = -1
             label = args.answer_word_dict[str(line[columns["label"]])]
             tgt_token_id = args.tokenizer.vocab[label]
@@ -95,14 +99,24 @@ def read_dataset(args, path):
                         src += prompt_token
             src += [args.tokenizer.vocab.get(SEP_TOKEN)]
             seg = [1] * len(src)
+
+            if len(src) > args.seq_length:
+                src = src[: args.seq_length]
+                seg = seg[: args.seq_length]
+
             PAD_ID = args.tokenizer.convert_tokens_to_ids([PAD_TOKEN])[0]
             while len(src) < args.seq_length:
                 src.append(PAD_ID)
                 seg.append(0)
             tgt = [0] * len(src)
+            # Ignore the sentence which the answer is not in a sequence
+            if mask_position >= args.seq_length:
+                ignore_count += 1
+                continue
             tgt[mask_position] = tgt_token_id
+            count += 1
             dataset.append((src, tgt, seg))
-
+        args.logger.info(f"read dataset, count:{count}, ignore_count:{ignore_count}")
     return dataset
 
 
@@ -117,11 +131,7 @@ def train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_bat
     if torch.cuda.device_count() > 1:
         loss = torch.mean(loss)
 
-    if args.fp16:
-        with args.amp.scale_loss(loss, optimizer) as scaled_loss:
-            scaled_loss.backward()
-    else:
-        loss.backward()
+    loss.backward()
 
     optimizer.step()
     scheduler.step()
@@ -130,7 +140,7 @@ def train_model(args, model, optimizer, scheduler, src_batch, tgt_batch, seg_bat
 
 
 def process_prompt_template(args):
-    with open(args.prompt_path, "r",encoding="utf-8") as f_json:
+    with open(args.prompt_path, "r", encoding="utf-8") as f_json:
         temp_dict = json.load(f_json)
         template_str = temp_dict[args.prompt_id]["template"]
         template_list = re.split(r"(\[TEXT_B\]|\[TEXT_A\]|\[ANS\])", template_str)
@@ -181,7 +191,6 @@ def evaluate(args, dataset):
             confusion[labels[int(pred[j])], labels[int(gold[j])]] += 1
         correct += torch.sum(pred == gold).item()
 
-
     args.logger.debug("Confusion matrix:")
     args.logger.debug(confusion)
     args.logger.debug("Report precision, recall, and f1:")
@@ -223,7 +232,7 @@ def main():
     args.answer_position = torch.LongTensor(answer_position)
     # Build classification model.
     model = ClozeTest(args)
-    
+
     # Load or initialize parameters.
     load_or_initialize_parameters(args, model)
 
@@ -243,14 +252,6 @@ def main():
     args.logger.info("Batch size: {}".format(batch_size))
     args.logger.info("The number of training instances: {}".format(instances_num))
     optimizer, scheduler = build_optimizer(args, model)
-
-    if args.fp16:
-        try:
-            from apex import amp
-        except ImportError:
-            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
-        args.amp = amp
 
     if torch.cuda.device_count() > 1:
         args.logger.info("{} GPUs are available. Let's use them.".format(torch.cuda.device_count()))

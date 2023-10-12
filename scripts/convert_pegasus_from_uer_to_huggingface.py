@@ -16,6 +16,7 @@ parser.add_argument("--input_model_path", type=str, default="models/input_model.
 parser.add_argument("--output_model_path", type=str, default="models/output_model.bin",
                     help=".")
 parser.add_argument("--layers_num", type=int, default=12, help=".")
+parser.add_argument("--decoder_layers_num", type=int, default=12, help=".")
 
 args = parser.parse_args()
 
@@ -23,15 +24,15 @@ input_model = torch.load(args.input_model_path)
 
 output_model = collections.OrderedDict()
 
-output_model["model.shared.weight"] = input_model["embedding.word_embedding.weight"]
-output_model["model.encoder.embed_positions.weight"] = input_model["embedding.pe"].squeeze(1)
-output_model["model.decoder.embed_positions.weight"] = input_model["tgt_embedding.pe"].squeeze(1)
-output_model["model.encoder.embed_tokens.weight"] = input_model["embedding.word_embedding.weight"]
-output_model["model.decoder.embed_tokens.weight"] = input_model["tgt_embedding.word_embedding.weight"]
-output_model["lm_head.weight"] = input_model["target.output_layer.weight"]
-output_model["final_logits_bias"] = input_model["target.output_layer.bias"].unsqueeze(0)
+output_model["model.shared.weight"] = input_model["embedding.word.embedding.weight"]
+output_model["model.encoder.embed_positions.weight"] = input_model["embedding.sinusoidalpos.pe"].squeeze(1)
+output_model["model.decoder.embed_positions.weight"] = input_model["tgt_embedding.sinusoidalpos.pe"].squeeze(1)
+output_model["model.encoder.embed_tokens.weight"] = input_model["embedding.word.embedding.weight"]
+output_model["model.decoder.embed_tokens.weight"] = input_model["tgt_embedding.word.embedding.weight"]
+output_model["lm_head.weight"] = input_model["target.lm.output_layer.weight"]
+output_model["final_logits_bias"] = input_model["target.lm.output_layer.bias"].unsqueeze(0)
 
-convert_encoder_decoder_transformer_from_uer_to_huggingface(input_model, output_model, args.layers_num)
+convert_encoder_decoder_transformer_from_uer_to_huggingface(input_model, output_model, args.layers_num, args.decoder_layers_num)
 
 output_model["model.encoder.layer_norm.weight"] = input_model["encoder.layer_norm.gamma"]
 output_model["model.encoder.layer_norm.bias"] = input_model["encoder.layer_norm.beta"]

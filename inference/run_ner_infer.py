@@ -24,10 +24,10 @@ def read_dataset(args, path):
     with open(path, mode="r", encoding="utf-8") as f:
         for line_id, line in enumerate(f):
             if line_id == 0:
-                for i, column_name in enumerate(line.strip().split("\t")):
+                for i, column_name in enumerate(line.rstrip("\r\n").split("\t")):
                     columns[column_name] = i
                 continue
-            line = line.strip().split('\t')
+            line = line.rstrip("\r\n").split("\t")
             text_a = line[columns["text_a"]]
             src = args.tokenizer.convert_tokens_to_ids(args.tokenizer.tokenize(text_a))
             seg = [1] * len(src)

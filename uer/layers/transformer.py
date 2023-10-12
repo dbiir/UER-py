@@ -25,7 +25,7 @@ class TransformerLayer(nn.Module):
 
         # Multi-headed self-attention.
         self.self_attn = MultiHeadedAttention(
-            args.hidden_size, args.heads_num, attention_head_size, args.dropout, has_bias=has_bias, with_scale = with_scale
+            args.hidden_size, args.heads_num, attention_head_size, args.dropout, has_bias=has_bias, with_scale=with_scale
         )
         self.dropout_1 = nn.Dropout(args.dropout)
 
@@ -89,13 +89,13 @@ class TransformerDecoderLayer(nn.Module):
 
         # Multi-headed self-attention.
         self.self_attn = MultiHeadedAttention(
-            args.hidden_size, args.heads_num, attention_head_size, args.dropout, has_bias=has_bias, with_scale = with_scale
+            args.hidden_size, args.heads_num, attention_head_size, args.dropout, has_bias=has_bias, with_scale=with_scale
         )
         self.dropout_1 = nn.Dropout(args.dropout)
 
         # Multi-headed context-attention.
         self.context_attn = MultiHeadedAttention(
-            args.hidden_size, args.heads_num, attention_head_size, args.dropout, has_bias=has_bias, with_scale = with_scale
+            args.hidden_size, args.heads_num, attention_head_size, args.dropout, has_bias=has_bias, with_scale=with_scale
         )
         self.dropout_2 = nn.Dropout(args.dropout)
 
@@ -111,7 +111,7 @@ class TransformerDecoderLayer(nn.Module):
         self.dropout_3 = nn.Dropout(args.dropout)
 
         # Layer Normalization
-        if  args.layernorm == "t5":
+        if args.layernorm == "t5":
             self.layer_norm_1 = T5LayerNorm(args.hidden_size)
             self.layer_norm_2 = T5LayerNorm(args.hidden_size)
             self.layer_norm_3 = T5LayerNorm(args.hidden_size)
@@ -120,7 +120,7 @@ class TransformerDecoderLayer(nn.Module):
             self.layer_norm_2 = LayerNorm(args.hidden_size)
             self.layer_norm_3 = LayerNorm(args.hidden_size)
 
-    def forward(self, hidden, encoder_hidden, mask_decoder, mask_encoder, self_position_bias = None, context_position_bias = None):
+    def forward(self, hidden, encoder_hidden, mask_decoder, mask_encoder, self_position_bias=None, context_position_bias=None):
         """
         Args:
             hidden: [batch_size x seq_length x emb_size]

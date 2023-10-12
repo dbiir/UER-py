@@ -18,11 +18,11 @@ output_model = collections.OrderedDict()
 emb_size = \
     input_model["roberta.embeddings.word_embeddings.weight"].shape[1]
 
-output_model["embedding.word_embedding.weight"] = \
+output_model["embedding.word.embedding.weight"] = \
     input_model["roberta.embeddings.word_embeddings.weight"]
-output_model["embedding.position_embedding.weight"] = \
+output_model["embedding.pos.embedding.weight"] = \
     torch.cat((input_model["roberta.embeddings.position_embeddings.weight"][2:], torch.zeros(2, emb_size)), 0)
-output_model["embedding.segment_embedding.weight"] = \
+output_model["embedding.seg.embedding.weight"] = \
     torch.cat((torch.Tensor(torch.zeros(2, emb_size)), input_model["roberta.embeddings.token_type_embeddings.weight"]), dim=0)
 output_model["embedding.layer_norm.gamma"] = \
     input_model["roberta.embeddings.LayerNorm.weight"]
@@ -63,17 +63,17 @@ for i in range(args.layers_num):
     output_model["encoder.transformer." + str(i) + ".layer_norm_2.beta"] = \
         input_model["roberta.encoder.layer." + str(i) + ".output.LayerNorm.bias"]
 
-output_model["target.mlm_linear_1.weight"] = \
+output_model["target.mlm.linear_1.weight"] = \
     input_model["lm_head.dense.weight"]
-output_model["target.mlm_linear_1.bias"] = \
+output_model["target.mlm.linear_1.bias"] = \
     input_model["lm_head.dense.bias"]
 output_model["target.layer_norm.gamma"] = \
     input_model["lm_head.layer_norm.weight"]
 output_model["target.layer_norm.beta"] = \
     input_model["lm_head.layer_norm.bias"]
-output_model["target.mlm_linear_2.weight"] = \
+output_model["target.mlm.linear_2.weight"] = \
     input_model["lm_head.decoder.weight"]
-output_model["target.mlm_linear_2.bias"] = \
+output_model["target.mlm.linear_2.bias"] = \
     input_model["lm_head.bias"]
 
 torch.save(output_model, args.output_model_path)
