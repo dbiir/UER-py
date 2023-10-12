@@ -93,8 +93,8 @@ def main():
         output_model["target.sp.linear_2.bias"] = input_model["cls/seq_relationship/output_bias"]
     output_model["target.mlm.linear_1.weight"] = input_model["cls/predictions/transform/dense/kernel"]
     output_model["target.mlm.linear_1.bias"] = input_model["cls/predictions/transform/dense/bias"]
-    output_model["target.layer_norm.gamma"] = input_model["cls/predictions/transform/LayerNorm/gamma"]
-    output_model["target.layer_norm.beta"] = input_model["cls/predictions/transform/LayerNorm/beta"]
+    output_model["target.mlm.layer_norm.gamma"] = input_model["cls/predictions/transform/LayerNorm/gamma"]
+    output_model["target.mlm.layer_norm.beta"] = input_model["cls/predictions/transform/LayerNorm/beta"]
     output_model["target.mlm.linear_2.weight"] = input_model["bert/embeddings/word_embeddings"]
     output_model["target.mlm.linear_2.bias"] = input_model["cls/predictions/output_bias"]
 
