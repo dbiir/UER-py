@@ -86,8 +86,8 @@ def main():
         output_model["cls/seq_relationship/output_bias"] = input_model["target.sp.linear_2.bias"]
     output_model["cls/predictions/transform/dense/kernel"] = input_model["target.mlm.linear_1.weight"]
     output_model["cls/predictions/transform/dense/bias"] = input_model["target.mlm.linear_1.bias"]
-    output_model["cls/predictions/transform/LayerNorm/gamma"] = input_model["target.layer_norm.gamma"]
-    output_model["cls/predictions/transform/LayerNorm/beta"] = input_model["target.layer_norm.beta"]
+    output_model["cls/predictions/transform/LayerNorm/gamma"] = input_model["target.mlm.layer_norm.gamma"]
+    output_model["cls/predictions/transform/LayerNorm/beta"] = input_model["target.mlm.layer_norm.beta"]
     output_model["cls/predictions/output_bias"] = input_model["target.mlm.linear_2.bias"]
 
     tf_vars = []

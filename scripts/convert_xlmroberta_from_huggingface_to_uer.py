@@ -67,9 +67,9 @@ output_model["target.mlm.linear_1.weight"] = \
     input_model["lm_head.dense.weight"]
 output_model["target.mlm.linear_1.bias"] = \
     input_model["lm_head.dense.bias"]
-output_model["target.layer_norm.gamma"] = \
+output_model["target.mlm.layer_norm.gamma"] = \
     input_model["lm_head.layer_norm.weight"]
-output_model["target.layer_norm.beta"] = \
+output_model["target.mlm.layer_norm.beta"] = \
     input_model["lm_head.layer_norm.bias"]
 output_model["target.mlm.linear_2.weight"] = \
     input_model["lm_head.decoder.weight"]
