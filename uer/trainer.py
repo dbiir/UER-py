@@ -439,7 +439,7 @@ str2trainer = {"bert": BertTrainer, "mlm": MlmTrainer, "lm": LmTrainer,
                "bart": BartTrainer, "prefixlm": PrefixlmTrainer, "cls_mlm": ClsMlmTrainer}
 
 
-def worker(local_rank, gpu_ranks, args, model):
+def workerworker(local_rank, args):
     """
     Args:
         local_rank: The id of GPU for single GPU mode;
