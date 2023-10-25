@@ -1,7 +1,7 @@
 import torch
 
 
-def initialize(args):
+def init_env(args):
     if args.dist_train:
         # Initialize multiprocessing distributed training environment.
         args.global_rank = args.gpu_ranks[args.local_rank]

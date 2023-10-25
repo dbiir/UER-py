@@ -3,7 +3,7 @@ import torch
 import torch.distributed as dist
 import torch.multiprocessing as mp
 from torch.nn.parallel import DistributedDataParallel
-from uer.initialize import initialize
+from uer.initialize import init_env
 from uer.model_loader import load_model
 from uer.model_saver import save_model
 from uer.model_builder import build_model
@@ -14,7 +14,7 @@ from uer.utils.vocab import Vocab
 from uer.utils.seed import set_seed
 
 
-def model_init(args):
+def init_model(args):
     # Build model.
     model = build_model(args)
 
@@ -41,7 +41,7 @@ def model_init(args):
     return model
 
 
-def optimizer_init(args, model):
+def init_optimizer(args, model):
     # Build optimizer.
     param_optimizer = list(model.named_parameters())
     no_decay = ["bias", "gamma", "beta"]
@@ -454,14 +454,14 @@ def worker(local_rank, args):
 
     # Env initialize.
     args.local_rank = local_rank
-    initialize(args)
+    init_env(args)
     global_rank = args.global_rank
 
     # Build model.
-    model = model_init(args)
+    model = init_model(args)
 
     # Build optimizer.
-    custom_optimizer, custom_scheduler = optimizer_init(args, model)
+    custom_optimizer, custom_scheduler = init_optimizer(args, model)
 
     if local_rank is not None:
         model.cuda(local_rank)
