@@ -82,6 +82,8 @@ def training_opts(parser):
                         help="Specific steps to print prompt.")
     parser.add_argument("--seed", type=int, default=7,
                         help="Random seed.")
+    parser.add_argument("--local_rank", type=int, required=False)
+    parser.add_argument("--global_rank", type=int, required=False)
     log_opts(parser)
 
 
