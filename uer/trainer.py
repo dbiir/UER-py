@@ -3,6 +3,7 @@ import torch
 import torch.distributed as dist
 import torch.multiprocessing as mp
 from torch.nn.parallel import DistributedDataParallel
+from uer.initialize import initialize
 from uer.model_loader import load_model
 from uer.model_saver import save_model
 from uer.model_builder import build_model
@@ -439,7 +440,7 @@ str2trainer = {"bert": BertTrainer, "mlm": MlmTrainer, "lm": LmTrainer,
                "bart": BartTrainer, "prefixlm": PrefixlmTrainer, "cls_mlm": ClsMlmTrainer}
 
 
-def workerworker(local_rank, args):
+def worker(local_rank, args):
     """
     Args:
         local_rank: The id of GPU for single GPU mode;
