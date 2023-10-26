@@ -79,13 +79,13 @@ def train_and_validate(args):
 
     if args.dist_train:
         # Multiprocessing distributed mode.
-        mp.spawn(worker, nprocs=args.ranks_num, args=(args), daemon=False)
+        mp.spawn(worker, nprocs=args.ranks_num, args=(args.gpu_ranks, args), daemon=False)
     elif args.single_gpu:
         # Single GPU mode.
-        worker(args.local_rank, args)
+        worker(args.local_rank, None, args)
     else:
         # CPU mode.
-        worker(None, args)
+        worker(None, None, args)
 
 
 class Trainer(object):
@@ -440,7 +440,7 @@ str2trainer = {"bert": BertTrainer, "mlm": MlmTrainer, "lm": LmTrainer,
                "bart": BartTrainer, "prefixlm": PrefixlmTrainer, "cls_mlm": ClsMlmTrainer}
 
 
-def worker(local_rank, args):
+def worker(local_rank, gpu_ranks, args):
     """
     Args:
         local_rank: The id of GPU for single GPU mode;
