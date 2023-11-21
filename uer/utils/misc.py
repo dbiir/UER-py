@@ -27,7 +27,7 @@ def pooling(memory_bank, seg, pooling_type):
         features = torch.sum(memory_bank, dim=1)
         features = torch.div(features, torch.sum(seg, dim=1))
     elif pooling_type == "last":
-        features = memory_bank[torch.arange(memory_bank.shape[0]), torch.squeeze(torch.sum(seg, dim=1).type(torch.int64) - 1), :]
+        features = memory_bank[torch.arange(memory_bank.shape[0]), torch.squeeze(torch.sum(seg!=0, dim=1).type(torch.int64) - 1), :]
     elif pooling_type == "max":
         features = torch.max(memory_bank + (seg - 1) * sys.maxsize, dim=1)[0]
     else:
