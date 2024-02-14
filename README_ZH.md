@@ -108,7 +108,7 @@ mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
 请注意，*pretrain.py*输出的模型会带有记录训练步数的后缀（*--total_steps*），这里我们可以删除后缀以方便使用。
 
-然后，我们在下游分类数据集上微调预训练模型，我们使用 *pretrain.py* 的输出*book_review_model.bin*（加载词向量层和编码层参数）：
+然后，我们在下游分类数据集上微调预训练模型，我们使用 *pretrain.py* 的输出[*book_review_model.bin*](https://share.weiyun.com/PnxMrRwZ)（加载词向量层和编码层参数）：
 ```
 python3 finetune/run_classifier.py --pretrained_model_path models/book_review_model.bin \
                                    --vocab_path models/google_zh_vocab.txt \

@@ -110,7 +110,7 @@ mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
 Notice that the model trained by *pretrain.py* is attacted with the suffix which records the training step (*--total_steps*). We could remove the suffix for ease of use.
 
-Then we fine-tune the pre-trained model on downstream classification dataset. We use embedding and encoder layers of *book_review_model.bin*, which is the output of *pretrain.py*:
+Then we fine-tune the pre-trained model on downstream classification dataset. We use embedding and encoder layers of [*book_review_model.bin*](https://share.weiyun.com/PnxMrRwZ), which is the output of *pretrain.py*:
 ```
 python3 finetune/run_classifier.py --pretrained_model_path models/book_review_model.bin \
                                    --vocab_path models/google_zh_vocab.txt \
@@ -132,7 +132,7 @@ python3 inference/run_classifier_infer.py --load_model_path models/finetuned_mod
 ```
 *--test_path* specifies the path of the file to be predicted. The file should contain text_a column.
 *--prediction_path* specifies the path of the file with prediction results.
-We need to explicitly specify the number of labels by *--labels_num*. Douban book review is a two-way classification dataset.
+We need to explicitly specify the number of labels by *--labels_num*. The above dataset is a two-way classification dataset.
 
 <br>
 
@@ -188,7 +188,7 @@ UER-py/
 
 ```
 
-The code is well-organized. Users can use and extend upon it with little efforts.
+The code is organized based on components (e.g. embeddings, encoders). Users can use and extend upon it with little efforts.
 
 Comprehensive examples of using UER can be found in :arrow_right: [__instructions__](https://github.com/dbiir/UER-py/wiki/Instructions) :arrow_left: , which help users quickly implement pre-training models such as BERT, GPT-2, ELMo, T5 and fine-tune pre-trained models on a range of downstream tasks.
 
