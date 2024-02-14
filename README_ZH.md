@@ -51,7 +51,6 @@ UER-py有如下几方面优势:
 * argparse
 * packaging
 * regex
-* 如果使用混合精度，需要安装英伟达的apex
 * 如果涉及到TensorFlow模型的转换，需要安装TensorFlow
 * 如果在tokenizer中使用sentencepiece模型，需要安装[SentencePiece](https://github.com/google/sentencepiece)
 * 如果使用模型集成stacking，需要安装LightGBM和[BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
@@ -109,7 +108,7 @@ mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
 请注意，*pretrain.py*输出的模型会带有记录训练步数的后缀（*--total_steps*），这里我们可以删除后缀以方便使用。
 
-然后，我们在下游分类数据集上微调预训练模型，我们使用 *pretrain.py* 的输出book_review_model.bin（加载词向量层和编码层参数）：
+然后，我们在下游分类数据集上微调预训练模型，我们使用 *pretrain.py* 的输出*book_review_model.bin*（加载词向量层和编码层参数）：
 ```
 python3 finetune/run_classifier.py --pretrained_model_path models/book_review_model.bin \
                                    --vocab_path models/google_zh_vocab.txt \
@@ -140,7 +139,7 @@ python3 inference/run_classifier_infer.py --load_model_path models/finetuned_mod
 <br/>
 
 ## 预训练数据
-我们提供了链接，指向一系列开源的 :arrow_right: [__预训练数据__](https://github.com/dbiir/UER-py/wiki/预训练数据) :arrow_left: 。
+我们提供了链接，指向一系列开源的 :arrow_right: [__预训练数据__](https://github.com/dbiir/UER-py/wiki/预训练数据) :arrow_left: 。UER可以直接加载这些预训练数据。
 
 <br/>
 
@@ -150,7 +149,7 @@ python3 inference/run_classifier_infer.py --load_model_path models/finetuned_mod
 <br/>
 
 ## 预训练模型仓库
-借助UER-py，我们训练不同性质的预训练模型（例如基于不同语料、编码器、目标任务）。用户可以在 :arrow_right: [__预训练模型仓库__](https://github.com/dbiir/UER-py/wiki/预训练模型仓库) :arrow_left: 中找到各种性质的预训练模型以及它们对应的描述和下载链接。所有预训练模型都可以由UER-py直接加载。将来我们会发布更多的预训练模型。
+借助UER-py，我们训练不同性质的预训练模型（例如基于不同语料、编码器、目标任务）。用户可以在 :arrow_right: [__预训练模型仓库__](https://github.com/dbiir/UER-py/wiki/预训练模型仓库) :arrow_left: 中找到各种性质的预训练模型以及它们对应的描述和下载链接。所有预训练模型都可以由UER-py直接加载。
 
 <br/>
 

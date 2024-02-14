@@ -53,7 +53,6 @@ UER-py has the following features:
 * argparse
 * packaging
 * regex
-* For the mixed precision training you will need apex from NVIDIA
 * For the pre-trained model conversion (related with TensorFlow) you will need TensorFlow
 * For the tokenization with sentencepiece model you will need [SentencePiece](https://github.com/google/sentencepiece)
 * For developing a stacking model you will need LightGBM and [BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
@@ -111,7 +110,7 @@ mv models/book_review_model.bin-5000 models/book_review_model.bin
 ```
 Notice that the model trained by *pretrain.py* is attacted with the suffix which records the training step (*--total_steps*). We could remove the suffix for ease of use.
 
-Then we fine-tune the pre-trained model on downstream classification dataset. We use embedding and encoder layers of book_review_model.bin, which is the output of *pretrain.py*:
+Then we fine-tune the pre-trained model on downstream classification dataset. We use embedding and encoder layers of *book_review_model.bin*, which is the output of *pretrain.py*:
 ```
 python3 finetune/run_classifier.py --pretrained_model_path models/book_review_model.bin \
                                    --vocab_path models/google_zh_vocab.txt \
@@ -142,7 +141,7 @@ The above content provides basic ways of using UER-py to pre-process, pre-train,
 <br/>
 
 ## Pre-training data
-This section provides links to a range of :arrow_right: [__pre-training data__](https://github.com/dbiir/UER-py/wiki/Pretraining-data) :arrow_left: .
+This section provides links to a range of :arrow_right: [__pre-training data__](https://github.com/dbiir/UER-py/wiki/Pretraining-data) :arrow_left: . UER can load these pre-training data directly.
 
 <br/>
 
@@ -152,7 +151,7 @@ This section provides links to a range of :arrow_right: [__downstream datasets__
 <br/>
 
 ## Modelzoo
-With the help of UER, we pre-trained models of different properties (e.g. models based on different corpora, encoders, and targets). Detailed introduction of pre-trained models and their download links can be found in :arrow_right: [__modelzoo__](https://github.com/dbiir/UER-py/wiki/Modelzoo) :arrow_left: . All pre-trained models can be loaded by UER directly. More pre-trained models will be released in the future.
+With the help of UER, we pre-trained models of different properties (e.g. models based on different corpora, encoders, and targets). Detailed introduction of pre-trained models and their download links can be found in :arrow_right: [__modelzoo__](https://github.com/dbiir/UER-py/wiki/Modelzoo) :arrow_left: . All pre-trained models can be loaded by UER directly.
 
 <br/>
 
