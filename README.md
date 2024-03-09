@@ -7,7 +7,7 @@
 
 <img src="logo.jpg" width="390" hegiht="390" align=left />
 
-Pre-training has become an essential part for NLP tasks. UER-py (Universal Encoder Representations) is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of existing pre-training models, and provides interfaces for users to further extend upon. With UER-py, we build a model zoo which contains pre-trained models of different properties. **See the Wiki for [Full Documentation](https://github.com/dbiir/UER-py/wiki)**.
+Pre-training has become an essential part for NLP tasks. UER-py (Universal Encoder Representations) is a toolkit for pre-training on general-domain corpus and fine-tuning on downstream task. UER-py maintains model modularity and supports research extensibility. It facilitates the use of existing pre-training models, and provides interfaces for users to further extend upon. With UER-py, we build a model zoo which contains pre-trained models of different properties. **See the [UER-py project Wiki](https://github.com/dbiir/UER-py/wiki) for full documentation**.
 
 <br/>
 <br/>
@@ -160,19 +160,20 @@ UER-py is organized as follows：
 ```
 UER-py/
     |--uer/
-    |    |--embeddings/ # contains embeddings
-    |    |--encoders/ # contains encoders such as RNN, CNN, 
-    |    |--decoders/ # contains decoders
-    |    |--targets/ # contains targets such as language modeling, masked language modeling
-    |    |--layers/ # contains frequently-used NN layers, such as embedding layer, normalization layer
-    |    |--models/ # contains model.py, which combines embedding, encoder, and target modules
+    |    |--embeddings/ # contains modules of embedding component
+    |    |--encoders/ # contains modules of encoder component such as RNN, CNN, Transformer
+    |    |--decoders/ # contains modules of decoder component
+    |    |--targets/ # contains modules of target component such as language modeling, masked language modeling
+    |    |--layers/ # contains frequently-used NN layers
+    |    |--models/ # contains model.py, which combines modules of different components
     |    |--utils/ # contains frequently-used utilities
     |    |--model_builder.py
     |    |--model_loader.py
     |    |--model_saver.py
+    |    |--opts.py
     |    |--trainer.py
     |
-    |--corpora/ # contains corpora for pre-training
+    |--corpora/ # contains pre-training data
     |--datasets/ # contains downstream tasks
     |--models/ # contains pre-trained models, vocabularies, and configuration files
     |--scripts/ # contains useful scripts for pre-training models
@@ -184,7 +185,7 @@ UER-py/
     |--README.md
     |--README_ZH.md
     |--requirements.txt
-    |--logo.jpg
+    |--LICENSE
 
 ```
 
@@ -214,7 +215,7 @@ UER-py has been used in winning solutions of many NLP competitions. In this sect
 <br/>
 
 ## Contact information
-For communication related to this project, please contact Zhe Zhao (helloworld@ruc.edu.cn; nlpzhezhao@tencent.com) or Yudong Li (liyudong123@hotmail.com) or Cheng Hou (chenghoubupt@bupt.edu.cn) or Wenhang Shi (wenhangshi@ruc.edu.cn).
+For communication related to this project, please contact Zhe Zhao (helloworld@alu.ruc.edu.cn; nlpzhezhao@tencent.com) or Yudong Li (liyudong123@hotmail.com) or Cheng Hou (chenghoubupt@bupt.edu.cn) or Wenhang Shi (wenhangshi@ruc.edu.cn).
 
 This work is instructed by my enterprise mentors __Qi Ju__, __Xuefeng Yang__, __Haotang Deng__ and school mentors __Tao Liu__, __Xiaoyong Du__.
 
