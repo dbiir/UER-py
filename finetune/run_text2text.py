@@ -95,13 +95,13 @@ def read_dataset(args, path):
                 tgt_seg = tgt_seg[: args.tgt_seq_length]
             tgt_out = tgt_in[1:] + [PAD_ID]
 
-            while len(src) < args.seq_length:
-                src.append(PAD_ID)
-                seg.append(0)
-            while len(tgt_in) < args.tgt_seq_length:
-                tgt_in.append(PAD_ID)
-                tgt_out.append(PAD_ID)
-                tgt_seg.append(0)
+            if len(src) < args.seq_length:
+                src += [PAD_ID] * (args.seq_length - len(src))
+                seg += [0] * (args.seq_length - len(seg))
+            if len(tgt_in) < args.tgt_seq_length:
+                tgt_in += [PAD_ID] * (args.tgt_seq_length - len(tgt_in))
+                tgt_out += [PAD_ID] * (args.tgt_seq_length - len(tgt_out))
+                tgt_seg += [0] * (args.tgt_seq_length - len(tgt_seg))
 
             dataset.append((src, tgt_in, tgt_out, seg, tgt_seg))
 
