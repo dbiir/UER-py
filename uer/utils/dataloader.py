@@ -73,8 +73,7 @@ class BertDataloader(Dataloader):
 
             for ins in instances:
                 src_single, pad_num = ins[0]
-                for _ in range(pad_num):
-                    src_single.append(self.vocab.get(PAD_TOKEN))
+                src_single += [self.vocab.get(PAD_TOKEN)] * pad_num
 
                 if len(ins) == 4:
                     src.append(src_single)
@@ -123,8 +122,7 @@ class MlmDataloader(Dataloader):
 
             for ins in instances:
                 src_single, pad_num = ins[0]
-                for _ in range(pad_num):
-                    src_single.append(self.vocab.get(PAD_TOKEN))
+                src_single += [self.vocab.get(PAD_TOKEN)] * pad_num
 
                 if len(ins) == 3:
                     src.append(src_single)
@@ -175,8 +173,7 @@ class LmDataloader(Dataloader):
 
             for ins in instances:
                 src_single, pad_num = ins[0]
-                for _ in range(pad_num):
-                    src_single.append(self.vocab.get(PAD_TOKEN))
+                src_single += [self.vocab.get(PAD_TOKEN)] * pad_num
                 src.append(src_single[:-1])
                 tgt.append(src_single[1:])
                 seg.append([1] * ins[1][0] + [0] * (len(src_single) - 1 - ins[1][0]))
@@ -206,10 +203,9 @@ class BilmDataloader(Dataloader):
             for ins in instances:
                 src_single, pad_num = ins[0]
                 tgt_forward_single, tgt_backward_single = ins[1], ins[2]
-                for _ in range(pad_num):
-                    src_single.append(self.vocab.get(PAD_TOKEN))
-                    tgt_forward_single.append(self.vocab.get(PAD_TOKEN))
-                    tgt_backward_single.append(self.vocab.get(PAD_TOKEN))
+                src_single += [self.vocab.get(PAD_TOKEN)] * pad_num
+                tgt_forward_single += [self.vocab.get(PAD_TOKEN)] * pad_num
+                tgt_backward_single += [self.vocab.get(PAD_TOKEN)] * pad_num
                 src.append(src_single)
                 tgt_forward.append(tgt_forward_single)
                 tgt_backward.append(tgt_backward_single)
@@ -241,11 +237,9 @@ class MtDataloader(Dataloader):
 
             for ins in instances:
                 src_single, pad_num = ins[0]
-                for _ in range(pad_num):
-                    src_single.append(self.vocab.get(PAD_TOKEN))
+                src_single += [self.vocab.get(PAD_TOKEN)] * pad_num
                 tgt_single, pad_num = ins[1]
-                for _ in range(pad_num):
-                    tgt_single.append(self.vocab.get(PAD_TOKEN))
+                tgt_single += [self.vocab.get(PAD_TOKEN)] * pad_num
 
                 src.append(src_single)
                 tgt_in.append(tgt_single[:-1])
@@ -283,8 +277,7 @@ class T5Dataloader(Dataloader):
 
             for _, ins in enumerate(instances):
                 src_single, pad_num = ins[0]
-                for _ in range(pad_num):
-                    src_single.append(self.vocab.get(PAD_TOKEN))
+                src_single += [self.vocab.get(PAD_TOKEN)] * pad_num
 
                 if len(ins) == 3:
                     tgt_single = ins[1]
@@ -370,11 +363,9 @@ class BartDataloader(Dataloader):
 
             for _, ins in enumerate(instances):
                 src_single, pad_num = ins[0]
-                for _ in range(pad_num):
-                    src_single.append(self.vocab.get(PAD_TOKEN))
+                src_single += [self.vocab.get(PAD_TOKEN)] * pad_num
                 tgt_single, pad_num = ins[1]
-                for _ in range(pad_num):
-                    tgt_single.append(self.vocab.get(PAD_TOKEN))
+                tgt_single += [self.vocab.get(PAD_TOKEN)] * pad_num
 
                 src_single, _ = mask_seq(src_single, self.tokenizer, self.whole_word_masking, self.span_masking,
                                          self.span_geo_prob, self.span_max_length)
@@ -436,9 +427,8 @@ class ClsDataloader(Dataloader):
                 elif len(seg_pos_single) == 2:
                     seg_single = [1] * seg_pos_single[0] + [2] * seg_pos_single[1]
                 
-                for _ in range(pad_num):
-                    src_single.append(self.vocab.get(PAD_TOKEN))
-                    seg_single.append(0)
+                src_single += [self.vocab.get(PAD_TOKEN)] * pad_num
+                seg_single += [0] * pad_num
                 
                 src.append(src_single)
                 tgt.append(ins[1])
@@ -468,9 +458,8 @@ class PrefixlmDataloader(Dataloader):
             for ins in instances:
                 src_single, pad_num = ins[0]
                 tgt_single = ins[1]
-                for _ in range(pad_num):
-                    src_single.append(self.vocab.get(PAD_TOKEN))
-                    tgt_single.append(self.vocab.get(PAD_TOKEN))
+                src_single += [self.vocab.get(PAD_TOKEN)] * pad_num
+                tgt_single += [self.vocab.get(PAD_TOKEN)] * pad_num
                 src.append(src_single)
                 tgt.append(tgt_single)
                 seg.append([1] * ins[2][0] + [2] * (ins[2][1] - ins[2][0]) + [0] * (len(src_single) - ins[2][1]))
@@ -509,9 +498,8 @@ class ClsMlmDataloader(Dataloader):
                 elif len(seg_pos_single) == 2:
                     seg_single = [1] * seg_pos_single[0] + [2] * seg_pos_single[1]
                 
-                for _ in range(pad_num):
-                    src_single.append(self.vocab.get(PAD_TOKEN))
-                    seg_single.append(0)
+                src_single += [self.vocab.get(PAD_TOKEN)] * pad_num
+                seg_single += [0] * pad_num
                 seg.append(seg_single)
 
                 if len(ins) == 4 :
