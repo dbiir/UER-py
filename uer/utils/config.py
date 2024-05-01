@@ -8,7 +8,7 @@ def load_hyperparam(args):
     Load arguments form argparse and config file
     Priority: default options < config file < command line args
     """
-    with open(dargs.config_path, mode="r", encoding="utf-8") as f:
+    with open(args.config_path, mode="r", encoding="utf-8") as f:
         config_args_dict = json.load(f)
 
     args_dict = vars(args)
