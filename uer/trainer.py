@@ -44,7 +44,7 @@ def init_model(args):
 def init_optimizer(args, model):
     # Build optimizer.
     param_optimizer = list(model.named_parameters())
-    no_decay = ["bias", "gamma", "beta"]
+    no_decay = ["bias", "gamma", "beta", "layer_norm"]
     optimizer_grouped_parameters = [
         {"params": [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], "weight_decay": 0.01},
         {"params": [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], "weight_decay": 0.0}

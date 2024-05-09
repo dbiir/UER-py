@@ -47,7 +47,7 @@ class TransformerLayer(nn.Module):
             self.layer_norm_1 = LayerNorm(args.hidden_size)
             self.layer_norm_2 = LayerNorm(args.hidden_size)
 
-    def forward(self, hidden, mask, position_bias = None, has_residual_attention=False, prev_attn=None):
+    def forward(self, hidden, mask, position_bias=None, has_residual_attention=False, prev_attn=None):
         """
         Args:
             hidden: [batch_size x seq_length x emb_size]

@@ -15,12 +15,20 @@ class Vocab(object):
         self.reserved_vocab_path = \
             os.path.abspath(os.path.join(os.path.dirname(__file__), "../../models/reserved_vocab.txt"))
         
-    def load(self, vocab_path, is_quiet=False):
-        with open(vocab_path, mode="r", encoding="utf-8") as reader:
-            for index, line in enumerate(reader):
-                w = line.strip("\r\n").split()[0] if line.strip() else line.strip("\r\n")
-                self.w2i[w] = index
-                self.i2w.append(w)
+    def load(self, vocab_path, is_quiet=False, is_vocab_json=False):
+        if is_vocab_json:
+            with open(vocab_path, 'r') as file:
+                voc = json.load(file)
+                sorted_voc = sorted(voc.items(), key=lambda x: x[1])
+                for w, i in sorted_voc:
+                    self.w2i[w] = i
+                    self.i2w.append(w)
+        else:
+            with open(vocab_path, mode="r", encoding="utf-8") as reader:
+                for index, line in enumerate(reader):
+                    w = line.strip("\r\n").split()[0] if line.strip() else line.strip("\r\n")
+                    self.w2i[w] = index
+                    self.i2w.append(w)
         if not is_quiet:
             print("Vocabulary size: ", len(self))
 

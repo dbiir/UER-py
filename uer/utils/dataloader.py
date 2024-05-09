@@ -502,7 +502,7 @@ class ClsMlmDataloader(Dataloader):
                 seg_single += [0] * pad_num
                 seg.append(seg_single)
 
-                if len(ins) == 4 :
+                if len(ins) == 4:
                     src.append(src_single)
                     masked_words_num += len(ins[1])
                     tgt_mlm.append([0] * len(src_single))
