@@ -16,7 +16,7 @@ def merge_dataset(dataset_path, workers_num):
     for i in range(workers_num):
         tmp_dataset_reader = open("dataset-tmp-" + str(i) + ".pt", "rb")
         while True:
-            tmp_data = tmp_dataset_reader.read(2**20)
+            tmp_data = tmp_dataset_reader.read(2 ** 20)
             if tmp_data:
                 dataset_writer.write(tmp_data)
             else:
@@ -210,7 +210,8 @@ class BertDataset(Dataset):
                         pad_num = self.seq_length - len(src)
 
                     if not self.dynamic_masking:
-                        src, tgt_mlm = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                        src, tgt_mlm = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking,
+                                                self.span_geo_prob, self.span_max_length)
                         src = (src, pad_num)
                         instance = (src, tgt_mlm, is_random_next, seg_pos)
                     else:
@@ -244,7 +245,8 @@ class MlmDataset(Dataset):
                     line = f.readline()
                     pos += 1
 
-                    document = [self.vocab.get(CLS_TOKEN)] + self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line)) + [self.vocab.get(SEP_TOKEN)]
+                    document = [self.vocab.get(CLS_TOKEN)] + self.tokenizer.convert_tokens_to_ids(
+                                self.tokenizer.tokenize(line)) + [self.vocab.get(SEP_TOKEN)]
 
                     if self.full_sentences:
                         if len(document) > 0:
@@ -292,7 +294,8 @@ class MlmDataset(Dataset):
             seg_pos = [len(src)]
 
             if not self.dynamic_masking:
-                src, tgt = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                src, tgt = mask_seq(src, self.tokenizer, self.whole_word_masking,
+                                    self.span_masking, self.span_geo_prob, self.span_max_length)
                 instance = ((src, 0), tgt, seg_pos)
             else:
                 instance = ((src, 0), seg_pos)
@@ -309,7 +312,8 @@ class MlmDataset(Dataset):
         pad_num = self.seq_length - len(src)
         
         if not self.dynamic_masking:
-            src, tgt = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+            src, tgt = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking,
+                                self.span_geo_prob, self.span_max_length)
             instance = ((src, pad_num), tgt, seg_pos)
         else:
             instance = ((src, pad_num), seg_pos)
@@ -416,7 +420,8 @@ class AlbertDataset(Dataset):
                         pad_num = self.seq_length - len(src)
 
                     if not self.dynamic_masking:
-                        src, tgt_mlm = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                        src, tgt_mlm = mask_seq(src, self.tokenizer, self.whole_word_masking, self.span_masking,
+                                                self.span_geo_prob, self.span_max_length)
                         src = (src, pad_num)
                         instance = (src, tgt_mlm, is_wrong_order, seg_pos)
                     else:
@@ -811,7 +816,8 @@ class ClsMlmDataset(Dataset):
                 if len(line) == 2:
                     label = int(line[0])
                     text = line[1]
-                    src = [self.vocab.get(CLS_TOKEN)] + self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(text)) + [self.vocab.get(SEP_TOKEN)]
+                    src = [self.vocab.get(CLS_TOKEN)] + self.tokenizer.convert_tokens_to_ids(
+                           self.tokenizer.tokenize(text)) + [self.vocab.get(SEP_TOKEN)]
                     tgt_cls = label
                     seg_pos = [len(src)]
                 elif len(line) == 3:  # For sentence pair input.
@@ -847,7 +853,8 @@ class ClsMlmDataset(Dataset):
 
                 if not self.dynamic_masking:
                     src_single, pad_num = src
-                    src_single, tgt_mlm = mask_seq(src_single, self.tokenizer, self.whole_word_masking, self.span_masking, self.span_geo_prob, self.span_max_length)
+                    src_single, tgt_mlm = mask_seq(src_single, self.tokenizer, self.whole_word_masking,
+                                                   self.span_masking, self.span_geo_prob, self.span_max_length)
                     src = (src_single, pad_num)
                     instance = (src, tgt_mlm, tgt_cls, seg_pos)
                 else:
